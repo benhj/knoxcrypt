@@ -43,6 +43,13 @@ private:
 
         // copy from the test stream to the entry stream
         boost::iostreams::copy(ss,  bfsEntryStream);
+
+        // tests
+        std::fstream input(testPath.string().c_str(), std::ios::in | std::ios::binary);
+        assert(bfs::detail::getImageSize(input) == bytes);
+        std::cout<<bfs::detail::getSizeOfFileN(input, 0)<<std::endl;
+        assert(bfs::detail::getSizeOfFileN(input, 1) == uint64_t(13));
+        input.close();
     }
 
     boost::filesystem::path m_uniquePath;

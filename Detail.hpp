@@ -71,6 +71,47 @@ namespace bfs { namespace detail {
     }
 
     /**
+     * @brief increments the file count
+     * @param imagePath the path of the container
+     */
+    inline void incrementFileCount(std::string const &imagePath)
+    {
+        std::fstream str(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        str.seekg((std::streampos)8);                        // first 8 bytes are fs size
+        uint8_t countBytes[8];                               // buffer to store the current file count
+        str.read((char*)countBytes, 8);                      // read in the file count bytes
+        uint64_t orig = convertInt8ArrayToInt64(countBytes); // convert to a 64 bit int
+        ++orig;                                              // increment the count
+        convertInt64ToInt8Array(orig, countBytes);           // convert back to bytes
+        str.seekp(0, str.beg);                               // seek to beginning
+        str.seekp((std::streampos)8);                        // seek to position 8
+        str.write((char*)countBytes, 8);                     // write the bytes
+        str.flush();
+        str.close();
+    }
+
+    /**
+     * @brief updates the total space occupied by all files
+     * @param imagePath the path of the container
+     * @param size the size of the file that was last added
+     */
+    inline void updateFileSpaceAccumulator(std::string const &imagePath, uint64_t const size)
+    {
+        std::fstream str(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        str.seekg((std::streampos)16);                       // first 16 bytes are fs size + fileCount
+        uint8_t sizeBytes[8];                                // buffer to store the current file accum size
+        str.read((char*)sizeBytes, 8);                       // read in the file count bytes
+        uint64_t orig = convertInt8ArrayToInt64(sizeBytes);  // convert to a 64 bit int
+        orig += size;                                        // update the accum size
+        convertInt64ToInt8Array(orig, sizeBytes);            // convert back to bytes
+        str.seekp(0, str.beg);                               // seek to beginning
+        str.seekp((std::streampos)16);                       // seek to position 8
+        str.write((char*)sizeBytes, 8);                      // write the bytes
+        str.flush();
+        str.close();
+    }
+
+    /**
      * @brief gets the offset of next free (unoccupied) metablock
      * @param in the bfs image
      * @return the offset

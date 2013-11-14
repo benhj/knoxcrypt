@@ -102,9 +102,9 @@ namespace bfs
             // write out size, file count bytes (initialized to zero)
             // and total file size bytes (also initialized to zero)
             std::fstream out(imageName.c_str(), std::ios::out | std::ios::binary);
-            out.write((char*)sizeBytes, 8);
-            out.write((char*)countBytes, 8);
-            out.write((char*)countBytes, 8);
+            out.write((char*)sizeBytes, 8);  // size of the fs
+            out.write((char*)countBytes, 8); // number of files
+            out.write((char*)countBytes, 8); // total space occupied by files
 
             // write out metaBytes of metadata
             writeOutMetaBytes(statAlloc, out);
