@@ -10,6 +10,7 @@ namespace bfs { namespace detail {
 
     uint64_t const METABLOCKS_BEGIN = 24;
     uint64_t const METABLOCK_SIZE = 32;
+    uint64_t const MAX_FILENAME_LENGTH = 50;
 
     inline void convertInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
     {
@@ -63,7 +64,6 @@ namespace bfs { namespace detail {
      */
     inline uint64_t getFileCount(std::fstream &in)
     {
-        in.seekg(0, in.beg);
         in.seekg(8);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
@@ -74,20 +74,27 @@ namespace bfs { namespace detail {
      * @brief increments the file count
      * @param imagePath the path of the container
      */
-    inline void incrementFileCount(std::string const &imagePath)
+    inline void incrementFileCount(std::fstream &in)
     {
-        std::fstream str(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-        str.seekg((std::streampos)8);                        // first 8 bytes are fs size
-        uint8_t countBytes[8];                               // buffer to store the current file count
-        str.read((char*)countBytes, 8);                      // read in the file count bytes
-        uint64_t orig = convertInt8ArrayToInt64(countBytes); // convert to a 64 bit int
+        uint64_t orig = getFileCount(in);                    // convert to a 64 bit int
         ++orig;                                              // increment the count
+        uint8_t countBytes[8];
         convertInt64ToInt8Array(orig, countBytes);           // convert back to bytes
-        str.seekp(0, str.beg);                               // seek to beginning
-        str.seekp((std::streampos)8);                        // seek to position 8
-        str.write((char*)countBytes, 8);                     // write the bytes
-        str.flush();
-        str.close();
+        in.seekp((std::streampos)8);                         // seek to position 8
+        in.write((char*)countBytes, 8);                      // write the bytes
+    }
+
+    /**
+     * @brief gets the accumulated file size from the third block
+     * @param in in the stream of the image
+     * @return the accumulated size
+     */
+    inline uint64_t getAccumulatedFileSize(std::fstream &in)
+    {
+        in.seekg((std::streampos)16);                        // first 16 bytes are fs size + fileCount
+        uint8_t sizeBytes[8];                                // buffer to store the current file accum size
+        in.read((char*)sizeBytes, 8);                        // read in the file count bytes
+        return convertInt8ArrayToInt64(sizeBytes);           // convert to a 64 bit int
     }
 
     /**
@@ -95,20 +102,15 @@ namespace bfs { namespace detail {
      * @param imagePath the path of the container
      * @param size the size of the file that was last added
      */
-    inline void updateFileSpaceAccumulator(std::string const &imagePath, uint64_t const size)
+    inline void updateFileSpaceAccumulator(std::fstream &in, uint64_t const size)
     {
-        std::fstream str(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-        str.seekg((std::streampos)16);                       // first 16 bytes are fs size + fileCount
-        uint8_t sizeBytes[8];                                // buffer to store the current file accum size
-        str.read((char*)sizeBytes, 8);                       // read in the file count bytes
-        uint64_t orig = convertInt8ArrayToInt64(sizeBytes);  // convert to a 64 bit int
+        uint64_t orig = getAccumulatedFileSize(in);          // convert to a 64 bit int
         orig += size;                                        // update the accum size
+        uint8_t sizeBytes[8];
         convertInt64ToInt8Array(orig, sizeBytes);            // convert back to bytes
-        str.seekp(0, str.beg);                               // seek to beginning
-        str.seekp((std::streampos)16);                       // seek to position 8
-        str.write((char*)sizeBytes, 8);                      // write the bytes
-        str.flush();
-        str.close();
+        in.seekp(0, in.beg);                                 // seek to beginning
+        in.seekp((std::streampos)16);                        // seek to position 8
+        in.write((char*)sizeBytes, 8);                       // write the bytes
     }
 
     /**
@@ -142,9 +144,9 @@ namespace bfs { namespace detail {
     inline uint64_t getSizeOfFileN(std::fstream &in, uint64_t const n)
     {
         uint64_t metaOffset = getOffsetOfMetaBlockForFileN(in, n);
-        (void)in.seekg(0, in.beg);
         (void)in.seekg((std::streampos)metaOffset);
         uint8_t dat[8];
+        (void)in.read((char*)dat, 8);
         return convertInt8ArrayToInt64(dat);
     }
 
@@ -160,6 +162,7 @@ namespace bfs { namespace detail {
         (void)in.seekg(0, in.beg);
         in.seekg((std::streampos)(metaOffset + 8)); // second 8 bytes is the position
         uint8_t dat[8];
+        (void)in.read((char*)dat, 8);
         return convertInt8ArrayToInt64(dat);
     }
 
@@ -185,18 +188,44 @@ namespace bfs { namespace detail {
 
     /**
      * @brief gets the offset of where we can store the next file
-     * @param in
-     * @return
+     * @param in the image stream
+     * @return the offset
      */
     inline uint64_t getOffsetOfNextFreeFileSpaceBlock(std::fstream &in)
     {
         uint64_t const fileCount = getFileCount(in);
+
+        if(fileCount == 0) {
+            return METABLOCKS_BEGIN + METABLOCK_SIZE;
+        }
+
         uint64_t const offsetOfLastFile = getOffsetOfFileN(in, fileCount);
         uint64_t const sizeOfLastFile = getSizeOfFileN(in, fileCount);
         return (offsetOfLastFile + sizeOfLastFile);
     }
 
-
+    /**
+     * @brief gets the file name of a particular entry
+     * @param in the image stream
+     * @param n the file index
+     * @return the file name
+     */
+    inline std::string getFileNameForFileN(std::fstream &in, uint64_t const n)
+    {
+        uint64_t fileOffset = getOffsetOfFileN(in, n);
+        (void)in.seekg((std::streampos)fileOffset);
+        uint8_t dat[MAX_FILENAME_LENGTH];
+        (void)in.read((char*)dat, MAX_FILENAME_LENGTH);
+        std::string name("");
+        for(int i = 0; i < MAX_FILENAME_LENGTH; ++i) {
+            if((char)dat[i] != '\0') {
+                name.push_back((char)dat[i]);
+            } else {
+                break;
+            }
+        }
+        return name;
+    }
 }
 }
 

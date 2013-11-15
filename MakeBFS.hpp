@@ -11,8 +11,6 @@
 namespace bfs
 {
 
-    uint64_t const MAX_FILENAME_LENGTH = 50;
-
     class MakeBFS
     {
     public:

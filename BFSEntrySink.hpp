@@ -40,7 +40,8 @@ namespace bfs
         uint64_t m_fileOffset;                                // point where file data should be stored
 
         void writeFileName();
-        void writeMetaBlock();
+        void writeMetaBlock();                                // the file metadata
+        void updateSuperBlock();                              // the first 24 bytes
 
     };
 

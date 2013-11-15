@@ -19,6 +19,7 @@ namespace bfs
         , m_metaOffset(detail::getOffsetOfNextFreeMetaSpaceBlock(*m_bfsOutputStream))
         , m_fileOffset(detail::getOffsetOfNextFreeFileSpaceBlock(*m_bfsOutputStream))
     {
+        updateSuperBlock();
         writeMetaBlock();
         writeFileName();
     }
@@ -30,13 +31,16 @@ namespace bfs
     BFSEntrySink::writeFileName()
     {
         std::vector<uint8_t> fname;
-        fname.resize(50);
+        fname.resize(detail::MAX_FILENAME_LENGTH);
         std::string::size_type t = m_entryName.length();
         for(int i = 0; i < t; ++i) {
             fname[i] = m_entryName[i];
         }
         fname[t] = '\0';
-        m_bfsOutputStream->write((char*)&fname.front(), 50);
+        uint64_t fileCount = detail::getFileCount(*m_bfsOutputStream);
+        uint64_t fileOffset = detail::getOffsetOfFileN(*m_bfsOutputStream, fileCount);
+        (void)m_bfsOutputStream->seekp((std::streampos)fileOffset);
+        m_bfsOutputStream->write((char*)&fname.front(), detail::MAX_FILENAME_LENGTH);
     }
 
     /**
@@ -56,13 +60,20 @@ namespace bfs
         detail::convertInt64ToInt8Array(m_fileOffset, posBytes);
         uint8_t parentBytes[8];
         detail::convertInt64ToInt8Array(m_parentIndex, parentBytes);
-        (void)m_bfsOutputStream->seekp(0, m_bfsOutputStream->beg);
         (void)m_bfsOutputStream->seekp((std::streampos)m_metaOffset);
         m_bfsOutputStream->write((char*)sizeBytes, 8);    // size of file
         m_bfsOutputStream->write((char*)posBytes, 8);     // position in main file space
         m_bfsOutputStream->write((char*)parentBytes, 8);  // index of parent directory
         m_bfsOutputStream->write((char*)parentBytes, 8);  // extra space for other stuff (tbd)
+    }
 
+    /**
+     * Updates file count and total file size information in the superblock
+     */
+    void BFSEntrySink::updateSuperBlock()
+    {
+        detail::incrementFileCount(*m_bfsOutputStream);
+        detail::updateFileSpaceAccumulator(*m_bfsOutputStream, m_fsize);
     }
 
     std::streamsize
@@ -74,6 +85,7 @@ namespace bfs
 
     BFSEntrySink::~BFSEntrySink()
     {
+        m_bfsOutputStream->flush();
         m_bfsOutputStream->close();
     }
 
