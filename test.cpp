@@ -5,5 +5,5 @@
 int main()
 {
     MakeBFSTest();
-    BFSEntrySinkTest();
+    //BFSEntrySinkTest();
 }

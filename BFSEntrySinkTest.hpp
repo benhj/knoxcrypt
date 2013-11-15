@@ -46,14 +46,27 @@ private:
             //boost::iostreams::copy(ss,  bfsEntryStream);
         }
 
+        // create a second entry sink
+        {
+            bfs::BFSEntrySink entrySink(testPath.c_str(), "testB.log", uint64_t(118), uint64_t(0));
+            //std::string testData("Hello, world!");
+            //std::stringstream ss;
+            //ss << testData.c_str();
+            //boost::iostreams::stream<bfs::BFSEntrySink> bfsEntryStream(entrySink);
+            // copy from the test stream to the entry stream
+            //boost::iostreams::copy(ss,  bfsEntryStream);
+        }
+
         // tests
         std::fstream input(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         assert(bfs::detail::getImageSize(input) == bytes);
-        assert(bfs::detail::getFileCount(input) == uint64_t(1));
-        assert(bfs::detail::getAccumulatedFileSize(input) == uint64_t(13));
+        assert(bfs::detail::getFileCount(input) == uint64_t(2));
+        assert(bfs::detail::getAccumulatedFileSize(input) == uint64_t(13 + 118));
         assert(bfs::detail::getSizeOfFileN(input, 1) == uint64_t(13));
-        assert(bfs::detail::getOffsetOfFileN(input, 1) == bfs::detail::METABLOCKS_BEGIN + bfs::detail::METABLOCK_SIZE);
+        assert(bfs::detail::getSizeOfFileN(input, 2) == uint64_t(118));
+        //assert(bfs::detail::getOffsetOfFileN(input, 1) == bfs::detail::METABLOCKS_BEGIN + bfs::detail::METABLOCK_SIZE + bfs::detail::getMetaDataSize(input));
         assert(bfs::detail::getFileNameForFileN(input, 1) == "test.txt");
+        assert(bfs::detail::getFileNameForFileN(input, 2) == "testB.log");
         input.close();
     }
 

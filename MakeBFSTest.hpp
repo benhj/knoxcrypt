@@ -12,9 +12,8 @@ public:
     MakeBFSTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
-        imageIsExpectedSize();
-        correctFSSizeIsReported();
-        correctNumberOfFilesIsReported();
+        correctBlockCountIsReported();
+        //correctNumberOfFilesIsReported();
     }
 
     ~MakeBFSTest()
@@ -23,45 +22,25 @@ public:
     }
 
 private:
-    void imageIsExpectedSize()
+    void correctBlockCountIsReported()
     {
         std::string testImage(boost::filesystem::unique_path().string());
         boost::filesystem::path testPath = m_uniquePath / testImage;
-        uint64_t bytes(1048576); // 1MB
-        bfs::MakeBFS bfs(testPath.string(), bytes);
+        uint64_t blocks(2048); // 1MB = 512 * 2048
+        bfs::MakeBFS bfs(testPath.string(), blocks);
 
         // test that enough bytes are written
         std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::binary);
-        assert(bytes == bfs::detail::getImageSize(is));
+        assert(blocks == bfs::detail::getBlockCount(is));
         is.close();
-    }
-
-
-    void correctFSSizeIsReported()
-    {
-        std::string testImage(boost::filesystem::unique_path().string());
-        boost::filesystem::path testPath = m_uniquePath / testImage;
-        uint64_t bytes(1048576); // 1MB
-        bfs::MakeBFS bfs(testPath.string(), bytes);
-        uint64_t statAlloc(static_cast<uint64_t>(bytes * 0.001) * 32);
-        uint64_t fsSize(bytes - statAlloc - bfs::detail::METABLOCKS_BEGIN);
-        std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::binary);
-
-        // get the size from this point to end which will be the file block size
-        uint64_t const actualSize = bfs::detail::getFSSize(is);
-
-        is.close();
-
-        // test assert that reported size is the expected size
-        assert(actualSize == fsSize);
     }
 
     void correctNumberOfFilesIsReported()
     {
         std::string testImage(boost::filesystem::unique_path().string());
         boost::filesystem::path testPath = m_uniquePath / testImage;
-        uint64_t bytes(1048576); // 1MB
-        bfs::MakeBFS bfs(testPath.string(), bytes);
+        uint64_t blocks(2048); // 1MB
+        bfs::MakeBFS bfs(testPath.string(), blocks);
 
         uint64_t fileCount(0);
         uint8_t fileCountBytes[8];

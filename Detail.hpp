@@ -49,7 +49,7 @@ namespace bfs { namespace detail {
      * @param in the image stream
      * @return amount of file space
      */
-    inline uint64_t getFSSize(std::fstream &in)
+    inline uint64_t getBlockCount(std::fstream &in)
     {
         in.seekg(0, in.beg);
         uint8_t dat[8];
@@ -64,7 +64,11 @@ namespace bfs { namespace detail {
      */
     inline uint64_t getFileCount(std::fstream &in)
     {
-        in.seekg(8);
+        uint8_t blockCountBytes[8];
+        in.seekg(0, in.beg);
+        (void)in.read((char*)blockCountBytes, 8);
+        uint64_t blockCount = convertInt8ArrayToInt64(blockCountBytes);
+        in.seekg(blockCount + 8);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         return convertInt8ArrayToInt64(dat);
@@ -132,7 +136,7 @@ namespace bfs { namespace detail {
      */
     inline uint64_t getOffsetOfMetaBlockForFileN(std::fstream &in, uint64_t const n)
     {
-        return ((getFileCount(in) - 1) * METABLOCK_SIZE) + METABLOCKS_BEGIN;
+        return ((n - 1) * METABLOCK_SIZE) + METABLOCKS_BEGIN;
     }
 
     /**
@@ -196,7 +200,8 @@ namespace bfs { namespace detail {
         uint64_t const fileCount = getFileCount(in);
 
         if(fileCount == 0) {
-            return METABLOCKS_BEGIN + METABLOCK_SIZE;
+            in.seekg(0, in.end);
+            return METABLOCKS_BEGIN + getMetaDataSize((uint64_t)in.tellg());
         }
 
         uint64_t const offsetOfLastFile = getOffsetOfFileN(in, fileCount);
