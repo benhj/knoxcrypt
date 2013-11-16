@@ -67,6 +67,7 @@ namespace bfs
         void zeroOutBits(std::vector<uint8_t> &bitMapData)
         {
             uint8_t byte;
+            byte &= 1 << 0;
             byte &= 1 << 1;
             byte &= 1 << 2;
             byte &= 1 << 3;
@@ -74,7 +75,6 @@ namespace bfs
             byte &= 1 << 5;
             byte &= 1 << 6;
             byte &= 1 << 7;
-            byte &= 1 << 8;
             bitMapData.push_back(byte);
         }
 
@@ -144,7 +144,7 @@ namespace bfs
             // Next 8 bytes: file size
             // Fourth 8 bytes: other metadata (tbd)
             //
-            uint64_t statAlloc(static_cast<uint64_t>((blocks * 512) * 0.001) * 74);
+            uint64_t statAlloc(detail::getMetaDataSize(blocks));
 
             // write out metaBytes of metadata
             writeOutMetaBytes(statAlloc, out);

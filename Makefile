@@ -1,5 +1,5 @@
-CC=c++
-CXXFLAGS=-ggdb -I/usr/local/boost_1_53_0
+CC=clang++
+CXXFLAGS=-I/usr/local/boost_1_53_0
 
 TEST_OBJS = test.o \
             BFSEntrySink.o \

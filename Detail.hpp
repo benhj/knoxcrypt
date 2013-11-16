@@ -5,12 +5,14 @@
 #include <fstream>
 #include <iostream>
 #include <stdint.h>
+#include <vector>
 
 namespace bfs { namespace detail {
 
     uint64_t const METABLOCKS_BEGIN = 24;
-    uint64_t const METABLOCK_SIZE = 32;
+    uint64_t const METABLOCK_SIZE = 74;
     uint64_t const MAX_FILENAME_LENGTH = 50;
+    uint64_t const FILE_BLOCK_SIZE = 512;
 
     inline void convertInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
     {
@@ -172,12 +174,12 @@ namespace bfs { namespace detail {
 
     /**
      * @brief gets the total amount of space allocated to metadata
-     * @param bytes the size of the bfs image
+     * @param blocks number of blocks making up image
      * @return space allocated to metadata
      */
-    inline uint64_t getMetaDataSize(uint64_t const bytes)
+    inline uint64_t getMetaDataSize(uint64_t const blocks)
     {
-        return (static_cast<uint64_t>(bytes * 0.001) * METABLOCK_SIZE);
+        return static_cast<uint64_t>((blocks * FILE_BLOCK_SIZE) * 0.001) * METABLOCK_SIZE;
     }
 
     /**
@@ -230,6 +232,79 @@ namespace bfs { namespace detail {
             }
         }
         return name;
+    }
+
+    /**
+     * @brief gets the number of blocks in this bfs
+     * @param in the bfs image stream
+     * @return the number of blocks
+     */
+    inline uint64_t getNumberOfBlocks(std::fstream &in)
+    {
+    	(void)in.seekg(0, in.beg);
+    	uint8_t dat[8];
+		(void)in.read((char*)dat, 8);
+		return convertInt8ArrayToInt64(dat);
+    }
+
+    /**
+     * @brief gets the index of the first unset bit from the byte
+     * @param byte the byte to search
+     * @return the index
+     */
+    inline int getNextAvailableBit(uint8_t const byte)
+    {
+    	for(int i = 0; i < 8; ++i) {
+    		if(!(byte & (1 << i))) {
+    			return i;
+    		}
+    	}
+
+    	return -1; // none available
+    }
+
+    /**
+     * @brief gets the offset of the next available block
+     * @param in the image stream
+     * @return the offset
+     */
+    inline uint64_t getOffSetNextAvailableBlock(std::fstream &in)
+    {
+    	// get number of blocks that make up fs
+    	uint64_t blocks = getNumberOfBlocks(in);
+
+    	// how many bytes does this value fit in to?
+    	uint64_t bytes = blocks / uint64_t(8);
+
+    	// read the bytes in to a buffer
+    	std::vector<uint8_t> buf;
+    	buf.resize(bytes);
+    	(void)in.read((char*)&buf.begin(), bytes);
+
+    	// find out the next available bit
+    	uint64_t bitCounter(0);
+    	for(uint64_t i = 0; i < bytes; ++i) {
+    		int availableBit = getNextAvailableBit(buf[i]);
+    		if(availableBit > -1) {
+    			bitCounter += availableBit;
+    			break;
+    		} else {
+    			bitCounter += 8;
+    		}
+    	}
+
+    	// no available blocks found
+    	if(bitCounter == blocks) {
+    		return 0;
+    	}
+
+    	// next available block == bitCounter
+    	// derive offset from bit counter. Note blocks
+    	// to be stored starting at 0 index.
+    	// Metadata starts at 8 (block count) + 8 (file count)
+    	// + bytes (volume bit map size) + meta data size
+    	return 8 + 8 + bytes + getMetaDataSize(blocks) + (FILE_BLOCK_SIZE * bitCounter);
+
     }
 }
 }
