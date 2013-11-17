@@ -67,14 +67,9 @@ namespace bfs
         void zeroOutBits(std::vector<uint8_t> &bitMapData)
         {
             uint8_t byte;
-            byte &= 1 << 0;
-            byte &= 1 << 1;
-            byte &= 1 << 2;
-            byte &= 1 << 3;
-            byte &= 1 << 4;
-            byte &= 1 << 5;
-            byte &= 1 << 6;
-            byte &= 1 << 7;
+            for(int i = 0; i < 8; ++i) {
+            	byte &= ~(1 << i);
+            }
             bitMapData.push_back(byte);
         }
 

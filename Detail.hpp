@@ -274,7 +274,7 @@ namespace bfs { namespace detail {
     	if(set) {
     		byte |= 1 << bit;
     	} else {
-    		byte &= 1 << bit;
+    		byte &= ~(1 << bit);
     	}
     }
 
@@ -284,7 +284,10 @@ namespace bfs { namespace detail {
      * @param blocks the number of blocks in this fs
      * @param in the image stream
      */
-    inline void setBlockToInUse(uint64_t const block, uint64_t const blocks, std::fstream &in)
+    inline void setBlockToInUse(uint64_t const block,
+    							uint64_t const blocks,
+    							std::fstream &in,
+    							bool const set = true)
     {
     	uint64_t bytes = blocks / uint64_t(8);
     	// read the bytes in to a buffer
@@ -298,7 +301,7 @@ namespace bfs { namespace detail {
 
         	(void)in.seekg(8);
     		uint8_t dat = buf[byteThatStoresBit];
-    		setBitInByte(dat, block);
+    		setBitInByte(dat, block, set);
     		(void)in.seekp(8);
     		(void)in.write((char*)&dat, 1);
 
@@ -309,7 +312,7 @@ namespace bfs { namespace detail {
     		byteThatStoresBit = (withoutLeftOver / 8) - 1;
     		++byteThatStoresBit;
     		uint8_t dat = buf[byteThatStoresBit];
-			setBitInByte(dat, leftOver);
+			setBitInByte(dat, leftOver, set);
 			(void)in.seekp(8 + byteThatStoresBit);
     		(void)in.write((char*)&dat, 1);
     	}

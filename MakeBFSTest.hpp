@@ -15,7 +15,7 @@ public:
         correctBlockCountIsReported();
         correctNumberOfFilesIsReported();
         firstBlockIsReportedAsBeingFree();
-        blocksCanBetSetToInUse();
+        blocksCanBeSetAndCleared();
     }
 
     ~MakeBFSTest()
@@ -71,7 +71,7 @@ private:
 		is.close();
     }
 
-    void blocksCanBetSetToInUse()
+    void blocksCanBeSetAndCleared()
     {
     	std::string testImage(boost::filesystem::unique_path().string());
 		boost::filesystem::path testPath = m_uniquePath / testImage;
@@ -83,12 +83,27 @@ private:
 		std::pair<uint64_t, uint64_t> p = bfs::detail::getOffSetNextAvailableBlock(is);
 		assert(p.first == 1);
 
-		for(int i = 1; i < 220; ++i) {
+		// check that rest of map can also be set correctly
+		for(int i = 1; i < 256; ++i) {
 			bfs::detail::setBlockToInUse(i, blocks, is);
 			p = bfs::detail::getOffSetNextAvailableBlock(is);
 			assert(p.first == i + 1);
 		}
 
+		// check that bit 25 (arbitrary) can be unset again
+		bfs::detail::setBlockToInUse(25, blocks, is, false);
+		p = bfs::detail::getOffSetNextAvailableBlock(is);
+		assert(p.first == 25);
+
+		// should still be 25 when blocks after 25 are also made available
+		bfs::detail::setBlockToInUse(27, blocks, is, false);
+		p = bfs::detail::getOffSetNextAvailableBlock(is);
+		assert(p.first == 25);
+
+		// should now be 27 since block 25 is made unavailable
+		bfs::detail::setBlockToInUse(25, blocks, is);
+		p = bfs::detail::getOffSetNextAvailableBlock(is);
+		assert(p.first == 27);
 
 
     }
