@@ -264,11 +264,63 @@ namespace bfs { namespace detail {
     }
 
     /**
+     * @brief set or clear a bit
+     * @param byte the byte to set or clear the bit of
+     * @param bit the bit to set or clear
+     * @param set whether to set, true be default; false will clear the bit
+     */
+    inline void setBitInByte(uint8_t &byte, int const bit, bool const set = true)
+    {
+    	if(set) {
+    		byte |= 1 << bit;
+    	} else {
+    		byte &= 1 << bit;
+    	}
+    }
+
+    /**
+     * @brief sets a block to in use in bit map representation
+     * @param block the block to set in the bit map to 'in use'
+     * @param blocks the number of blocks in this fs
+     * @param in the image stream
+     */
+    inline void setBlockToInUse(uint64_t const block, uint64_t const blocks, std::fstream &in)
+    {
+    	uint64_t bytes = blocks / uint64_t(8);
+    	// read the bytes in to a buffer
+    	std::vector<uint8_t> buf;
+    	buf.assign(bytes, 0);
+    	(void)in.seekg(8);
+    	(void)in.read((char*)&buf.front(), bytes);
+
+    	uint64_t byteThatStoresBit(0);
+    	if(block < 8) {
+
+        	(void)in.seekg(8);
+    		uint8_t dat = buf[byteThatStoresBit];
+    		setBitInByte(dat, block);
+    		(void)in.seekp(8);
+    		(void)in.write((char*)&dat, 1);
+
+    	} else {
+        	(void)in.seekg(8);
+        	uint64_t const leftOver = block % 8;
+    		uint64_t withoutLeftOver = block - leftOver;
+    		byteThatStoresBit = (withoutLeftOver / 8) - 1;
+    		++byteThatStoresBit;
+    		uint8_t dat = buf[byteThatStoresBit];
+			setBitInByte(dat, leftOver);
+			(void)in.seekp(8 + byteThatStoresBit);
+    		(void)in.write((char*)&dat, 1);
+    	}
+    }
+
+    /**
      * @brief gets the offset of the next available block
      * @param in the image stream
      * @return the offset
      */
-    inline uint64_t getOffSetNextAvailableBlock(std::fstream &in)
+    inline std::pair<uint64_t, uint64_t> getOffSetNextAvailableBlock(std::fstream &in)
     {
     	// get number of blocks that make up fs
     	uint64_t blocks = getNumberOfBlocks(in);
@@ -278,11 +330,12 @@ namespace bfs { namespace detail {
 
     	// read the bytes in to a buffer
     	std::vector<uint8_t> buf;
-    	buf.resize(bytes);
-    	(void)in.read((char*)&buf.begin(), bytes);
+    	buf.assign(bytes, 0);
+    	(void)in.read((char*)&buf.front(), bytes);
 
     	// find out the next available bit
     	uint64_t bitCounter(0);
+
     	for(uint64_t i = 0; i < bytes; ++i) {
     		int availableBit = getNextAvailableBit(buf[i]);
     		if(availableBit > -1) {
@@ -295,7 +348,7 @@ namespace bfs { namespace detail {
 
     	// no available blocks found
     	if(bitCounter == blocks) {
-    		return 0;
+    		std::make_pair(0,0);
     	}
 
     	// next available block == bitCounter
@@ -303,8 +356,9 @@ namespace bfs { namespace detail {
     	// to be stored starting at 0 index.
     	// Metadata starts at 8 (block count) + 8 (file count)
     	// + bytes (volume bit map size) + meta data size
-    	return 8 + 8 + bytes + getMetaDataSize(blocks) + (FILE_BLOCK_SIZE * bitCounter);
+    	uint64_t const offset = 8 + 8 + bytes + getMetaDataSize(blocks) + (FILE_BLOCK_SIZE * bitCounter);
 
+    	return std::pair<uint64_t, uint64_t>(std::make_pair(bitCounter, offset));
     }
 }
 }
