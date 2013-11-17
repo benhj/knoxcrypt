@@ -68,7 +68,7 @@ namespace bfs
         {
             uint8_t byte;
             for(int i = 0; i < 8; ++i) {
-            	byte &= ~(1 << i);
+            	detail::setBitInByte(byte, i, false);
             }
             bitMapData.push_back(byte);
         }
