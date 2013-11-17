@@ -16,8 +16,8 @@ namespace bfs
         , m_fsize(fsize)
         , m_parentIndex(parentIndex)
         , m_bfsOutputStream(boost::make_shared<std::fstream>(bfsOutputPath.c_str(), std::ios::in | std::ios::out | std::ios::binary))
-        , m_metaOffset(detail::getOffsetOfNextFreeMetaSpaceBlock(*m_bfsOutputStream))
-        , m_fileOffset(detail::getOffsetOfNextFreeFileSpaceBlock(*m_bfsOutputStream))
+        //, m_metaOffset(detail::getOffsetOfNextFreeMetaSpaceBlock(*m_bfsOutputStream))
+     //   , m_fileOffset(detail::getOffsetOfNextFreeFileSpaceBlock(*m_bfsOutputStream))
     {
         updateSuperBlock();
         writeMetaBlock();
@@ -38,8 +38,8 @@ namespace bfs
         }
         fname[t] = '\0';
         uint64_t fileCount = detail::getFileCount(*m_bfsOutputStream);
-        uint64_t fileOffset = detail::getOffsetOfFileN(*m_bfsOutputStream, fileCount);
-        (void)m_bfsOutputStream->seekp((std::streampos)fileOffset);
+        //uint64_t fileOffset = detail::getOffsetOfFileN(*m_bfsOutputStream, fileCount);
+        //(void)m_bfsOutputStream->seekp((std::streampos)fileOffset);
         m_bfsOutputStream->write((char*)&fname.front(), detail::MAX_FILENAME_LENGTH);
     }
 
@@ -73,7 +73,7 @@ namespace bfs
     void BFSEntrySink::updateSuperBlock()
     {
         detail::incrementFileCount(*m_bfsOutputStream);
-        detail::updateFileSpaceAccumulator(*m_bfsOutputStream, m_fsize);
+        //detail::updateFileSpaceAccumulator(*m_bfsOutputStream, m_fsize);
     }
 
     std::streamsize

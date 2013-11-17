@@ -1,6 +1,7 @@
 #ifndef BFS_BFS_DETAIL_HPP__
 #define BFS_BFS_DETAIL_HPP__
 
+#include <boost/optional.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -10,8 +11,8 @@
 namespace bfs { namespace detail {
 
     uint64_t const METABLOCKS_BEGIN = 24;
-    uint64_t const METABLOCK_SIZE = 74;
-    uint64_t const MAX_FILENAME_LENGTH = 50;
+    uint64_t const METABLOCK_SIZE = 40;
+    uint64_t const MAX_FILENAME_LENGTH = 255;
     uint64_t const FILE_BLOCK_SIZE = 512;
 
     inline void convertInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
@@ -91,88 +92,6 @@ namespace bfs { namespace detail {
     }
 
     /**
-     * @brief gets the accumulated file size from the third block
-     * @param in in the stream of the image
-     * @return the accumulated size
-     */
-    inline uint64_t getAccumulatedFileSize(std::fstream &in)
-    {
-        in.seekg((std::streampos)16);                        // first 16 bytes are fs size + fileCount
-        uint8_t sizeBytes[8];                                // buffer to store the current file accum size
-        in.read((char*)sizeBytes, 8);                        // read in the file count bytes
-        return convertInt8ArrayToInt64(sizeBytes);           // convert to a 64 bit int
-    }
-
-    /**
-     * @brief updates the total space occupied by all files
-     * @param imagePath the path of the container
-     * @param size the size of the file that was last added
-     */
-    inline void updateFileSpaceAccumulator(std::fstream &in, uint64_t const size)
-    {
-        uint64_t orig = getAccumulatedFileSize(in);          // convert to a 64 bit int
-        orig += size;                                        // update the accum size
-        uint8_t sizeBytes[8];
-        convertInt64ToInt8Array(orig, sizeBytes);            // convert back to bytes
-        in.seekp(0, in.beg);                                 // seek to beginning
-        in.seekp((std::streampos)16);                        // seek to position 8
-        in.write((char*)sizeBytes, 8);                       // write the bytes
-    }
-
-    /**
-     * @brief gets the offset of next free (unoccupied) metablock
-     * @param in the bfs image
-     * @return the offset
-     */
-    inline uint64_t getOffsetOfNextFreeMetaSpaceBlock(std::fstream &in)
-    {
-        uint64_t fileCount = getFileCount(in);
-        return (fileCount * METABLOCK_SIZE) + METABLOCKS_BEGIN;
-    }
-
-    /**
-     * @brief gets the offset of a specific meta entry for file N
-     * @param in the bfs image
-     * @param n the file entry
-     * @return the offset
-     */
-    inline uint64_t getOffsetOfMetaBlockForFileN(std::fstream &in, uint64_t const n)
-    {
-        return ((n - 1) * METABLOCK_SIZE) + METABLOCKS_BEGIN;
-    }
-
-    /**
-     * @brief gets the size of file n from its metadata
-     * @param in the bfs image stream
-     * @param n the file to lookup about
-     * @return the file's size
-     */
-    inline uint64_t getSizeOfFileN(std::fstream &in, uint64_t const n)
-    {
-        uint64_t metaOffset = getOffsetOfMetaBlockForFileN(in, n);
-        (void)in.seekg((std::streampos)metaOffset);
-        uint8_t dat[8];
-        (void)in.read((char*)dat, 8);
-        return convertInt8ArrayToInt64(dat);
-    }
-
-    /**
-     * @brief gets the offset of file n in the filespace
-     * @param in the bfs image stream
-     * @param n the file to lookup about
-     * @return the file's offset
-     */
-    inline uint64_t getOffsetOfFileN(std::fstream &in, uint64_t const n)
-    {
-        uint64_t metaOffset = getOffsetOfMetaBlockForFileN(in, n);
-        (void)in.seekg(0, in.beg);
-        in.seekg((std::streampos)(metaOffset + 8)); // second 8 bytes is the position
-        uint8_t dat[8];
-        (void)in.read((char*)dat, 8);
-        return convertInt8ArrayToInt64(dat);
-    }
-
-    /**
      * @brief gets the total amount of space allocated to metadata
      * @param blocks number of blocks making up image
      * @return space allocated to metadata
@@ -183,32 +102,110 @@ namespace bfs { namespace detail {
     }
 
     /**
-     * @brief gets the offset of where file space begins
-     * @param bytes the bfs image size
-     * @return the offset
+     * @brief gets the offset of a given meta data block
+     * @param fileIndex the file index that this metablock represents
+     * @return the offset of the meta data block
      */
-    inline uint64_t getFileSpaceBeginOffset(uint64_t const bytes)
+    inline uint64_t getOffsetOfMetaDataBlock(uint64_t const fileIndex,
+									         uint64_t const totalBlocks)
     {
-        return getMetaDataSize(bytes) + METABLOCKS_BEGIN;
+    	uint64_t const volumeBitMapBytes = totalBlocks / 8;
+    	return 8 							   // number of fs blocks
+			   + volumeBitMapBytes 		       // volume bit map
+			   + 8 							   // total number of files
+			   + (METABLOCK_SIZE * fileIndex); // meta data block
     }
 
     /**
-     * @brief gets the offset of where we can store the next file
-     * @param in the image stream
-     * @return the offset
+     * @brief writes the file size to metadata of given file
+     * @param fileIndex index of associated file
+     * @param totalBlocks total blocks in fs image
+     * @param fileSize size of associated file
+     * @param in the bfs image stream
      */
-    inline uint64_t getOffsetOfNextFreeFileSpaceBlock(std::fstream &in)
+    inline void writeFileSizeToMetaBlock(uint64_t const block,
+    									 uint64_t const totalBlocks,
+    									 uint64_t const fileSize,
+    									 std::fstream &in)
     {
-        uint64_t const fileCount = getFileCount(in);
+    	uint64_t const offset = getOffsetOfMetaDataBlock(block, totalBlocks);
+    	(void)in.seekp(offset);
+    	uint8_t dat[8];
+    	convertInt64ToInt8Array(fileSize, dat);
+    	(void)in.write((char*)dat, 8);
+    }
 
-        if(fileCount == 0) {
-            in.seekg(0, in.end);
-            return METABLOCKS_BEGIN + getMetaDataSize((uint64_t)in.tellg());
-        }
+    /**
+     * @brief writes the first block offset to metadata of given file
+     * @param fileIndex index of associated file
+     * @param totalBlocks total blocks in fs image
+     * @param firstBlockOffset offset of first file block
+     * @param in the bfs image stream
+     */
+    inline void writeFirstBlockOffsetToMetaBlock(uint64_t const fileIndex,
+    									 	 	 uint64_t const totalBlocks,
+    									 	 	 uint64_t const firstBlockOffset,
+    									 	 	 std::fstream &in)
+    {
+    	uint64_t const offset = getOffsetOfMetaDataBlock(fileIndex, totalBlocks);
+    	(void)in.seekp(offset + 8);
+    	uint8_t dat[8];
+    	convertInt64ToInt8Array(firstBlockOffset, dat);
+    	(void)in.write((char*)dat, 8);
+    }
 
-        uint64_t const offsetOfLastFile = getOffsetOfFileN(in, fileCount);
-        uint64_t const sizeOfLastFile = getSizeOfFileN(in, fileCount);
-        return (offsetOfLastFile + sizeOfLastFile);
+    /**
+     * @brief returns the file size of the file that meta data is associated with
+     * @param fileIndex the index of the file to read the metadata of
+     * @param totalBlocks the total number of file blocks
+     * @param in the bfs image stream
+     * @return the file size
+     */
+    inline uint64_t readFileSizeFromMetaBlock(uint64_t const fileIndex,
+    									      uint64_t const totalBlocks,
+    									      std::fstream &in)
+    {
+    	uint64_t const offset = getOffsetOfMetaDataBlock(fileIndex, totalBlocks);
+    	(void)in.seekg(offset);
+    	uint8_t dat[8];
+    	(void)in.read((char*)dat, 8);
+    	return convertInt8ArrayToInt64(dat);
+    }
+
+    /**
+     * @brief returns the offset of the first file block as stored
+     * in the file's metadata
+     * @param fileIndex the index of the file to read the metadata of
+     * @param totalBlocks the total number of file blocks
+     * @param in the bfs image stream
+     * @return the offset value
+     */
+    inline uint64_t readFirstBlockOffsetFromMetaBlock(uint64_t const fileIndex,
+    									 	 	      uint64_t const totalBlocks,
+    									 	 	      std::fstream &in)
+    {
+    	uint64_t const offset = getOffsetOfMetaDataBlock(fileIndex, totalBlocks);
+    	(void)in.seekg(offset + 8);
+    	uint8_t dat[8];
+    	(void)in.read((char*)dat, 8);
+    	return convertInt8ArrayToInt64(dat);
+    }
+
+
+    /**
+     * @brief gets the offset of a given file block
+     * @param block the file block that we want to get the offset of
+     * @return the offset of the file block
+     */
+    inline uint64_t getOffsetOfFileBlock(uint64_t const block,
+									     uint64_t const totalBlocks)
+    {
+    	uint64_t const volumeBitMapBytes = totalBlocks / 8;
+    	return 8 							  // number of fs blocks
+			   + volumeBitMapBytes 		      // volume bit map
+			   + 8 						      // total number of files
+			   + getMetaDataSize(totalBlocks) // space occupied by metadata
+			   + (FILE_BLOCK_SIZE * block);   // file block
     }
 
     /**
@@ -219,6 +216,7 @@ namespace bfs { namespace detail {
      */
     inline std::string getFileNameForFileN(std::fstream &in, uint64_t const n)
     {
+    	/*
         uint64_t fileOffset = getOffsetOfFileN(in, n);
         (void)in.seekg((std::streampos)fileOffset);
         uint8_t dat[MAX_FILENAME_LENGTH];
@@ -232,6 +230,7 @@ namespace bfs { namespace detail {
             }
         }
         return name;
+        */
     }
 
     /**
@@ -252,7 +251,7 @@ namespace bfs { namespace detail {
      * @param byte the byte to search
      * @return the index
      */
-    inline int getNextAvailableBit(uint8_t const byte)
+    inline int getNextAvailableBitInAByte(uint8_t const byte)
     {
     	for(int i = 0; i < 8; ++i) {
     		if(!(byte & (1 << i))) {
@@ -319,11 +318,12 @@ namespace bfs { namespace detail {
     }
 
     /**
-     * @brief gets the offset of the next available block
+     * @brief gets the the next available block
      * @param in the image stream
-     * @return the offset
+     * @return the next available block
      */
-    inline std::pair<uint64_t, uint64_t> getOffSetNextAvailableBlock(std::fstream &in)
+    typedef boost::optional<uint64_t> OptionalBlock;
+    inline OptionalBlock getNextAvailableBlock(std::fstream &in)
     {
     	// get number of blocks that make up fs
     	uint64_t blocks = getNumberOfBlocks(in);
@@ -340,7 +340,7 @@ namespace bfs { namespace detail {
     	uint64_t bitCounter(0);
 
     	for(uint64_t i = 0; i < bytes; ++i) {
-    		int availableBit = getNextAvailableBit(buf[i]);
+    		int availableBit = getNextAvailableBitInAByte(buf[i]);
     		if(availableBit > -1) {
     			bitCounter += availableBit;
     			break;
@@ -351,7 +351,7 @@ namespace bfs { namespace detail {
 
     	// no available blocks found
     	if(bitCounter == blocks) {
-    		std::make_pair(0,0);
+    		return OptionalBlock();
     	}
 
     	// next available block == bitCounter
@@ -359,9 +359,9 @@ namespace bfs { namespace detail {
     	// to be stored starting at 0 index.
     	// Metadata starts at 8 (block count) + 8 (file count)
     	// + bytes (volume bit map size) + meta data size
-    	uint64_t const offset = 8 + 8 + bytes + getMetaDataSize(blocks) + (FILE_BLOCK_SIZE * bitCounter);
+    	//uint64_t const offset = 8 + 8 + bytes + getMetaDataSize(blocks) + (FILE_BLOCK_SIZE * bitCounter);
 
-    	return std::pair<uint64_t, uint64_t>(std::make_pair(bitCounter, offset));
+    	return OptionalBlock(bitCounter);
     }
 }
 }

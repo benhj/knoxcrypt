@@ -132,12 +132,13 @@ namespace bfs
 
             //
             // we will have 0.1% bytes file count; each file metadata item
-            // will be 74 bytes in length
+            // will be 40 bytes in length
             //
-            // First 50 bytes: name
+            // First 8 bytes: file size
             // Next 8 bytes: 1st block position
-            // Next 8 bytes: file size
-            // Fourth 8 bytes: other metadata (tbd)
+            // Next 8 bytes: parent meta data
+            // Next 8 bytes: permissions
+            // Next 8 bytes: other metadata (tbd)
             //
             uint64_t statAlloc(detail::getMetaDataSize(blocks));
 

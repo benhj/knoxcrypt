@@ -63,11 +63,8 @@ private:
 		bfs::MakeBFS bfs(testPath.string(), blocks);
 
 		std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::binary);
-		std::pair<uint64_t, uint64_t> p = bfs::detail::getOffSetNextAvailableBlock(is);
-		assert(p.first == 0);
-		assert(p.second > 0);
-		uint64_t bytes(blocks / 8);
-		assert(p.second == 8 + 8 + bytes + bfs::detail::getMetaDataSize(blocks));
+		bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
+		assert(*p == 0);
 		is.close();
     }
 
@@ -80,30 +77,30 @@ private:
 
 		std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::out | std::ios::binary);
 		bfs::detail::setBlockToInUse(0, blocks, is);
-		std::pair<uint64_t, uint64_t> p = bfs::detail::getOffSetNextAvailableBlock(is);
-		assert(p.first == 1);
+		bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
+		assert(*p == 1);
 
 		// check that rest of map can also be set correctly
 		for(int i = 1; i < 256; ++i) {
 			bfs::detail::setBlockToInUse(i, blocks, is);
-			p = bfs::detail::getOffSetNextAvailableBlock(is);
-			assert(p.first == i + 1);
+			p = bfs::detail::getNextAvailableBlock(is);
+			assert(*p == i + 1);
 		}
 
 		// check that bit 25 (arbitrary) can be unset again
 		bfs::detail::setBlockToInUse(25, blocks, is, false);
-		p = bfs::detail::getOffSetNextAvailableBlock(is);
-		assert(p.first == 25);
+		p = bfs::detail::getNextAvailableBlock(is);
+		assert(*p == 25);
 
 		// should still be 25 when blocks after 25 are also made available
 		bfs::detail::setBlockToInUse(27, blocks, is, false);
-		p = bfs::detail::getOffSetNextAvailableBlock(is);
-		assert(p.first == 25);
+		p = bfs::detail::getNextAvailableBlock(is);
+		assert(*p == 25);
 
 		// should now be 27 since block 25 is made unavailable
 		bfs::detail::setBlockToInUse(25, blocks, is);
-		p = bfs::detail::getOffSetNextAvailableBlock(is);
-		assert(p.first == 27);
+		p = bfs::detail::getNextAvailableBlock(is);
+		assert(*p == 27);
 
 
     }

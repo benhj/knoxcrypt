@@ -29,7 +29,7 @@ private:
 
     void oneDataEntry()
     {
-
+/*
         std::string testImage(boost::filesystem::unique_path().string());
         boost::filesystem::path testPath = m_uniquePath / testImage;
         uint64_t bytes(1048576); // 1MB
@@ -68,6 +68,7 @@ private:
         assert(bfs::detail::getFileNameForFileN(input, 1) == "test.txt");
         assert(bfs::detail::getFileNameForFileN(input, 2) == "testB.log");
         input.close();
+        */
     }
 
     boost::filesystem::path m_uniquePath;
