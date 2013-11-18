@@ -8,7 +8,7 @@
 
 class MakeBFSTest
 {
-public:
+  public:
     MakeBFSTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
@@ -23,7 +23,7 @@ public:
         boost::filesystem::remove_all(m_uniquePath);
     }
 
-private:
+  private:
     void correctBlockCountIsReported()
     {
         std::string testImage(boost::filesystem::unique_path().string());
@@ -57,52 +57,50 @@ private:
 
     void firstBlockIsReportedAsBeingFree()
     {
-    	std::string testImage(boost::filesystem::unique_path().string());
-		boost::filesystem::path testPath = m_uniquePath / testImage;
-		uint64_t blocks(2048); // 1MB
-		bfs::MakeBFS bfs(testPath.string(), blocks);
+        std::string testImage(boost::filesystem::unique_path().string());
+        boost::filesystem::path testPath = m_uniquePath / testImage;
+        uint64_t blocks(2048); // 1MB
+        bfs::MakeBFS bfs(testPath.string(), blocks);
 
-		std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::binary);
-		bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
-		assert(*p == 0);
-		is.close();
+        std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::binary);
+        bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
+        assert(*p == 0);
+        is.close();
     }
 
     void blocksCanBeSetAndCleared()
     {
-    	std::string testImage(boost::filesystem::unique_path().string());
-		boost::filesystem::path testPath = m_uniquePath / testImage;
-		uint64_t blocks(2048); // 1MB
-		bfs::MakeBFS bfs(testPath.string(), blocks);
+        std::string testImage(boost::filesystem::unique_path().string());
+        boost::filesystem::path testPath = m_uniquePath / testImage;
+        uint64_t blocks(2048); // 1MB
+        bfs::MakeBFS bfs(testPath.string(), blocks);
 
-		std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::out | std::ios::binary);
-		bfs::detail::setBlockToInUse(0, blocks, is);
-		bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
-		assert(*p == 1);
+        std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::detail::setBlockToInUse(0, blocks, is);
+        bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
+        assert(*p == 1);
 
-		// check that rest of map can also be set correctly
-		for(int i = 1; i < 256; ++i) {
-			bfs::detail::setBlockToInUse(i, blocks, is);
-			p = bfs::detail::getNextAvailableBlock(is);
-			assert(*p == i + 1);
-		}
+        // check that rest of map can also be set correctly
+        for (int i = 1; i < 256; ++i) {
+            bfs::detail::setBlockToInUse(i, blocks, is);
+            p = bfs::detail::getNextAvailableBlock(is);
+            assert(*p == i + 1);
+        }
 
-		// check that bit 25 (arbitrary) can be unset again
-		bfs::detail::setBlockToInUse(25, blocks, is, false);
-		p = bfs::detail::getNextAvailableBlock(is);
-		assert(*p == 25);
+        // check that bit 25 (arbitrary) can be unset again
+        bfs::detail::setBlockToInUse(25, blocks, is, false);
+        p = bfs::detail::getNextAvailableBlock(is);
+        assert(*p == 25);
 
-		// should still be 25 when blocks after 25 are also made available
-		bfs::detail::setBlockToInUse(27, blocks, is, false);
-		p = bfs::detail::getNextAvailableBlock(is);
-		assert(*p == 25);
+        // should still be 25 when blocks after 25 are also made available
+        bfs::detail::setBlockToInUse(27, blocks, is, false);
+        p = bfs::detail::getNextAvailableBlock(is);
+        assert(*p == 25);
 
-		// should now be 27 since block 25 is made unavailable
-		bfs::detail::setBlockToInUse(25, blocks, is);
-		p = bfs::detail::getNextAvailableBlock(is);
-		assert(*p == 27);
-
-
+        // should now be 27 since block 25 is made unavailable
+        bfs::detail::setBlockToInUse(25, blocks, is);
+        p = bfs::detail::getNextAvailableBlock(is);
+        assert(*p == 27);
     }
 
     boost::filesystem::path m_uniquePath;

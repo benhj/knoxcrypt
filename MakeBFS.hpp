@@ -13,14 +13,14 @@ namespace bfs
 
     class MakeBFS
     {
-    public:
+      public:
 
         MakeBFS(std::string const &imageName, uint64_t const blocks)
         {
             buildImage(imageName, blocks);
         }
 
-    private:
+      private:
         MakeBFS(); // not required
 
         void buildBlockBytes(uint64_t const fsSize, uint8_t sizeBytes[8])
@@ -45,13 +45,13 @@ namespace bfs
             ints.assign(4096, 0);
             uint64_t leftOver = byteCount % uint64_t(4096);
 
-            if(byteCount > 4096) {
+            if (byteCount > 4096) {
                 uint64_t iterations = (byteCount - leftOver) / uint64_t(4096);
                 for (int i = 0; i < iterations; ++i) {
                     out.write((char*)&ints.front(), 4096);
                 }
             }
-            out.write((char*) (&ints.front()), leftOver);
+            out.write((char*)(&ints.front()), leftOver);
         }
 
         void writeOutMetaBytes(uint64_t const metaBytes, std::fstream &out)
@@ -67,8 +67,8 @@ namespace bfs
         void zeroOutBits(std::vector<uint8_t> &bitMapData)
         {
             uint8_t byte;
-            for(int i = 0; i < 8; ++i) {
-            	detail::setBitInByte(byte, i, false);
+            for (int i = 0; i < 8; ++i) {
+                detail::setBitInByte(byte, i, false);
             }
             bitMapData.push_back(byte);
         }
@@ -89,7 +89,7 @@ namespace bfs
             //
             uint64_t bytesRequired = blocks / uint64_t(8);
             std::vector<uint8_t> bitMapData;
-            for(uint64_t b = 0; b < bytesRequired; ++b) {
+            for (uint64_t b = 0; b < bytesRequired; ++b) {
                 zeroOutBits(bitMapData);
             }
             (void)out.write((char*)&bitMapData.front(), bytesRequired);
@@ -132,13 +132,12 @@ namespace bfs
 
             //
             // we will have 0.1% bytes file count; each file metadata item
-            // will be 40 bytes in length
+            // will be 32 bytes in length
             //
             // First 8 bytes: file size
             // Next 8 bytes: 1st block position
             // Next 8 bytes: parent meta data
             // Next 8 bytes: permissions
-            // Next 8 bytes: other metadata (tbd)
             //
             uint64_t statAlloc(detail::getMetaDataSize(blocks));
 
@@ -151,7 +150,7 @@ namespace bfs
             out.flush();
             out.close();
         }
-};
+    };
 }
 
 #endif // BFS_MAKE_BFS_HPP__
