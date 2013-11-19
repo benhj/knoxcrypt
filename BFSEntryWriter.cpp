@@ -54,7 +54,6 @@ namespace bfs
         , m_totalBlocks(detail::getBlockCount(*m_bfsOutputStream))
         , m_blocksToUse(detail::getNAvailableBlocks(*m_bfsOutputStream, detail::computeBlocksRequired(fsize), m_totalBlocks))
           //, m_metaOffset(detail::getOffsetOfNextFreeMetaSpaceBlock(*m_bfsOutputStream))
-          //   , m_fileOffset(detail::getOffsetOfNextFreeFileSpaceBlock(*m_bfsOutputStream))
     {
         //updateSuperBlock();
         //writeMetaBlock();
@@ -162,7 +161,7 @@ namespace bfs
 
                 // write
                 // clear
-                // update burrent block index
+                // update current block index
                 // start again
 
                 uint64_t const bytes = m_totalBlocks / uint64_t(8);
@@ -173,8 +172,7 @@ namespace bfs
                 m_dataBuffer.clear();
                 ++m_currentBlockIndex;
 
-            } else {
-                // write how many bytes will be occupied
+                // write how many bytes will be occupied in the next block
                 uint64_t bufferSize = computeBufferSize(m_currentBlockIndex);
                 bufferBytesUsedForFileBlockN();
                 uint64_t prev;
