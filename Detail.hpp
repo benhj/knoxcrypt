@@ -12,7 +12,7 @@ namespace bfs { namespace detail
 {
 
     uint64_t const METABLOCKS_BEGIN = 24;
-    uint64_t const METABLOCK_SIZE = 32;
+    uint64_t const METABLOCK_SIZE = 25;
     uint64_t const MAX_FILENAME_LENGTH = 255;
     uint64_t const FILE_BLOCK_SIZE = 512;
 
@@ -101,13 +101,31 @@ namespace bfs { namespace detail
     }
 
     /**
+     * @brief gets the number of meta blocks used to store file meta data
+     * computed as a fraction of the total number of bytes in the file space
+     * @note the number of metablocks imposes a limit on the total number of
+     * permitted files
+     * @param blocks the total number of fs blocks
+     * @return the number of meta blocks
+     */
+    inline uint64_t getMetaBlockCount(uint64_t const blocks)
+    {
+    	uint64_t metaBlockCount = ((blocks * FILE_BLOCK_SIZE) * 0.001);
+    	uint64_t leftOver = metaBlockCount % 2;
+    	if(leftOver != 0) {
+    		metaBlockCount -= leftOver;
+    	}
+    	return metaBlockCount;
+    }
+
+    /**
      * @brief gets the total amount of space allocated to metadata
      * @param blocks number of blocks making up image
      * @return space allocated to metadata
      */
     inline uint64_t getMetaDataSize(uint64_t const blocks)
     {
-        return static_cast<uint64_t>((blocks * FILE_BLOCK_SIZE) * 0.001) * METABLOCK_SIZE;
+        return getMetaBlockCount(blocks) * METABLOCK_SIZE;
     }
 
     /**

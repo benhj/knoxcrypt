@@ -29,22 +29,28 @@ class BFSEntryWriterTest
 
     void oneDataEntry()
     {
-        /*
+
           std::string testImage(boost::filesystem::unique_path().string());
           boost::filesystem::path testPath = m_uniquePath / testImage;
-          uint64_t bytes(1048576); // 1MB
-          bfs::MakeBFS bfs(testPath.string(), bytes);
+
+          {
+			  uint64_t blocks(2048); // 1MB
+			  bfs::MakeBFS bfs(testPath.string(), blocks);
+          }
+
 
           // create a test entry sink
           {
-          bfs::BFSEntrySink entrySink(testPath.c_str(), "test.txt", uint64_t(13), uint64_t(0));
-          //std::string testData("Hello, world!");
-          //std::stringstream ss;
-          //ss << testData.c_str();
-          //boost::iostreams::stream<bfs::BFSEntrySink> bfsEntryStream(entrySink);
-          // copy from the test stream to the entry stream
-          //boost::iostreams::copy(ss,  bfsEntryStream);
+        	  bfs::BFSEntryWriter entrySink(testPath.c_str(), "test.txt", uint64_t(13), uint64_t(0));
+        	  std::string testData("Hello, world!");
+        	  std::stringstream ss;
+        	  ss << testData.c_str();
+        	  boost::iostreams::stream<bfs::BFSEntryWriter> bfsEntryStream(entrySink);
+        	  // copy from the test stream to the entry stream
+        	  boost::iostreams::copy(ss,  bfsEntryStream);
           }
+
+          /*
 
           // create a second entry sink
           {

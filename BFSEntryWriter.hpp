@@ -5,6 +5,7 @@
 
 #include <vector>
 
+#include <boost/iostreams/categories.hpp>  // sink_tag
 #include <iosfwd>                          // streamsize
 #include <string>
 #include <fstream>
@@ -16,6 +17,9 @@ namespace bfs
     class BFSEntryWriter
     {
       public:
+
+        typedef char                          char_type;
+        typedef boost::iostreams::sink_tag    category;
 
         BFSEntryWriter(std::string const &bfsOutputPath,
                      std::string const &entryName,

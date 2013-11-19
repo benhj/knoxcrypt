@@ -54,9 +54,14 @@ namespace bfs
             out.write((char*)(&ints.front()), leftOver);
         }
 
-        void writeOutMetaBytes(uint64_t const metaBytes, std::fstream &out)
+        void writeOutMetaBytes(uint64_t const fileBlockCount, std::fstream &out)
         {
-            writeOut4KBlocks(metaBytes, out);
+        	uint64_t metaBlocks = detail::getMetaBlockCount(fileBlockCount);
+        	for(uint64_t i(0); i < metaBlocks ; ++i) {
+        		std::vector<uint8_t> ints;
+				ints.assign(detail::METABLOCK_SIZE, 0);
+        		(void)out.write((char*)&ints.front(), detail::METABLOCK_SIZE);
+        	}
         }
 
         void writeOutFileSpaceBytes(uint64_t const fileSpaceBytes, std::fstream &out)
@@ -132,17 +137,17 @@ namespace bfs
 
             //
             // we will have 0.1% bytes file count; each file metadata item
-            // will be 32 bytes in length
+            // will be 25 bytes in length
             //
-            // First 8 bytes: file size
+            // First 1 bytes: binary info (1st bit in use or not)
+            // Next 8 bytes: file size
             // Next 8 bytes: 1st block position
-            // Next 8 bytes: parent meta data
-            // Next 8 bytes: permissions
+            // Next 8 bytes: parent meta block
             //
-            uint64_t statAlloc(detail::getMetaDataSize(blocks));
+            //uint64_t statAlloc(detail::getMetaDataSize(blocks));
 
             // write out metaBytes of metadata
-            writeOutMetaBytes(statAlloc, out);
+            writeOutMetaBytes(blocks, out);
 
             // write out the file space bytes
             writeOutFileSpaceBytes((blocks * 512), out);
