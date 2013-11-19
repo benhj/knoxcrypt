@@ -1,5 +1,5 @@
-#ifndef BFS_BFS_ENTRY_SINK_HPP__
-#define BFS_BFS_ENTRY_SINK_HPP__
+#ifndef BFS_BFS_ENTRY_WRITER_HPP__
+#define BFS_BFS_ENTRY_WRITER_HPP__
 
 #include <boost/shared_ptr.hpp>
 
@@ -13,11 +13,11 @@
 namespace bfs
 {
 
-    class BFSEntrySink
+    class BFSEntryWriter
     {
       public:
 
-        BFSEntrySink(std::string const &bfsOutputPath,
+        BFSEntryWriter(std::string const &bfsOutputPath,
                      std::string const &entryName,
                      uint64_t const fsize,
                      uint64_t const parentIndex);
@@ -28,7 +28,7 @@ namespace bfs
          * @return the number of bytes written
          */
         void writeIn(std::fstream &orig) const;
-        ~BFSEntrySink();
+        ~BFSEntryWriter();
 
       private:
         std::string const m_bfsOutputPath;                    // the image path
@@ -46,10 +46,11 @@ namespace bfs
         void updateSuperBlock();                              // the first 24 bytes
         void computePreviousAndNextBlockIndices(uint64_t &prev, uint64_t &next, uint64_t const b) const;
         uint64_t computeBufferSize(uint64_t const b) const;
-    void writeVeryFirstFileBlock(std::fstream& orig) const;
+        void writeVeryFirstFileBlock(std::fstream& orig) const;
+    void writeRemainingFileBlocks(std::fstream& orig) const;
 };
 
 
 }
 
-#endif // BFS_BFS_ENTRY_SINK_HPP__
+#endif // BFS_BFS_ENTRY_WRITER_HPP__

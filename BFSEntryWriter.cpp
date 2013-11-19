@@ -1,4 +1,4 @@
-#include "BFSEntrySink.hpp"
+#include "BFSEntryWriter.hpp"
 #include "Detail.hpp"
 
 #include <boost/make_shared.hpp>
@@ -112,10 +112,10 @@ namespace bfs
         }
     }
 
-    BFSEntrySink::BFSEntrySink(std::string const &bfsOutputPath,
-                               std::string const &entryName,
-                               uint64_t const fsize,
-                               uint64_t const parentIndex)
+    BFSEntryWriter::BFSEntryWriter(std::string const &bfsOutputPath,
+                                   std::string const &entryName,
+                                   uint64_t const fsize,
+                                   uint64_t const parentIndex)
         : m_bfsOutputPath(bfsOutputPath)
         , m_entryName(entryName)
         , m_fsize(fsize)
@@ -135,7 +135,7 @@ namespace bfs
      * writes the filename which has a max size of 50 bytes
      */
     void
-    BFSEntrySink::writeFileName()
+    BFSEntryWriter::writeFileName()
     {
         std::vector<uint8_t> fname;
         fname.resize(detail::MAX_FILENAME_LENGTH);
@@ -159,7 +159,7 @@ namespace bfs
      * 8 bytes specifying other data (e.g. read-only, last modified etc)
      */
     void
-    BFSEntrySink::writeMetaBlock()
+    BFSEntryWriter::writeMetaBlock()
     {
         uint8_t sizeBytes[8];
         detail::convertInt64ToInt8Array(m_fsize, sizeBytes);
@@ -177,26 +177,24 @@ namespace bfs
     /**
      * Updates file count and total file size information in the superblock
      */
-    void BFSEntrySink::updateSuperBlock()
+    void BFSEntryWriter::updateSuperBlock()
     {
         detail::incrementFileCount(*m_bfsOutputStream);
         //detail::updateFileSpaceAccumulator(*m_bfsOutputStream, m_fsize);
     }
 
-    void BFSEntrySink::writeVeryFirstFileBlock(std::fstream& orig) const
+    void BFSEntryWriter::writeVeryFirstFileBlock(std::fstream& orig) const
     {
         const uint64_t fSizePlusFileNameLength = m_fsize
             + detail::MAX_FILENAME_LENGTH;
         const uint64_t blockSizeWithoutMetaStuff = detail::FILE_BLOCK_SIZE - 20;
-        // seek to beginning of input stream
-        orig.seekg(0, orig.beg);
+
         // write very first file block data which includes filename
         {
-            uint64_t bufferSize;
+            uint64_t bufferSize = computeBufferSize(0);
             uint64_t prev;
             uint64_t next;
             if (fSizePlusFileNameLength < blockSizeWithoutMetaStuff) {
-                bufferSize = fSizePlusFileNameLength;
                 prev = 0;
                 next = 0;
                 // write out bytes used to block
@@ -204,7 +202,6 @@ namespace bfs
                                                    fSizePlusFileNameLength, 0, m_blocksToUse[0],
                                                    m_totalBlocks);
             } else {
-                bufferSize = blockSizeWithoutMetaStuff;
                 prev = 0;
                 next = m_blocksToUse[1];
                 // write out previous and next block indices
@@ -226,48 +223,59 @@ namespace bfs
         }
     }
 
-    void
-    BFSEntrySink::writeIn(std::fstream &orig) const
+    void BFSEntryWriter::writeRemainingFileBlocks(std::fstream& orig) const
     {
-        writeVeryFirstFileBlock(orig);
         // write remaining data blocks
         if (m_blocksToUse.size() > 1) {
-            for (uint64_t b(1) ; b < m_blocksToUse.size() ; ++b) {
-
+            for (uint64_t b(1); b < m_blocksToUse.size(); ++b) {
                 // write how many bytes will be occupied
                 uint64_t bufferSize = computeBufferSize(b);
-
                 // write out bytes used to block
-                detail::writeBytesUsedInFileBlockN(*m_bfsOutputStream,
-                                                   bufferSize,
-                                                   b,
-                                                   m_blocksToUse[b],
-                                                   m_totalBlocks);
-
+                detail::writeBytesUsedInFileBlockN(*m_bfsOutputStream, bufferSize,
+                                                   b, m_blocksToUse[b], m_totalBlocks);
                 // establish the previous and next block indices
                 uint64_t prev;
                 uint64_t next;
                 computePreviousAndNextBlockIndices(prev, next, b);
-
                 // write out previous and next block indices
                 detail::writeLastAndNextBlockIndicesToFileBlockN(*m_bfsOutputStream,
-                                                                 prev,
-                                                                 next,
-                                                                 m_blocksToUse[b],
-                                                                 m_totalBlocks);
+                                                                 prev, next, m_blocksToUse[b], m_totalBlocks);
                 std::vector<uint8_t> readBuffer;
                 readBuffer.resize(bufferSize, 0);
-                (void)orig.read((char*)&readBuffer.front(), bufferSize);
-                (void)m_bfsOutputStream->write((char*)&readBuffer.front(), bufferSize);
+                (void)(orig.read((char*)(&readBuffer.front()), bufferSize));
+                (void)(m_bfsOutputStream->write((char*)(&readBuffer.front()),
+                                                bufferSize));
             }
         }
     }
 
+    void
+    BFSEntryWriter::writeIn(std::fstream &orig) const
+    {
+        // seek to beginning of input stream
+        orig.seekg(0, orig.beg);
+
+        // write the very first block which includes filename
+        writeVeryFirstFileBlock(orig);
+
+        // write remaining data blocks
+        writeRemainingFileBlocks(orig);
+    }
+
     uint64_t
-    BFSEntrySink::computeBufferSize(uint64_t const b) const
+    BFSEntryWriter::computeBufferSize(uint64_t const b) const
     {
         uint64_t const fSizePlusFileNameLength = m_fsize + detail::MAX_FILENAME_LENGTH;
         uint64_t const blockSizeWithoutMetaStuff = detail::FILE_BLOCK_SIZE - 20;
+
+        if(b == 0) {
+            if (fSizePlusFileNameLength < blockSizeWithoutMetaStuff) {
+                return fSizePlusFileNameLength;
+            } else {
+                return blockSizeWithoutMetaStuff;
+            }
+        }
+
         if (b < (m_blocksToUse.size() - 1)) {
             return blockSizeWithoutMetaStuff;
         } else {
@@ -276,7 +284,7 @@ namespace bfs
         }
     }
     void
-    BFSEntrySink::computePreviousAndNextBlockIndices(uint64_t &prev, uint64_t &next, uint64_t const b) const
+    BFSEntryWriter::computePreviousAndNextBlockIndices(uint64_t &prev, uint64_t &next, uint64_t const b) const
     {
         if (b == 0) {
             prev = m_blocksToUse[b];
@@ -290,7 +298,7 @@ namespace bfs
         }
     }
 
-    BFSEntrySink::~BFSEntrySink()
+    BFSEntryWriter::~BFSEntryWriter()
     {
         m_bfsOutputStream->flush();
         m_bfsOutputStream->close();

@@ -1,5 +1,5 @@
 #include "Detail.hpp"
-#include "BFSEntrySink.hpp"
+#include "BFSEntryWriter.hpp"
 #include "MakeBFS.hpp"
 
 #include <boost/filesystem/path.hpp>
@@ -11,16 +11,16 @@
 #include <sstream>
 #include <fstream>
 
-class BFSEntrySinkTest
+class BFSEntryWriterTest
 {
   public:
-    BFSEntrySinkTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
+    BFSEntryWriterTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
         oneDataEntry();
     }
 
-    ~BFSEntrySinkTest()
+    ~BFSEntryWriterTest()
     {
         boost::filesystem::remove_all(m_uniquePath);
     }

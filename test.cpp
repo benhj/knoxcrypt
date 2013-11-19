@@ -1,4 +1,4 @@
-#include "BFSEntrySinkTest.hpp"
+#include "BFSEntryWriterTest.hpp"
 #include "MakeBFSTest.hpp"
 
 

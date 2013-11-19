@@ -2,7 +2,7 @@ CC=clang++
 CXXFLAGS=-I/usr/local/boost_1_53_0
 
 TEST_OBJS = test.o \
-            BFSEntrySink.o \
+            BFSEntryWriter.o \
             /usr/local/boost_1_53_0/stage/lib/libboost_filesystem.dylib \
             /usr/local/boost_1_53_0/stage/lib/libboost_system.dylib
 
