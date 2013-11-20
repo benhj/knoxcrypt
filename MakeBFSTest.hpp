@@ -102,6 +102,8 @@ class MakeBFSTest
         bfs::detail::setBlockToInUse(25, blocks, is);
         p = bfs::detail::getNextAvailableBlock(is);
         assert(*p == 27);
+
+        is.close();
     }
 
     void allMetaBlocksAreAvailable()
@@ -116,6 +118,8 @@ class MakeBFSTest
         for(int i = 0; i < metaBlockCount; ++i) {
             assert(bfs::detail::metaBlockIsAvailable(is, i));
         }
+
+        is.close();
     }
 
     boost::filesystem::path m_uniquePath;

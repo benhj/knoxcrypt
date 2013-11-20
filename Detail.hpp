@@ -130,17 +130,17 @@ namespace bfs { namespace detail
 
     /**
      * @brief gets the offset of a given meta data block
-     * @param fileIndex the file index that this metablock represents
-     * @return the offset of the meta data block
+     * @param metaBlockIndex the index of the metablock
+     * @return the offset of the meta block
      */
-    inline uint64_t getOffsetOfMetaDataBlock(uint64_t const fileIndex,
-                                             uint64_t const totalBlocks)
+    inline uint64_t getOffsetOfMetalock(uint64_t const metaBlockIndex,
+                                        uint64_t const totalBlocks)
     {
         uint64_t const volumeBitMapBytes = totalBlocks / 8;
         return 8                                                       // number of fs blocks
             + volumeBitMapBytes                 // volume bit map
             + 8                                                     // total number of files
-            + (METABLOCK_SIZE * fileIndex); // meta data block
+            + (METABLOCK_SIZE * metaBlockIndex); // meta data block
     }
 
     /**
@@ -155,7 +155,7 @@ namespace bfs { namespace detail
                                          uint64_t const fileSize,
                                          std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetaDataBlock(block, totalBlocks);
+        uint64_t const offset = getOffsetOfMetalock(block, totalBlocks);
         (void)in.seekp(offset);
         uint8_t dat[8];
         convertInt64ToInt8Array(fileSize, dat);
@@ -174,7 +174,7 @@ namespace bfs { namespace detail
                                                  uint64_t const firstBlockOffset,
                                                  std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetaDataBlock(fileIndex, totalBlocks);
+        uint64_t const offset = getOffsetOfMetalock(fileIndex, totalBlocks);
         (void)in.seekp(offset + 8);
         uint8_t dat[8];
         convertInt64ToInt8Array(firstBlockOffset, dat);
@@ -192,7 +192,7 @@ namespace bfs { namespace detail
                                               uint64_t const totalBlocks,
                                               std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetaDataBlock(fileIndex, totalBlocks);
+        uint64_t const offset = getOffsetOfMetalock(fileIndex, totalBlocks);
         (void)in.seekg(offset);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
@@ -211,7 +211,7 @@ namespace bfs { namespace detail
                                                       uint64_t const totalBlocks,
                                                       std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetaDataBlock(fileIndex, totalBlocks);
+        uint64_t const offset = getOffsetOfMetalock(fileIndex, totalBlocks);
         (void)in.seekg(offset + 8);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
@@ -407,18 +407,33 @@ namespace bfs { namespace detail
      * @param metablock meta block to determine its availability
      * @return true if metablock is available, false otherwise
      */
-    inline bool metaBlockIsAvailable(std::fstream &in, uint64_t const metaBlock)
+    inline bool metaBlockIsAvailable(std::fstream &in, uint64_t const metaBlock, uint64_t const totalBlocks = 0)
     {
         // get number of blocks that make up fs
-        uint64_t blocks = getNumberOfBlocks(in);
+        uint64_t totalFileBlocks = totalBlocks;
+        if(totalFileBlocks == 0) {
+            totalFileBlocks = getNumberOfBlocks(in);
+        }
 
-        uint64_t offset = 8 + blocks + 8 + (metaBlock * METABLOCK_SIZE);
+        uint64_t offset = 8 + totalFileBlocks + 8 + (metaBlock * METABLOCK_SIZE);
         (void)in.seekg(offset);
 
         uint8_t byte;
         (void)in.read((char*)&byte, 1);
 
         return (!isBitSetInByte(byte, 0));
+    }
+
+    inline uint64_t getNextAvailableMetaBlock(std::fstream &in, uint64_t const totalFileBlocks)
+    {
+        uint64_t const metaBlockCount = getMetaBlockCount(totalFileBlocks);
+        for(uint64_t b(0); b < metaBlockCount; ++b) {
+            if(metaBlockIsAvailable(in, b, totalFileBlocks)) {
+                return b;
+            }
+        }
+
+        // maybe throw here?
     }
 
     /**

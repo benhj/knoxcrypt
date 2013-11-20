@@ -53,7 +53,6 @@ namespace bfs
         , m_bfsOutputStream(boost::make_shared<std::fstream>(bfsOutputPath.c_str(), std::ios::in | std::ios::out | std::ios::binary))
         , m_totalBlocks(detail::getBlockCount(*m_bfsOutputStream))
         , m_blocksToUse(detail::getNAvailableBlocks(*m_bfsOutputStream, detail::computeBlocksRequired(fsize), m_totalBlocks))
-          //, m_metaOffset(detail::getOffsetOfNextFreeMetaSpaceBlock(*m_bfsOutputStream))
     {
         //updateSuperBlock();
         //writeMetaBlock();
@@ -72,17 +71,25 @@ namespace bfs
     void
     BFSEntryWriter::writeMetaBlock()
     {
+
+        uint64_t const nextAvailableMetaBlock = detail::getNextAvailableMetaBlock(*m_bfsOutputStream, m_totalBlocks);
+        uint64_t const offset = detail::getOffsetOfMetalock(nextAvailableMetaBlock, m_totalBlocks);
+        (void)m_bfsOutputStream->seekg(offset);
+        uint8_t firstByte;
+        (void)m_bfsOutputStream->read((char*)&firstByte, 1);    // size of file
+        (void)m_bfsOutputStream->seekp(offset);
+        detail::setBitInByte(firstByte, 1, true);
+        (void)m_bfsOutputStream->write((char*)&firstByte, 1);    // size of file
+
         uint8_t sizeBytes[8];
         detail::convertInt64ToInt8Array(m_fsize, sizeBytes);
-        uint8_t posBytes[8];
-        detail::convertInt64ToInt8Array(m_fileOffset, posBytes);
+        uint8_t firstFileBlockIndex[8];
+        detail::convertInt64ToInt8Array(m_blocksToUse[0], firstFileBlockIndex);
         uint8_t parentBytes[8];
-        detail::convertInt64ToInt8Array(m_parentIndex, parentBytes);
-        (void)m_bfsOutputStream->seekp((std::streampos)m_metaOffset);
+        detail::convertInt64ToInt8Array(m_blocksToUse[0], parentBytes);
         m_bfsOutputStream->write((char*)sizeBytes, 8);    // size of file
-        m_bfsOutputStream->write((char*)posBytes, 8);     // position in main file space
+        m_bfsOutputStream->write((char*)firstFileBlockIndex, 8);     // position in main file space
         m_bfsOutputStream->write((char*)parentBytes, 8);  // index of parent directory
-        m_bfsOutputStream->write((char*)parentBytes, 8);  // extra space for other stuff (tbd)
     }
 
     /**
@@ -96,10 +103,9 @@ namespace bfs
 
 
     void
-    BFSEntryWriter::bufferBytesUsedForFileBlockN()
+    BFSEntryWriter::bufferBytesUsedToDescribeBytesOccupiedForFileBlockN()
     {
         uint64_t const bytes = m_totalBlocks / uint64_t(8);
-        uint64_t const offset = detail::getOffsetOfFileBlock(m_blocksToUse[m_currentBlockIndex], m_totalBlocks);
 
         // file blocks to also store filename which also needs to be
         // taken in to account
@@ -133,8 +139,6 @@ namespace bfs
                                                               uint64_t const nextBlockIndex)
     {
         uint64_t const bytes = m_totalBlocks / uint64_t(8);
-        // note, the '4' on the end signifies skip past the 4 byte 'bytes used' block
-        uint64_t const offset = detail::getOffsetOfFileBlock(m_blocksToUse[m_currentBlockIndex], m_totalBlocks) + 4;
         uint8_t dat[8];
         detail::convertInt64ToInt8Array(m_blocksToUse[lastBlockIndex], dat);
         for(int i = 0; i < 8; ++i) {m_dataBuffer.push_back(dat[i]);}
@@ -174,7 +178,7 @@ namespace bfs
 
                 // write how many bytes will be occupied in the next block
                 uint64_t bufferSize = computeBufferSize(m_currentBlockIndex);
-                bufferBytesUsedForFileBlockN();
+                bufferBytesUsedToDescribeBytesOccupiedForFileBlockN();
                 uint64_t prev;
                 uint64_t next;
                 computePreviousAndNextBlockIndices(prev, next, m_currentBlockIndex);
@@ -196,7 +200,7 @@ namespace bfs
                 uint64_t bufferSize = computeBufferSize(0);
                 uint64_t prev;
                 uint64_t next;
-                bufferBytesUsedForFileBlockN();
+                bufferBytesUsedToDescribeBytesOccupiedForFileBlockN();
                 if (fSizePlusFileNameLength < blockSizeWithoutMetaStuff) {
                     prev = 0;
                     next = 0;
