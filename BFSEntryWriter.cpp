@@ -53,10 +53,10 @@ namespace bfs
         , m_bfsOutputStream(boost::make_shared<std::fstream>(bfsOutputPath.c_str(), std::ios::in | std::ios::out | std::ios::binary))
         , m_totalBlocks(detail::getBlockCount(*m_bfsOutputStream))
         , m_blocksToUse(detail::getNAvailableBlocks(*m_bfsOutputStream, detail::computeBlocksRequired(fsize), m_totalBlocks))
+        , m_currentBlockIndex(0)
+        , m_buffered(0)
     {
         //updateSuperBlock();
-        //writeMetaBlock();
-        //writeFileName();
     }
 
 
@@ -73,7 +73,7 @@ namespace bfs
     {
 
         uint64_t const nextAvailableMetaBlock = detail::getNextAvailableMetaBlock(*m_bfsOutputStream, m_totalBlocks);
-        uint64_t const offset = detail::getOffsetOfMetalock(nextAvailableMetaBlock, m_totalBlocks);
+        uint64_t const offset = detail::getOffsetOfMetaBlock(nextAvailableMetaBlock, m_totalBlocks);
         (void)m_bfsOutputStream->seekg(offset);
         uint8_t firstByte;
         (void)m_bfsOutputStream->read((char*)&firstByte, 1);    // size of file
@@ -93,12 +93,13 @@ namespace bfs
     }
 
     /**
-     * Updates file count and total file size information in the superblock
+     * Updates blocks used, the volume bitmap, and the file count
      */
     void BFSEntryWriter::updateSuperBlock()
     {
-        detail::incrementFileCount(*m_bfsOutputStream);
-        //detail::updateFileSpaceAccumulator(*m_bfsOutputStream, m_fsize);
+        detail::setBlocksUsed(*m_bfsOutputStream, m_blocksToUse.size());
+        detail::updateVolumeBitmap(*m_bfsOutputStream, m_blocksToUse, m_totalBlocks);
+        detail::incrementFileCount(*m_bfsOutputStream, m_totalBlocks);
     }
 
 
@@ -151,6 +152,7 @@ namespace bfs
     {
         m_dataBuffer.push_back(byte);
         ++m_buffered;
+
         if(m_buffered == m_fsize + detail::MAX_FILENAME_LENGTH) {
 
             // write out remaining bytes
@@ -159,6 +161,17 @@ namespace bfs
             (void)m_bfsOutputStream->seekp(offset);
             (void)m_bfsOutputStream->write((char*)&m_dataBuffer.front(), m_dataBuffer.size());
             m_dataBuffer.clear();
+
+            // write the metablock info associated with this file
+            writeMetaBlock();
+
+            // finally update super block with number of file blocks in use
+            // (first 8 bytes), the volume bitmap with newly allocated file blocks
+            // (the next m_totalBlocks bytes), and the number of files (the next
+            // 8 bytes)
+            updateSuperBlock();
+
+            // finished writing data!
 
         } else {
             if(m_dataBuffer.size() == detail::FILE_BLOCK_SIZE) {
@@ -197,6 +210,7 @@ namespace bfs
 
             // write very first file block data which includes filename
             {
+
                 uint64_t bufferSize = computeBufferSize(0);
                 uint64_t prev;
                 uint64_t next;
@@ -213,9 +227,12 @@ namespace bfs
                 bufferLastAndNextBlockIndicesForFileBlockN(prev, next);
 
                 // write filename portion of block. Already in correct place in stream
-                for(int i = 0; i<m_entryName.length(); ++i) {m_dataBuffer.push_back(m_entryName[i]);}
+                for(int i = 0; i < m_entryName.length(); ++i) {m_dataBuffer.push_back(m_entryName[i]);}
                 char eol = '\0';
                 m_dataBuffer.push_back(eol);
+                for(int i = 0; i < detail::MAX_FILENAME_LENGTH - m_entryName.length() - 1; ++i) {
+                    m_dataBuffer.push_back(eol);
+                }
             }
             m_buffered = m_dataBuffer.size() - 20; // don't accumulate meta info
         }

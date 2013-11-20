@@ -72,14 +72,18 @@ namespace bfs { namespace detail
     /**
      * @brief gets the number of files stored in the BFS
      * @param in the BFS image stream
+     * @param totalFileBlocks total blocks in file space
      * @return the number of files
      */
-    inline uint64_t getFileCount(std::fstream &in)
+    inline uint64_t getFileCount(std::fstream &in, uint64_t const totalFileBlocks = 0)
     {
-        uint8_t blockCountBytes[8];
-        in.seekg(0, in.beg);
-        (void)in.read((char*)blockCountBytes, 8);
-        uint64_t blockCount = convertInt8ArrayToInt64(blockCountBytes);
+        uint64_t blockCount = totalFileBlocks;
+        if(blockCount == 0) { // read in, in this case as should never be 0
+            uint8_t blockCountBytes[8];
+            in.seekg(0, in.beg);
+            (void)in.read((char*)blockCountBytes, 8);
+            blockCount = convertInt8ArrayToInt64(blockCountBytes);
+        }
         in.seekg(blockCount + 8);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
@@ -88,16 +92,22 @@ namespace bfs { namespace detail
 
     /**
      * @brief increments the file count
-     * @param imagePath the path of the container
+     * @param in the path of the container
+     * @param totalFileBlocks total fs blocks
+     * @param increment whether to increment (true) or decrement (false) the file count
      */
-    inline void incrementFileCount(std::fstream &in)
+    inline void incrementFileCount(std::fstream &in, uint64_t const totalFileBlocks, bool const increment = true)
     {
-        uint64_t orig = getFileCount(in);                    // convert to a 64 bit int
-        ++orig;                                              // increment the count
-        uint8_t countBytes[8];
-        convertInt64ToInt8Array(orig, countBytes);           // convert back to bytes
-        in.seekp((std::streampos)8);                         // seek to position 8
-        in.write((char*)countBytes, 8);                      // write the bytes
+        uint64_t numberOfFiles = getFileCount(in, totalFileBlocks);
+        if(increment) {
+            ++numberOfFiles;
+        } else {
+            --numberOfFiles;
+        }
+        (void)in.seekg(8 + totalFileBlocks);
+        uint8_t dat[8];
+        convertInt64ToInt8Array(numberOfFiles, dat);
+        (void)in.write((char*)dat, 8);
     }
 
     /**
@@ -133,7 +143,7 @@ namespace bfs { namespace detail
      * @param metaBlockIndex the index of the metablock
      * @return the offset of the meta block
      */
-    inline uint64_t getOffsetOfMetalock(uint64_t const metaBlockIndex,
+    inline uint64_t getOffsetOfMetaBlock(uint64_t const metaBlockIndex,
                                         uint64_t const totalBlocks)
     {
         uint64_t const volumeBitMapBytes = totalBlocks / 8;
@@ -155,7 +165,7 @@ namespace bfs { namespace detail
                                          uint64_t const fileSize,
                                          std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetalock(block, totalBlocks);
+        uint64_t const offset = getOffsetOfMetaBlock(block, totalBlocks);
         (void)in.seekp(offset);
         uint8_t dat[8];
         convertInt64ToInt8Array(fileSize, dat);
@@ -174,7 +184,7 @@ namespace bfs { namespace detail
                                                  uint64_t const firstBlockOffset,
                                                  std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetalock(fileIndex, totalBlocks);
+        uint64_t const offset = getOffsetOfMetaBlock(fileIndex, totalBlocks);
         (void)in.seekp(offset + 8);
         uint8_t dat[8];
         convertInt64ToInt8Array(firstBlockOffset, dat);
@@ -192,7 +202,7 @@ namespace bfs { namespace detail
                                               uint64_t const totalBlocks,
                                               std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetalock(fileIndex, totalBlocks);
+        uint64_t const offset = getOffsetOfMetaBlock(fileIndex, totalBlocks);
         (void)in.seekg(offset);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
@@ -211,7 +221,7 @@ namespace bfs { namespace detail
                                                       uint64_t const totalBlocks,
                                                       std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetalock(fileIndex, totalBlocks);
+        uint64_t const offset = getOffsetOfMetaBlock(fileIndex, totalBlocks);
         (void)in.seekg(offset + 8);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
@@ -271,6 +281,28 @@ namespace bfs { namespace detail
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         return convertInt8ArrayToInt64(dat);
+    }
+
+    /**
+     * @brief updates the number of file blocks used
+     * @param in the bfs image stream
+     * @param blocksUsed the number of blocks to increment block usage by
+     */
+    inline void setBlocksUsed(std::fstream &in, uint64_t const blocksUsed, bool increment = true)
+    {
+        (void)in.seekg(0, in.beg);
+        uint8_t dat[8];
+        (void)in.read((char*)dat, 8);
+        uint64_t blockCountStore = convertInt8ArrayToInt64(dat);
+        if(increment) {
+            blockCountStore += blocksUsed;
+        } else {
+            blockCountStore -= blocksUsed;
+        }
+        convertInt64ToInt8Array(blockCountStore, dat);
+        (void)in.seekp(0, in.beg);
+        (void)in.write((char*)dat, 8);
+
     }
 
     /**
@@ -467,6 +499,41 @@ namespace bfs { namespace detail
             }
         }
         return std::vector<uint64_t>(); // empty not enough free blocks found
+    }
+
+    /**
+     * @brief updates the volume bit map with newly allocated file blocks
+     * @param in the bfs image stream
+     * @param blocksUsed a vector of newly allocated file block indices
+     * @param totalBlocks total number of fs blocks
+     */
+    inline void updateVolumeBitmap(std::fstream &in,
+                                   std::vector<uint64_t> const &blocksUsed,
+                                   uint64_t const totalBlocks)
+    {
+
+
+
+        // how many bytes does this value fit in to?
+        uint64_t bytes = totalBlocks / uint64_t(8);
+
+        std::vector<uint64_t>::const_iterator it = blocksUsed.begin();
+        for(; it != blocksUsed.end(); ++it) {
+            uint64_t const leftOver = (*it) % uint64_t(8);
+            uint64_t const roundedDown = (*it) - leftOver;
+            uint64_t byteIndex = roundedDown / uint64_t(8);
+            uint64_t bitToSet = 7;
+            if(leftOver > 0) {
+                ++byteIndex;
+                bitToSet = leftOver;
+            }
+            (void)in.seekg(8 + byteIndex);
+            uint8_t byte;
+            (void)in.read((char*)&byte, 1);
+            setBitInByte(byte, bitToSet);
+            (void)in.seekp(8 + byteIndex);
+            (void)in.write((char*)&byte, 1);
+        }
     }
 }
 }
