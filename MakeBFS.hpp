@@ -33,40 +33,29 @@ namespace bfs
             detail::convertInt64ToInt8Array(fileCount, sizeBytes);
         }
 
-        //
-        // note this is just an implementation detail, we don't have
-        // to write in 4K blocks. This was just an arbitrary decision
-        // based on what the size of out buffer should be
-        //
-        void writeOut4KBlocks(uint64_t const byteCount, std::fstream &out)
-        {
-            // write out metaBytes of metadata
-            std::vector<int8_t> ints;
-            ints.assign(4096, 0);
-            uint64_t leftOver = byteCount % uint64_t(4096);
-
-            if (byteCount > 4096) {
-                uint64_t iterations = (byteCount - leftOver) / uint64_t(4096);
-                for (int i = 0; i < iterations; ++i) {
-                    out.write((char*)&ints.front(), 4096);
-                }
-            }
-            out.write((char*)(&ints.front()), leftOver);
-        }
-
         void writeOutMetaBytes(uint64_t const fileBlockCount, std::fstream &out)
         {
         	uint64_t metaBlocks = detail::getMetaBlockCount(fileBlockCount);
         	for(uint64_t i(0); i < metaBlocks ; ++i) {
         		std::vector<uint8_t> ints;
-				ints.assign(detail::METABLOCK_SIZE, 0);
-        		(void)out.write((char*)&ints.front(), detail::METABLOCK_SIZE);
+				ints.assign(detail::METABLOCK_SIZE - 1, 0);
+				uint8_t byte;
+
+				// set the first bit of the first byte to 0 to indicate that
+				// the metablock is not in use
+				detail::setBitInByte(byte, 0, false);
+				(void)out.write((char*)&byte, 1);
+        		(void)out.write((char*)&ints.front(), detail::METABLOCK_SIZE-1);
         	}
         }
 
-        void writeOutFileSpaceBytes(uint64_t const fileSpaceBytes, std::fstream &out)
+        void writeOutFileSpaceBytes(uint64_t const fileBlockCount, std::fstream &out)
         {
-            writeOut4KBlocks(fileSpaceBytes, out);
+            for(uint64_t i(0); i < fileBlockCount ; ++i) {
+                std::vector<uint8_t> ints;
+                ints.assign(detail::FILE_BLOCK_SIZE, 0);
+                (void)out.write((char*)&ints.front(), detail::FILE_BLOCK_SIZE);
+            }
         }
 
         void zeroOutBits(std::vector<uint8_t> &bitMapData)
@@ -144,13 +133,12 @@ namespace bfs
             // Next 8 bytes: 1st block position
             // Next 8 bytes: parent meta block
             //
-            //uint64_t statAlloc(detail::getMetaDataSize(blocks));
 
             // write out metaBytes of metadata
             writeOutMetaBytes(blocks, out);
 
             // write out the file space bytes
-            writeOutFileSpaceBytes((blocks * 512), out);
+            writeOutFileSpaceBytes(blocks, out);
 
             out.flush();
             out.close();

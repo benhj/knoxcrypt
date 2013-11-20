@@ -16,6 +16,7 @@ class MakeBFSTest
         correctNumberOfFilesIsReported();
         firstBlockIsReportedAsBeingFree();
         blocksCanBeSetAndCleared();
+        allMetaBlocksAreAvailable();
     }
 
     ~MakeBFSTest()
@@ -81,7 +82,7 @@ class MakeBFSTest
         assert(*p == 1);
 
         // check that rest of map can also be set correctly
-        for (int i = 1; i < 256; ++i) {
+        for (int i = 1; i < blocks - 1; ++i) {
             bfs::detail::setBlockToInUse(i, blocks, is);
             p = bfs::detail::getNextAvailableBlock(is);
             assert(*p == i + 1);
@@ -101,6 +102,20 @@ class MakeBFSTest
         bfs::detail::setBlockToInUse(25, blocks, is);
         p = bfs::detail::getNextAvailableBlock(is);
         assert(*p == 27);
+    }
+
+    void allMetaBlocksAreAvailable()
+    {
+        std::string testImage(boost::filesystem::unique_path().string());
+        boost::filesystem::path testPath = m_uniquePath / testImage;
+        uint64_t blocks(2048); // 1MB
+        bfs::MakeBFS bfs(testPath.string(), blocks);
+
+        std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        uint64_t metaBlockCount = bfs::detail::getMetaBlockCount(blocks);
+        for(int i = 0; i < metaBlockCount; ++i) {
+            assert(bfs::detail::metaBlockIsAvailable(is, i));
+        }
     }
 
     boost::filesystem::path m_uniquePath;

@@ -274,6 +274,17 @@ namespace bfs { namespace detail
     }
 
     /**
+     * @brief determines whether a bit is set in a byte
+     * @param byte the byte to test
+     * @param bit the bit index to check
+     * @return true bit is set false otherwise
+     */
+    inline bool isBitSetInByte(uint8_t const byte, int const bit)
+    {
+        return (byte & (1 << bit));
+    }
+
+    /**
      * @brief gets the index of the first unset bit from the byte
      * @param byte the byte to search
      * @return the index
@@ -281,7 +292,7 @@ namespace bfs { namespace detail
     inline int getNextAvailableBitInAByte(uint8_t const byte)
     {
         for (int i = 0; i < 8; ++i) {
-            if (!(byte & (1 << i))) {
+            if (!isBitSetInByte(byte, i)) {
                 return i;
             }
         }
@@ -388,6 +399,26 @@ namespace bfs { namespace detail
         //uint64_t const offset = 8 + 8 + bytes + getMetaDataSize(blocks) + (FILE_BLOCK_SIZE * bitCounter);
 
         return OptionalBlock(bitCounter);
+    }
+
+    /**
+     * @brief determines whether a meta block is available by reading the very first bit
+     * @param in the image stream
+     * @param metablock meta block to determine its availability
+     * @return true if metablock is available, false otherwise
+     */
+    inline bool metaBlockIsAvailable(std::fstream &in, uint64_t const metaBlock)
+    {
+        // get number of blocks that make up fs
+        uint64_t blocks = getNumberOfBlocks(in);
+
+        uint64_t offset = 8 + blocks + 8 + (metaBlock * METABLOCK_SIZE);
+        (void)in.seekg(offset);
+
+        uint8_t byte;
+        (void)in.read((char*)&byte, 1);
+
+        return (!isBitSetInByte(byte, 0));
     }
 
     /**
