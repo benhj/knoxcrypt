@@ -11,10 +11,12 @@
 #include <sstream>
 #include <fstream>
 
+int const HELLO_IT = 200;
+int const BIG_SIZE = HELLO_IT * 13;
+
 class BFSEntryWriterTest
 {
-    int const HELLO_IT = 400;
-    int const BIG_SIZE = HELLO_IT * 13;
+
 
   public:
     BFSEntryWriterTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
@@ -46,6 +48,8 @@ class BFSEntryWriterTest
           boost::filesystem::path testPath = m_uniquePath / testImage;
           uint64_t blocks(2048); // 1MB
 
+
+
           {
 			  bfs::MakeBFS bfs(testPath.string(), blocks);
           }
@@ -59,6 +63,7 @@ class BFSEntryWriterTest
           }
 
           // create a test entry sink
+
           {
         	  bfs::BFSEntryWriter entrySink(testPath.c_str(), "test.txt", uint64_t(13), uint64_t(0));
         	  std::string testData("Hello, world!");
@@ -67,7 +72,6 @@ class BFSEntryWriterTest
         	  boost::iostreams::stream<bfs::BFSEntryWriter> bfsEntryStream(entrySink);
         	  boost::iostreams::copy(ss,  bfsEntryStream);
           }
-
 
           // create a second entry sink
           {
@@ -85,12 +89,12 @@ class BFSEntryWriterTest
               std::string testData(createLargeStringToWrite());
               std::stringstream ss;
               ss << testData.c_str();
-              boost::iostreams::stream<bfs::BFSEntryWriter> bfsEntryStream(entrySink);
-              boost::iostreams::copy(ss, bfsEntryStream);
+              ss.flush();
+              std::vector<uint8_t> vec(testData.begin(), testData.end());
+              entrySink.write((char*)&vec.front(), testData.length());
           }
 
           // check after that meta block is unavailable
-
           std::fstream input(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
           assert(!bfs::detail::metaBlockIsAvailable(input, 0, blocks));
           assert(!bfs::detail::metaBlockIsAvailable(input, 1, blocks));

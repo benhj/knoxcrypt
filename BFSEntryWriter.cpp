@@ -174,6 +174,7 @@ namespace bfs
             uint64_t const offset = detail::getOffsetOfFileBlock(m_blocksToUse[m_currentBlockIndex], m_totalBlocks);
             std::fstream stream(m_bfsOutputPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
             (void)stream.seekp(offset);
+
             (void)stream.write((char*)&m_dataBuffer.front(), m_dataBuffer.size());
             m_dataBuffer.clear();
 
@@ -190,6 +191,7 @@ namespace bfs
             stream.flush();
             stream.close();
 
+
         } else {
             if(m_dataBuffer.size() == detail::FILE_BLOCK_SIZE) {
 
@@ -205,6 +207,7 @@ namespace bfs
                 (void)stream.write((char*)&m_dataBuffer.front(), m_dataBuffer.size());
 
                 m_dataBuffer.clear();
+
                 ++m_currentBlockIndex;
 
                 // write how many bytes will be occupied in the next block
@@ -222,34 +225,38 @@ namespace bfs
     std::streamsize
     BFSEntryWriter::write(char const * const buf, std::streamsize const n)
     {
-        if(m_currentBlockIndex == 0 && m_dataBuffer.empty()){
-            const uint64_t fSizePlusFileNameLength = m_fsize + detail::MAX_FILENAME_LENGTH;
-            const uint64_t blockSizeWithoutMetaStuff = detail::FILE_BLOCK_SIZE - 20;
+        if(m_currentBlockIndex == 0){
+            if(m_dataBuffer.empty()) {
+                const uint64_t fSizePlusFileNameLength = m_fsize + detail::MAX_FILENAME_LENGTH;
+                const uint64_t blockSizeWithoutMetaStuff = detail::FILE_BLOCK_SIZE - 20;
 
-            // write very first file block data which includes filename
-            uint64_t prev;
-            uint64_t next;
-            bufferBytesUsedToDescribeBytesOccupiedForFileBlockN();
-            if (fSizePlusFileNameLength < blockSizeWithoutMetaStuff) {
-                prev = 0;
-                next = 0;
-            } else {
-                prev = 0;
-                next = 1;
-            }
+                // write very first file block data which includes filename
+                uint64_t prev;
+                uint64_t next;
+                bufferBytesUsedToDescribeBytesOccupiedForFileBlockN();
+                if (fSizePlusFileNameLength < blockSizeWithoutMetaStuff) {
+                    prev = 0;
+                    next = 0;
+                } else {
+                    prev = 0;
+                    next = 1;
+                }
 
-            // write out previous and next block indices
-            bufferLastAndNextBlockIndicesForFileBlockN(prev, next);
+                // write out previous and next block indices
+                bufferLastAndNextBlockIndicesForFileBlockN(prev, next);
 
-            // write filename portion of block. Already in correct place in stream
-            for(int i = 0; i < m_entryName.length(); ++i) {m_dataBuffer.push_back(m_entryName[i]);}
-            char eol = '\0';
-            m_dataBuffer.push_back(eol);
-            for(int i = 0; i < detail::MAX_FILENAME_LENGTH - m_entryName.length() - 1; ++i) {
+                // write filename portion of block. Already in correct place in stream
+                for(int i = 0; i < m_entryName.length(); ++i) {m_dataBuffer.push_back(m_entryName[i]);}
+                char eol = '\0';
                 m_dataBuffer.push_back(eol);
+                for(int i = 0; i < detail::MAX_FILENAME_LENGTH - m_entryName.length() - 1; ++i) {
+                    m_dataBuffer.push_back(eol);
+                }
+
+
+                m_buffered = m_dataBuffer.size() - 20; // don't accumulate meta
             }
 
-            m_buffered = m_dataBuffer.size() - 20; // don't accumulate meta info
         }
         for(int i = 0; i < n; ++i) {
             bufferByte(buf[i]);

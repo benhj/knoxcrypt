@@ -496,7 +496,6 @@ namespace bfs { namespace detail
 
             for(int b = 0; b < 8; ++b) {
                 int availableBit = (!isBitSetInByte(buf[i], b)) ? (b + eightCounter) : -1;
-                std::cout<<availableBit<<std::endl;
                 if (availableBit > -1) {
                     bitBuffer.push_back((uint64_t)availableBit);
                     if(bitBuffer.size() == blocksRequired) {

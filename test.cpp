@@ -4,6 +4,6 @@
 
 int main()
 {
-    MakeBFSTest();
+    //MakeBFSTest();
     BFSEntryWriterTest();
 }
