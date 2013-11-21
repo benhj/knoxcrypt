@@ -32,12 +32,19 @@ class BFSEntryWriterTest
 
           std::string testImage(boost::filesystem::unique_path().string());
           boost::filesystem::path testPath = m_uniquePath / testImage;
+          uint64_t blocks(2048); // 1MB
 
           {
-			  uint64_t blocks(2048); // 1MB
 			  bfs::MakeBFS bfs(testPath.string(), blocks);
           }
 
+          // check before that meta block is available
+          {
+              std::fstream input(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+              assert(bfs::detail::metaBlockIsAvailable(input, 0, blocks));
+              assert(bfs::detail::getNextAvailableMetaBlock(input, blocks) == 0);
+              input.close();
+          }
 
           // create a test entry sink
           {
@@ -49,6 +56,16 @@ class BFSEntryWriterTest
         	  // copy from the test stream to the entry stream
         	  boost::iostreams::copy(ss,  bfsEntryStream);
           }
+
+          // check after that meta block is unavailable
+          {
+              std::fstream input(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+              assert(!bfs::detail::metaBlockIsAvailable(input, 0, blocks));
+
+              assert(bfs::detail::getNextAvailableMetaBlock(input, blocks) == 1);
+              input.close();
+          }
+
 
           /*
 

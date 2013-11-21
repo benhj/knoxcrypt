@@ -311,7 +311,7 @@ namespace bfs { namespace detail
      * @param bit the bit index to check
      * @return true bit is set false otherwise
      */
-    inline bool isBitSetInByte(uint8_t const byte, int const bit)
+    inline bool isBitSetInByte(uint8_t &byte, int const bit)
     {
         return (byte & (1 << bit));
     }
@@ -321,7 +321,7 @@ namespace bfs { namespace detail
      * @param byte the byte to search
      * @return the index
      */
-    inline int getNextAvailableBitInAByte(uint8_t const byte)
+    inline int getNextAvailableBitInAByte(uint8_t &byte)
     {
         for (int i = 0; i < 8; ++i) {
             if (!isBitSetInByte(byte, i)) {
@@ -447,12 +447,13 @@ namespace bfs { namespace detail
             totalFileBlocks = getNumberOfBlocks(in);
         }
 
-        uint64_t offset = 8 + totalFileBlocks + 8 + (metaBlock * METABLOCK_SIZE);
-        (void)in.seekg(offset);
+        uint64_t const volumeMapBytes = totalFileBlocks / (uint64_t(8));
 
+        uint64_t const offset = 8 + volumeMapBytes + 8 + (metaBlock * METABLOCK_SIZE);
+
+        (void)in.seekg(offset);
         uint8_t byte;
         (void)in.read((char*)&byte, 1);
-
         return (!isBitSetInByte(byte, 0));
     }
 

@@ -44,6 +44,13 @@ namespace bfs
 				// set the first bit of the first byte to 0 to indicate that
 				// the metablock is not in use
 				detail::setBitInByte(byte, 0, false);
+				detail::setBitInByte(byte, 1, false);
+				detail::setBitInByte(byte, 2, false);
+				detail::setBitInByte(byte, 3, false);
+				detail::setBitInByte(byte, 4, false);
+				detail::setBitInByte(byte, 5, false);
+				detail::setBitInByte(byte, 6, false);
+				detail::setBitInByte(byte, 7, false);
 				(void)out.write((char*)&byte, 1);
         		(void)out.write((char*)&ints.front(), detail::METABLOCK_SIZE-1);
         	}

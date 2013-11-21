@@ -47,11 +47,8 @@ namespace bfs
         // parent folder index (self if no parent)
         uint64_t const m_parentIndex;
 
-        // the bfs image stream (shared for copyability)
-        boost::shared_ptr<std::fstream> m_bfsOutputStream;
-
         // number of blocks in fs
-        uint64_t const m_totalBlocks;
+        uint64_t m_totalBlocks;
 
         // file blocks to be used to store file
         std::vector<uint64_t> m_blocksToUse;
