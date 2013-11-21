@@ -13,6 +13,9 @@
 
 class BFSEntryWriterTest
 {
+    int const HELLO_IT = 400;
+    int const BIG_SIZE = HELLO_IT * 13;
+
   public:
     BFSEntryWriterTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
@@ -26,6 +29,15 @@ class BFSEntryWriterTest
     }
 
   private:
+
+    std::string createLargeStringToWrite() const
+    {
+        std::string theString("");
+        for(int i = 0; i < HELLO_IT; ++i) {
+            theString.append("Hello, World!");
+        }
+        return theString;
+    }
 
     void oneDataEntry()
     {
@@ -53,19 +65,47 @@ class BFSEntryWriterTest
         	  std::stringstream ss;
         	  ss << testData.c_str();
         	  boost::iostreams::stream<bfs::BFSEntryWriter> bfsEntryStream(entrySink);
-        	  // copy from the test stream to the entry stream
         	  boost::iostreams::copy(ss,  bfsEntryStream);
           }
 
-          // check after that meta block is unavailable
-          {
-              std::fstream input(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-              assert(!bfs::detail::metaBlockIsAvailable(input, 0, blocks));
 
-              assert(bfs::detail::getNextAvailableMetaBlock(input, blocks) == 1);
-              input.close();
+          // create a second entry sink
+          {
+              bfs::BFSEntryWriter entrySink(testPath.c_str(), "testB.log", uint64_t(26), uint64_t(0));
+              std::string testData("Hello, world!Hello, world!");
+              std::stringstream ss;
+              ss << testData.c_str();
+              boost::iostreams::stream<bfs::BFSEntryWriter> bfsEntryStream(entrySink);
+              boost::iostreams::copy(ss,  bfsEntryStream);
           }
 
+          // create a third entry sink with much bigger file
+          {
+              bfs::BFSEntryWriter entrySink(testPath.c_str(), "testLongFileName.log", uint64_t(BIG_SIZE), uint64_t(0));
+              std::string testData(createLargeStringToWrite());
+              std::stringstream ss;
+              ss << testData.c_str();
+              boost::iostreams::stream<bfs::BFSEntryWriter> bfsEntryStream(entrySink);
+              boost::iostreams::copy(ss, bfsEntryStream);
+          }
+
+          // check after that meta block is unavailable
+
+          std::fstream input(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+          assert(!bfs::detail::metaBlockIsAvailable(input, 0, blocks));
+          assert(!bfs::detail::metaBlockIsAvailable(input, 1, blocks));
+          assert(bfs::detail::getNextAvailableMetaBlock(input, blocks) == 3);
+          std::cout<<(bfs::detail::getFileNameForFileN(input, 0, blocks))<<std::endl;
+          std::cout<<(bfs::detail::getFileNameForFileN(input, 1, blocks))<<std::endl;
+          std::cout<<(bfs::detail::getFileNameForFileN(input, 2, blocks))<<std::endl;
+          assert(bfs::detail::getFileNameForFileN(input, 0, blocks) == "test.txt");
+          assert(bfs::detail::getFileNameForFileN(input, 1, blocks) == "testB.log");
+          assert(bfs::detail::getFileNameForFileN(input, 2, blocks) == "testLongFileName.log");
+          assert(bfs::detail::readFileSizeFromMetaBlock(0, blocks, input) == 13);
+          assert(bfs::detail::readFileSizeFromMetaBlock(1, blocks, input) == 26);
+          assert(bfs::detail::readFileSizeFromMetaBlock(2, blocks, input) == (BIG_SIZE));
+          assert(bfs::detail::getFileCount(input, blocks) == 3);
+          input.close();
 
           /*
 

@@ -84,7 +84,8 @@ namespace bfs { namespace detail
             (void)in.read((char*)blockCountBytes, 8);
             blockCount = convertInt8ArrayToInt64(blockCountBytes);
         }
-        in.seekg(blockCount + 8);
+        uint64_t const volumeBitMapBytes = blockCount / 8;
+        in.seekg(volumeBitMapBytes + 8);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         return convertInt8ArrayToInt64(dat);
@@ -104,7 +105,8 @@ namespace bfs { namespace detail
         } else {
             --numberOfFiles;
         }
-        (void)in.seekg(8 + totalFileBlocks);
+        uint64_t const volumeBitMapBytes = totalFileBlocks / 8;
+        (void)in.seekg(8 + volumeBitMapBytes);
         uint8_t dat[8];
         convertInt64ToInt8Array(numberOfFiles, dat);
         (void)in.write((char*)dat, 8);
@@ -147,10 +149,7 @@ namespace bfs { namespace detail
                                         uint64_t const totalBlocks)
     {
         uint64_t const volumeBitMapBytes = totalBlocks / 8;
-        return 8                                                       // number of fs blocks
-            + volumeBitMapBytes                 // volume bit map
-            + 8                                                     // total number of files
-            + (METABLOCK_SIZE * metaBlockIndex); // meta data block
+        return 8 + volumeBitMapBytes + 8 + (METABLOCK_SIZE * metaBlockIndex);
     }
 
     /**
@@ -184,8 +183,8 @@ namespace bfs { namespace detail
                                                  uint64_t const firstBlockOffset,
                                                  std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetaBlock(fileIndex, totalBlocks);
-        (void)in.seekp(offset + 8);
+        uint64_t const offset = getOffsetOfMetaBlock(fileIndex, totalBlocks) + 8 + 1;
+        (void)in.seekp(offset);
         uint8_t dat[8];
         convertInt64ToInt8Array(firstBlockOffset, dat);
         (void)in.write((char*)dat, 8);
@@ -202,7 +201,7 @@ namespace bfs { namespace detail
                                               uint64_t const totalBlocks,
                                               std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetaBlock(fileIndex, totalBlocks);
+        uint64_t const offset = getOffsetOfMetaBlock(fileIndex, totalBlocks) + 1;
         (void)in.seekg(offset);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
@@ -221,8 +220,8 @@ namespace bfs { namespace detail
                                                       uint64_t const totalBlocks,
                                                       std::fstream &in)
     {
-        uint64_t const offset = getOffsetOfMetaBlock(fileIndex, totalBlocks);
-        (void)in.seekg(offset + 8);
+        uint64_t const offset = getOffsetOfMetaBlock(fileIndex, totalBlocks) + 1 + 8;
+        (void)in.seekg(offset);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         return convertInt8ArrayToInt64(dat);
@@ -251,23 +250,31 @@ namespace bfs { namespace detail
      * @param n the file index
      * @return the file name
      */
-    inline std::string getFileNameForFileN(std::fstream &in, uint64_t const n)
+    inline std::string getFileNameForFileN(std::fstream &in,
+                                           uint64_t const n,
+                                           uint64_t const totalBlocks = 0)
     {
-        /*
-          uint64_t fileOffset = getOffsetOfFileN(in, n);
-          (void)in.seekg((std::streampos)fileOffset);
-          uint8_t dat[MAX_FILENAME_LENGTH];
-          (void)in.read((char*)dat, MAX_FILENAME_LENGTH);
-          std::string name("");
-          for(int i = 0; i < MAX_FILENAME_LENGTH; ++i) {
-          if((char)dat[i] != '\0') {
-          name.push_back((char)dat[i]);
-          } else {
-          break;
-          }
-          }
-          return name;
-        */
+        // get index of file block
+        uint64_t firstFileBlockIndex = readFirstBlockIndexFromMetaBlock(n, totalBlocks, in);
+
+        // get offset
+        uint64_t const offset = getOffsetOfFileBlock(firstFileBlockIndex, totalBlocks);
+
+        // seek to correct position
+        (void)in.seekg(offset+20);
+
+        // do actual reading up to null character
+        uint8_t dat[MAX_FILENAME_LENGTH];
+        (void)in.read((char*)dat, MAX_FILENAME_LENGTH);
+        std::string name("");
+        for(int i = 0; i < MAX_FILENAME_LENGTH; ++i) {
+            if((char)dat[i] != '\0') {
+                name.push_back((char)dat[i]);
+            } else {
+                break;
+            }
+        }
+        return name;
     }
 
     /**
@@ -441,16 +448,8 @@ namespace bfs { namespace detail
      */
     inline bool metaBlockIsAvailable(std::fstream &in, uint64_t const metaBlock, uint64_t const totalBlocks = 0)
     {
-        // get number of blocks that make up fs
-        uint64_t totalFileBlocks = totalBlocks;
-        if(totalFileBlocks == 0) {
-            totalFileBlocks = getNumberOfBlocks(in);
-        }
 
-        uint64_t const volumeMapBytes = totalFileBlocks / (uint64_t(8));
-
-        uint64_t const offset = 8 + volumeMapBytes + 8 + (metaBlock * METABLOCK_SIZE);
-
+        uint64_t const offset = getOffsetOfMetaBlock(metaBlock, totalBlocks);
         (void)in.seekg(offset);
         uint8_t byte;
         (void)in.read((char*)&byte, 1);
@@ -486,18 +485,26 @@ namespace bfs { namespace detail
         // read the bytes in to a buffer
         std::vector<uint8_t> buf;
         buf.assign(bytes, 0);
+        assert(in.tellg() == 8);
         (void)in.read((char*)&buf.front(), bytes);
 
+
         // find n available blocks
+        uint64_t eightCounter(0);
         std::vector<uint64_t> bitBuffer;
         for (uint64_t i = 0; i < bytes; ++i) {
-            int availableBit = getNextAvailableBitInAByte(buf[i]);
-            if (availableBit > -1) {
-                bitBuffer.push_back((uint64_t)availableBit);
-                if(bitBuffer.size() == blocksRequired) {
-                    return bitBuffer;
+
+            for(int b = 0; b < 8; ++b) {
+                int availableBit = (!isBitSetInByte(buf[i], b)) ? (b + eightCounter) : -1;
+                std::cout<<availableBit<<std::endl;
+                if (availableBit > -1) {
+                    bitBuffer.push_back((uint64_t)availableBit);
+                    if(bitBuffer.size() == blocksRequired) {
+                        return bitBuffer;
+                    }
                 }
             }
+            eightCounter += 8;
         }
         return std::vector<uint64_t>(); // empty not enough free blocks found
     }
@@ -512,28 +519,11 @@ namespace bfs { namespace detail
                                    std::vector<uint64_t> const &blocksUsed,
                                    uint64_t const totalBlocks)
     {
-
-
-
         // how many bytes does this value fit in to?
         uint64_t bytes = totalBlocks / uint64_t(8);
-
         std::vector<uint64_t>::const_iterator it = blocksUsed.begin();
         for(; it != blocksUsed.end(); ++it) {
-            uint64_t const leftOver = (*it) % uint64_t(8);
-            uint64_t const roundedDown = (*it) - leftOver;
-            uint64_t byteIndex = roundedDown / uint64_t(8);
-            uint64_t bitToSet = 7;
-            if(leftOver > 0) {
-                ++byteIndex;
-                bitToSet = leftOver;
-            }
-            (void)in.seekg(8 + byteIndex);
-            uint8_t byte;
-            (void)in.read((char*)&byte, 1);
-            setBitInByte(byte, bitToSet);
-            (void)in.seekp(8 + byteIndex);
-            (void)in.write((char*)&byte, 1);
+            setBlockToInUse(*it, totalBlocks, in);
         }
     }
 }

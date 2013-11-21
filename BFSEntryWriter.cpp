@@ -79,20 +79,26 @@ namespace bfs
         uint64_t const nextAvailableMetaBlock = detail::getNextAvailableMetaBlock(stream, m_totalBlocks);
         uint64_t offset = detail::getOffsetOfMetaBlock(nextAvailableMetaBlock, m_totalBlocks);
         (void)stream.seekg(offset);
+
+        //Êfirst set metablog in use bit (very first bit of block)
         uint8_t firstByte = 0;
-        (void)stream.read((char*)&firstByte, 1);    // size of file
+        (void)stream.read((char*)&firstByte, 1);
         detail::setBitInByte(firstByte, 0);
         (void)stream.seekp(offset);
-        (void)stream.write((char*)&firstByte, 1);    // size of file
+        (void)stream.write((char*)&firstByte, 1);
+
+        // compute other meta information
         uint8_t sizeBytes[8];
         detail::convertInt64ToInt8Array(m_fsize, sizeBytes);
         uint8_t firstFileBlockIndex[8];
         detail::convertInt64ToInt8Array(m_blocksToUse[0], firstFileBlockIndex);
         uint8_t parentBytes[8];
         detail::convertInt64ToInt8Array(m_blocksToUse[0], parentBytes);
-        stream.write((char*)sizeBytes, 8);    // size of file
-        stream.write((char*)firstFileBlockIndex, 8);     // position in main file space
-        stream.write((char*)parentBytes, 8);  // index of parent directory
+
+        // write out remaining meta information
+        stream.write((char*)sizeBytes, 8);
+        stream.write((char*)firstFileBlockIndex, 8);
+        stream.write((char*)parentBytes, 8);
         stream.flush();
         stream.close();
     }
@@ -202,7 +208,6 @@ namespace bfs
                 ++m_currentBlockIndex;
 
                 // write how many bytes will be occupied in the next block
-                uint64_t bufferSize = computeBufferSize(m_currentBlockIndex);
                 bufferBytesUsedToDescribeBytesOccupiedForFileBlockN();
                 uint64_t prev;
                 uint64_t next;
@@ -222,8 +227,6 @@ namespace bfs
             const uint64_t blockSizeWithoutMetaStuff = detail::FILE_BLOCK_SIZE - 20;
 
             // write very first file block data which includes filename
-
-            uint64_t bufferSize = computeBufferSize(0);
             uint64_t prev;
             uint64_t next;
             bufferBytesUsedToDescribeBytesOccupiedForFileBlockN();
@@ -250,28 +253,6 @@ namespace bfs
         }
         for(int i = 0; i < n; ++i) {
             bufferByte(buf[i]);
-        }
-    }
-
-    uint64_t
-    BFSEntryWriter::computeBufferSize(uint64_t const b)
-    {
-        uint64_t const fSizePlusFileNameLength = m_fsize + detail::MAX_FILENAME_LENGTH;
-        uint64_t const blockSizeWithoutMetaStuff = detail::FILE_BLOCK_SIZE - 20;
-
-        if(b == 0) {
-            if (fSizePlusFileNameLength < blockSizeWithoutMetaStuff) {
-                return fSizePlusFileNameLength;
-            } else {
-                return blockSizeWithoutMetaStuff;
-            }
-        }
-
-        if (b < (m_blocksToUse.size() - 1)) {
-            return blockSizeWithoutMetaStuff;
-        } else {
-            uint64_t const leftOver = fSizePlusFileNameLength % blockSizeWithoutMetaStuff;
-            return leftOver;
         }
     }
 

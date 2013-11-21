@@ -89,15 +89,6 @@ namespace bfs
         void computePreviousAndNextBlockIndices(uint64_t &prev, uint64_t &next, uint64_t const b);
 
         /**
-         * @brief computes number of bytes that actually store file data
-         * in a given file block. The very first file block of a file also stores
-         * the file name which is set to 255 bytes (null terminated)
-         * @param b the current block
-         * @return the space occupied
-         */
-        uint64_t computeBufferSize(uint64_t const b);
-
-        /**
          * @brief buffers the number of file bytes written to the current file block
          * flushed to the correct point in the image stream
          */
