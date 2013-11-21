@@ -58,7 +58,6 @@ namespace bfs
         std::fstream stream(m_bfsOutputPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         m_totalBlocks = detail::getBlockCount(stream);
         m_blocksToUse = detail::getNAvailableBlocks(stream, detail::computeBlocksRequired(fsize), m_totalBlocks);
-        stream.flush();
         stream.close();
     }
 
@@ -99,7 +98,6 @@ namespace bfs
         stream.write((char*)sizeBytes, 8);
         stream.write((char*)firstFileBlockIndex, 8);
         stream.write((char*)parentBytes, 8);
-        stream.flush();
         stream.close();
     }
 
@@ -112,7 +110,6 @@ namespace bfs
         detail::setBlocksUsed(stream, m_blocksToUse.size());
         detail::updateVolumeBitmap(stream, m_blocksToUse, m_totalBlocks);
         detail::incrementFileCount(stream, m_totalBlocks);
-        stream.flush();
         stream.close();
     }
 
@@ -188,7 +185,6 @@ namespace bfs
             updateSuperBlock();
 
             // finished writing data!
-            stream.flush();
             stream.close();
 
 
@@ -216,7 +212,6 @@ namespace bfs
                 uint64_t next;
                 computePreviousAndNextBlockIndices(prev, next, m_currentBlockIndex);
                 bufferLastAndNextBlockIndicesForFileBlockN(prev, next);
-                stream.flush();
                 stream.close();
             }
         }

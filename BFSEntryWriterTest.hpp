@@ -11,7 +11,7 @@
 #include <sstream>
 #include <fstream>
 
-int const HELLO_IT = 200;
+int const HELLO_IT = 2000;
 int const BIG_SIZE = HELLO_IT * 13;
 
 class BFSEntryWriterTest
@@ -48,8 +48,6 @@ class BFSEntryWriterTest
           boost::filesystem::path testPath = m_uniquePath / testImage;
           uint64_t blocks(2048); // 1MB
 
-
-
           {
 			  bfs::MakeBFS bfs(testPath.string(), blocks);
           }
@@ -67,29 +65,22 @@ class BFSEntryWriterTest
           {
         	  bfs::BFSEntryWriter entrySink(testPath.c_str(), "test.txt", uint64_t(13), uint64_t(0));
         	  std::string testData("Hello, world!");
-        	  std::stringstream ss;
-        	  ss << testData.c_str();
-        	  boost::iostreams::stream<bfs::BFSEntryWriter> bfsEntryStream(entrySink);
-        	  boost::iostreams::copy(ss,  bfsEntryStream);
+              std::vector<uint8_t> vec(testData.begin(), testData.end());
+              entrySink.write((char*)&vec.front(), testData.length());
           }
 
           // create a second entry sink
           {
               bfs::BFSEntryWriter entrySink(testPath.c_str(), "testB.log", uint64_t(26), uint64_t(0));
               std::string testData("Hello, world!Hello, world!");
-              std::stringstream ss;
-              ss << testData.c_str();
-              boost::iostreams::stream<bfs::BFSEntryWriter> bfsEntryStream(entrySink);
-              boost::iostreams::copy(ss,  bfsEntryStream);
+              std::vector<uint8_t> vec(testData.begin(), testData.end());
+              entrySink.write((char*)&vec.front(), testData.length());
           }
 
           // create a third entry sink with much bigger file
           {
               bfs::BFSEntryWriter entrySink(testPath.c_str(), "testLongFileName.log", uint64_t(BIG_SIZE), uint64_t(0));
               std::string testData(createLargeStringToWrite());
-              std::stringstream ss;
-              ss << testData.c_str();
-              ss.flush();
               std::vector<uint8_t> vec(testData.begin(), testData.end());
               entrySink.write((char*)&vec.front(), testData.length());
           }
