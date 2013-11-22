@@ -15,6 +15,7 @@ namespace bfs { namespace detail
     uint64_t const METABLOCK_SIZE = 25;
     uint64_t const MAX_FILENAME_LENGTH = 255;
     uint64_t const FILE_BLOCK_SIZE = 512;
+    uint64_t const FILE_BLOCK_META = 12;
 
     inline void convertInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
     {
@@ -261,7 +262,7 @@ namespace bfs { namespace detail
         uint64_t const offset = getOffsetOfFileBlock(firstFileBlockIndex, totalBlocks);
 
         // seek to correct position
-        (void)in.seekg(offset+20);
+        (void)in.seekg(offset + FILE_BLOCK_META);
 
         // do actual reading up to null character
         uint8_t dat[MAX_FILENAME_LENGTH];

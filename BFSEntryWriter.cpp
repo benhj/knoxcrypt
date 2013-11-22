@@ -18,11 +18,10 @@ namespace bfs
             // file blocks to also store filename which also needs to be
             // taken in to account
             uint64_t const fSizePlusFileNameLength = fsize + MAX_FILENAME_LENGTH;
-            // 20:
+            // 12 (FILE_BLOCK_META)
             // 4 for number of bytes utilized in a given block
             // 8 for next block index
-            // 8 for previous block index
-            uint64_t const blockSizeWithoutMetaStuff = FILE_BLOCK_SIZE - 20;
+            uint64_t const blockSizeWithoutMetaStuff = FILE_BLOCK_SIZE - FILE_BLOCK_META;
 
             // compute how many 512 byte blocks are required to store the file
             uint64_t blocksRequired(0);
@@ -122,11 +121,10 @@ namespace bfs
         // file blocks to also store filename which also needs to be
         // taken in to account
         uint64_t const fSizePlusFileNameLength = m_fsize + detail::MAX_FILENAME_LENGTH;
-        // 20:
+        // 12:
         // 4 for number of bytes utilized in a given block
         // 8 for next block index
-        // 8 for previous block index
-        uint64_t const blockSizeWithoutMetaStuff = detail::FILE_BLOCK_SIZE - 20;
+        uint64_t const blockSizeWithoutMetaStuff = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
         if (fSizePlusFileNameLength < blockSizeWithoutMetaStuff) {
             uint8_t dat[4];
             detail::convertInt32ToInt4Array((uint32_t)fSizePlusFileNameLength, dat);
@@ -147,13 +145,9 @@ namespace bfs
     }
 
     void
-    BFSEntryWriter::bufferLastAndNextBlockIndicesForFileBlockN(uint64_t const lastBlockIndex,
-                                                              uint64_t const nextBlockIndex)
+    BFSEntryWriter::bufferNextBlockIndexForFileBlockN(uint64_t const nextBlockIndex)
     {
-        uint64_t const bytes = m_totalBlocks / uint64_t(8);
         uint8_t dat[8];
-        detail::convertInt64ToInt8Array(m_blocksToUse[lastBlockIndex], dat);
-        for(int i = 0; i < 8; ++i) {m_dataBuffer.push_back(dat[i]);}
         detail::convertInt64ToInt8Array(m_blocksToUse[nextBlockIndex], dat);
         for(int i = 0; i < 8; ++i) {m_dataBuffer.push_back(dat[i]);}
     }
@@ -208,10 +202,9 @@ namespace bfs
 
                 // write how many bytes will be occupied in the next block
                 bufferBytesUsedToDescribeBytesOccupiedForFileBlockN();
-                uint64_t prev;
                 uint64_t next;
-                computePreviousAndNextBlockIndices(prev, next, m_currentBlockIndex);
-                bufferLastAndNextBlockIndicesForFileBlockN(prev, next);
+                computeNextBlockIndex(next, m_currentBlockIndex);
+                bufferNextBlockIndexForFileBlockN(next);
                 stream.close();
             }
         }
@@ -223,22 +216,19 @@ namespace bfs
         if(m_currentBlockIndex == 0){
             if(m_dataBuffer.empty()) {
                 const uint64_t fSizePlusFileNameLength = m_fsize + detail::MAX_FILENAME_LENGTH;
-                const uint64_t blockSizeWithoutMetaStuff = detail::FILE_BLOCK_SIZE - 20;
+                const uint64_t blockSizeWithoutMetaStuff = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
 
                 // write very first file block data which includes filename
-                uint64_t prev;
                 uint64_t next;
                 bufferBytesUsedToDescribeBytesOccupiedForFileBlockN();
                 if (fSizePlusFileNameLength < blockSizeWithoutMetaStuff) {
-                    prev = 0;
                     next = 0;
                 } else {
-                    prev = 0;
                     next = 1;
                 }
 
                 // write out previous and next block indices
-                bufferLastAndNextBlockIndicesForFileBlockN(prev, next);
+                bufferNextBlockIndexForFileBlockN(next);
 
                 // write filename portion of block. Already in correct place in stream
                 for(int i = 0; i < m_entryName.length(); ++i) {m_dataBuffer.push_back(m_entryName[i]);}
@@ -249,7 +239,7 @@ namespace bfs
                 }
 
 
-                m_buffered = m_dataBuffer.size() - 20; // don't accumulate meta
+                m_buffered = m_dataBuffer.size() - detail::FILE_BLOCK_META; // don't accumulate meta
             }
 
         }
@@ -259,13 +249,8 @@ namespace bfs
     }
 
     void
-    BFSEntryWriter::computePreviousAndNextBlockIndices(uint64_t &prev, uint64_t &next, uint64_t const b)
+    BFSEntryWriter::computeNextBlockIndex(uint64_t &next, uint64_t const b)
     {
-        if (b == 0) {
-            prev = b;
-        } else {
-            prev = b - 1;
-        }
         if (b == m_blocksToUse.size() - 1) {
             next = b;
         } else {

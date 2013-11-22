@@ -80,13 +80,11 @@ namespace bfs
         void updateSuperBlock();
 
         /**
-         * @brief calculates the previous associate file blocks and the next
-         * file block used to construct file data
-         * @param prev the previous block index
+         * @brief calculates the next associate file block
          * @param next the next block index
          * @param b the current block
          */
-        void computePreviousAndNextBlockIndices(uint64_t &prev, uint64_t &next, uint64_t const b);
+        void computeNextBlockIndex(uint64_t &next, uint64_t const b);
 
         /**
          * @brief buffers the number of file bytes written to the current file block
@@ -95,12 +93,10 @@ namespace bfs
         void bufferBytesUsedToDescribeBytesOccupiedForFileBlockN();
 
         /**
-         * @brief buffers the
-         * @param lastBlockIndex
-         * @param nextBlockIndex
+         * @brief buffers the next block index
+         * @param nextBlockIndex the next block index
          */
-        void bufferLastAndNextBlockIndicesForFileBlockN(uint64_t const lastBlockIndex,
-                                                       uint64_t const nextBlockIndex);
+        void bufferNextBlockIndexForFileBlockN(uint64_t const nextBlockIndex);
 
         /**
          * @brief buffers an incoming byte from the write function. When the buffer
