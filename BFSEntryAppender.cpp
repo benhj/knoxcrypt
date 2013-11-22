@@ -19,13 +19,70 @@ namespace bfs
         , m_fileBlockInImage(startIndex)
         , m_metaBlockIndex(metaBlockIndex)
         , m_buffered(0)
-        , m_sizeInLastBlock(getSizeOfLastBlock())
+        , m_positionInfileBlock(getSizeOfLastBlock())
     {
     }
 
     BFSEntryAppender::~BFSEntryAppender()
     {
 
+    }
+
+    void
+    BFSEntryAppender::writeOutChunk(std::fstream &stream, uint32_t const count)
+    {
+        // write out the chunk of data to a position offset by where we should
+        // start writing in the file block
+        (void)stream.seekp(detail::getOffsetOfFileBlock(m_fileBlockInImage, m_totalBlocks)
+                           + detail::FILE_BLOCK_META
+                           + m_positionInfileBlock);
+        (void)stream.write((char*)&m_dataBuffer.front(), m_dataBuffer.size());
+
+        // write how many data bytes are written in this file block
+        detail::writeNumberOfDataBytesWrittenToFileBlockN(stream, m_fileBlockInImage, m_totalBlocks, count);
+    }
+
+    void
+    BFSEntryAppender::writeOutChunkAndUpdate(uint32_t const count)
+    {
+        std::fstream stream(m_bfsOutputPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+
+        // write out the data chunk
+        writeOutChunk(stream, count);
+
+        // position of in next file block should start at 0
+        m_positionInfileBlock = 0;
+
+        // clear the data buffer ready to be filled up with more data
+        m_dataBuffer.clear();
+
+        // set next available file block
+        // note returns an optional that must be dereferenced
+        // todo -- what happens when no file blocks available????
+        detail::OptionalBlock block = detail::getNextAvailableBlock(stream);
+        if(block) {
+            detail::writeIndexOfNextFileBlockFromFileBlockN(stream, m_fileBlockInImage, m_totalBlocks, *block);
+            m_fileBlockInImage = *block;
+            m_newBlocksOccupied.push_back(m_fileBlockInImage);
+
+        } else {
+            // throw???
+        }
+
+        stream.close();
+    }
+
+    void
+    BFSEntryAppender::bufferByte(char const byte)
+    {
+        m_dataBuffer.push_back(byte);
+
+        // if the we're at the size of the buffer according to buffer size
+        // offset to the position we start in the buffer, write it out
+        uint32_t const occupied = (uint32_t)(m_dataBuffer.size() + m_positionInfileBlock);
+        if(occupied == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+            writeOutChunkAndUpdate(occupied);
+        }
     }
 
     std::streamsize
@@ -40,76 +97,17 @@ namespace bfs
     BFSEntryAppender::finishUp()
     {
         std::fstream stream(m_bfsOutputPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-        (void)stream.seekp(detail::getOffsetOfFileBlock(m_fileBlockInImage, m_totalBlocks)
-                           + detail::FILE_BLOCK_META
-                           + m_sizeInLastBlock);
-        (void)stream.write((char*)&m_dataBuffer.front(), m_dataBuffer.size());
-        detail::writeNumberOfDataBytesWrittenToFileBlockN(stream, m_fileBlockInImage, m_totalBlocks, m_dataBuffer.size());
-
-        m_sizeInLastBlock = 0;
+        writeOutChunk(stream, m_dataBuffer.size());
         m_dataBuffer.clear();
+
+        // last file block so set next index to be 'this' index
         detail::writeIndexOfNextFileBlockFromFileBlockN(stream, m_fileBlockInImage, m_totalBlocks, m_fileBlockInImage);
+
+        // need to also update meta-block associated with this file
+
+        // finally need to update super block and volume block
+
         stream.close();
-    }
-
-    void
-    BFSEntryAppender::bufferByte(char const byte)
-    {
-        m_dataBuffer.push_back(byte);
-
-        uint32_t const occupied = (uint32_t)(m_dataBuffer.size() + m_sizeInLastBlock);
-        if(occupied == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
-            std::fstream stream(m_bfsOutputPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-            (void)stream.seekp(detail::getOffsetOfFileBlock(m_fileBlockInImage, m_totalBlocks)
-                               + detail::FILE_BLOCK_META
-                               + m_sizeInLastBlock);
-            (void)stream.write((char*)&m_dataBuffer.front(), m_dataBuffer.size());
-            detail::writeNumberOfDataBytesWrittenToFileBlockN(stream, m_fileBlockInImage, m_totalBlocks, occupied);
-            m_sizeInLastBlock = 0;
-            m_dataBuffer.clear();
-
-            // set next available file block
-            // note returns an optional that must be dereferenced
-            // todo -- what happens when no file blocks available????
-            detail::OptionalBlock block = detail::getNextAvailableBlock(stream);
-            if(block) {
-                detail::writeIndexOfNextFileBlockFromFileBlockN(stream, m_fileBlockInImage, m_totalBlocks, *block);
-                m_fileBlockInImage = *block;
-                m_newBlocksOccupied.push_back(m_fileBlockInImage);
-
-            } else {
-                // throw???
-            }
-
-            stream.close();
-
-        } else {
-            if(m_dataBuffer.size() == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
-                std::fstream stream(m_bfsOutputPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-                (void)stream.seekp(detail::getOffsetOfFileBlock(m_fileBlockInImage, m_totalBlocks)
-                                   + detail::FILE_BLOCK_META
-                                   + m_sizeInLastBlock);
-                (void)stream.write((char*)&m_dataBuffer.front(), m_dataBuffer.size());
-                detail::writeNumberOfDataBytesWrittenToFileBlockN(stream, m_fileBlockInImage, m_totalBlocks, m_dataBuffer.size());
-
-                m_sizeInLastBlock = 0;
-                m_dataBuffer.clear();
-
-                // set next available file block
-                // note returns an optional that must be dereferenced
-                // todo -- what happens when no file blocks available????
-                detail::OptionalBlock block = detail::getNextAvailableBlock(stream);
-                if(block) {
-                    detail::writeIndexOfNextFileBlockFromFileBlockN(stream, m_fileBlockInImage, m_totalBlocks, *block);
-                    m_fileBlockInImage = *block;
-                    m_newBlocksOccupied.push_back(m_fileBlockInImage);
-                } else {
-                    // throw???
-                }
-
-                stream.close();
-            }
-        }
     }
 
     uint32_t

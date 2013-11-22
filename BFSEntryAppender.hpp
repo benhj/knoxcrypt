@@ -69,13 +69,17 @@ namespace bfs
         uint64_t m_buffered;
 
         // the data space occupied in last file block making up file
-        uint32_t m_sizeInLastBlock;
+        uint32_t m_positionInfileBlock;
 
         uint32_t getSizeOfLastBlock();
 
         void bufferByte(char const byte);
 
         void updateMetaSizeInfo();
+
+        void writeOutChunk(std::fstream &stream, uint32_t const count);
+
+        void writeOutChunkAndUpdate(uint32_t const);
 
     };
 
