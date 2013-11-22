@@ -1,5 +1,7 @@
 #include "BFSEntryWriter.hpp"
-#include "Detail.hpp"
+#include "DetailBFS.hpp"
+#include "DetailFileBlock.hpp"
+#include "DetailMeta.hpp"
 
 #include <boost/make_shared.hpp>
 

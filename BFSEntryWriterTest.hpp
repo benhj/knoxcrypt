@@ -1,4 +1,6 @@
-#include "Detail.hpp"
+#include "DetailBFS.hpp"
+#include "DetailFileBlock.hpp"
+#include "DetailMeta.hpp"
 #include "BFSEntryWriter.hpp"
 #include "MakeBFS.hpp"
 

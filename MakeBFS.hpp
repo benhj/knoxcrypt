@@ -1,7 +1,9 @@
 #ifndef BFS_MAKE_BFS_HPP__
 #define BFS_MAKE_BFS_HPP__
 
-#include "Detail.hpp"
+#include "DetailBFS.hpp"
+#include "DetailFileBlock.hpp"
+#include "DetailMeta.hpp"
 
 #include <string>
 #include <fstream>

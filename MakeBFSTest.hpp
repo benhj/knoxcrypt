@@ -1,4 +1,6 @@
-#include "Detail.hpp"
+#include "DetailBFS.hpp"
+#include "DetailFileBlock.hpp"
+#include "DetailMeta.hpp"
 #include "MakeBFS.hpp"
 
 #include <boost/filesystem/path.hpp>

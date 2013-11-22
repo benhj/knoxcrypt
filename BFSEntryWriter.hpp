@@ -35,6 +35,9 @@ namespace bfs
         ~BFSEntryWriter();
 
       private:
+
+        BFSEntryWriter();
+
         // the image path
         std::string const m_bfsOutputPath;
 
