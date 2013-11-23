@@ -55,14 +55,12 @@ namespace bfs
         /**
          * @brief for when a file block needs to be read use this constructor
          * @param index the index of the file block
-         * @param extraOffset in case need to skip some characters
          * @note other params like size and next will be initialized when
          * the block is actually read
          */
         FileBlock(std::string const &imagePath,
         		  uint64_t const totalBlocks,
-        		  uint64_t const index,
-        		  uint64_t const extraOffset = 0)
+        		  uint64_t const index)
     		: m_imagePath(imagePath)
             , m_totalBlocks(totalBlocks)
     	    , m_index(index)
@@ -72,7 +70,7 @@ namespace bfs
         {
         	// set m_offset
 			std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-			m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks) + extraOffset;
+			m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks);
 			(void)stream.seekg(m_offset);
 
 			// read m_size
@@ -112,12 +110,13 @@ namespace bfs
         {
         	// open the image stream for writing
         	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-			(void)stream.seekp(m_offset);
+			(void)stream.seekp(m_offset + detail::FILE_BLOCK_META);
 			(void)stream.write((char*)buf, n);
 
 			// check if we need to update m_size and m_next
 			if(n < m_size) {
 				m_size = n;
+				m_next = m_index;
 	        	(void)stream.seekp(m_offset);
 
 	        	// update m_size
@@ -127,7 +126,7 @@ namespace bfs
 
 	        	// update m_next
 	        	uint8_t nextDat[8];
-	        	detail::convertInt64ToInt8Array(m_index, nextDat);
+	        	detail::convertInt64ToInt8Array(m_next, nextDat);
 	        	(void)stream.write((char*)nextDat, 8);
 			}
 
@@ -155,12 +154,12 @@ namespace bfs
         std::string const m_imagePath;
         uint64_t m_totalBlocks;
         uint64_t m_index;
-        uint32_t m_size;
-        uint64_t m_next;
+        mutable uint32_t m_size;
+        mutable uint64_t m_next;
         uint64_t m_offset;
 
     };
 
 }
 
-#endif // BFS_BFS_FILE_BLOCK_HPP__
+#endif // BFS_FILE_BLOCK_HPP__

@@ -1,9 +1,11 @@
 #include "BFSEntryWriterTest.hpp"
+#include "FileBlockTest.hpp"
 #include "MakeBFSTest.hpp"
 
 
 int main()
 {
-    //MakeBFSTest();
-    BFSEntryWriterTest();
+    MakeBFSTest();
+    FileBlockTest();
+    //BFSEntryWriterTest();
 }
