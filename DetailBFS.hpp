@@ -243,10 +243,15 @@ namespace bfs { namespace detail
      * @return the next available block
      */
     typedef boost::optional<uint64_t> OptionalBlock;
-    inline OptionalBlock getNextAvailableBlock(std::fstream &in)
+    inline OptionalBlock getNextAvailableBlock(std::fstream &in, uint64_t const blocks_ = 0)
     {
         // get number of blocks that make up fs
-        uint64_t blocks = getNumberOfBlocks(in);
+    	uint64_t blocks = blocks_;
+    	if(blocks == 0) {
+    		blocks = getNumberOfBlocks(in);
+    	} else {
+    		(void)in.seekg(8);
+    	}
 
         // how many bytes does this value fit in to?
         uint64_t bytes = blocks / uint64_t(8);
@@ -341,6 +346,21 @@ namespace bfs { namespace detail
         for(; it != blocksUsed.end(); ++it) {
             setBlockToInUse(*it, totalBlocks, in);
         }
+    }
+
+    /**
+     * @brief updates the volume bit map with newly allocated file blocks
+     * @param in the bfs image stream
+     * @param blockUsed the used block
+     * @param totalBlocks total number of fs blocks
+     */
+    inline void updateVolumeBitmapWithOne(std::fstream &in,
+                                   	   	  uint64_t const &blockUsed,
+                                   	   	  uint64_t const totalBlocks)
+    {
+        // how many bytes does this value fit in to?
+        uint64_t bytes = totalBlocks / uint64_t(8);
+        setBlockToInUse(blockUsed, totalBlocks, in);
     }
 
 }
