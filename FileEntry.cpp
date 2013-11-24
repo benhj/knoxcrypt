@@ -1,4 +1,5 @@
 #include "DetailBFS.hpp"
+#include "DetailFileBlock.hpp"
 #include "FileEntry.hpp"
 
 namespace bfs
@@ -112,7 +113,7 @@ namespace bfs
 	FileEntry::writeBufferedDataToBlock(uint32_t const bytes)
 	{
 		int index = m_fileBlocks.size() - 1;
-		m_fileBlocks[index].write((char*)&m_buffer.begin(), detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
+		m_fileBlocks[index].write((char*)&m_buffer.front(), detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
 		m_buffer.clear();
 		std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
 		detail::updateVolumeBitmapWithOne(stream, m_currentBlock, m_totalBlocks);

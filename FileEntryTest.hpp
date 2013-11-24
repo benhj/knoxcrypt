@@ -1,7 +1,7 @@
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
 #include "DetailMeta.hpp"
-#include "BFSEntryWriter.hpp"
+#include "FileEntry.hpp"
 #include "MakeBFS.hpp"
 
 #include <boost/filesystem/path.hpp>

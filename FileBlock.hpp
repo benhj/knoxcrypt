@@ -151,7 +151,7 @@ namespace bfs
 
     private:
 
-        std::string const m_imagePath;
+        std::string m_imagePath;
         uint64_t m_totalBlocks;
         uint64_t m_index;
         mutable uint32_t m_size;
