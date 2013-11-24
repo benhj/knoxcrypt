@@ -124,7 +124,9 @@ namespace bfs
     void
     FileEntry::bufferByteForWriting(char const byte)
     {
-    	m_buffer.push_back(byte);
+    	if(byte != '\0') {
+    		m_buffer.push_back(byte);
+    	}
     	if(m_buffer.size() == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
     		writeBufferedDataToBlock(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
     	} else if(byte == '\0') {
