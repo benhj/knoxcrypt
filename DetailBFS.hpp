@@ -307,7 +307,7 @@ namespace bfs { namespace detail
         // read the bytes in to a buffer
         std::vector<uint8_t> buf;
         buf.assign(bytes, 0);
-        assert(in.tellg() == 8);
+        (void)in.seekg(8);
         (void)in.read((char*)&buf.front(), bytes);
 
 

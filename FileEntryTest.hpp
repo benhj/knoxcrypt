@@ -13,6 +13,9 @@
 #include <sstream>
 #include <fstream>
 
+//int const HELLO_IT = 70000;
+//int const BIG_SIZE = HELLO_IT * 13;
+
 class FileEntryTest
 {
 
@@ -21,6 +24,17 @@ class FileEntryTest
 	FileEntryTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
+        test();
+    }
+
+
+    std::string createLargeStringToWrite() const
+    {
+        std::string theString("");
+        for(int i = 0; i < HELLO_IT; ++i) {
+            theString.append("Hello, World!");
+        }
+        return theString;
     }
 
     ~FileEntryTest()
@@ -31,4 +45,23 @@ class FileEntryTest
   private:
 
     boost::filesystem::path m_uniquePath;
+
+    void test()
+    {
+        std::string testImage(boost::filesystem::unique_path().string());
+        boost::filesystem::path testPath = m_uniquePath / testImage;
+        uint64_t blocks(2048); // 1MB
+
+        {
+			  bfs::MakeBFS bfs(testPath.string(), blocks);
+        }
+
+        {
+			bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+
+        }
+    }
 };
