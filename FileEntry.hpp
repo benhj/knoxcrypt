@@ -27,6 +27,18 @@ namespace bfs
         FileEntry(std::string const &imagePath, uint64_t const totalBlocks, std::string const &name);
 
         /**
+         * @brief when appending to the end of a file this constructor should be used
+         * @param imagePath the path of the bfs image
+         * @param totalBlocks the total number of blocks in the bfs
+         * @param name the name of the file entry
+         * @param block the starting block of the file entry
+         */
+        FileEntry(std::string const &imagePath,
+                  uint64_t const totalBlocks,
+                  std::string const &name,
+                  uint64_t const startBlock);
+
+        /**
          * @brief when reading a file this constructor should be used
          * @param imagePath the path of the bfs image
          * @param totalBlocks the total number of blocks in the bfs
@@ -105,6 +117,13 @@ namespace bfs
          * @param stream the bfs image stream
          */
         void newWritableFileBlock(std::fstream &stream);
+
+        /**
+         * @brief when appending, set all blocks in the block list
+         * @note also updates file size as it seeks to end block
+         * @param stream the bfs image stream
+         */
+        void setBlocks(std::fstream &stream);
 
         /**
          * @brief writes data to file block

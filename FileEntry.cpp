@@ -4,6 +4,7 @@
 
 namespace bfs
 {
+    // for writing
 	FileEntry::FileEntry(std::string const &imagePath, uint64_t const totalBlocks, std::string const &name)
 		: m_imagePath(imagePath)
 		, m_totalBlocks(totalBlocks)
@@ -22,6 +23,27 @@ namespace bfs
 		stream.close();
 	}
 
+	// for appending
+    FileEntry::FileEntry(std::string const &imagePath,
+              uint64_t const totalBlocks,
+              std::string const &name,
+              uint64_t const startBlock)
+        : m_imagePath(imagePath)
+        , m_totalBlocks(totalBlocks)
+        , m_name(name)
+        , m_fileSize(0)
+        , m_fileBlocks()
+        , m_buffer()
+        , m_currentBlock(startBlock)
+    {
+        // store all file blocks associated with file in container
+        // also updates the file size as it does this
+        std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        setBlocks(stream);
+        stream.close();
+    }
+
+    // for reading
 	FileEntry::FileEntry(std::string const &imagePath, uint64_t const totalBlocks, uint64_t const startBlock)
 		: m_imagePath(imagePath)
 		, m_totalBlocks(totalBlocks)
@@ -116,6 +138,36 @@ namespace bfs
 		m_fileBlocks.push_back(block);
 	}
 
+	void FileEntry::setBlocks(std::fstream &stream)
+	{
+	    // find very first block
+        FileBlock block(m_imagePath,
+                        m_totalBlocks,
+                        m_currentBlock);
+
+        uint64_t nextBlock = block.getNextIndex();
+        m_fileSize += block.getDataBytesWritten();
+        m_fileBlocks.push_back(block);
+
+        // seek to the very end block
+        while(nextBlock != m_currentBlock) {
+            m_currentBlock = nextBlock;
+            FileBlock newBlock(m_imagePath,
+                                m_totalBlocks,
+                                m_currentBlock);
+            nextBlock = newBlock.getNextIndex();
+            m_fileSize += newBlock.getDataBytesWritten();
+            m_fileBlocks.push_back(newBlock);
+        }
+
+        // update the starting write position of the end block to how many
+        // bytes have been written to it so far so that we start from this
+        // position when appending extra bytes
+        long index = m_fileBlocks.size() - 1;
+        m_fileBlocks[index].setExtraOffset(m_fileBlocks[index].getDataBytesWritten());
+
+	}
+
 	void
 	FileEntry::writeBufferedDataToBlock(uint32_t const bytes)
 	{
@@ -132,7 +184,12 @@ namespace bfs
     FileEntry::bufferByteForWriting(char const byte)
     {
         m_buffer.push_back(byte);
-    	if(m_buffer.size() == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+
+        // check the buffer size and if it matches the space remaining in given
+        // block, write to the block with data
+        int index = m_fileBlocks.size() - 1;
+    	if(m_buffer.size() == (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META -
+    	                       m_fileBlocks[index].getDataBytesWritten())) {
     		writeBufferedDataToBlock(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
     	}
     }

@@ -31,7 +31,7 @@ namespace bfs
     		: m_imagePath(imagePath)
     		, m_totalBlocks(totalBlocks)
     	    , m_index(index)
-    		, m_size(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
+    		, m_size(0)
     		, m_next(next)
     		, m_offset(0)
         {
@@ -40,9 +40,10 @@ namespace bfs
         	m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks);
         	(void)stream.seekp(m_offset);
 
-        	// write m_size (set to default can later be updated if necessary)
+        	// write m_size (set size to default can later be updated if necessary)
         	uint8_t sizeDat[4];
-        	detail::convertInt32ToInt4Array(m_size, sizeDat);
+        	uint32_t size = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+        	detail::convertInt32ToInt4Array(size, sizeDat);
         	(void)stream.write((char*)sizeDat, 4);
 
         	// write m_next
