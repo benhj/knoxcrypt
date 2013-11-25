@@ -12,7 +12,6 @@
 #include <string>
 #include <fstream>
 
-
 namespace bfs
 {
 
@@ -65,6 +64,11 @@ namespace bfs
          * @return
          */
         boost::iostreams::stream_offset seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
+
+        /**
+         * @brief flushes any remaining data
+         */
+        void flush();
 
 
     private:

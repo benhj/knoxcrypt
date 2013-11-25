@@ -34,7 +34,6 @@ class FileEntryTest
         for(int i = 0; i < HELLO_IT; ++i) {
             theString.append("Hello, World!");
         }
-        theString.append("\0");
         return theString;
     }
 
@@ -57,12 +56,25 @@ class FileEntryTest
 			  bfs::MakeBFS bfs(testPath.string(), blocks);
         }
 
+        // test write
         {
 			bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
-            entry.write((char*)&vec.front(), testData.length() + 1);
+            entry.write((char*)&vec.front(), BIG_SIZE);
+            entry.flush();
+        }
 
+        // test read
+
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, 0);
+            std::string expected(createLargeStringToWrite());
+            std::vector<char> vec;
+            vec.resize(BIG_SIZE);
+            entry.read(&vec.front(), BIG_SIZE);
+            std::string recovered(vec.begin(), vec.begin() + BIG_SIZE);
+            assert(recovered == expected);
         }
     }
 };

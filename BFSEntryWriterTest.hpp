@@ -13,7 +13,7 @@
 #include <sstream>
 #include <fstream>
 
-int const HELLO_IT = 70000;
+int const HELLO_IT = 500;
 int const BIG_SIZE = HELLO_IT * 13;
 
 class BFSEntryWriterTest

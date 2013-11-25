@@ -6,10 +6,16 @@
 #include <vector>
 
 #include <boost/iostreams/categories.hpp>  // sink_tag
+
+#include <boost/shared_ptr.hpp>
+
 #include <iosfwd>                          // streamsize
 #include <string>
 #include <fstream>
 
+class FileBlock;
+
+typedef boost::shared_ptr<FileBlock> SharedFileBlock;
 
 namespace bfs
 {
@@ -38,6 +44,7 @@ namespace bfs
         	// set m_offset
         	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         	m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks);
+            std::cout<<"off write "<<m_offset<<std::endl;
         	(void)stream.seekp(m_offset);
 
         	// write m_size (set to default can later be updated if necessary)
@@ -45,12 +52,23 @@ namespace bfs
         	detail::convertInt32ToInt4Array(m_size, sizeDat);
         	(void)stream.write((char*)sizeDat, 4);
 
+        	std::cout<<"write block constructor tellp: "<<stream.tellp()<<std::endl;
+
         	// write m_next
         	uint8_t nextDat[8];
         	detail::convertInt64ToInt8Array(m_next, nextDat);
         	assert(m_next == detail::convertInt8ArrayToInt64(nextDat));
         	(void)stream.write((char*)nextDat, 8);
+        	std::cout<<"write block constructor "<<index<<"\t"<<m_next<<std::endl;
         	stream.flush();
+
+
+        	stream.seekg(m_offset + 4);
+        	uint8_t nextB[8];
+        	(void)stream.read((char*)nextB, 8);
+        	uint64_t indexRec  = detail::convertInt8ArrayToInt64(nextB);
+        	assert(indexRec == m_next);
+        	std::cout<<"indexRec: "<<indexRec<<std::endl;
         	stream.close();
         }
 
@@ -73,6 +91,7 @@ namespace bfs
         	// set m_offset
 			std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
 			m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks);
+            std::cout<<"off read "<<m_offset<<std::endl;
 			(void)stream.seekg(m_offset);
 
 			// read m_size
@@ -80,10 +99,16 @@ namespace bfs
         	(void)stream.read((char*)sizeDat, 4);
         	m_size = detail::convertInt4ArrayToInt32(sizeDat);
 
+            std::cout<<"read block constructor for index "<<index<<"\tm_size: "<<m_size<<std::endl;
+            std::cout<<"read block constructor tellg: "<<stream.tellg()<<std::endl;
+
         	// read m_next
-        	uint8_t nextDat[8];
-        	(void)stream.read((char*)nextDat, 8);
-        	m_next = detail::convertInt8ArrayToInt64(nextDat);
+            uint8_t nextDat[8];
+            (void)stream.read((char*)nextDat, 8);
+            m_next = detail::convertInt8ArrayToInt64(nextDat);
+
+            std::cout<<"read block constructor index and next "<<index<<"\t"<<m_next<<std::endl;
+
 
         	stream.close();
 
@@ -119,7 +144,10 @@ namespace bfs
 			if(n < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
 				m_size = uint32_t(n);
 				m_next = m_index;
+				std::cout<<"set m_next to "<<m_next<<std::endl;
 	        	(void)stream.seekp(m_offset);
+
+	        	std::cout<<"tellg after correctly setting m_next: "<<stream.tellp()<<std::endl;
 
 	        	// update m_size
 	        	uint8_t sizeDat[4];

@@ -32,25 +32,26 @@ namespace bfs
 		, m_currentBlock(startBlock)
 	{
 		// create the very first block making up file
-		uint64_t const extraOffset = detail::MAX_FILENAME_LENGTH;
+		//uint64_t const extraOffset = detail::MAX_FILENAME_LENGTH;
         FileBlock block(m_imagePath,
         		  	    m_totalBlocks,
         		  	    m_currentBlock);
 
         // retrieve the file name
+        /*
         std::vector<char> name;
         block.read(&name.front(), detail::MAX_FILENAME_LENGTH);
         char byte = name[0];
         while(byte != '\0') {
         	m_name.push_back(byte);
         	++byte;
-        }
+        }*/
 
         // ensure that during subseuqnet writes, filename is skipped
-        block.setExtraOffset(extraOffset);
+        //block.setExtraOffset(extraOffset);
 
         // update file size which also takes in to account name length
-        m_fileSize += detail::MAX_FILENAME_LENGTH;
+        //m_fileSize += detail::MAX_FILENAME_LENGTH;
 
         // store block
         m_fileBlocks.push_back(block);
@@ -73,8 +74,10 @@ namespace bfs
     {
     	int index = m_fileBlocks.size() - 1;
     	uint32_t size =  m_fileBlocks[index].getDataBytesWritten();
+    	std::vector<uint8_t>().swap(m_buffer);
     	m_buffer.resize(size);
     	(void)m_fileBlocks[index].read((char*)&m_buffer.front(), size);
+
     	if(m_currentBlock != m_fileBlocks[index].getNextIndex()) {
     		m_currentBlock = m_fileBlocks[index].getNextIndex();
 			FileBlock block(m_imagePath,
@@ -90,13 +93,17 @@ namespace bfs
 	{
 		// read block data
 		uint32_t read(0);
+        uint64_t offset(0);
 		while(read < n) {
-			read += readCurrentBlockBytes();
-			uint64_t offset(0);
-			for(int b = 0; b < read; ++b) {
+
+		    uint32_t count = readCurrentBlockBytes();
+			read += count;
+
+			for(int b = 0; b < count; ++b) {
 				s[offset + b] = m_buffer[b];
 			}
-			offset += read;
+
+			offset += count;
 		}
 		return n;
 	}
@@ -113,8 +120,8 @@ namespace bfs
 	FileEntry::writeBufferedDataToBlock(uint32_t const bytes)
 	{
 		int index = m_fileBlocks.size() - 1;
-		m_fileBlocks[index].write((char*)&m_buffer.front(), detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
-		m_buffer.clear();
+		m_fileBlocks[index].write((char*)&m_buffer.front(), bytes);
+		std::vector<uint8_t>().swap(m_buffer);
 		std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
 		detail::updateVolumeBitmapWithOne(stream, m_currentBlock, m_totalBlocks);
 		newWritableFileBlock(stream);
@@ -124,14 +131,10 @@ namespace bfs
     void
     FileEntry::bufferByteForWriting(char const byte)
     {
-    	if(byte != '\0') {
-    		m_buffer.push_back(byte);
-    	}
+        m_buffer.push_back(byte);
     	if(m_buffer.size() == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
     		writeBufferedDataToBlock(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
-    	} else if(byte == '\0') {
-			writeBufferedDataToBlock(m_buffer.size());
-		}
+    	}
     }
 
 	std::streamsize
@@ -148,5 +151,11 @@ namespace bfs
 	FileEntry::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
 	{
 		return off;
+	}
+
+	void
+	FileEntry::flush()
+	{
+	    writeBufferedDataToBlock(m_buffer.size());
 	}
 }
