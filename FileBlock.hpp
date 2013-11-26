@@ -34,6 +34,7 @@ namespace bfs
     		, m_size(0)
     		, m_next(next)
     		, m_offset(0)
+            , m_extraOffset(0)
         {
         	// set m_offset
         	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
@@ -70,6 +71,7 @@ namespace bfs
     		, m_size(0)
     		, m_next(0)
     		, m_offset(0)
+            , m_extraOffset(0)
         {
         	// set m_offset
 			std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
@@ -96,14 +98,14 @@ namespace bfs
          */
         void setExtraOffset(uint64_t const extraOffset)
         {
-        	m_offset += extraOffset;
+        	m_extraOffset = extraOffset;
         }
 
         std::streamsize read(char * const buf, std::streamsize const n) const
         {
         	// open the image stream for reading
         	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-			(void)stream.seekg(m_offset + detail::FILE_BLOCK_META);
+			(void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_extraOffset);
 			(void)stream.read((char*)buf, n);
 			stream.close();
 			return n;
@@ -113,11 +115,14 @@ namespace bfs
         {
         	// open the image stream for writing
         	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-			(void)stream.seekp(m_offset + detail::FILE_BLOCK_META);
+			(void)stream.seekp(m_offset + detail::FILE_BLOCK_META + m_extraOffset);
 			(void)stream.write((char*)buf, n);
 
-			// check if we need to update m_size and m_next
-			if(n < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+			// check if we need to update m_size and m_next. This will be different
+			// probably if the number of bytes read is not consistent with the
+			// reported size stored in m_size or if the stream has been moved
+			// to a position past its start as indicated by m_extraOffset
+			if(n < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META || m_extraOffset > 0) {
 				m_size = uint32_t(n);
 				m_next = m_index;
 	        	(void)stream.seekp(m_offset);
@@ -162,6 +167,7 @@ namespace bfs
         mutable uint32_t m_size;
         mutable uint64_t m_next;
         mutable uint64_t m_offset;
+        mutable uint64_t m_extraOffset;
 
     };
 
