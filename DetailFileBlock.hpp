@@ -2,7 +2,6 @@
 #define BFS_BFS_DETAIL_FILE_BLOCK_HPP__
 
 #include "DetailBFS.hpp"
-#include "DetailMeta.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -24,41 +23,7 @@ namespace bfs { namespace detail
         return 8                           // number of fs blocks
             + volumeBitMapBytes            // volume bit map
             + 8                            // total number of files
-            + getMetaDataSize(totalBlocks) // space occupied by metadata
             + (FILE_BLOCK_SIZE * block);   // file block
-    }
-
-    /**
-     * @brief gets the file name of a particular entry
-     * @param in the image stream
-     * @param n the file index
-     * @return the file name
-     */
-    inline std::string getFileNameForFileN(std::fstream &in,
-                                           uint64_t const n,
-                                           uint64_t const totalBlocks = 0)
-    {
-        // get index of file block
-        uint64_t firstFileBlockIndex = readFirstBlockIndexFromMetaBlock(n, totalBlocks, in);
-
-        // get offset
-        uint64_t const offset = getOffsetOfFileBlock(firstFileBlockIndex, totalBlocks);
-
-        // seek to correct position
-        (void)in.seekg(offset + FILE_BLOCK_META);
-
-        // do actual reading up to null character
-        uint8_t dat[MAX_FILENAME_LENGTH];
-        (void)in.read((char*)dat, MAX_FILENAME_LENGTH);
-        std::string name("");
-        for(int i = 0; i < MAX_FILENAME_LENGTH; ++i) {
-            if((char)dat[i] != '\0') {
-                name.push_back((char)dat[i]);
-            } else {
-                break;
-            }
-        }
-        return name;
     }
 
     /**

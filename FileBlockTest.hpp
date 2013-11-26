@@ -1,6 +1,5 @@
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
-#include "DetailMeta.hpp"
 #include "FileBlock.hpp"
 #include "MakeBFS.hpp"
 

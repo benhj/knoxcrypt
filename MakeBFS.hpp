@@ -3,7 +3,6 @@
 
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
-#include "DetailMeta.hpp"
 
 #include <string>
 #include <fstream>
@@ -33,22 +32,6 @@ namespace bfs
         void buildFileCountBytes(uint64_t const fileCount, uint8_t sizeBytes[8])
         {
             detail::convertInt64ToInt8Array(fileCount, sizeBytes);
-        }
-
-        void writeOutMetaBytes(uint64_t const fileBlockCount, std::fstream &out)
-        {
-        	uint64_t metaBlocks = detail::getMetaBlockCount(fileBlockCount);
-        	for(uint64_t i(0); i < metaBlocks ; ++i) {
-        		std::vector<uint8_t> ints;
-				ints.assign(detail::METABLOCK_SIZE - 1, 0);
-				uint8_t byte;
-
-				// set the first bit of the first byte to 0 to indicate that
-				// the metablock is not in use
-				detail::setBitInByte(byte, 0, false);
-				(void)out.write((char*)&byte, 1);
-        		(void)out.write((char*)&ints.front(), detail::METABLOCK_SIZE-1);
-        	}
         }
 
         void writeOutFileSpaceBytes(uint64_t const fileBlockCount, std::fstream &out)
@@ -125,19 +108,6 @@ namespace bfs
 
             // write out file count
             out.write((char*)countBytes, 8);
-
-            //
-            // we will have 0.1% bytes file count; each file metadata item
-            // will be 25 bytes in length
-            //
-            // First 1 bytes: binary info (1st bit in use or not)
-            // Next 8 bytes: file size
-            // Next 8 bytes: 1st block position
-            // Next 8 bytes: parent meta block
-            //
-
-            // write out metaBytes of metadata
-            writeOutMetaBytes(blocks, out);
 
             // write out the file space bytes
             writeOutFileSpaceBytes(blocks, out);
