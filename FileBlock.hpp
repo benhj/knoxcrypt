@@ -2,6 +2,7 @@
 #define BFS_FILE_BLOCK_HPP__
 
 #include "DetailBFS.hpp"
+#include "DetailFileBlock.hpp"
 
 #include <vector>
 

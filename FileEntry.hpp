@@ -53,6 +53,8 @@ namespace bfs
 
         uint64_t fileSize() const;
 
+        uint64_t getCurrentBlockIndex() const;
+
         /**
          * @brief for reading
          * @param s

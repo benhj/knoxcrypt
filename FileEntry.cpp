@@ -91,6 +91,12 @@ namespace bfs
     	return m_fileSize;
     }
 
+    uint64_t
+    FileEntry::getCurrentBlockIndex() const
+    {
+        return m_currentBlock;
+    }
+
     std::streamsize
     FileEntry::readCurrentBlockBytes()
     {
