@@ -65,7 +65,7 @@ class MakeBFSTest
 
         std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::binary);
         bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
-        assert(*p == 0);
+        assert(*p == 1);
         is.close();
     }
 
@@ -77,12 +77,12 @@ class MakeBFSTest
         bfs::MakeBFS bfs(testPath.string(), blocks);
 
         std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::out | std::ios::binary);
-        bfs::detail::setBlockToInUse(0, blocks, is);
+        bfs::detail::setBlockToInUse(1, blocks, is);
         bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
-        assert(*p == 1);
+        assert(*p == 2);
 
         // check that rest of map can also be set correctly
-        for (int i = 1; i < blocks - 1; ++i) {
+        for (int i = 2; i < blocks - 1; ++i) {
             bfs::detail::setBlockToInUse(i, blocks, is);
             p = bfs::detail::getNextAvailableBlock(is);
             assert(*p == i + 1);

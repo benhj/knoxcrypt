@@ -1,3 +1,4 @@
+#include "DetailFolder.hpp"
 #include "FolderEntry.hpp"
 
 namespace bfs
@@ -18,6 +19,10 @@ namespace bfs
     FileEntry
     FolderEntry::addFileEntry(std::string const &name)
     {
+
+        // increment entry count
+        detail::incrementFolderEntryCount(m_imagePath, m_folderData.getStartBlockIndex(), m_totalBlocks);
+
         // set the first bit to indicate that this entry is in use
         // it will point to a file and should not be written over
         uint8_t byte = 0;
@@ -55,6 +60,9 @@ namespace bfs
     FolderEntry
     FolderEntry::addFolderEntry(std::string const &name)
     {
+        // increment entry count
+        detail::incrementFolderEntryCount(m_imagePath, m_folderData.getStartBlockIndex(), m_totalBlocks);
+
         /*
         // set the first bit to indicate that this entry is in use
         // it will point to a file and should not be written over

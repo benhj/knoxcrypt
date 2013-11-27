@@ -59,40 +59,47 @@ class FileEntryTest
         {
 			bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
             std::string testData(createLargeStringToWrite());
-            std::cout<<"created large string"<<std::endl;
             std::vector<uint8_t> vec(testData.begin(), testData.end());
-            std::cout<<"created large string vector"<<std::endl;
             entry.write((char*)&vec.front(), BIG_SIZE);
-            std::cout<<"written"<<std::endl;
             entry.flush();
         }
 
+        std::cout<<"File entry write passed"<<std::endl;
+
         // test read
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, 0);
+            bfs::FileEntry entry(testPath.c_str(), blocks, 1);
             std::string expected(createLargeStringToWrite());
             std::vector<char> vec;
             vec.resize(BIG_SIZE);
             entry.read(&vec.front(), BIG_SIZE);
-            std::cout<<"read!"<<std::endl;
             std::string recovered(vec.begin(), vec.begin() + BIG_SIZE);
             assert(recovered == expected);
         }
 
+        std::cout<<"File entry read passed"<<std::endl;
+
+
         // test append
+        std::string appendString("appended!");
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt", 0);
-            std::string appendString("appended!");
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt", 1);
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
+        }
+
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, 1);
             std::string expected(createLargeStringToWrite());
             expected.append(appendString);
             std::vector<char> vec;
             vec.resize(BIG_SIZE + appendString.length());
             entry.read(&vec.front(), BIG_SIZE + appendString.length());
-            std::cout<<"read!"<<std::endl;
             std::string recovered(vec.begin(), vec.begin() + BIG_SIZE + appendString.length());
             assert(recovered == expected);
         }
+
+        std::cout<<"File entry append passed"<<std::endl;
+
     }
 };

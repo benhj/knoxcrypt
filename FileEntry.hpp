@@ -55,6 +55,8 @@ namespace bfs
 
         uint64_t getCurrentBlockIndex() const;
 
+        uint64_t getStartBlockIndex() const;
+
         /**
          * @brief for reading
          * @param s
@@ -107,6 +109,9 @@ namespace bfs
 
         // theindex of the current file block being read from or written to
         uint64_t m_currentBlock;
+
+        // the start file block index
+        uint64_t m_startBlock;
 
         /**
          * @brief buffers a byte for writing

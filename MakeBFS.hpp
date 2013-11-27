@@ -74,6 +74,17 @@ namespace bfs
             (void)out.write((char*)&bitMapData.front(), bytesRequired);
         }
 
+        void writeRootDirectory(uint64_t const blocks, std::fstream &out)
+        {
+            // the entry count of the root directory (start out at 0 entries)
+            uint64_t startCount = 0;
+            uint8_t buf[8];
+            detail::convertInt64ToInt8Array(startCount, buf);
+
+            // write out entry count
+            (void)out.write((char*)buf, 8);
+        }
+
         /**
          * @brief build the file system image
          *
@@ -97,20 +108,34 @@ namespace bfs
             buildBlockBytes(blocks, sizeBytes);
 
             // write out size, and volume bitmap bytes
-            std::fstream out(imageName.c_str(), std::ios::out | std::ios::binary);
-            out.write((char*)sizeBytes, 8);
-            createVolumeBitMap(blocks, out);
+            {
+                std::fstream out(imageName.c_str(), std::ios::out | std::ios::binary);
+                out.write((char*)sizeBytes, 8);
+                createVolumeBitMap(blocks, out);
 
-            // file count will always be 0 upon initialization
-            uint64_t fileCount(0);
-            uint8_t countBytes[8];
-            buildFileCountBytes(fileCount, countBytes);
+                // file count will always be 0 upon initialization
+                uint64_t fileCount(0);
+                uint8_t countBytes[8];
+                buildFileCountBytes(fileCount, countBytes);
 
-            // write out file count
-            out.write((char*)countBytes, 8);
+                // write out file count
+                out.write((char*)countBytes, 8);
 
-            // write out the file space bytes
-            writeOutFileSpaceBytes(blocks, out);
+                // write out the file space bytes
+                writeOutFileSpaceBytes(blocks, out);
+
+                // set the very first file block (0) as being the first file block
+                // of the root directory
+                writeRootDirectory(blocks, out);
+                out.flush();
+                out.close();
+            }
+
+            // re-open in read/write
+            std::fstream out(imageName.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+
+            // set first file block as being in use
+            detail::updateVolumeBitmapWithOne(out, 0, blocks);
 
             out.flush();
             out.close();

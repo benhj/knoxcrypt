@@ -13,6 +13,7 @@ namespace bfs
 		, m_fileBlocks()
 		, m_buffer()
 		, m_currentBlock(0)
+	    , m_startBlock(0)
 	{
 		// make the very first file block. Find out two available blocks
 		// for this 'this' and the 'next'. Note if we end up not needing the next block,
@@ -35,6 +36,7 @@ namespace bfs
         , m_fileBlocks()
         , m_buffer()
         , m_currentBlock(startBlock)
+        , m_startBlock(startBlock)
     {
         // store all file blocks associated with file in container
         // also updates the file size as it does this
@@ -52,6 +54,7 @@ namespace bfs
 		, m_fileBlocks()
 		, m_buffer()
 		, m_currentBlock(startBlock)
+	    , m_startBlock(startBlock)
 	{
 		// create the very first block making up file
 		//uint64_t const extraOffset = detail::MAX_FILENAME_LENGTH;
@@ -95,6 +98,12 @@ namespace bfs
     FileEntry::getCurrentBlockIndex() const
     {
         return m_currentBlock;
+    }
+
+    uint64_t
+    FileEntry::getStartBlockIndex() const
+    {
+        return m_startBlock;
     }
 
     std::streamsize
