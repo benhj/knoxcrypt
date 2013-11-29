@@ -17,6 +17,7 @@ class MakeBFSTest
         correctNumberOfFilesIsReported();
         firstBlockIsReportedAsBeingFree();
         blocksCanBeSetAndCleared();
+        testThatRootFolderContainsZeroEntries();
     }
 
     ~MakeBFSTest()
@@ -104,6 +105,23 @@ class MakeBFSTest
         assert(*p == 27);
 
         is.close();
+    }
+
+    void testThatRootFolderContainsZeroEntries()
+    {
+        std::string testImage(boost::filesystem::unique_path().string());
+        boost::filesystem::path testPath = m_uniquePath / testImage;
+        uint64_t blocks(2048); // 1MB
+        bfs::MakeBFS bfs(testPath.string(), blocks);
+
+        uint64_t offset = bfs::detail::getOffsetOfFileBlock(0, blocks);
+        // open a stream and read the first byte which signifies number of entries
+        std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        is.seekg(offset);
+        uint8_t bytes[8];
+        (void)is.read((char*)bytes, 8);
+        uint64_t const count = bfs::detail::convertInt8ArrayToInt64(bytes);
+        assert(count == 0);
     }
 
     boost::filesystem::path m_uniquePath;
