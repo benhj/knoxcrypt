@@ -14,6 +14,7 @@ namespace bfs
 		, m_buffer()
 		, m_currentBlock(0)
 	    , m_startBlock(0)
+		, m_blockIndex(0)
 	{
 		// make the very first file block. Find out two available blocks
 		// for this 'this' and the 'next'. Note if we end up not needing the next block,
@@ -37,12 +38,21 @@ namespace bfs
         , m_buffer()
         , m_currentBlock(startBlock)
         , m_startBlock(startBlock)
+    	, m_blockIndex(0)
     {
         // store all file blocks associated with file in container
         // also updates the file size as it does this
         std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         setBlocks(stream);
         stream.close();
+
+        // essentially seek right to the very last block
+        m_blockIndex = m_fileBlocks.size() - 1;
+
+        // update the starting write position of the end block to how many
+        // bytes have been written to it so far so that we start from this
+        // position when appending extra bytes
+        m_fileBlocks[m_blockIndex].setExtraOffset(m_fileBlocks[m_blockIndex].getDataBytesWritten());
     }
 
     // for reading
@@ -55,31 +65,13 @@ namespace bfs
 		, m_buffer()
 		, m_currentBlock(startBlock)
 	    , m_startBlock(startBlock)
+	    , m_blockIndex(0)
 	{
-		// create the very first block making up file
-		//uint64_t const extraOffset = detail::MAX_FILENAME_LENGTH;
-        FileBlock block(m_imagePath,
-        		  	    m_totalBlocks,
-        		  	    m_currentBlock);
-
-        // retrieve the file name
-        /*
-        std::vector<char> name;
-        block.read(&name.front(), detail::MAX_FILENAME_LENGTH);
-        char byte = name[0];
-        while(byte != '\0') {
-        	m_name.push_back(byte);
-        	++byte;
-        }*/
-
-        // ensure that during subseuqnet writes, filename is skipped
-        //block.setExtraOffset(extraOffset);
-
-        // update file size which also takes in to account name length
-        //m_fileSize += detail::MAX_FILENAME_LENGTH;
-
-        // store block
-        m_fileBlocks.push_back(block);
+        // store all file blocks associated with file in container
+        // also updates the file size as it does this
+        std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        setBlocks(stream);
+        stream.close();
 	}
 
     std::string
@@ -109,19 +101,18 @@ namespace bfs
     std::streamsize
     FileEntry::readCurrentBlockBytes()
     {
-    	int index = m_fileBlocks.size() - 1;
-    	uint32_t size =  m_fileBlocks[index].getDataBytesWritten();
+
+    	uint32_t size =  m_fileBlocks[m_blockIndex].getDataBytesWritten();
+
     	std::vector<uint8_t>().swap(m_buffer);
     	m_buffer.resize(size);
-    	(void)m_fileBlocks[index].read((char*)&m_buffer.front(), size);
+    	(void)m_fileBlocks[m_blockIndex].read((char*)&m_buffer.front(), size);
 
-    	if(m_currentBlock != m_fileBlocks[index].getNextIndex()) {
-    		m_currentBlock = m_fileBlocks[index].getNextIndex();
-			FileBlock block(m_imagePath,
-							m_totalBlocks,
-							m_currentBlock);
-			m_fileBlocks.push_back(block);
+    	if(m_blockIndex + 1 < m_fileBlocks.size()) {
+    		++m_blockIndex;
+    		m_currentBlock = m_fileBlocks[m_blockIndex].getIndex();
     	}
+
     	return size;
     }
 
@@ -134,7 +125,14 @@ namespace bfs
 		while(read < n) {
 
 		    uint32_t count = readCurrentBlockBytes();
+
+		    // check that we don't read too much!
+		    if(read + count >= n) {
+		    	count -= (read + count - n);
+		    }
+
 			read += count;
+
 
 			for(int b = 0; b < count; ++b) {
 				s[offset + b] = m_buffer[b];
@@ -175,12 +173,6 @@ namespace bfs
             m_fileBlocks.push_back(newBlock);
         }
 
-        // update the starting write position of the end block to how many
-        // bytes have been written to it so far so that we start from this
-        // position when appending extra bytes
-        long index = m_fileBlocks.size() - 1;
-        m_fileBlocks[index].setExtraOffset(m_fileBlocks[index].getDataBytesWritten());
-
 	}
 
 	void
@@ -202,9 +194,8 @@ namespace bfs
 
         // check the buffer size and if it matches the space remaining in given
         // block, write to the block with data
-        int index = m_fileBlocks.size() - 1;
     	if(m_buffer.size() == (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META -
-    	                       m_fileBlocks[index].getDataBytesWritten())) {
+    	                       m_fileBlocks[m_blockIndex].getDataBytesWritten())) {
     		writeBufferedDataToBlock(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
     	}
     }
@@ -222,6 +213,50 @@ namespace bfs
 	boost::iostreams::stream_offset
 	FileEntry::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
 	{
+		// find what file block the offset would relate to and set extra offset in file block
+		// to that position
+		uint64_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+		uint64_t casted = uint64_t(off);
+		uint64_t const leftOver = blockSize % off;
+		uint64_t block = 0;
+		uint32_t blockPosition = 0;
+		if(off > blockSize) {
+			if(leftOver > 0) {
+				// round down casted
+				casted -= leftOver;
+
+				// set the position of the stream in block to leftOver
+				blockPosition = leftOver;
+
+			} else {
+				blockPosition = 0;
+			}
+
+			// get exact number of blocks after round-down
+			block = blockSize / casted;
+
+			// add 1 to block because any left over left over
+			// will be in next block / divided perfectly so need
+			// to start at next block
+			++block;
+
+		} else {
+			// offset is smaller than the first block so keep block
+			// index at 0 and the position for the zero block at offset
+			blockPosition = off;
+		}
+
+		// update block where we start reading/writing from
+		m_blockIndex = block;
+
+		// check bounds and error if too big
+		if(m_blockIndex >= m_fileBlocks.size()) {
+			return -1; // fail
+		} else {
+			// set the position to seek to for given block
+			// this will be the point from which we read or write
+			m_fileBlocks[m_blockIndex].setExtraOffset(off);
+		}
 		return off;
 	}
 

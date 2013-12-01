@@ -107,11 +107,17 @@ namespace bfs
         // a buffer used for storing chunks of data
         std::vector<uint8_t> m_buffer;
 
-        // theindex of the current file block being read from or written to
+        // the index of the current file block being read from or written to
+        // note, this is the position of the block in the bfs
         uint64_t m_currentBlock;
 
         // the start file block index
         uint64_t m_startBlock;
+
+        // the index of the block in the actual blocks container;
+        // in comparison to m_currentBlock, this is where the block
+        // exists in m_fileBlocks
+        uint64_t m_blockIndex;
 
         /**
          * @brief buffers a byte for writing

@@ -160,6 +160,11 @@ namespace bfs
         	return m_offset;
         }
 
+        uint64_t getIndex() const
+		{
+        	return m_index;
+		}
+
     private:
 
         std::string m_imagePath;
