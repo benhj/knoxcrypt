@@ -79,7 +79,8 @@ namespace bfs
          * @param way
          * @return
          */
-        boost::iostreams::stream_offset seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
+        boost::iostreams::stream_offset seek(boost::iostreams::stream_offset off,
+        									 std::ios_base::seekdir way = std::ios_base::beg);
 
         /**
          * @brief flushes any remaining data

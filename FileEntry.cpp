@@ -194,8 +194,8 @@ namespace bfs
 
         // check the buffer size and if it matches the space remaining in given
         // block, write to the block with data
-    	if(m_buffer.size() == (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META -
-    	                       m_fileBlocks[m_blockIndex].getDataBytesWritten())) {
+    	if(m_buffer.size() == (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)) {
+    	                       //m_fileBlocks[m_blockIndex].getDataBytesWritten())) {
     		writeBufferedDataToBlock(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
     	}
     }
@@ -217,28 +217,26 @@ namespace bfs
 		// to that position
 		uint64_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
 		uint64_t casted = uint64_t(off);
-		uint64_t const leftOver = blockSize % off;
+		uint64_t const leftOver = casted % blockSize;
 		uint64_t block = 0;
 		uint32_t blockPosition = 0;
 		if(off > blockSize) {
 			if(leftOver > 0) {
+
 				// round down casted
 				casted -= leftOver;
 
 				// set the position of the stream in block to leftOver
 				blockPosition = leftOver;
 
+				++block;
+
 			} else {
 				blockPosition = 0;
 			}
 
 			// get exact number of blocks after round-down
-			block = blockSize / casted;
-
-			// add 1 to block because any left over left over
-			// will be in next block / divided perfectly so need
-			// to start at next block
-			++block;
+			block = off / blockSize;
 
 		} else {
 			// offset is smaller than the first block so keep block
@@ -249,13 +247,14 @@ namespace bfs
 		// update block where we start reading/writing from
 		m_blockIndex = block;
 
+
 		// check bounds and error if too big
 		if(m_blockIndex >= m_fileBlocks.size()) {
 			return -1; // fail
 		} else {
 			// set the position to seek to for given block
 			// this will be the point from which we read or write
-			m_fileBlocks[m_blockIndex].setExtraOffset(off);
+			m_fileBlocks[m_blockIndex].setExtraOffset(blockPosition);
 		}
 		return off;
 	}

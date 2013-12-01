@@ -123,8 +123,13 @@ namespace bfs
 			// probably if the number of bytes read is not consistent with the
 			// reported size stored in m_size or if the stream has been moved
 			// to a position past its start as indicated by m_extraOffset
+			if(m_extraOffset > 0) {
+				m_size += uint32_t(n);
+			}
 			if(n < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META || m_extraOffset > 0) {
-				m_size = uint32_t(n);
+				if(m_extraOffset == 0) {
+					m_size = uint32_t(n); // this already been updated
+				}
 				m_next = m_index;
 	        	(void)stream.seekp(m_offset);
 
