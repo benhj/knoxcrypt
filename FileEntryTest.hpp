@@ -92,8 +92,6 @@ class FileEntryTest
 
         {
             bfs::FileEntry entry(testPath.c_str(), blocks, 1);
-
-
             std::string expected(createLargeStringToWrite());
             expected.append(appendString);
             std::vector<char> vec;

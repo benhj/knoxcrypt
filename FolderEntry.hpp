@@ -55,6 +55,12 @@ namespace bfs
          */
         std::string getName();
 
+        /**
+         * @brief retrieves the name of an entry with given index
+         * @return the name
+         */
+        std::string getEntryName(uint64_t const index);
+
     private:
 
         FolderEntry();

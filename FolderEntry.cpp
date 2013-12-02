@@ -112,6 +112,27 @@ namespace bfs
     }
 
     std::string
+    FolderEntry::getEntryName(uint64_t const index)
+    {
+    	// to do -- what if goes out of bounds?? No protection here
+    	uint32_t bufferSize = detail::MAX_FILENAME_LENGTH + 1 + 8;
+    	if(m_folderData.seek(index * bufferSize) != -1) {
+    		std::vector<uint8_t> buffer;
+    		buffer.resize(bufferSize);
+    		m_folderData.read((char*)&buffer.front(), bufferSize);
+    		std::string nameDat(buffer.begin() + 1, buffer.end() - 8);
+    		std::string returnString;
+    		int c = 0;
+    		while(nameDat.at(c) != '\0') {
+    			returnString.push_back(nameDat.at(c));
+    			++c;
+    		}
+    		return returnString;
+    	}
+    	return "ERROR";
+    }
+
+    std::string
     FolderEntry::getName()
     {
         return m_name;
