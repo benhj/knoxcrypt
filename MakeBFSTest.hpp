@@ -117,7 +117,7 @@ class MakeBFSTest
         uint64_t offset = bfs::detail::getOffsetOfFileBlock(0, blocks);
         // open a stream and read the first byte which signifies number of entries
         std::fstream is(testPath.string().c_str(), std::ios::in | std::ios::out | std::ios::binary);
-        is.seekg(offset);
+        is.seekg(offset + bfs::detail::FILE_BLOCK_META);
         uint8_t bytes[8];
         (void)is.read((char*)bytes, 8);
         uint64_t const count = bfs::detail::convertInt8ArrayToInt64(bytes);

@@ -12,7 +12,7 @@
 #include <sstream>
 #include <fstream>
 
-int const HELLO_IT = 60539;
+int const HELLO_IT = 539;
 int const BIG_SIZE = HELLO_IT * 13;
 
 class FileEntryTest

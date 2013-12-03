@@ -52,7 +52,7 @@ namespace bfs
         // update the starting write position of the end block to how many
         // bytes have been written to it so far so that we start from this
         // position when appending extra bytes
-        m_fileBlocks[m_blockIndex].setExtraOffset(m_fileBlocks[m_blockIndex].getDataBytesWritten());
+        this->seek(0, std::ios_base::end);
     }
 
     // for reading
@@ -213,6 +213,15 @@ namespace bfs
 	boost::iostreams::stream_offset
 	FileEntry::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
 	{
+
+	    // if at end jsut seek right to end and don't do anything else
+	    if(way == std::ios_base::end) {
+	        m_blockIndex = m_fileBlocks.size() - 1;
+	        uint32_t blockPosition = m_fileBlocks[m_blockIndex].getDataBytesWritten();
+	        m_fileBlocks[m_blockIndex].setExtraOffset(blockPosition);
+	        return off;
+	    }
+
 		// find what file block the offset would relate to and set extra offset in file block
 		// to that position
 		uint64_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;

@@ -74,19 +74,6 @@ namespace bfs
             (void)out.write((char*)&bitMapData.front(), bytesRequired);
         }
 
-        void writeRootDirectory(uint64_t const blocks, std::fstream &out)
-        {
-            // the entry count of the root directory (start out at 0 entries)
-            uint64_t startCount(0);
-            uint8_t buf[8];
-            detail::convertInt64ToInt8Array(startCount, buf);
-
-            // write out entry count
-            uint64_t zeroBlockOffset = detail::getOffsetOfFileBlock(0, blocks);
-            out.seekp(zeroBlockOffset);
-            (void)out.write((char*)buf, 8);
-        }
-
         /**
          * @brief build the file system image
          *
@@ -135,18 +122,20 @@ namespace bfs
             // 2. updating volume bitmap
 
 
-            // re-open in read/write
-            std::fstream out(imageName.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-
             // set the very first file block (0) as being the first file block
             // of the root directory
-            writeRootDirectory(blocks, out);
+            FileBlock rootDirBlock(imageName, blocks, 0 /* first */, 0 /* next, of which there are none */);
+            uint64_t startCount(0); // no entries to begin with
+            uint8_t buf[8];
+            detail::convertInt64ToInt8Array(startCount, buf);
+            (void)rootDirBlock.write((char*)buf, 8);
 
             // set first file block as being in use
+            std::fstream out(imageName.c_str(), std::ios::in | std::ios::out | std::ios::binary);
             detail::updateVolumeBitmapWithOne(out, 0, blocks);
-
             out.flush();
             out.close();
+
         }
     };
 }
