@@ -11,5 +11,4 @@ int main()
     FileBlockTest();
     FileEntryTest();
     FolderEntryTest();
-    //BFSEntryWriterTest();
 }
