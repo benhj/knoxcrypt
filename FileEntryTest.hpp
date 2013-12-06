@@ -23,7 +23,7 @@ class FileEntryTest
 	FileEntryTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
-        test();
+        testBasicAppend();
         testSeekAndReadSmallFile();
         testSeekAndReadBigFile();
     }
@@ -47,7 +47,7 @@ class FileEntryTest
 
     boost::filesystem::path m_uniquePath;
 
-    void test()
+    void testBasicAppend()
     {
         std::string testImage(boost::filesystem::unique_path().string());
         boost::filesystem::path testPath = m_uniquePath / testImage;
@@ -189,7 +189,7 @@ class FileEntryTest
             assert(recovered == appendString);
         }
 
-        std::cout<<"File entry append passed"<<std::endl;
+        std::cout<<"Test seek and read big file passed"<<std::endl;
     }
 
 };
