@@ -2,8 +2,6 @@ CXX=clang++
 CXXFLAGS=-I/usr/local/boost_1_53_0
 
 TEST_OBJS = test.o \
-            BFSEntryWriter.o \
-            BFSEntryAppender.o \
             FileEntry.o \
             FolderEntry.o \
             /usr/local/boost_1_53_0/stage/lib/libboost_filesystem.dylib \
