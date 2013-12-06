@@ -23,13 +23,11 @@ When a file is created the associated bits in the bitmap are set and the volume
 bitmap is updated. When a file is deleted the associated bits are cleared, the 
 map is updated and the blocks are free to be used in the storage of other files.
 
-A set of metadata the size of which is calculated as a fraction of the size of 
-the allocated space will store information about each file including whether the
-metablock is currently in use (stored by the first bit of the very first byte),
-the index of the first allocated block (8 bytes), the total number of allocated blocks
-(8 bytes), and the parent entry index (8 bytes). Thus each metablock is 25 bytes.
+Folder entries will also be treated as file entries that are constructed from file 
+blocks. Their data will be formed of file name and other folder name entries that
+link to the respective index values of the first file block making up a given file.
 
-Each 512 byte file block will also store the number of bytes stored by the block 
-(<=512-20 stored as a 4 byte value), and the previous and next block indices
-(stored as 8 byte values). The first block making up a file will also store the 
-filename in the first 255 bytes of data space (null terminated).
+When the file system container is created, the root directory is automatically
+added which is set to having zero entries. As files and folders are added to
+the container, the root directory entry is accordingly updated. In a similar
+manner, any sub folders will also be accordingly updated.
