@@ -60,6 +60,14 @@ namespace bfs
         (void)m_folderData.write((char*)buf, 8);
         m_folderData.flush();
 
+        // indicate that first block of new file entry is in use. NOte at this
+        // point in time, it won't have any data. When data
+        // needs to be added to the file entry, it will be opened
+        // in append mode
+        std::fstream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+    	detail::updateVolumeBitmapWithOne(out, firstBlock, m_totalBlocks);
+    	out.close();
+
         return entry;
     }
 

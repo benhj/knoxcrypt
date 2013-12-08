@@ -68,7 +68,7 @@ class FileEntryTest
 
         // test read
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, 1);
+            bfs::FileEntry entry(testPath.c_str(), blocks, uint64_t(1));
             std::string expected(createLargeStringToWrite());
             std::vector<char> vec;
             vec.resize(BIG_SIZE);

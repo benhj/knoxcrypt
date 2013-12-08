@@ -16,6 +16,10 @@ namespace bfs
 	    , m_startBlock(0)
 		, m_blockIndex(0)
 	{
+    	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+    	m_currentBlock = *detail::getNextAvailableBlock(stream);
+    	m_startBlock = m_currentBlock;
+		stream.close();
 	}
 
 	// for appending
@@ -121,7 +125,6 @@ namespace bfs
 		    }
 
 			read += count;
-
 
 			for(int b = 0; b < count; ++b) {
 				s[offset + b] = m_buffer[b];
