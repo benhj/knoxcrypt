@@ -51,8 +51,7 @@ class FolderEntryTest
 			folder.addFileEntry("shitter.mp3");
         }
         {
-        	bool writable = false;
-        	bfs::FolderEntry folder(testPath.string(), blocks, 0, "root", writable);
+        	bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
 			assert(folder.getEntryName(0) == "test.txt");
 			assert(folder.getEntryName(1) == "fucker.log");
 			assert(folder.getEntryName(2) == "crap.jpg");

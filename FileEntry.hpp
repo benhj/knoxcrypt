@@ -136,7 +136,7 @@ namespace bfs
          * @note also updates file size as it seeks to end block
          * @param stream the bfs image stream
          */
-        void setBlocks(std::fstream &stream);
+        void setBlocks();
 
         /**
          * @brief writes data to file block

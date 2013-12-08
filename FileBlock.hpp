@@ -90,7 +90,6 @@ namespace bfs
         	m_next = detail::convertInt8ArrayToInt64(nextDat);
 
         	stream.close();
-
         }
 
         /**
@@ -175,7 +174,7 @@ namespace bfs
         {
         	m_next = next;
         	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-			(void)stream.seekp(m_offset + 4); // 4 indicate bytes written
+			(void)stream.seekp(m_offset+4); // 4 indicate bytes written
 			// update m_next
 			uint8_t nextDat[8];
 			detail::convertUInt64ToInt8Array(m_next, nextDat);

@@ -53,11 +53,15 @@ class FileBlockTest
         uint64_t size = bfs::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
         assert(size == 26);
 
+        std::cout<<"Test correct block write size being returned passed"<<std::endl;
+
         // test that reported next index correct
         assert(block.getNextIndex() == 0);
         uint64_t next = bfs::detail::getIndexOfNextFileBlockFromFileBlockN(stream, 0, blocks);
         stream.close();
         assert(next == 0);
+
+        std::cout<<"Test correct block next index passed"<<std::endl;
 
         // test that data can be read correctly
         std::vector<uint8_t> dat;
@@ -65,6 +69,8 @@ class FileBlockTest
         assert(block.read((char*)&dat.front(), size) == size);
         std::string str(dat.begin(), dat.end());
         assert(str == testData);
+
+        std::cout<<"Test block data read passed"<<std::endl;
 
     }
 

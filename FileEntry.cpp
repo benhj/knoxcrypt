@@ -35,9 +35,7 @@ namespace bfs
     {
         // store all file blocks associated with file in container
         // also updates the file size as it does this
-        std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-        setBlocks(stream);
-        stream.close();
+        setBlocks();
 
         // essentially seek right to the very last block
         m_blockIndex = m_fileBlocks.size() - 1;
@@ -62,9 +60,7 @@ namespace bfs
 	{
         // store all file blocks associated with file in container
         // also updates the file size as it does this
-        std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-        setBlocks(stream);
-        stream.close();
+        setBlocks();
 	}
 
     std::string
@@ -147,18 +143,14 @@ namespace bfs
 		m_currentBlock = firstAndNext[0];
 	}
 
-	void FileEntry::setBlocks(std::fstream &stream)
+	void FileEntry::setBlocks()
 	{
 	    // find very first block
         FileBlock block(m_imagePath,
                         m_totalBlocks,
                         m_currentBlock);
 
-        std::cout<<"m_currentBlock in setBlocks: "<<m_currentBlock<<std::endl;
-
         uint64_t nextBlock = block.getNextIndex();
-
-        std::cout<<m_currentBlock<<"  ***  "<<nextBlock<<std::endl;
 
         m_fileSize += block.getDataBytesWritten();
         m_fileBlocks.push_back(block);
@@ -171,8 +163,6 @@ namespace bfs
                                 m_totalBlocks,
                                 m_currentBlock);
             nextBlock = newBlock.getNextIndex();
-
-            std::cout<<"nextBlock: "<<nextBlock<<std::endl;
 
             m_fileSize += newBlock.getDataBytesWritten();
             m_fileBlocks.push_back(newBlock);
@@ -191,8 +181,6 @@ namespace bfs
 	FileEntry::setNextOfLastBlockToIndexOfNewBlock()
 	{
 		uint64_t lastIndex(m_blockIndex - 1);
-		std::cout<<"m_curentBlock when setting last: "<<m_currentBlock<<std::endl;
-		std::cout<<"lastIndex: "<<lastIndex<<std::endl;
 		m_fileBlocks[lastIndex].setNext(m_currentBlock);
 	}
 
@@ -209,7 +197,6 @@ namespace bfs
 
 		// in this case the current block is exhausted so we need a new one
 		if(bytesWritten == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
-			std::cout<<"exhausted"<<std::endl;
 			newWritableFileBlock();
 
 			// update next index of last block
@@ -252,8 +239,6 @@ namespace bfs
     	if(m_buffer.size() == ((detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
     	                       - bytesWrittenAlready)) {
 
-    		std::cout<<"writing"<<std::endl;
-
     		// make a new block to write to. Not necessarily the case that
     		// we want a new file block if in append mode. Won't be in append
     		// mode if no data bytes have yet been written
@@ -292,7 +277,6 @@ namespace bfs
 	    // if at end just seek right to end and don't do anything else
 	    if(way == std::ios_base::end) {
 	        m_blockIndex = m_fileBlocks.size() - 1;
-	        std::cout<<"m_blockIndex: "<<m_blockIndex<<"\t"<<m_currentBlock<<std::endl;
 	        uint32_t blockPosition = m_fileBlocks[m_blockIndex].getDataBytesWritten();
 	        m_fileBlocks[m_blockIndex].setExtraOffset(blockPosition);
 	        return off;
