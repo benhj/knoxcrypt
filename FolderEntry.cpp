@@ -1,5 +1,6 @@
 #include "DetailFolder.hpp"
 #include "FolderEntry.hpp"
+#include <stdexcept>
 
 namespace bfs
 {
@@ -107,13 +108,49 @@ namespace bfs
     FileEntry
     FolderEntry::getFileEntry(std::string const &name)
     {
+    	// find out total number of entries
+    	// NOTE: should probably initialize this in constructor
+        std::fstream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartBlockIndex(), m_totalBlocks);
+        (void)out.seekg(offset + detail::FILE_BLOCK_META);
+        uint8_t buf[8];
+        (void)out.read((char*)buf, 8);
+        uint64_t count = detail::convertInt8ArrayToInt64(buf);
+        out.close();
+        uint64_t i(0);
 
+        // loop over entries until name found
+        for(; i < count; ++i) {
+        	std::string entryName(getEntryName(i));
+        	if(entryName == name) {
+        		uint64_t n = getBlockIndexForEntry(i);
+        		return FileEntry(m_imagePath, m_totalBlocks, m_name, n);
+        	}
+        }
+
+        throw std::runtime_error("File entry with that name not found");
     }
 
     FolderEntry
     FolderEntry::getFolderEntry(std::string const &name)
     {
 
+    }
+
+    uint64_t
+    FolderEntry::getBlockIndexForEntry(uint64_t const n)
+    {
+
+    	uint32_t bufferSize = detail::MAX_FILENAME_LENGTH + 1 + 8;
+
+    	// note in the following the '8' bytes represent the number of
+    	// entries in the folder
+    	if(m_folderData.seek((n * bufferSize) + 1 + detail::MAX_FILENAME_LENGTH) != -1) {
+    		uint8_t buf[8];
+    		m_folderData.read((char*)&buf, 8);
+    		return detail::convertInt8ArrayToInt64(buf);
+    	}
+    	throw std::runtime_error("Problem retrieving block index for file entry");
     }
 
     std::string
@@ -132,6 +169,8 @@ namespace bfs
     		std::vector<uint8_t> buffer;
     		buffer.resize(bufferSize);
     		m_folderData.read((char*)&buffer.front(), bufferSize);
+    		// read past the first byte up until the end minus the
+    		// first block index bytes
     		std::string nameDat(buffer.begin() + 1, buffer.end() - 8);
     		std::string returnString;
     		int c = 0;

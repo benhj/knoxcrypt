@@ -67,6 +67,13 @@ namespace bfs
 
         FolderEntry();
 
+        /**
+         * @brief
+         * @param n
+         * @return
+         */
+        uint64_t getBlockIndexForEntry(uint64_t const n);
+
         // the path of the bfs image
         std::string const m_imagePath;
 

@@ -11,7 +11,10 @@ class FolderManager
 public:
 	FolderManager(std::string const &name);
 
-	void addFile(std::string const& name, std::iostream &fileData);
+	void addFile(std::string const& name, std::iostream &fileData)
+	{
+		m_thisFolderEntry.addFileEntry(name);
+	}
 	void addFolder(std::string const& name);
 
 	void getFile(std::string &name, std::ostream &output);
