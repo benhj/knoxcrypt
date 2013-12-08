@@ -50,7 +50,7 @@ namespace bfs
 
         	// write m_next
         	uint8_t nextDat[8];
-        	detail::convertInt64ToInt8Array(m_next, nextDat);
+        	detail::convertUInt64ToInt8Array(m_next, nextDat);
         	assert(m_next == detail::convertInt8ArrayToInt64(nextDat));
         	(void)stream.write((char*)nextDat, 8);
         	stream.flush();
@@ -108,6 +108,7 @@ namespace bfs
         	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
 			(void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_extraOffset);
 			(void)stream.read((char*)buf, n);
+
 			stream.close();
 			return n;
         }
@@ -140,7 +141,7 @@ namespace bfs
 
 	        	// update m_next
 	        	uint8_t nextDat[8];
-	        	detail::convertInt64ToInt8Array(m_next, nextDat);
+	        	detail::convertUInt64ToInt8Array(m_next, nextDat);
 	        	(void)stream.write((char*)nextDat, 8);
 			}
 
@@ -169,6 +170,26 @@ namespace bfs
 		{
         	return m_index;
 		}
+
+        void setNext(uint64_t const next)
+        {
+        	m_next = next;
+        	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+			(void)stream.seekp(m_offset + 4); // 4 indicate bytes written
+			// update m_next
+			uint8_t nextDat[8];
+			detail::convertUInt64ToInt8Array(m_next, nextDat);
+			(void)stream.write((char*)nextDat, 8);
+			stream.flush();
+			stream.close();
+        }
+
+        void registerBlockWithVolumeBitmap()
+        {
+    		std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+    		detail::updateVolumeBitmapWithOne(stream, m_index, m_totalBlocks);
+    		stream.close();
+        }
 
     private:
 

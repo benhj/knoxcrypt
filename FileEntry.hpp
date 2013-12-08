@@ -128,9 +128,8 @@ namespace bfs
 
         /**
          * @brief creates and pushes back a new file block for writing
-         * @param stream the bfs image stream
          */
-        void newWritableFileBlock(std::fstream &stream);
+        void newWritableFileBlock();
 
         /**
          * @brief when appending, set all blocks in the block list
@@ -150,6 +149,25 @@ namespace bfs
          * @return the number of bytes read
          */
         std::streamsize readCurrentBlockBytes();
+
+        /**
+         * @brief gets the number of bytes written already to last file block
+         * helpful when in append mode
+         * @return bytes written
+         */
+        uint32_t getBytesWrittenInLastFileBlock() const;
+
+        /**
+         * @brief will build a new file block for writing to if there are
+         * no file blocks or if there are file blocks and it is determined
+         * that we're not in append mode
+         */
+        void checkAndCreateWritableFileBlock();
+
+        /**
+         * @brief sets the next index of the last block to that of the new block
+         */
+        void setNextOfLastBlockToIndexOfNewBlock();
 };
 
 }

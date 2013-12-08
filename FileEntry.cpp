@@ -16,13 +16,6 @@ namespace bfs
 	    , m_startBlock(0)
 		, m_blockIndex(0)
 	{
-		// make the very first file block. Find out two available blocks
-		// for this 'this' and the 'next'. Note if we end up not needing the next block,
-		// we can overwrite it. Note, also set the size to block size which again
-		// can be set in the block if it ends up being less
-    	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-		newWritableFileBlock(stream);
-		stream.close();
 	}
 
 	// for appending
@@ -143,12 +136,15 @@ namespace bfs
 		return n;
 	}
 
-	void FileEntry::newWritableFileBlock(std::fstream &stream)
+	void FileEntry::newWritableFileBlock()
 	{
+    	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
 		std::vector<uint64_t> firstAndNext = detail::getNAvailableBlocks(stream, 2, m_totalBlocks);
-		m_currentBlock = firstAndNext[0];
+		stream.close();
 		FileBlock block(m_imagePath, m_totalBlocks, firstAndNext[0], firstAndNext[1]);
 		m_fileBlocks.push_back(block);
+		m_blockIndex = m_fileBlocks.size() - 1;
+		m_currentBlock = firstAndNext[0];
 	}
 
 	void FileEntry::setBlocks(std::fstream &stream)
@@ -158,17 +154,26 @@ namespace bfs
                         m_totalBlocks,
                         m_currentBlock);
 
+        std::cout<<"m_currentBlock in setBlocks: "<<m_currentBlock<<std::endl;
+
         uint64_t nextBlock = block.getNextIndex();
+
+        std::cout<<m_currentBlock<<"  ***  "<<nextBlock<<std::endl;
+
         m_fileSize += block.getDataBytesWritten();
         m_fileBlocks.push_back(block);
 
         // seek to the very end block
         while(nextBlock != m_currentBlock) {
+
             m_currentBlock = nextBlock;
             FileBlock newBlock(m_imagePath,
                                 m_totalBlocks,
                                 m_currentBlock);
             nextBlock = newBlock.getNextIndex();
+
+            std::cout<<"nextBlock: "<<nextBlock<<std::endl;
+
             m_fileSize += newBlock.getDataBytesWritten();
             m_fileBlocks.push_back(newBlock);
         }
@@ -178,13 +183,62 @@ namespace bfs
 	void
 	FileEntry::writeBufferedDataToBlock(uint32_t const bytes)
 	{
-		int index = m_fileBlocks.size() - 1;
-		m_fileBlocks[index].write((char*)&m_buffer.front(), bytes);
+		m_fileBlocks[m_blockIndex].write((char*)&m_buffer.front(), bytes);
 		std::vector<uint8_t>().swap(m_buffer);
-		std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-		detail::updateVolumeBitmapWithOne(stream, m_currentBlock, m_totalBlocks);
-		newWritableFileBlock(stream);
-		stream.close();
+	}
+
+	void
+	FileEntry::setNextOfLastBlockToIndexOfNewBlock()
+	{
+		uint64_t lastIndex(m_blockIndex - 1);
+		std::cout<<"m_curentBlock when setting last: "<<m_currentBlock<<std::endl;
+		std::cout<<"lastIndex: "<<lastIndex<<std::endl;
+		m_fileBlocks[lastIndex].setNext(m_currentBlock);
+	}
+
+	void
+	FileEntry::checkAndCreateWritableFileBlock()
+	{
+		// first case no file blocks so absolutely need one to write to
+		if(m_fileBlocks.empty()) {
+			newWritableFileBlock();
+			return;
+		}
+
+		uint32_t const bytesWritten = m_fileBlocks[m_blockIndex].getDataBytesWritten();
+
+		// in this case the current block is exhausted so we need a new one
+		if(bytesWritten == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+			std::cout<<"exhausted"<<std::endl;
+			newWritableFileBlock();
+
+			// update next index of last block
+			setNextOfLastBlockToIndexOfNewBlock();
+
+			return;
+		}
+
+		// in the third case the buffer is not exhausted so don't bother creating a new one
+		bool const appendMode = (bytesWritten > 0);
+		if(!appendMode) {
+			// note the following call also updates the block index and current block
+			newWritableFileBlock();
+
+			// update next index of last block
+			setNextOfLastBlockToIndexOfNewBlock();
+
+			return;
+		}
+
+	}
+
+	uint32_t
+	FileEntry::getBytesWrittenInLastFileBlock() const
+	{
+        if(!m_fileBlocks.empty()) {
+        	return m_fileBlocks[m_blockIndex].getDataBytesWritten();
+        }
+        return uint32_t(0);
 	}
 
     void
@@ -192,11 +246,24 @@ namespace bfs
     {
         m_buffer.push_back(byte);
 
-        // check the buffer size and if it matches the space remaining in given
-        // block, write to the block with data
-    	if(m_buffer.size() == (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)) {
-    	                       //m_fileBlocks[m_blockIndex].getDataBytesWritten())) {
-    		writeBufferedDataToBlock(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
+        // if the buffer is full, then write
+        uint32_t bytesWrittenAlready(getBytesWrittenInLastFileBlock());
+
+    	if(m_buffer.size() == ((detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
+    	                       - bytesWrittenAlready)) {
+
+    		std::cout<<"writing"<<std::endl;
+
+    		// make a new block to write to. Not necessarily the case that
+    		// we want a new file block if in append mode. Won't be in append
+    		// mode if no data bytes have yet been written
+    		checkAndCreateWritableFileBlock();
+
+    		// write the data
+    		writeBufferedDataToBlock((detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
+                    				- bytesWrittenAlready);
+
+    		m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     	}
     }
 
@@ -207,16 +274,25 @@ namespace bfs
 			++m_fileSize;
 			bufferByteForWriting(s[i]);
 		}
+
 		return n;
 	}
 
 	boost::iostreams::stream_offset
 	FileEntry::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
 	{
+		// reset any offset values to zero. An offset value determines
+		// an offset point within a file block from which reading or writing
+		// or appending etc. starts
+		std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
+		for(; it != m_fileBlocks.end(); ++it) {
+			it->setExtraOffset(0);
+		}
 
-	    // if at end jsut seek right to end and don't do anything else
+	    // if at end just seek right to end and don't do anything else
 	    if(way == std::ios_base::end) {
 	        m_blockIndex = m_fileBlocks.size() - 1;
+	        std::cout<<"m_blockIndex: "<<m_blockIndex<<"\t"<<m_currentBlock<<std::endl;
 	        uint32_t blockPosition = m_fileBlocks[m_blockIndex].getDataBytesWritten();
 	        m_fileBlocks[m_blockIndex].setExtraOffset(blockPosition);
 	        return off;
@@ -256,7 +332,6 @@ namespace bfs
 		// update block where we start reading/writing from
 		m_blockIndex = block;
 
-
 		// check bounds and error if too big
 		if(m_blockIndex >= m_fileBlocks.size()) {
 			return -1; // fail
@@ -271,6 +346,8 @@ namespace bfs
 	void
 	FileEntry::flush()
 	{
+		checkAndCreateWritableFileBlock();
 	    writeBufferedDataToBlock(m_buffer.size());
+	    m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
 	}
 }

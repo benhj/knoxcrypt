@@ -66,8 +66,6 @@ class FileEntryTest
             entry.flush();
         }
 
-        std::cout<<"File entry write passed"<<std::endl;
-
         // test read
         {
             bfs::FileEntry entry(testPath.c_str(), blocks, 1);
@@ -79,7 +77,7 @@ class FileEntryTest
             assert(recovered == expected);
         }
 
-        std::cout<<"File entry read passed"<<std::endl;
+        std::cout<<"File entry write followed by read passed"<<std::endl;
 
         // test append
         std::string appendString("appended!");

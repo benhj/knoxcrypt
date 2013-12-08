@@ -14,12 +14,14 @@ namespace bfs
          * @param imagePath path of the bfs image
          * @param totalBlocks total file blocks in the bfs image
          * @param startBlock the index of the starting file block making up entry data
+         * @param writable if data entries can be added to folder
          * @param name the name of the entry
          */
         FolderEntry(std::string const &imagePath,
                     uint64_t const totalBlocks,
                     uint64_t const startBlock,
-                    std::string const &name = "root");
+                    std::string const &name = "root",
+                    bool const writable = true);
 
         /**
          * @brief appends a new file entry and start index to the entry data

@@ -23,7 +23,7 @@ namespace bfs { namespace detail
         uint64_t count = convertInt8ArrayToInt64(buf);
         ++count;
         (void)out.seekp(offset);
-        convertInt64ToInt8Array(count, buf);
+        convertUInt64ToInt8Array(count, buf);
         (void)out.write((char*)buf, 8);
         out.close();
     }
@@ -40,7 +40,7 @@ namespace bfs { namespace detail
         uint64_t count = convertInt8ArrayToInt64(buf);
         --count;
         (void)out.seekp(offset);
-        convertInt64ToInt8Array(count, buf);
+        convertUInt64ToInt8Array(count, buf);
         (void)out.write((char*)buf, 8);
         out.close();
     }

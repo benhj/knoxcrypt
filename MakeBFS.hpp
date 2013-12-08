@@ -26,12 +26,12 @@ namespace bfs
 
         void buildBlockBytes(uint64_t const fsSize, uint8_t sizeBytes[8])
         {
-            detail::convertInt64ToInt8Array(fsSize, sizeBytes);
+            detail::convertUInt64ToInt8Array(fsSize, sizeBytes);
         }
 
         void buildFileCountBytes(uint64_t const fileCount, uint8_t sizeBytes[8])
         {
-            detail::convertInt64ToInt8Array(fileCount, sizeBytes);
+            detail::convertUInt64ToInt8Array(fileCount, sizeBytes);
         }
 
         void writeOutFileSpaceBytes(uint64_t const fileBlockCount, std::fstream &out)
@@ -127,7 +127,7 @@ namespace bfs
             FileBlock rootDirBlock(imageName, blocks, 0 /* first */, 0 /* next, of which there are none */);
             uint64_t startCount(0); // no entries to begin with
             uint8_t buf[8];
-            detail::convertInt64ToInt8Array(startCount, buf);
+            detail::convertUInt64ToInt8Array(startCount, buf);
             (void)rootDirBlock.write((char*)buf, 8);
 
             // set first file block as being in use

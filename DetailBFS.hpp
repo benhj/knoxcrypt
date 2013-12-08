@@ -17,7 +17,7 @@ namespace bfs { namespace detail
     uint64_t const FILE_BLOCK_SIZE = 512;
     uint64_t const FILE_BLOCK_META = 12;
 
-    inline void convertInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
+    inline void convertUInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
     {
         array[0] = static_cast<uint8_t>((bigNum >> 56) & 0xFF);
         array[1] = static_cast<uint8_t>((bigNum >> 48) & 0xFF);
@@ -115,7 +115,7 @@ namespace bfs { namespace detail
         uint64_t const volumeBitMapBytes = totalFileBlocks / 8;
         (void)in.seekg(8 + volumeBitMapBytes);
         uint8_t dat[8];
-        convertInt64ToInt8Array(numberOfFiles, dat);
+        convertUInt64ToInt8Array(numberOfFiles, dat);
         (void)in.write((char*)dat, 8);
     }
 
@@ -150,7 +150,7 @@ namespace bfs { namespace detail
         } else {
             blockCountStore -= blocksUsed;
         }
-        convertInt64ToInt8Array(blockCountStore, dat);
+        convertUInt64ToInt8Array(blockCountStore, dat);
         (void)in.seekp(0, in.beg);
         (void)in.write((char*)dat, 8);
 

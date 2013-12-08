@@ -7,11 +7,13 @@ namespace bfs
     FolderEntry::FolderEntry(std::string const &imagePath,
                             uint64_t const totalBlocks,
                             uint64_t const startBlock,
-                            std::string const &name)
+                            std::string const &name,
+                            bool const writable)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
         // create folder data FileEntry in append mode
-        , m_folderData(FileEntry(imagePath, totalBlocks, name, startBlock))
+        , m_folderData(writable ? FileEntry(imagePath, totalBlocks, name, startBlock) :
+        				FileEntry(imagePath, totalBlocks, startBlock))
         , m_name(name)
     {
     }
@@ -49,7 +51,7 @@ namespace bfs
         // create bytes to represent first block
         uint64_t firstBlock = entry.getCurrentBlockIndex();
         uint8_t buf[8];
-        detail::convertInt64ToInt8Array(firstBlock, buf);
+        detail::convertUInt64ToInt8Array(firstBlock, buf);
 
         // write entry data to this folder
         (void)m_folderData.write((char*)&byte, 1);
@@ -117,7 +119,6 @@ namespace bfs
     std::string
     FolderEntry::getEntryName(uint64_t const index)
     {
-    	// to do -- what if goes out of bounds?? No protection here
         // note in the following the '1' represents first byte,
         // the first bit of which indicates if entry is in use
         // the '8' is number of bytes representing the first block index
@@ -127,6 +128,7 @@ namespace bfs
     	// note in the following the '8' bytes represent the number of
     	// entries in the folder
     	if(m_folderData.seek((index * bufferSize) + 8) != -1) {
+
     		std::vector<uint8_t> buffer;
     		buffer.resize(bufferSize);
     		m_folderData.read((char*)&buffer.front(), bufferSize);

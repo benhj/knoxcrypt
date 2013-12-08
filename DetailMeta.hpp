@@ -65,7 +65,7 @@ namespace bfs { namespace detail
         uint64_t const offset = getOffsetOfMetaBlock(block, totalBlocks);
         (void)in.seekp(offset);
         uint8_t dat[8];
-        convertInt64ToInt8Array(fileSize, dat);
+        convertUInt64ToInt8Array(fileSize, dat);
         (void)in.write((char*)dat, 8);
     }
 
@@ -84,7 +84,7 @@ namespace bfs { namespace detail
         uint64_t const offset = getOffsetOfMetaBlock(fileIndex, totalBlocks) + 8 + 1;
         (void)in.seekp(offset);
         uint8_t dat[8];
-        convertInt64ToInt8Array(firstBlockOffset, dat);
+        convertUInt64ToInt8Array(firstBlockOffset, dat);
         (void)in.write((char*)dat, 8);
     }
 

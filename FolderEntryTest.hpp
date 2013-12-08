@@ -46,13 +46,17 @@ class FolderEntryTest
         {
 			bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
 			folder.addFileEntry("test.txt");
-			assert(folder.getEntryName(0) == "test.txt");
-        }
-
-        {
-			bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
 			folder.addFileEntry("fucker.log");
+			folder.addFileEntry("crap.jpg");
+			folder.addFileEntry("shitter.mp3");
+        }
+        {
+        	bool writable = false;
+        	bfs::FolderEntry folder(testPath.string(), blocks, 0, "root", writable);
+			assert(folder.getEntryName(0) == "test.txt");
 			assert(folder.getEntryName(1) == "fucker.log");
+			assert(folder.getEntryName(2) == "crap.jpg");
+			assert(folder.getEntryName(3) == "shitter.mp3");
         }
 
         std::cout<<"Test adding folder entries (files) passed.."<<std::endl;
