@@ -50,23 +50,26 @@ namespace bfs
         FileEntry entry(m_imagePath, m_totalBlocks, m_name);
 
         // create bytes to represent first block
-        uint64_t firstBlock = entry.getCurrentBlockIndex();
+        uint64_t firstBlock = entry.getStartBlockIndex();
         uint8_t buf[8];
         detail::convertUInt64ToInt8Array(firstBlock, buf);
+
+        // indicate that first block of new file entry is in use. NOte at this
+        // point in time, it won't have any data. When data
+        // needs to be added to the file entry, it will be opened
+        // in append mode
+        // Also: we need to do this before adding data to the folder entry
+        // as data added to the folder entry might write over the block we
+        // allocated for file
+        std::fstream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        detail::updateVolumeBitmapWithOne(out, firstBlock, m_totalBlocks);
+        out.close();
 
         // write entry data to this folder
         (void)m_folderData.write((char*)&byte, 1);
         (void)m_folderData.write((char*)&filename.front(), detail::MAX_FILENAME_LENGTH);
         (void)m_folderData.write((char*)buf, 8);
         m_folderData.flush();
-
-        // indicate that first block of new file entry is in use. NOte at this
-        // point in time, it won't have any data. When data
-        // needs to be added to the file entry, it will be opened
-        // in append mode
-        std::fstream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-    	detail::updateVolumeBitmapWithOne(out, firstBlock, m_totalBlocks);
-    	out.close();
 
         return entry;
     }
@@ -153,7 +156,7 @@ namespace bfs
 
     	// note in the following the '8' bytes represent the number of
     	// entries in the folder
-    	if(m_folderData.seek((n * bufferSize) + 1 + detail::MAX_FILENAME_LENGTH) != -1) {
+    	if(m_folderData.seek((n * bufferSize) + 8 + 1 + detail::MAX_FILENAME_LENGTH) != -1) {
     		uint8_t buf[8];
     		m_folderData.read((char*)&buf, 8);
     		return detail::convertInt8ArrayToInt64(buf);

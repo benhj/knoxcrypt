@@ -17,7 +17,7 @@ namespace bfs
 		, m_blockIndex(0)
 	{
     	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-    	m_currentBlock = *detail::getNextAvailableBlock(stream);
+    	m_currentBlock = detail::getNAvailableBlocks(stream, 1, m_totalBlocks)[0];
     	m_startBlock = m_currentBlock;
 		stream.close();
 	}

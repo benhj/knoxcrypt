@@ -1,5 +1,6 @@
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
+#include "FileEntry.hpp"
 #include "FolderEntry.hpp"
 #include "MakeBFS.hpp"
 
@@ -43,22 +44,53 @@ class FolderEntryTest
 			  bfs::MakeBFS bfs(testPath.string(), blocks);
         }
 
+        //
+        // when entry 0 added to root folder, root folder block starts at 0
+        // this creates a new file entry at block 1
+        // when entry 1 added, still at block 0, this creates a new file entry
+        // at block 2; folder entry ends up also writing to block 3
+        // when entry 2 added, root folder at block 3, this creates a new file
+        // entry at block 4
+        // when entry 3 added, root folder still at block 3, this creates a new
+        // file entry at block 5. Root folder ends up also writing to block 6
+        //
+
         {
 			bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
 			folder.addFileEntry("test.txt");
 			folder.addFileEntry("fucker.log");
 			folder.addFileEntry("crap.jpg");
 			folder.addFileEntry("shitter.mp3");
-        }
-        {
-        	bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
 			assert(folder.getEntryName(0) == "test.txt");
 			assert(folder.getEntryName(1) == "fucker.log");
 			assert(folder.getEntryName(2) == "crap.jpg");
 			assert(folder.getEntryName(3) == "shitter.mp3");
         }
 
-        std::cout<<"Test adding folder entries (files) passed.."<<std::endl;
+        std::cout<<"Test adding folder entries (files) plus name retrieval passed.."<<std::endl;
+
+        {
+            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::FileEntry fa = folder.getFileEntry("test.txt");
+            bfs::FileEntry fb = folder.getFileEntry("fucker.log");
+            bfs::FileEntry fc = folder.getFileEntry("crap.jpg");
+            bfs::FileEntry fd = folder.getFileEntry("shitter.mp3");
+            uint64_t b1 = fa.getStartBlockIndex();
+            uint64_t b2 = fb.getStartBlockIndex();
+            uint64_t b3 = fc.getStartBlockIndex();
+            uint64_t b4 = fd.getStartBlockIndex();
+
+            // see comment above for expectations
+            assert(b1 == 1);
+            assert(b2 == 2);
+            assert(b3 == 4);
+            assert(b4 == 5);
+
+        }
+
+        std::cout<<"Test file entry block index retrieval passed.."<<std::endl;
+
+
 
     }
 };
