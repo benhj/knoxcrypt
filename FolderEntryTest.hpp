@@ -85,12 +85,32 @@ class FolderEntryTest
             assert(b2 == 2);
             assert(b3 == 4);
             assert(b4 == 5);
-
         }
 
         std::cout<<"Test file entry block index retrieval passed.."<<std::endl;
+        std::string testData("some test data!");
+        {
+            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            std::cout<<entry.getStartBlockIndex()<<std::endl;
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
+        }
 
+        {
+            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            std::cout<<entry.getStartBlockIndex()<<std::endl;
+            entry.seek(0);
+            std::vector<uint8_t> vec;
+            vec.resize(testData.length());
+            entry.read((char*)&vec.front(), testData.length());
+            std::string result(vec.begin(), vec.end());
+            std::cout<<result<<std::endl;
+        }
 
+        std::cout<<"Test file entry retrieval plus appending of small data passed.."<<std::endl;
 
     }
 };
