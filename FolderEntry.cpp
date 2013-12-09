@@ -191,7 +191,7 @@ namespace bfs
     		}
     		return returnString;
     	}
-    	return "ERROR";
+    	throw std::runtime_error("Problem getting entry name for index");
     }
 
     std::string
