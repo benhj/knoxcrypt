@@ -16,10 +16,6 @@ namespace bfs
 	    , m_startBlock(0)
 		, m_blockIndex(0)
 	{
-    	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-    	m_currentBlock = detail::getNAvailableBlocks(stream, 1, m_totalBlocks)[0];
-    	m_startBlock = m_currentBlock;
-		stream.close();
 	}
 
 	// for appending
@@ -80,14 +76,22 @@ namespace bfs
     }
 
     uint64_t
-    FileEntry::getCurrentBlockIndex() const
+    FileEntry::getCurrentBlockIndex()
     {
+        if(m_fileBlocks.empty()) {
+            checkAndCreateWritableFileBlock();
+            m_startBlock = m_currentBlock;
+        }
         return m_currentBlock;
     }
 
     uint64_t
-    FileEntry::getStartBlockIndex() const
+    FileEntry::getStartBlockIndex()
     {
+        if(m_fileBlocks.empty()) {
+            checkAndCreateWritableFileBlock();
+            m_startBlock = m_currentBlock;
+        }
         return m_startBlock;
     }
 
@@ -140,7 +144,7 @@ namespace bfs
     	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
 		std::vector<uint64_t> firstAndNext = detail::getNAvailableBlocks(stream, 2, m_totalBlocks);
 		stream.close();
-		FileBlock block(m_imagePath, m_totalBlocks, firstAndNext[0], firstAndNext[1]);
+		FileBlock block(m_imagePath, m_totalBlocks, firstAndNext[0], firstAndNext[0]);
 		m_fileBlocks.push_back(block);
 		m_blockIndex = m_fileBlocks.size() - 1;
 		m_currentBlock = firstAndNext[0];
@@ -156,6 +160,7 @@ namespace bfs
         uint64_t nextBlock = block.getNextIndex();
 
         m_fileSize += block.getDataBytesWritten();
+
         m_fileBlocks.push_back(block);
 
         // seek to the very end block
@@ -187,6 +192,18 @@ namespace bfs
 		m_fileBlocks[lastIndex].setNext(m_currentBlock);
 	}
 
+	bool
+	FileEntry::shouldCurrentBufferBeUsed() const
+	{
+	    uint32_t const bytesWritten = getBytesWrittenSoFarToCurrentFileBlock();
+
+	    if(bytesWritten < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+	        return true;
+	    }
+	    return false;
+
+	}
+
 	void
 	FileEntry::checkAndCreateWritableFileBlock()
 	{
@@ -196,37 +213,33 @@ namespace bfs
 			return;
 		}
 
-		uint32_t const bytesWritten = m_fileBlocks[m_blockIndex].getDataBytesWritten();
+        // in this case the current block is exhausted so we need a new one
+        if(!shouldCurrentBufferBeUsed()) {
 
-		// in this case the current block is exhausted so we need a new one
-		if(bytesWritten == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
-			newWritableFileBlock();
+            newWritableFileBlock();
 
-			// update next index of last block
-			setNextOfLastBlockToIndexOfNewBlock();
+            // update next index of last block
+            setNextOfLastBlockToIndexOfNewBlock();
 
-			return;
-		}
-
-		// in the third case the buffer is not exhausted so don't bother creating a new one
-		bool const appendMode = (bytesWritten > 0);
-		if(!appendMode) {
-			// note the following call also updates the block index and current block
-			newWritableFileBlock();
-
-			// update next index of last block
-			setNextOfLastBlockToIndexOfNewBlock();
-
-			return;
-		}
+            return;
+        }
 
 	}
 
 	uint32_t
-	FileEntry::getBytesWrittenInLastFileBlock() const
+	FileEntry::getBytesWrittenSoFarToCurrentFileBlock() const
 	{
         if(!m_fileBlocks.empty()) {
         	return m_fileBlocks[m_blockIndex].getDataBytesWritten();
+        }
+        return uint32_t(0);
+	}
+
+	uint32_t
+	FileEntry::getInitialBytesWrittenToCurrentFileBlock() const
+	{
+        if(!m_fileBlocks.empty()) {
+            return m_fileBlocks[m_blockIndex].getInitialDataBytesWritten();
         }
         return uint32_t(0);
 	}
@@ -237,10 +250,10 @@ namespace bfs
         m_buffer.push_back(byte);
 
         // if the buffer is full, then write
-        uint32_t bytesWrittenAlready(getBytesWrittenInLastFileBlock());
+        uint32_t initialBytesWritten(getInitialBytesWrittenToCurrentFileBlock());
 
-    	if(m_buffer.size() == ((detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
-    	                       - bytesWrittenAlready)) {
+    	if(m_buffer.size() == (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
+    	                       - initialBytesWritten) {
 
     		// make a new block to write to. Not necessarily the case that
     		// we want a new file block if in append mode. Won't be in append
@@ -249,7 +262,7 @@ namespace bfs
 
     		// write the data
     		writeBufferedDataToBlock((detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
-                    				- bytesWrittenAlready);
+                    				- initialBytesWritten);
 
     		m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     	}

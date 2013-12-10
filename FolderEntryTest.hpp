@@ -69,6 +69,7 @@ class FolderEntryTest
 
         std::cout<<"Test adding folder entries (files) plus name retrieval passed.."<<std::endl;
 
+
         {
             bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
             bfs::FileEntry fa = folder.getFileEntry("test.txt");
@@ -88,11 +89,11 @@ class FolderEntryTest
         }
 
         std::cout<<"Test file entry block index retrieval passed.."<<std::endl;
+
         std::string testData("some test data!");
         {
             bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
             bfs::FileEntry entry = folder.getFileEntry("fucker.log");
-            std::cout<<entry.getStartBlockIndex()<<std::endl;
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -100,17 +101,17 @@ class FolderEntryTest
 
         {
             bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
-            std::cout<<entry.getStartBlockIndex()<<std::endl;
-            entry.seek(0);
+            bfs::FileEntry entry(folder.getFileEntry("fucker.log"));
+            entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
             std::vector<uint8_t> vec;
             vec.resize(testData.length());
             entry.read((char*)&vec.front(), testData.length());
             std::string result(vec.begin(), vec.end());
-            std::cout<<result<<std::endl;
+            assert(result == testData);
         }
 
         std::cout<<"Test file entry retrieval plus appending of small data passed.."<<std::endl;
+
 
     }
 };

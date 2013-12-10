@@ -53,9 +53,9 @@ namespace bfs
 
         uint64_t fileSize() const;
 
-        uint64_t getCurrentBlockIndex() const;
+        uint64_t getCurrentBlockIndex();
 
-        uint64_t getStartBlockIndex() const;
+        uint64_t getStartBlockIndex();
 
         /**
          * @brief for reading
@@ -155,7 +155,9 @@ namespace bfs
          * helpful when in append mode
          * @return bytes written
          */
-        uint32_t getBytesWrittenInLastFileBlock() const;
+        uint32_t getBytesWrittenSoFarToCurrentFileBlock() const;
+
+        uint32_t getInitialBytesWrittenToCurrentFileBlock() const;
 
         /**
          * @brief will build a new file block for writing to if there are
@@ -168,6 +170,8 @@ namespace bfs
          * @brief sets the next index of the last block to that of the new block
          */
         void setNextOfLastBlockToIndexOfNewBlock();
+
+        bool shouldCurrentBufferBeUsed() const;
 };
 
 }

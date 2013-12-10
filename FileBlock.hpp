@@ -32,19 +32,20 @@ namespace bfs
     		: m_imagePath(imagePath)
     		, m_totalBlocks(totalBlocks)
     	    , m_index(index)
-    		, m_size(0)
+    		, m_bytesWritten(0)
     		, m_next(next)
     		, m_offset(0)
             , m_extraOffset(0)
+            , m_initialBytesWritten(0)
         {
         	// set m_offset
         	std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         	m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks);
         	(void)stream.seekp(m_offset);
 
-        	// write m_size (set size to default can later be updated if necessary)
+        	// write m_bytesWritten
         	uint8_t sizeDat[4];
-        	uint32_t size = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+        	uint32_t size = 0;
         	detail::convertInt32ToInt4Array(size, sizeDat);
         	(void)stream.write((char*)sizeDat, 4);
 
@@ -69,7 +70,7 @@ namespace bfs
     		: m_imagePath(imagePath)
             , m_totalBlocks(totalBlocks)
     	    , m_index(index)
-    		, m_size(0)
+    		, m_bytesWritten(0)
     		, m_next(0)
     		, m_offset(0)
             , m_extraOffset(0)
@@ -79,10 +80,11 @@ namespace bfs
 			m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks);
 			(void)stream.seekg(m_offset);
 
-			// read m_size
+			// read m_bytesWritten
         	uint8_t sizeDat[4];
         	(void)stream.read((char*)sizeDat, 4);
-        	m_size = detail::convertInt4ArrayToInt32(sizeDat);
+        	m_bytesWritten = detail::convertInt4ArrayToInt32(sizeDat);
+        	m_initialBytesWritten = m_bytesWritten;
 
         	// read m_next
         	uint8_t nextDat[8];
@@ -119,25 +121,21 @@ namespace bfs
 			(void)stream.seekp(m_offset + detail::FILE_BLOCK_META + m_extraOffset);
 			(void)stream.write((char*)buf, n);
 
-			// check if we need to update m_size and m_next. This will be different
+			// check if we need to update m_bytesWritten and m_next. This will be different
 			// probably if the number of bytes read is not consistent with the
-			// reported size stored in m_size or if the stream has been moved
+			// reported size stored in m_bytesWritten or if the stream has been moved
 			// to a position past its start as indicated by m_extraOffset
-			if(m_extraOffset > 0) {
-				m_size += uint32_t(n);
-			}
+            m_bytesWritten += uint32_t(n);
+
+            // update m_bytesWritten
+            (void)stream.seekp(m_offset);
+            uint8_t sizeDat[4];
+            detail::convertInt32ToInt4Array(m_bytesWritten, sizeDat);
+            (void)stream.write((char*)sizeDat, 4);
+
 			if(n < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META || m_extraOffset > 0) {
-				if(m_extraOffset == 0) {
-					m_size = uint32_t(n); // this already been updated
-				}
+
 				m_next = m_index;
-	        	(void)stream.seekp(m_offset);
-
-	        	// update m_size
-	        	uint8_t sizeDat[4];
-	        	detail::convertInt32ToInt4Array(m_size, sizeDat);
-	        	(void)stream.write((char*)sizeDat, 4);
-
 	        	// update m_next
 	        	uint8_t nextDat[8];
 	        	detail::convertUInt64ToInt8Array(m_next, nextDat);
@@ -152,7 +150,12 @@ namespace bfs
 
         uint32_t getDataBytesWritten() const
         {
-        	return m_size;
+        	return m_bytesWritten;
+        }
+
+        uint32_t getInitialDataBytesWritten() const
+        {
+            return m_initialBytesWritten;
         }
 
         uint64_t getNextIndex() const
@@ -195,7 +198,8 @@ namespace bfs
         std::string m_imagePath;
         uint64_t m_totalBlocks;
         uint64_t m_index;
-        mutable uint32_t m_size;
+        mutable uint32_t m_bytesWritten;
+        mutable uint32_t m_initialBytesWritten;
         mutable uint64_t m_next;
         mutable uint64_t m_offset;
         mutable uint64_t m_extraOffset;

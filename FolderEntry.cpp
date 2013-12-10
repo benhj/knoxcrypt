@@ -12,6 +12,7 @@ namespace bfs
                             bool const writable)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
+        , m_startBlock(startBlock)
         // create folder data FileEntry in append mode
         , m_folderData(writable ? FileEntry(imagePath, totalBlocks, name, startBlock) :
         				FileEntry(imagePath, totalBlocks, startBlock))
@@ -19,7 +20,7 @@ namespace bfs
     {
     }
 
-    FileEntry
+    void
     FolderEntry::addFileEntry(std::string const &name)
     {
 
@@ -71,7 +72,10 @@ namespace bfs
         (void)m_folderData.write((char*)buf, 8);
         m_folderData.flush();
 
-        return entry;
+        // need to reset the file entry to make sure in correct place
+        // NOTE: could probably optimize to not have to do this
+        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startBlock);
+
     }
 
     FolderEntry

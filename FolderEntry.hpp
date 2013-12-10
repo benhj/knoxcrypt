@@ -28,7 +28,7 @@ namespace bfs
          * @param name the name of the entry
          * @return a copy of a FileEntry that will be used to reference the file data
          */
-        FileEntry addFileEntry(std::string const &name);
+        void addFileEntry(std::string const &name);
 
         /**
          * @brief appends a new folder entry and start index of the entry data
@@ -79,6 +79,8 @@ namespace bfs
 
         // total file blocks in the bfs image
         uint64_t const m_totalBlocks;
+
+        uint64_t const m_startBlock;
 
         // the underlying file blocks storing the folder entry data
         FileEntry m_folderData;
