@@ -2,6 +2,7 @@
 #include "DetailFileBlock.hpp"
 #include "FileEntry.hpp"
 #include "MakeBFS.hpp"
+#include "TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -12,13 +13,8 @@
 #include <sstream>
 #include <fstream>
 
-int const HELLO_IT = 539;
-int const BIG_SIZE = HELLO_IT * 13;
-
 class FileEntryTest
 {
-
-
   public:
 	FileEntryTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
@@ -26,16 +22,6 @@ class FileEntryTest
         testBasicAppend();
         testSeekAndReadSmallFile();
         testSeekAndReadBigFile();
-    }
-
-
-    std::string createLargeStringToWrite() const
-    {
-        std::string theString("");
-        for(int i = 0; i < HELLO_IT; ++i) {
-            theString.append("Hello, World!");
-        }
-        return theString;
     }
 
     ~FileEntryTest()

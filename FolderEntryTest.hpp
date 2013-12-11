@@ -3,6 +3,7 @@
 #include "FileEntry.hpp"
 #include "FolderEntry.hpp"
 #include "MakeBFS.hpp"
+#include "TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -104,14 +105,82 @@ class FolderEntryTest
             bfs::FileEntry entry(folder.getFileEntry("fucker.log"));
             entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
             std::vector<uint8_t> vec;
-            vec.resize(testData.length());
-            entry.read((char*)&vec.front(), testData.length());
+            vec.resize(entry.fileSize());
+            entry.read((char*)&vec.front(), entry.fileSize());
             std::string result(vec.begin(), vec.end());
             assert(result == testData);
         }
 
         std::cout<<"Test file entry retrieval plus appending of small data passed.."<<std::endl;
+        std::string testString(createLargeStringToWrite());
+        {
+            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            std::vector<uint8_t> vec(testString.begin(), testString.end());
+            entry.write((char*)&vec.front(), testString.length());
+            entry.flush();
+        }
 
+        std::string origTestData = testData;
+
+        {
+            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::FileEntry entry(folder.getFileEntry("fucker.log"));
+            entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
+            std::vector<uint8_t> vec;
+            vec.resize(entry.fileSize());
+            entry.read((char*)&vec.front(), entry.fileSize());
+            std::string result(vec.begin(), vec.end());
+            assert(result == (testData.append(testString)));
+        }
+
+        testData = origTestData;
+
+        std::cout<<"Test file entry retrieval plus appending of large data to already appended small data passed.."<<std::endl;
+
+        {
+            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::FileEntry entry = folder.getFileEntry("crap.jpg");
+            std::vector<uint8_t> vec(testString.begin(), testString.end());
+            entry.write((char*)&vec.front(), testString.length());
+            entry.flush();
+        }
+
+        {
+            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::FileEntry entry(folder.getFileEntry("crap.jpg"));
+            entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
+            std::vector<uint8_t> vec;
+            vec.resize(entry.fileSize());
+            entry.read((char*)&vec.front(), entry.fileSize());
+            std::string result(vec.begin(), vec.end());
+            assert(result == testString);
+        }
+
+        std::cout<<"Test another file entry retrieval plus appending of large data passed.."<<std::endl;
+
+        {
+            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::FileEntry entry = folder.getFileEntry("crap.jpg");
+            entry.seek(0, std::ios::end);
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
+        }
+
+
+        {
+            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::FileEntry entry(folder.getFileEntry("crap.jpg"));
+            entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
+            std::vector<uint8_t> vec;
+            vec.resize(entry.fileSize());
+            entry.read((char*)&vec.front(), entry.fileSize());
+            std::string result(vec.begin(), vec.end());
+            assert(result == (testString.append(testData)));
+        }
+
+        std::cout<<"Test another file entry retrieval plus appending of small data to already appended large data passed.."<<std::endl;
 
     }
 };

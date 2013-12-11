@@ -249,16 +249,16 @@ namespace bfs
     {
         m_buffer.push_back(byte);
 
+        // make a new block to write to. Not necessarily the case that
+        // we want a new file block if in append mode. Won't be in append
+        // mode if no data bytes have yet been written
+        checkAndCreateWritableFileBlock();
+
         // if the buffer is full, then write
         uint32_t initialBytesWritten(getInitialBytesWrittenToCurrentFileBlock());
 
     	if(m_buffer.size() == (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
     	                       - initialBytesWritten) {
-
-    		// make a new block to write to. Not necessarily the case that
-    		// we want a new file block if in append mode. Won't be in append
-    		// mode if no data bytes have yet been written
-    		checkAndCreateWritableFileBlock();
 
     		// write the data
     		writeBufferedDataToBlock((detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
