@@ -16,4 +16,11 @@ std::string createLargeStringToWrite()
     return theString;
 }
 
+#define ASSERT_EQUAL(A, B, C) \
+    if(A == B) { \
+        std::cout<<C<<"\tpassed"<<std::endl; \
+    } else { \
+        std::cout<<C<<"\tfailed"<<std::endl; \
+    }
+
 #endif

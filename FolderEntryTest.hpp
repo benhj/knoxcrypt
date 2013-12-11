@@ -62,10 +62,10 @@ class FolderEntryTest
 			folder.addFileEntry("fucker.log");
 			folder.addFileEntry("crap.jpg");
 			folder.addFileEntry("shitter.mp3");
-			assert(folder.getEntryName(0) == "test.txt");
-			assert(folder.getEntryName(1) == "fucker.log");
-			assert(folder.getEntryName(2) == "crap.jpg");
-			assert(folder.getEntryName(3) == "shitter.mp3");
+			ASSERT_EQUAL(folder.getEntryName(0), "test.txt", "Folder entry get entry test");
+            ASSERT_EQUAL(folder.getEntryName(1), "fucker.log", "Folder entry get entry test");
+            ASSERT_EQUAL(folder.getEntryName(2), "crap.jpg", "Folder entry get entry test");
+            ASSERT_EQUAL(folder.getEntryName(3), "shitter.mp3", "Folder entry get entry test");
         }
 
         std::cout<<"Test adding folder entries (files) plus name retrieval passed.."<<std::endl;
@@ -83,10 +83,10 @@ class FolderEntryTest
             uint64_t b4 = fd.getStartBlockIndex();
 
             // see comment above for expectations
-            assert(b1 == 1);
-            assert(b2 == 2);
-            assert(b3 == 4);
-            assert(b4 == 5);
+            ASSERT_EQUAL(b1, 1, "Folder entry get start block index")
+            ASSERT_EQUAL(b2, 2, "Folder entry get start block index")
+            ASSERT_EQUAL(b3, 4, "Folder entry get start block index")
+            ASSERT_EQUAL(b4, 5, "Folder entry get start block index")
         }
 
         std::cout<<"Test file entry block index retrieval passed.."<<std::endl;
@@ -108,7 +108,7 @@ class FolderEntryTest
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
             std::string result(vec.begin(), vec.end());
-            assert(result == testData);
+            ASSERT_EQUAL(result, testData, "Folder entry written data test")
         }
 
         std::cout<<"Test file entry retrieval plus appending of small data passed.."<<std::endl;
