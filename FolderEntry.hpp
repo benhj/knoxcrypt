@@ -8,9 +8,22 @@ namespace bfs
 
     class FolderEntry
     {
-    public:
+      public:
         /**
-         * @brief constructs a FolderEntry
+         * @brief constructs a FolderEntry to write to. In this case the
+         * starting block is unknown
+         * @param imagePath path of the bfs image
+         * @param totalBlocks total file blocks in the bfs image
+         * @param startBlock the index of the starting file block making up entry data
+         * @param writable if data entries can be added to folder
+         * @param name the name of the entry
+         */
+        FolderEntry(std::string const &imagePath,
+                    uint64_t const totalBlocks,
+                    std::string const &name = "root");
+
+        /**
+         * @brief constructs a FolderEntry to read from
          * @param imagePath path of the bfs image
          * @param totalBlocks total file blocks in the bfs image
          * @param startBlock the index of the starting file block making up entry data
@@ -20,8 +33,7 @@ namespace bfs
         FolderEntry(std::string const &imagePath,
                     uint64_t const totalBlocks,
                     uint64_t const startBlock,
-                    std::string const &name = "root",
-                    bool const writable = true);
+                    std::string const &name = "root");
 
         /**
          * @brief appends a new file entry and start index to the entry data
@@ -55,15 +67,21 @@ namespace bfs
          * @brief retrieves the name of this folder
          * @return the name
          */
-        std::string getName();
+        std::string getName() const;
 
         /**
          * @brief retrieves the name of an entry with given index
          * @return the name
          */
-        std::string getEntryName(uint64_t const index);
+        std::string getEntryName(uint64_t const index) const;
 
-    private:
+        /**
+         * @brief returns a vector of entry strings
+         * @return all entry names
+         */
+        std::vector<std::string> listAllEntries();
+
+      private:
 
         FolderEntry();
 
@@ -74,16 +92,18 @@ namespace bfs
          */
         uint64_t getBlockIndexForEntry(uint64_t const n);
 
+        uint64_t getNumberOfEntries() const;
+
         // the path of the bfs image
         std::string const m_imagePath;
 
         // total file blocks in the bfs image
         uint64_t const m_totalBlocks;
 
-        uint64_t const m_startBlock;
-
         // the underlying file blocks storing the folder entry data
-        FileEntry m_folderData;
+        mutable FileEntry m_folderData;
+
+        uint64_t m_startBlock;
 
         // stores the name of this folder
         std::string m_name;

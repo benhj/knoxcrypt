@@ -34,8 +34,8 @@ namespace bfs { namespace detail
      * @return the next file block index
      */
     inline uint64_t getIndexOfNextFileBlockFromFileBlockN(std::fstream &in,
-                                                   uint64_t const n,
-                                                   uint64_t const totalBlocks)
+                                                          uint64_t const n,
+                                                          uint64_t const totalBlocks)
     {
         uint64_t offset = getOffsetOfFileBlock(n, totalBlocks) + 4;
         (void)in.seekg(offset);
@@ -52,8 +52,8 @@ namespace bfs { namespace detail
      * @return the next file block index
      */
     inline uint32_t getNumberOfDataBytesWrittenToFileBlockN(std::fstream &in,
-                                                     uint64_t const n,
-                                                     uint64_t const totalBlocks)
+                                                            uint64_t const n,
+                                                            uint64_t const totalBlocks)
     {
         uint64_t offset = getOffsetOfFileBlock(n, totalBlocks);
         (void)in.seekg(offset);

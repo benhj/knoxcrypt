@@ -1,3 +1,4 @@
+#include "DetailBFS.hpp"
 #include "DetailFolder.hpp"
 #include "FolderEntry.hpp"
 #include <stdexcept>
@@ -6,18 +7,32 @@ namespace bfs
 {
 
     FolderEntry::FolderEntry(std::string const &imagePath,
-                            uint64_t const totalBlocks,
-                            uint64_t const startBlock,
-                            std::string const &name,
-                            bool const writable)
+                             uint64_t const totalBlocks,
+                             uint64_t const startBlock,
+                             std::string const &name)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
+        , m_folderData(FileEntry(imagePath, totalBlocks, name, startBlock))
         , m_startBlock(startBlock)
-        // create folder data FileEntry in append mode
-        , m_folderData(writable ? FileEntry(imagePath, totalBlocks, name, startBlock) :
-        				FileEntry(imagePath, totalBlocks, startBlock))
         , m_name(name)
     {
+    }
+
+    FolderEntry::FolderEntry(std::string const &imagePath,
+                             uint64_t const totalBlocks,
+                             std::string const &name)
+        : m_imagePath(imagePath)
+        , m_totalBlocks(totalBlocks)
+        , m_folderData(m_imagePath, m_totalBlocks, m_name)
+        , m_startBlock(m_folderData.getStartBlockIndex())
+        , m_name(name)
+    {
+        // set initial number of entries; there will be none to begin with
+        uint64_t startCount(0);
+        uint8_t buf[8];
+        detail::convertUInt64ToInt8Array(startCount, buf);
+        (void)m_folderData.write((char*)buf, 8);
+        m_folderData.flush();
     }
 
     void
@@ -42,7 +57,7 @@ namespace bfs
         std::vector<uint8_t> filename;
         filename.assign(detail::MAX_FILENAME_LENGTH, 0);
         int i = 0;
-        for(; i < name.length(); ++i) {
+        for (; i < name.length(); ++i) {
             filename[i] = name[i];
         }
         filename[i] = '\0'; // set null byte to indicate end of filename
@@ -98,7 +113,7 @@ namespace bfs
         filename.assign(detail::MAX_FILENAME_LENGTH, 0);
         int i = 0;
         for(; i < name.length(); ++i) {
-            filename[i] = name[i];
+        filename[i] = name[i];
         }
         filename[i] = '\0'; // set null byte to indicate end of filename
 
@@ -123,8 +138,8 @@ namespace bfs
     FileEntry
     FolderEntry::getFileEntry(std::string const &name)
     {
-    	// find out total number of entries
-    	// NOTE: should probably initialize this in constructor
+        // find out total number of entries
+        // NOTE: should probably initialize this in constructor
         std::fstream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartBlockIndex(), m_totalBlocks);
         (void)out.seekg(offset + detail::FILE_BLOCK_META);
@@ -135,12 +150,12 @@ namespace bfs
         uint64_t i(0);
 
         // loop over entries until name found
-        for(; i < count; ++i) {
-        	std::string entryName(getEntryName(i));
-        	if(entryName == name) {
-        		uint64_t n = getBlockIndexForEntry(i);
-        		return FileEntry(m_imagePath, m_totalBlocks, m_name, n);
-        	}
+        for (; i < count; ++i) {
+            std::string entryName(getEntryName(i));
+            if (entryName == name) {
+                uint64_t n = getBlockIndexForEntry(i);
+                return FileEntry(m_imagePath, m_totalBlocks, m_name, n);
+            }
         }
 
         throw std::runtime_error("File entry with that name not found");
@@ -156,52 +171,83 @@ namespace bfs
     FolderEntry::getBlockIndexForEntry(uint64_t const n)
     {
 
-    	uint32_t bufferSize = detail::MAX_FILENAME_LENGTH + 1 + 8;
+        // note in the following, the '1' represents meta data for this
+        // filename descriptor and the 8 represents bytes storing the file
+        // entry offset. The values for the buffer are stored in the order
+        // in which they are given in the addition
+        uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
 
-    	// note in the following the '8' bytes represent the number of
-    	// entries in the folder
-    	if(m_folderData.seek((n * bufferSize) + 8 + 1 + detail::MAX_FILENAME_LENGTH) != -1) {
-    		uint8_t buf[8];
-    		m_folderData.read((char*)&buf, 8);
-    		return detail::convertInt8ArrayToInt64(buf);
-    	}
-    	throw std::runtime_error("Problem retrieving block index for file entry");
+        // note in the following the '8' bytes represent the number of
+        // entries in the folder so we seek past that bit; then we
+        // seek to the correct filename descriptor position given bufferSize
+        // Then, for the given descriptor that we've seeked to, we need to seek
+        // past the first byte which is descriptor metadata and past the actual
+        // filename data. We then end up at the start of the final 8 bytes which
+        // represents the offset of the first block making up the file entry
+        if (m_folderData.seek(8 + (n * bufferSize) + 1 + detail::MAX_FILENAME_LENGTH) != -1) {
+            uint8_t buf[8];
+            m_folderData.read((char*)&buf, 8);
+            return detail::convertInt8ArrayToInt64(buf);
+        }
+        throw std::runtime_error("Problem retrieving block index for file entry");
     }
 
     std::string
-    FolderEntry::getEntryName(uint64_t const index)
+    FolderEntry::getEntryName(uint64_t const index) const
     {
         // note in the following the '1' represents first byte,
         // the first bit of which indicates if entry is in use
         // the '8' is number of bytes representing the first block index
         // of the given file entry
-    	uint32_t bufferSize = detail::MAX_FILENAME_LENGTH + 1 + 8;
+        uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
 
-    	// note in the following the '8' bytes represent the number of
-    	// entries in the folder
-    	if(m_folderData.seek((index * bufferSize) + 8) != -1) {
+        // note in the following the '8' bytes represent the number of
+        // entries in the folder
+        if (m_folderData.seek(8 + (index * bufferSize)) != -1) {
 
-    		std::vector<uint8_t> buffer;
-    		buffer.resize(bufferSize);
-    		m_folderData.read((char*)&buffer.front(), bufferSize);
-    		// read past the first byte up until the end minus the
-    		// first block index bytes
-    		std::string nameDat(buffer.begin() + 1, buffer.end() - 8);
-    		std::string returnString;
-    		int c = 0;
-    		while(nameDat.at(c) != '\0') {
-    			returnString.push_back(nameDat.at(c));
-    			++c;
-    		}
-    		return returnString;
-    	}
-    	throw std::runtime_error("Problem getting entry name for index");
+            std::vector<uint8_t> buffer;
+            buffer.resize(bufferSize);
+            m_folderData.read((char*)&buffer.front(), bufferSize);
+            // read past the first byte up until the end minus the
+            // first block index bytes
+            std::string nameDat(buffer.begin() + 1, buffer.end() - 8);
+            std::string returnString;
+            int c = 0;
+            while (nameDat.at(c) != '\0') {
+                returnString.push_back(nameDat.at(c));
+                ++c;
+            }
+            return returnString;
+        }
+        throw std::runtime_error("Problem getting entry name for index");
     }
 
     std::string
-    FolderEntry::getName()
+    FolderEntry::getName() const
     {
         return m_name;
+    }
+
+    std::vector<std::string>
+    FolderEntry::listAllEntries()
+    {
+        std::vector<std::string> entries;
+        uint64_t entryCount = getNumberOfEntries();
+        for (long i = 0; i < entryCount; ++i) {
+            entries.push_back(getEntryName(i));
+        }
+        return entries;
+    }
+
+    uint64_t
+    FolderEntry::getNumberOfEntries() const
+    {
+        std::fstream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartBlockIndex(), m_totalBlocks);
+        (void)out.seekg(offset + detail::FILE_BLOCK_META);
+        uint8_t buf[8];
+        (void)out.read((char*)buf, 8);
+        return detail::convertInt8ArrayToInt64(buf);
     }
 
 }

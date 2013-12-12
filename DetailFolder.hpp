@@ -29,8 +29,8 @@ namespace bfs { namespace detail
     }
 
     void decrementFolderEntryCount(std::string const imagePath,
-                                    uint64_t const startBlock,
-                                    uint64_t const totalBlocks)
+                                   uint64_t const startBlock,
+                                   uint64_t const totalBlocks)
     {
         std::fstream out(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, totalBlocks);

@@ -6,29 +6,29 @@
 
 namespace bfs
 {
-class FolderManager
-{
-public:
-	FolderManager(std::string const &name);
+    class FolderManager
+    {
+      public:
+        FolderManager(std::string const &name);
 
-	void addFile(std::string const& name, std::iostream &fileData)
-	{
-		m_thisFolderEntry.addFileEntry(name);
-	}
-	void addFolder(std::string const& name);
+        void addFile(std::string const& name, std::iostream &fileData)
+        {
+            m_thisFolderEntry.addFileEntry(name);
+        }
+        void addFolder(std::string const& name);
 
-	void getFile(std::string &name, std::ostream &output);
-	void getFile(uint64_t const fileId, std::ostream &output);
+        void getFile(std::string &name, std::ostream &output);
+        void getFile(uint64_t const fileId, std::ostream &output);
 
-	void removeFile(std::string const &name);
-	void removeFolder(std::string const &name);
+        void removeFile(std::string const &name);
+        void removeFolder(std::string const &name);
 
-	std::vector<std::string> listContents();
+        std::vector<std::string> listContents();
 
-private:
-	FolderEntry m_thisFolderEntry;
+      private:
+        FolderEntry m_thisFolderEntry;
 
-};
+    };
 }
 
 #endif // BFS_FOLDER_MANAGER_HPP__

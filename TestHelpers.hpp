@@ -21,18 +21,17 @@ inline boost::filesystem::path buildImage(boost::filesystem::path const &path, l
 std::string createLargeStringToWrite()
 {
     std::string theString("");
-    for(int i = 0; i < HELLO_IT; ++i) {
+    for (int i = 0; i < HELLO_IT; ++i) {
         theString.append("Hello, World!");
     }
     return theString;
 }
 
-#define ASSERT_EQUAL(A, B, C) \
-    if(A == B) { \
-        std::cout<<C<<"...passed"<<std::endl; \
-    } else { \
-        std::cout<<C<<"...failed"<<std::endl; \
+#define ASSERT_EQUAL(A, B, C)                   \
+    if(A == B) {                                \
+        std::cout<<C<<"...passed"<<std::endl;   \
+    } else {                                    \
+        std::cout<<C<<"...failed"<<std::endl;   \
     }
 
 #endif
-

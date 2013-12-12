@@ -3,6 +3,8 @@
 
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
+#include "FileBlock.hpp"
+#include "FolderEntry.hpp"
 
 #include <string>
 #include <fstream>
@@ -36,7 +38,7 @@ namespace bfs
 
         void writeOutFileSpaceBytes(uint64_t const fileBlockCount, std::fstream &out)
         {
-            for(uint64_t i(0); i < fileBlockCount ; ++i) {
+            for (uint64_t i(0); i < fileBlockCount ; ++i) {
                 std::vector<uint8_t> ints;
                 ints.assign(detail::FILE_BLOCK_SIZE, 0);
                 (void)out.write((char*)&ints.front(), detail::FILE_BLOCK_SIZE);
@@ -97,45 +99,31 @@ namespace bfs
             buildBlockBytes(blocks, sizeBytes);
 
             // write out size, and volume bitmap bytes
-            {
-                std::fstream out(imageName.c_str(), std::ios::out | std::ios::binary);
-                out.write((char*)sizeBytes, 8);
-                createVolumeBitMap(blocks, out);
 
-                // file count will always be 0 upon initialization
-                uint64_t fileCount(0);
-                uint8_t countBytes[8];
-                buildFileCountBytes(fileCount, countBytes);
+            std::fstream out(imageName.c_str(), std::ios::out | std::ios::binary);
+            out.write((char*)sizeBytes, 8);
+            createVolumeBitMap(blocks, out);
 
-                // write out file count
-                out.write((char*)countBytes, 8);
+            // file count will always be 0 upon initialization
+            uint64_t fileCount(0);
+            uint8_t countBytes[8];
+            buildFileCountBytes(fileCount, countBytes);
 
-                // write out the file space bytes
-                writeOutFileSpaceBytes(blocks, out);
+            // write out file count
+            out.write((char*)countBytes, 8);
 
-                out.flush();
-                out.close();
-            }
+            // write out the file space bytes
+            writeOutFileSpaceBytes(blocks, out);
 
-            // finish up by
-            // 1. Creating the root directory entry
-            // 2. updating volume bitmap
-
-
-            // set the very first file block (0) as being the first file block
-            // of the root directory
-            FileBlock rootDirBlock(imageName, blocks, 0 /* first */, 0 /* next, of which there are none */);
-            uint64_t startCount(0); // no entries to begin with
-            uint8_t buf[8];
-            detail::convertUInt64ToInt8Array(startCount, buf);
-            (void)rootDirBlock.write((char*)buf, 8);
-
-            // set first file block as being in use
-            std::fstream out(imageName.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-            detail::updateVolumeBitmapWithOne(out, 0, blocks);
             out.flush();
             out.close();
 
+
+            // create the root folder directory. Calling this constructor will
+            // automatically set the initial root block and set the initial
+            // number of entries to zero. Note, the initial root block will
+            // always be block 0
+            FolderEntry rootDir(imageName, blocks, "root");
         }
     };
 }

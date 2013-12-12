@@ -16,7 +16,7 @@
 class FileEntryTest
 {
   public:
-	FileEntryTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
+    FileEntryTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
         testFileSizeReportedCorrectly();
@@ -161,8 +161,8 @@ class FileEntryTest
 
         // test write
         {
-			bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
-			std::string const testString("Hello and goodbye!");
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            std::string const testString("Hello and goodbye!");
             std::string testData(testString);
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -189,7 +189,7 @@ class FileEntryTest
 
         // test write
         {
-			bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);

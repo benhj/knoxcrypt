@@ -17,13 +17,13 @@ namespace bfs
 
     class FileEntry
     {
-    public:
-    	/**
-    	 * @brief when writing a file this constructor should be used
-    	 * @param imagePath the path of the bfs image
-    	 * @param totalBlocks the total number of blocks in the bfs
-    	 * @param name the name of the file entry
-    	 */
+      public:
+        /**
+         * @brief when writing a file this constructor should be used
+         * @param imagePath the path of the bfs image
+         * @param totalBlocks the total number of blocks in the bfs
+         * @param name the name of the file entry
+         */
         FileEntry(std::string const &imagePath, uint64_t const totalBlocks, std::string const &name);
 
         /**
@@ -46,7 +46,7 @@ namespace bfs
          */
         FileEntry(std::string const &imagePath, uint64_t const totalBlocks, uint64_t const startBlock);
 
-        typedef char                 				   char_type;
+        typedef char                                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
 
         std::string filename() const;
@@ -80,7 +80,7 @@ namespace bfs
          * @return
          */
         boost::iostreams::stream_offset seek(boost::iostreams::stream_offset off,
-        									 std::ios_base::seekdir way = std::ios_base::beg);
+                                             std::ios_base::seekdir way = std::ios_base::beg);
 
         /**
          * @brief flushes any remaining data
@@ -88,7 +88,7 @@ namespace bfs
         void flush();
 
 
-    private:
+      private:
 
         // the path of the bfs image
         std::string m_imagePath;
@@ -172,7 +172,7 @@ namespace bfs
         void setNextOfLastBlockToIndexOfNewBlock();
 
         bool shouldCurrentBufferBeUsed() const;
-};
+    };
 
 }
 

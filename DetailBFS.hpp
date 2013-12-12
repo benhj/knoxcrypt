@@ -48,7 +48,7 @@ namespace bfs { namespace detail
     inline uint32_t convertInt4ArrayToInt32(uint8_t array[4])
     {
         return ((uint32_t)array[0] << 24) | ((uint32_t)array[1] << 16)  |
-               ((uint32_t)array[2] << 8) | ((uint32_t)array[3]);
+            ((uint32_t)array[2] << 8) | ((uint32_t)array[3]);
     }
 
     /**
@@ -85,7 +85,7 @@ namespace bfs { namespace detail
     inline uint64_t getFileCount(std::fstream &in, uint64_t const totalFileBlocks = 0)
     {
         uint64_t blockCount = totalFileBlocks;
-        if(blockCount == 0) { // read in, in this case as should never be 0
+        if (blockCount == 0) { // read in, in this case as should never be 0
             uint8_t blockCountBytes[8];
             in.seekg(0, in.beg);
             (void)in.read((char*)blockCountBytes, 8);
@@ -107,7 +107,7 @@ namespace bfs { namespace detail
     inline void incrementFileCount(std::fstream &in, uint64_t const totalFileBlocks, bool const increment = true)
     {
         uint64_t numberOfFiles = getFileCount(in, totalFileBlocks);
-        if(increment) {
+        if (increment) {
             ++numberOfFiles;
         } else {
             --numberOfFiles;
@@ -145,7 +145,7 @@ namespace bfs { namespace detail
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         uint64_t blockCountStore = convertInt8ArrayToInt64(dat);
-        if(increment) {
+        if (increment) {
             blockCountStore += blocksUsed;
         } else {
             blockCountStore -= blocksUsed;
@@ -246,12 +246,12 @@ namespace bfs { namespace detail
     inline OptionalBlock getNextAvailableBlock(std::fstream &in, uint64_t const blocks_ = 0)
     {
         // get number of blocks that make up fs
-    	uint64_t blocks = blocks_;
-    	if(blocks == 0) {
-    		blocks = getNumberOfBlocks(in);
-    	} else {
-    		(void)in.seekg(8);
-    	}
+        uint64_t blocks = blocks_;
+        if (blocks == 0) {
+            blocks = getNumberOfBlocks(in);
+        } else {
+            (void)in.seekg(8);
+        }
 
         // how many bytes does this value fit in to?
         uint64_t bytes = blocks / uint64_t(8);
@@ -316,11 +316,11 @@ namespace bfs { namespace detail
         std::vector<uint64_t> bitBuffer;
         for (uint64_t i = 0; i < bytes; ++i) {
 
-            for(int b = 0; b < 8; ++b) {
+            for (int b = 0; b < 8; ++b) {
                 int availableBit = (!isBitSetInByte(buf[i], b)) ? (b + eightCounter) : -1;
                 if (availableBit > -1) {
                     bitBuffer.push_back((uint64_t)availableBit);
-                    if(bitBuffer.size() == blocksRequired) {
+                    if (bitBuffer.size() == blocksRequired) {
                         return bitBuffer;
                     }
                 }
@@ -343,7 +343,7 @@ namespace bfs { namespace detail
         // how many bytes does this value fit in to?
         uint64_t bytes = totalBlocks / uint64_t(8);
         std::vector<uint64_t>::const_iterator it = blocksUsed.begin();
-        for(; it != blocksUsed.end(); ++it) {
+        for (; it != blocksUsed.end(); ++it) {
             setBlockToInUse(*it, totalBlocks, in);
         }
     }
@@ -355,8 +355,8 @@ namespace bfs { namespace detail
      * @param totalBlocks total number of fs blocks
      */
     inline void updateVolumeBitmapWithOne(std::fstream &in,
-                                   	   	  uint64_t const &blockUsed,
-                                   	   	  uint64_t const totalBlocks)
+                                          uint64_t const &blockUsed,
+                                          uint64_t const totalBlocks)
     {
         // how many bytes does this value fit in to?
         uint64_t bytes = totalBlocks / uint64_t(8);
