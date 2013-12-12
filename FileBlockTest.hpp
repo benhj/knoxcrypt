@@ -2,6 +2,7 @@
 #include "DetailFileBlock.hpp"
 #include "FileBlock.hpp"
 #include "MakeBFS.hpp"
+#include "TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -34,13 +35,8 @@ class FileBlockTest
 
     void blockWriteAndReadTest()
     {
-        std::string testImage(boost::filesystem::unique_path().string());
-        boost::filesystem::path testPath = m_uniquePath / testImage;
-        uint64_t blocks(2048); // 1MB
-
-        {
-			  bfs::MakeBFS bfs(testPath.string(), blocks);
-        }
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
         bfs::FileBlock block(testPath.string(), blocks, uint64_t(0), uint64_t(0));
         std::string testData("Hello, world!Hello, world!");
@@ -51,27 +47,20 @@ class FileBlockTest
         assert(block.getDataBytesWritten() == 26);
         std::fstream stream(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         uint64_t size = bfs::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
-        assert(size == 26);
-
-        std::cout<<"Test correct block write size being returned passed"<<std::endl;
+        ASSERT_EQUAL(size, 26, "blockWriteAndReadTest: correctly returned block size");
 
         // test that reported next index correct
         assert(block.getNextIndex() == 0);
         uint64_t next = bfs::detail::getIndexOfNextFileBlockFromFileBlockN(stream, 0, blocks);
         stream.close();
-        assert(next == 0);
-
-        std::cout<<"Test correct block next index passed"<<std::endl;
+        ASSERT_EQUAL(next, 0, "blockWriteAndReadTest: correct block index");
 
         // test that data can be read correctly
         std::vector<uint8_t> dat;
         dat.resize(size);
         assert(block.read((char*)&dat.front(), size) == size);
         std::string str(dat.begin(), dat.end());
-        assert(str == testData);
-
-        std::cout<<"Test block data read passed"<<std::endl;
-
+        ASSERT_EQUAL(str, testData, "blockWriteAndReadTest: data read");
     }
 
 };

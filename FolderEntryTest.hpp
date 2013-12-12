@@ -23,7 +23,14 @@ class FolderEntryTest
 	FolderEntryTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
-        testAddEntry();
+        testAddEntryNameRetrieval();
+        testAddEntryBlockIndexRetrieval();
+        testEntryRetrievalAndAppendSmallData();
+        testEntryRetrievalAndAppendLargeData();
+        testEntryRetrievalAppendSmallFollowedByAppendLarge();
+        testEntryRetrievalAppendLargeFollowedByAppendSmall();
+        testEntryRetrievalAppendSmallToFirstFileAndAppendLargeToSecond();
+        testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond();
     }
 
     ~FolderEntryTest()
@@ -35,15 +42,44 @@ class FolderEntryTest
 
     boost::filesystem::path m_uniquePath;
 
-    void testAddEntry()
+    bfs::FolderEntry createTestFolder(boost::filesystem::path const &p, long const blocks)
     {
-        std::string testImage(boost::filesystem::unique_path().string());
-        boost::filesystem::path testPath = m_uniquePath / testImage;
-        uint64_t blocks(2048); // 1MB
+        bfs::FolderEntry folder(p.string(), blocks, 0, "root");
+        folder.addFileEntry("test.txt");
+        folder.addFileEntry("fucker.log");
+        folder.addFileEntry("crap.jpg");
+        folder.addFileEntry("shitter.mp3");
+        return folder;
+    }
+
+    void testAddEntryNameRetrieval()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
         {
-			  bfs::MakeBFS bfs(testPath.string(), blocks);
+			bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+			ASSERT_EQUAL(folder.getEntryName(0), "test.txt", "testAddEntryNameRetrieval A");
+            ASSERT_EQUAL(folder.getEntryName(1), "fucker.log", "testAddEntryNameRetrieval B");
+            ASSERT_EQUAL(folder.getEntryName(2), "crap.jpg", "testAddEntryNameRetrieval C");
+            ASSERT_EQUAL(folder.getEntryName(3), "shitter.mp3", "testAddEntryNameRetrieval D");
         }
+    }
+
+
+    void testAddEntryBlockIndexRetrieval()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        bfs::FileEntry fa = folder.getFileEntry("test.txt");
+        bfs::FileEntry fb = folder.getFileEntry("fucker.log");
+        bfs::FileEntry fc = folder.getFileEntry("crap.jpg");
+        bfs::FileEntry fd = folder.getFileEntry("shitter.mp3");
+        uint64_t b1 = fa.getStartBlockIndex();
+        uint64_t b2 = fb.getStartBlockIndex();
+        uint64_t b3 = fc.getStartBlockIndex();
+        uint64_t b4 = fd.getStartBlockIndex();
 
         //
         // when entry 0 added to root folder, root folder block starts at 0
@@ -55,42 +91,52 @@ class FolderEntryTest
         // when entry 3 added, root folder still at block 3, this creates a new
         // file entry at block 5. Root folder ends up also writing to block 6
         //
+        ASSERT_EQUAL(b1, 1, "testAddEntryBlockIndexRetrieval A")
+        ASSERT_EQUAL(b2, 2, "testAddEntryBlockIndexRetrieval B")
+        ASSERT_EQUAL(b3, 4, "testAddEntryBlockIndexRetrieval C")
+        ASSERT_EQUAL(b4, 5, "testAddEntryBlockIndexRetrieval D")
+    }
 
-        {
-			bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-			folder.addFileEntry("test.txt");
-			folder.addFileEntry("fucker.log");
-			folder.addFileEntry("crap.jpg");
-			folder.addFileEntry("shitter.mp3");
-			ASSERT_EQUAL(folder.getEntryName(0), "test.txt", "Folder entry get entry test");
-            ASSERT_EQUAL(folder.getEntryName(1), "fucker.log", "Folder entry get entry test");
-            ASSERT_EQUAL(folder.getEntryName(2), "crap.jpg", "Folder entry get entry test");
-            ASSERT_EQUAL(folder.getEntryName(3), "shitter.mp3", "Folder entry get entry test");
-        }
+    void testEntryRetrievalAndAppendSmallData()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        std::string testData("some test data!");
+        bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+        std::vector<uint8_t> vec(testData.begin(), testData.end());
+        entry.write((char*)&vec.front(), testData.length());
+        entry.flush();
+        entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
+        vec.resize(entry.fileSize());
+        entry.read((char*)&vec.front(), entry.fileSize());
+        std::string result(vec.begin(), vec.end());
+        ASSERT_EQUAL(result, testData, "testEntryRetrievalAndAppendSmallData")
 
-        std::cout<<"Test adding folder entries (files) plus name retrieval passed.."<<std::endl;
+    }
 
+    void testEntryRetrievalAndAppendLargeData()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        std::string testString(createLargeStringToWrite());
+        bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+        std::vector<uint8_t> vec(testString.begin(), testString.end());
+        entry.write((char*)&vec.front(), testString.length());
+        entry.flush();
+        entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
+        vec.resize(entry.fileSize());
+        entry.read((char*)&vec.front(), entry.fileSize());
+        std::string result(vec.begin(), vec.end());
+        ASSERT_EQUAL(result, testString, "testEntryRetrievalAndAppendLargeData")
+    }
 
-        {
-            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-            bfs::FileEntry fa = folder.getFileEntry("test.txt");
-            bfs::FileEntry fb = folder.getFileEntry("fucker.log");
-            bfs::FileEntry fc = folder.getFileEntry("crap.jpg");
-            bfs::FileEntry fd = folder.getFileEntry("shitter.mp3");
-            uint64_t b1 = fa.getStartBlockIndex();
-            uint64_t b2 = fb.getStartBlockIndex();
-            uint64_t b3 = fc.getStartBlockIndex();
-            uint64_t b4 = fd.getStartBlockIndex();
-
-            // see comment above for expectations
-            ASSERT_EQUAL(b1, 1, "Folder entry get start block index")
-            ASSERT_EQUAL(b2, 2, "Folder entry get start block index")
-            ASSERT_EQUAL(b3, 4, "Folder entry get start block index")
-            ASSERT_EQUAL(b4, 5, "Folder entry get start block index")
-        }
-
-        std::cout<<"Test file entry block index retrieval passed.."<<std::endl;
-
+    void testEntryRetrievalAppendSmallFollowedByAppendLarge()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testData("some test data!");
         {
             bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
@@ -99,88 +145,109 @@ class FolderEntryTest
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
         }
-
         {
-            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-            bfs::FileEntry entry(folder.getFileEntry("fucker.log"));
+            std::string testString(createLargeStringToWrite());
+            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            std::vector<uint8_t> vec(testString.begin(), testString.end());
+            entry.write((char*)&vec.front(), testString.length());
+            entry.flush();
             entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
-            std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
             std::string result(vec.begin(), vec.end());
-            ASSERT_EQUAL(result, testData, "Folder entry written data test")
+            std::string concat(testData.append(testString));
+            ASSERT_EQUAL(result, concat, "testEntryRetrievalAppendSmallFollowedByAppendLarge")
         }
+    }
 
-        std::cout<<"Test file entry retrieval plus appending of small data passed.."<<std::endl;
+    void testEntryRetrievalAppendLargeFollowedByAppendSmall()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        std::string testData("some test data!");
         std::string testString(createLargeStringToWrite());
         {
             bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
             bfs::FileEntry entry = folder.getFileEntry("fucker.log");
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
-            entry.flush();
         }
-
-        std::string origTestData = testData;
-
         {
-            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-            bfs::FileEntry entry(folder.getFileEntry("fucker.log"));
+            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
+            entry.flush();
             entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
-            std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
             std::string result(vec.begin(), vec.end());
-            assert(result == (testData.append(testString)));
+            std::string concat(testString.append(testData));
+            ASSERT_EQUAL(result, concat, "testEntryRetrievalAppendLargeFollowedByAppendSmall")
+        }
+    }
+
+    void testEntryRetrievalAppendSmallToFirstFileAndAppendLargeToSecond()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        {
+            std::string testData("some test data!");
+            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
+            entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
+            vec.resize(entry.fileSize());
+            entry.read((char*)&vec.front(), entry.fileSize());
+            std::string result(vec.begin(), vec.end());
         }
 
-        testData = origTestData;
-
-        std::cout<<"Test file entry retrieval plus appending of large data to already appended small data passed.."<<std::endl;
-
         {
-            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            std::string testString(createLargeStringToWrite());
             bfs::FileEntry entry = folder.getFileEntry("crap.jpg");
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
-        }
-
-        {
-            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-            bfs::FileEntry entry(folder.getFileEntry("crap.jpg"));
             entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
-            std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
             std::string result(vec.begin(), vec.end());
-            assert(result == testString);
+            ASSERT_EQUAL(result, testString, "testEntryRetrievalAppendSmallToFirstFileAndAppendLargeToSecond")
         }
+    }
 
-        std::cout<<"Test another file entry retrieval plus appending of large data passed.."<<std::endl;
+    void testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
 
         {
-            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            std::string testString(createLargeStringToWrite());
             bfs::FileEntry entry = folder.getFileEntry("crap.jpg");
-            entry.seek(0, std::ios::end);
+            std::vector<uint8_t> vec(testString.begin(), testString.end());
+            entry.write((char*)&vec.front(), testString.length());
+            entry.flush();
+            entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
+            vec.resize(entry.fileSize());
+            entry.read((char*)&vec.front(), entry.fileSize());
+            std::string result(vec.begin(), vec.end());
+        }
+        {
+            std::string testData("some test data!");
+            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
-        }
-
-
-        {
-            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-            bfs::FileEntry entry(folder.getFileEntry("crap.jpg"));
             entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
-            std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
             std::string result(vec.begin(), vec.end());
-            assert(result == (testString.append(testData)));
+            ASSERT_EQUAL(result, testData, "testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond")
         }
-
-        std::cout<<"Test another file entry retrieval plus appending of small data to already appended large data passed.."<<std::endl;
-
     }
+
 };

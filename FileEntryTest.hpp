@@ -19,9 +19,12 @@ class FileEntryTest
 	FileEntryTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
-        testBasicAppend();
+        testFileSizeReportedCorrectly();
+        testBigWriteFollowedByRead();
+        testBigWriteFollowedBySmallAppend();
+        testSmallWriteFollowedByBigAppend();
         testSeekAndReadSmallFile();
-        testSeekAndReadBigFile();
+        testWriteBigDataAppendSmallStringSeekToAndReadAppendedString();
     }
 
     ~FileEntryTest()
@@ -33,22 +36,39 @@ class FileEntryTest
 
     boost::filesystem::path m_uniquePath;
 
-    void testBasicAppend()
+    void testFileSizeReportedCorrectly()
     {
-        std::string testImage(boost::filesystem::unique_path().string());
-        boost::filesystem::path testPath = m_uniquePath / testImage;
-        uint64_t blocks(2048); // 1MB
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
+        // test write get file size from same entry
         {
-			  bfs::MakeBFS bfs(testPath.string(), blocks);
-        }
-
-        // test write
-        {
-			bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
+            entry.flush();
+            ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "testFileSizeReportedCorrectly A");
+        }
+
+        // test get file size different entry but same data
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, uint64_t(1));
+            ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "testFileSizeReportedCorrectly B");
+        }
+    }
+
+    void testBigWriteFollowedByRead()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // test write
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
             entry.flush();
         }
 
@@ -57,15 +77,29 @@ class FileEntryTest
             bfs::FileEntry entry(testPath.c_str(), blocks, uint64_t(1));
             std::string expected(createLargeStringToWrite());
             std::vector<char> vec;
-            vec.resize(BIG_SIZE);
-            entry.read(&vec.front(), BIG_SIZE);
-            std::string recovered(vec.begin(), vec.begin() + BIG_SIZE);
+            vec.resize(entry.fileSize());
+            entry.read(&vec.front(), entry.fileSize());
+            std::string recovered(vec.begin(), vec.begin() + entry.fileSize());
             assert(recovered == expected);
+            ASSERT_EQUAL(recovered, expected, "testWriteFollowedByRead");
+        }
+    }
+
+    void testBigWriteFollowedBySmallAppend()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // initial big write
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), BIG_SIZE);
+            entry.flush();
         }
 
-        std::cout<<"File entry write followed by read passed"<<std::endl;
-
-        // test append
+        // small append
         std::string appendString("appended!");
         {
             bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt", 1);
@@ -73,7 +107,7 @@ class FileEntryTest
             entry.flush();
         }
 
-
+        // test read
         {
             bfs::FileEntry entry(testPath.c_str(), blocks, 1);
             std::string expected(createLargeStringToWrite());
@@ -82,21 +116,48 @@ class FileEntryTest
             vec.resize(BIG_SIZE + appendString.length());
             entry.read(&vec.front(), BIG_SIZE + appendString.length());
             std::string recovered(vec.begin(), vec.begin() + BIG_SIZE + appendString.length());
-            assert(recovered == expected);
+            ASSERT_EQUAL(recovered, expected, "testBigWriteFollowedBySmallAppend");
+        }
+    }
+
+    void testSmallWriteFollowedByBigAppend()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // initial small write
+        std::string testData("small string");
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
         }
 
-        std::cout<<"File entry append passed"<<std::endl;
+        // big append
+        std::string appendString(createLargeStringToWrite());
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt", 1);
+            entry.write(appendString.c_str(), appendString.length());
+            entry.flush();
+        }
+
+        // test read
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, 1);
+            std::string expected(testData.append(appendString));
+            std::vector<char> vec;
+            vec.resize(entry.fileSize());
+            entry.read(&vec.front(), entry.fileSize());
+            std::string recovered(vec.begin(), vec.begin() + entry.fileSize());
+            ASSERT_EQUAL(recovered, expected, "testSmallWriteFollowedByBigAppend");
+        }
     }
 
     void testSeekAndReadSmallFile()
     {
-        std::string testImage(boost::filesystem::unique_path().string());
-        boost::filesystem::path testPath = m_uniquePath / testImage;
-        uint64_t blocks(2048); // 1MB
-
-        {
-			  bfs::MakeBFS bfs(testPath.string(), blocks);
-        }
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
         // test write
         {
@@ -117,22 +178,14 @@ class FileEntryTest
             entry.seek(10);
             entry.read(&vec.front(), expected.size());
             std::string recovered(vec.begin(), vec.end());
-            assert(recovered == expected);
+            ASSERT_EQUAL(recovered, expected, "testSeekAndReadSmallFile");
         }
-
-        std::cout<<"Test seek and read small file passed"<<std::endl;
-
     }
 
-    void testSeekAndReadBigFile()
+    void testWriteBigDataAppendSmallStringSeekToAndReadAppendedString()
     {
-        std::string testImage(boost::filesystem::unique_path().string());
-        boost::filesystem::path testPath = m_uniquePath / testImage;
-        uint64_t blocks(2048); // 1MB
-
-        {
-			  bfs::MakeBFS bfs(testPath.string(), blocks);
-        }
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
         // test write
         {
@@ -141,18 +194,6 @@ class FileEntryTest
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
             entry.flush();
-        }
-
-        // test read
-        {
-            bfs::FileEntry entry(testPath.c_str(), blocks, 1);
-            std::string expected(createLargeStringToWrite());
-            std::vector<char> vec;
-            vec.resize(BIG_SIZE);
-            entry.read(&vec.front(), BIG_SIZE);
-            std::string recovered(vec.begin(), vec.end());
-
-            assert(recovered == expected);
         }
 
         // test seek of big file
@@ -170,10 +211,9 @@ class FileEntryTest
             entry.seek(BIG_SIZE);
             entry.read(&vec.front(), appendString.length());
             std::string recovered(vec.begin(), vec.end());
-            assert(recovered == appendString);
+            ASSERT_EQUAL(recovered, appendString, "testWriteBigDataAppendSmallStringSeekToAndReadAppendedString");
         }
 
-        std::cout<<"Test seek and read big file passed"<<std::endl;
     }
 
 };
