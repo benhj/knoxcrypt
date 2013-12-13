@@ -121,7 +121,7 @@ namespace bfs
          * @note assumes in correct position
          * @return
          */
-        std::streamsize doWriteFirstByteToEntryMetaData();
+        std::streamsize doWriteFirstByteToEntryMetaData(EntryType const &entryType);
 
         /**
          * @brief write filename file metadata
@@ -135,6 +135,13 @@ namespace bfs
          * @return number of bytes written
          */
         std::streamsize doWriteFirstBlockIndexToEntryMetaData(FileEntry const &entry);
+
+        /**
+         * @brief retrieves the type of a given entry
+         * @param n the entry to retrieve the type of
+         * @return the type of the entry
+         */
+        EntryType getTypeForEntry(uint64_t const n) const;
 
         // the path of the bfs image
         std::string const m_imagePath;
