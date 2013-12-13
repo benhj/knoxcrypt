@@ -1,6 +1,7 @@
 #ifndef BFS_FOLDER_ENTRY_HPP__
 #define BFS_FOLDER_ENTRY_HPP__
 
+#include "EntryInfo.hpp"
 #include "FileEntry.hpp"
 
 namespace bfs
@@ -47,14 +48,14 @@ namespace bfs
          * @param name the name of the entry
          * @return a copy of a FolderEntry that will be used to reference the folder data
          */
-        FolderEntry addFolderEntry(std::string const &name);
+        void addFolderEntry(std::string const &name);
 
         /**
          * @brief retrieves a FileEntry with specific name
          * @param name the name of the entry to lookup
          * @return a copy of the FileEntry with name
          */
-        FileEntry getFileEntry(std::string const &name);
+        FileEntry getFileEntry(std::string const &name) const;
 
         /**
          * @brief retrieves a FolderEntry with specific name
@@ -69,30 +70,42 @@ namespace bfs
          */
         std::string getName() const;
 
+
         /**
-         * @brief retrieves the name of an entry with given index
-         * @return the name
+         * @brief retrieves the entry info attributes of a given indexed entry
+         * @param index the index of the entry to get the attributes of
+         * @return the entry information
          */
-        std::string getEntryName(uint64_t const index) const;
+        EntryInfo getEntryInfo(uint64_t const index) const;
 
         /**
          * @brief returns a vector of entry strings
          * @return all entry names
          */
-        std::vector<std::string> listAllEntries();
+        std::vector<EntryInfo> listAllEntries();
 
       private:
 
         FolderEntry();
 
         /**
-         * @brief
-         * @param n
-         * @return
+         * @brief retrieves the starting block index of a given entry
+         * @param n the entry to retrieve the block index of
+         * @return the starting block index
          */
-        uint64_t getBlockIndexForEntry(uint64_t const n);
+        uint64_t getBlockIndexForEntry(uint64_t const n) const;
 
+        /**
+         * @brief retrieves the number of entries in folder entry
+         * @return the number of folder entries
+         */
         uint64_t getNumberOfEntries() const;
+
+        /**
+         * @brief retrieves the name of an entry with given index
+         * @return the name
+         */
+        std::string getEntryName(uint64_t const index) const;
 
         // the path of the bfs image
         std::string const m_imagePath;

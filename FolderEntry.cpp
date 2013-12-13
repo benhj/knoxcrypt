@@ -93,7 +93,7 @@ namespace bfs
 
     }
 
-    FolderEntry
+    void
     FolderEntry::addFolderEntry(std::string const &name)
     {
         // increment entry count
@@ -136,7 +136,7 @@ namespace bfs
     }
 
     FileEntry
-    FolderEntry::getFileEntry(std::string const &name)
+    FolderEntry::getFileEntry(std::string const &name) const
     {
         // find out total number of entries
         // NOTE: should probably initialize this in constructor
@@ -167,29 +167,47 @@ namespace bfs
 
     }
 
-    uint64_t
-    FolderEntry::getBlockIndexForEntry(uint64_t const n)
+
+    std::string
+    FolderEntry::getName() const
     {
+        return m_name;
+    }
 
-        // note in the following, the '1' represents meta data for this
-        // filename descriptor and the 8 represents bytes storing the file
-        // entry offset. The values for the buffer are stored in the order
-        // in which they are given in the addition
-        uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
+    std::vector<EntryInfo>
+    FolderEntry::listAllEntries()
+    {
+        std::vector<EntryInfo> entries;
+        uint64_t entryCount = getNumberOfEntries();
+        for (long entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
 
-        // note in the following the '8' bytes represent the number of
-        // entries in the folder so we seek past that bit; then we
-        // seek to the correct filename descriptor position given bufferSize
-        // Then, for the given descriptor that we've seeked to, we need to seek
-        // past the first byte which is descriptor metadata and past the actual
-        // filename data. We then end up at the start of the final 8 bytes which
-        // represents the offset of the first block making up the file entry
-        if (m_folderData.seek(8 + (n * bufferSize) + 1 + detail::MAX_FILENAME_LENGTH) != -1) {
-            uint8_t buf[8];
-            m_folderData.read((char*)&buf, 8);
-            return detail::convertInt8ArrayToInt64(buf);
+            entries.push_back(getEntryInfo(entryIndex));
         }
-        throw std::runtime_error("Problem retrieving block index for file entry");
+        return entries;
+    }
+
+    EntryInfo
+    FolderEntry::getEntryInfo(uint64_t const entryIndex) const
+    {
+        std::string entryName = getEntryName(entryIndex);
+        FileEntry fe(getFileEntry(entryName));
+        return EntryInfo(entryName,
+                        fe.fileSize(),
+                        EntryType::FileType,
+                        true, // writable
+                        fe.getStartBlockIndex(),
+                        entryIndex);
+    }
+
+    uint64_t
+    FolderEntry::getNumberOfEntries() const
+    {
+        std::fstream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartBlockIndex(), m_totalBlocks);
+        (void)out.seekg(offset + detail::FILE_BLOCK_META);
+        uint8_t buf[8];
+        (void)out.read((char*)buf, 8);
+        return detail::convertInt8ArrayToInt64(buf);
     }
 
     std::string
@@ -222,32 +240,29 @@ namespace bfs
         throw std::runtime_error("Problem getting entry name for index");
     }
 
-    std::string
-    FolderEntry::getName() const
-    {
-        return m_name;
-    }
-
-    std::vector<std::string>
-    FolderEntry::listAllEntries()
-    {
-        std::vector<std::string> entries;
-        uint64_t entryCount = getNumberOfEntries();
-        for (long i = 0; i < entryCount; ++i) {
-            entries.push_back(getEntryName(i));
-        }
-        return entries;
-    }
-
     uint64_t
-    FolderEntry::getNumberOfEntries() const
+    FolderEntry::getBlockIndexForEntry(uint64_t const n) const
     {
-        std::fstream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartBlockIndex(), m_totalBlocks);
-        (void)out.seekg(offset + detail::FILE_BLOCK_META);
-        uint8_t buf[8];
-        (void)out.read((char*)buf, 8);
-        return detail::convertInt8ArrayToInt64(buf);
+
+        // note in the following, the '1' represents meta data for this
+        // filename descriptor and the 8 represents bytes storing the file
+        // entry offset. The values for the buffer are stored in the order
+        // in which they are given in the addition
+        uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
+
+        // note in the following the '8' bytes represent the number of
+        // entries in the folder so we seek past that bit; then we
+        // seek to the correct filename descriptor position given bufferSize
+        // Then, for the given descriptor that we've seeked to, we need to seek
+        // past the first byte which is descriptor metadata and past the actual
+        // filename data. We then end up at the start of the final 8 bytes which
+        // represents the offset of the first block making up the file entry
+        if (m_folderData.seek(8 + (n * bufferSize) + 1 + detail::MAX_FILENAME_LENGTH) != -1) {
+            uint8_t buf[8];
+            m_folderData.read((char*)&buf, 8);
+            return detail::convertInt8ArrayToInt64(buf);
+        }
+        throw std::runtime_error("Problem retrieving block index for file entry");
     }
 
 }

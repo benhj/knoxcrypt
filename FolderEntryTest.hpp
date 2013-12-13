@@ -60,10 +60,10 @@ class FolderEntryTest
 
         {
             bfs::FolderEntry folder = createTestFolder(testPath, blocks);
-            ASSERT_EQUAL(folder.getEntryName(0), "test.txt", "testAddEntryNameRetrieval A");
-            ASSERT_EQUAL(folder.getEntryName(1), "fucker.log", "testAddEntryNameRetrieval B");
-            ASSERT_EQUAL(folder.getEntryName(2), "crap.jpg", "testAddEntryNameRetrieval C");
-            ASSERT_EQUAL(folder.getEntryName(3), "shitter.mp3", "testAddEntryNameRetrieval D");
+            ASSERT_EQUAL(folder.getEntryInfo(0).filename(), "test.txt", "testAddEntryNameRetrieval A");
+            ASSERT_EQUAL(folder.getEntryInfo(1).filename(), "fucker.log", "testAddEntryNameRetrieval B");
+            ASSERT_EQUAL(folder.getEntryInfo(2).filename(), "crap.jpg", "testAddEntryNameRetrieval C");
+            ASSERT_EQUAL(folder.getEntryInfo(3).filename(), "shitter.mp3", "testAddEntryNameRetrieval D");
         }
     }
 
@@ -72,13 +72,13 @@ class FolderEntryTest
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
         bfs::FolderEntry folder = createTestFolder(testPath, blocks);
-        std::vector<std::string> entries = folder.listAllEntries();
+        std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 4, "testListAllEntries: number of entries");
-        std::vector<std::string>::iterator it = entries.begin();
-        ASSERT_EQUAL(entries[0], "test.txt", "testListAllEntries: entry A");
-        ASSERT_EQUAL(entries[1], "fucker.log", "testListAllEntries: entry B");
-        ASSERT_EQUAL(entries[2], "crap.jpg", "testListAllEntries: entry C");
-        ASSERT_EQUAL(entries[3], "shitter.mp3", "testListAllEntries: entry D");
+        std::vector<bfs::EntryInfo>::iterator it = entries.begin();
+        ASSERT_EQUAL(entries[0].filename(), "test.txt", "testListAllEntries: filename A");
+        ASSERT_EQUAL(entries[1].filename(), "fucker.log", "testListAllEntries: filename B");
+        ASSERT_EQUAL(entries[2].filename(), "crap.jpg", "testListAllEntries: filename C");
+        ASSERT_EQUAL(entries[3].filename(), "shitter.mp3", "testListAllEntries: filename D");
     }
 
     void testAddEntryBlockIndexRetrieval()
@@ -86,14 +86,11 @@ class FolderEntryTest
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
         bfs::FolderEntry folder = createTestFolder(testPath, blocks);
-        bfs::FileEntry fa = folder.getFileEntry("test.txt");
-        bfs::FileEntry fb = folder.getFileEntry("fucker.log");
-        bfs::FileEntry fc = folder.getFileEntry("crap.jpg");
-        bfs::FileEntry fd = folder.getFileEntry("shitter.mp3");
-        uint64_t b1 = fa.getStartBlockIndex();
-        uint64_t b2 = fb.getStartBlockIndex();
-        uint64_t b3 = fc.getStartBlockIndex();
-        uint64_t b4 = fd.getStartBlockIndex();
+
+        uint64_t b1 = folder.getEntryInfo(0).firstFileBlock();
+        uint64_t b2 = folder.getEntryInfo(1).firstFileBlock();
+        uint64_t b3 = folder.getEntryInfo(2).firstFileBlock();
+        uint64_t b4 = folder.getEntryInfo(3).firstFileBlock();
 
         //
         // when entry 0 added to root folder, root folder block starts at 0
@@ -105,11 +102,11 @@ class FolderEntryTest
         // when entry 3 added, root folder still at block 3, this creates a new
         // file entry at block 5. Root folder ends up also writing to block 6
         //
-        ASSERT_EQUAL(b1, 1, "testAddEntryBlockIndexRetrieval A")
-            ASSERT_EQUAL(b2, 2, "testAddEntryBlockIndexRetrieval B")
-            ASSERT_EQUAL(b3, 4, "testAddEntryBlockIndexRetrieval C")
-            ASSERT_EQUAL(b4, 5, "testAddEntryBlockIndexRetrieval D")
-            }
+        ASSERT_EQUAL(b1, 1, "testAddEntryBlockIndexRetrieval A");
+        ASSERT_EQUAL(b2, 2, "testAddEntryBlockIndexRetrieval B");
+        ASSERT_EQUAL(b3, 4, "testAddEntryBlockIndexRetrieval C");
+        ASSERT_EQUAL(b4, 5, "testAddEntryBlockIndexRetrieval D");
+    }
 
     void testEntryRetrievalAndAppendSmallData()
     {
@@ -125,9 +122,9 @@ class FolderEntryTest
         vec.resize(entry.fileSize());
         entry.read((char*)&vec.front(), entry.fileSize());
         std::string result(vec.begin(), vec.end());
-        ASSERT_EQUAL(result, testData, "testEntryRetrievalAndAppendSmallData")
+        ASSERT_EQUAL(result, testData, "testEntryRetrievalAndAppendSmallData");
 
-            }
+    }
 
     void testEntryRetrievalAndAppendLargeData()
     {
@@ -143,8 +140,8 @@ class FolderEntryTest
         vec.resize(entry.fileSize());
         entry.read((char*)&vec.front(), entry.fileSize());
         std::string result(vec.begin(), vec.end());
-        ASSERT_EQUAL(result, testString, "testEntryRetrievalAndAppendLargeData")
-            }
+        ASSERT_EQUAL(result, testString, "testEntryRetrievalAndAppendLargeData");
+    }
 
     void testEntryRetrievalAppendSmallFollowedByAppendLarge()
     {
@@ -170,8 +167,8 @@ class FolderEntryTest
             entry.read((char*)&vec.front(), entry.fileSize());
             std::string result(vec.begin(), vec.end());
             std::string concat(testData.append(testString));
-            ASSERT_EQUAL(result, concat, "testEntryRetrievalAppendSmallFollowedByAppendLarge")
-                }
+            ASSERT_EQUAL(result, concat, "testEntryRetrievalAppendSmallFollowedByAppendLarge");
+        }
     }
 
     void testEntryRetrievalAppendLargeFollowedByAppendSmall()
@@ -198,8 +195,8 @@ class FolderEntryTest
             entry.read((char*)&vec.front(), entry.fileSize());
             std::string result(vec.begin(), vec.end());
             std::string concat(testString.append(testData));
-            ASSERT_EQUAL(result, concat, "testEntryRetrievalAppendLargeFollowedByAppendSmall")
-                }
+            ASSERT_EQUAL(result, concat, "testEntryRetrievalAppendLargeFollowedByAppendSmall");
+        }
     }
 
     void testEntryRetrievalAppendSmallToFirstFileAndAppendLargeToSecond()
@@ -229,8 +226,8 @@ class FolderEntryTest
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
             std::string result(vec.begin(), vec.end());
-            ASSERT_EQUAL(result, testString, "testEntryRetrievalAppendSmallToFirstFileAndAppendLargeToSecond")
-                }
+            ASSERT_EQUAL(result, testString, "testEntryRetrievalAppendSmallToFirstFileAndAppendLargeToSecond");
+        }
     }
 
     void testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond()
@@ -260,8 +257,8 @@ class FolderEntryTest
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
             std::string result(vec.begin(), vec.end());
-            ASSERT_EQUAL(result, testData, "testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond")
-                }
+            ASSERT_EQUAL(result, testData, "testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond");
+        }
     }
 
 };
