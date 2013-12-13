@@ -86,7 +86,7 @@ namespace bfs
     }
 
     uint64_t
-    FileEntry::getStartBlockIndex()
+    FileEntry::getStartBlockIndex() const
     {
         if (m_fileBlocks.empty()) {
             checkAndCreateWritableFileBlock();
@@ -141,7 +141,7 @@ namespace bfs
         return n;
     }
 
-    void FileEntry::newWritableFileBlock()
+    void FileEntry::newWritableFileBlock() const
     {
         std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         std::vector<uint64_t> firstAndNext = detail::getNAvailableBlocks(stream, 2, m_totalBlocks);
@@ -188,14 +188,14 @@ namespace bfs
     }
 
     void
-    FileEntry::setNextOfLastBlockToIndexOfNewBlock()
+    FileEntry::setNextOfLastBlockToIndexOfNewBlock() const
     {
         uint64_t lastIndex(m_blockIndex - 1);
         m_fileBlocks[lastIndex].setNext(m_currentBlock);
     }
 
     bool
-    FileEntry::shouldCurrentBufferBeUsed() const
+    FileEntry::currentBlockHasAvailableSpace() const
     {
         uint32_t const bytesWritten = getBytesWrittenSoFarToCurrentFileBlock();
 
@@ -207,7 +207,7 @@ namespace bfs
     }
 
     void
-    FileEntry::checkAndCreateWritableFileBlock()
+    FileEntry::checkAndCreateWritableFileBlock() const
     {
         // first case no file blocks so absolutely need one to write to
         if (m_fileBlocks.empty()) {
@@ -216,7 +216,7 @@ namespace bfs
         }
 
         // in this case the current block is exhausted so we need a new one
-        if (!shouldCurrentBufferBeUsed()) {
+        if (!currentBlockHasAvailableSpace()) {
 
             newWritableFileBlock();
 

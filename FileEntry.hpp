@@ -55,7 +55,7 @@ namespace bfs
 
         uint64_t getCurrentBlockIndex();
 
-        uint64_t getStartBlockIndex();
+        uint64_t getStartBlockIndex() const;
 
         /**
          * @brief for reading
@@ -108,22 +108,22 @@ namespace bfs
         uint64_t m_fileSize;
 
         // the file blocks making up the file
-        std::vector<FileBlock> m_fileBlocks;
+        mutable std::vector<FileBlock> m_fileBlocks;
 
         // a buffer used for storing chunks of data
         std::vector<uint8_t> m_buffer;
 
         // the index of the current file block being read from or written to
         // note, this is the position of the block in the bfs
-        uint64_t m_currentBlock;
+        mutable uint64_t m_currentBlock;
 
         // the start file block index
-        uint64_t m_startBlock;
+        mutable uint64_t m_startBlock;
 
         // the index of the block in the actual blocks container;
         // in comparison to m_currentBlock, this is where the block
         // exists in m_fileBlocks
-        uint64_t m_blockIndex;
+        mutable uint64_t m_blockIndex;
 
         /**
          * @brief buffers a byte for writing
@@ -134,7 +134,7 @@ namespace bfs
         /**
          * @brief creates and pushes back a new file block for writing
          */
-        void newWritableFileBlock();
+        void newWritableFileBlock() const;
 
         /**
          * @brief when appending, set all blocks in the block list
@@ -169,14 +169,19 @@ namespace bfs
          * no file blocks or if there are file blocks and it is determined
          * that we're not in append mode
          */
-        void checkAndCreateWritableFileBlock();
+        void checkAndCreateWritableFileBlock() const;
 
         /**
          * @brief sets the next index of the last block to that of the new block
          */
-        void setNextOfLastBlockToIndexOfNewBlock();
+        void setNextOfLastBlockToIndexOfNewBlock() const;
 
-        bool shouldCurrentBufferBeUsed() const;
+        /**
+         * @brief used in the context of discovering if currently set block
+         * has enough space to write more data to
+         * @return true if space availble, false otherwise
+         */
+        bool currentBlockHasAvailableSpace() const;
     };
 
 }

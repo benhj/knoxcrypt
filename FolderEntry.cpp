@@ -35,6 +35,62 @@ namespace bfs
         m_folderData.flush();
     }
 
+    namespace detail
+    {
+        std::vector<uint8_t> createFileNameVector(std::string const &name)
+        {
+            std::vector<uint8_t> filename;
+            filename.assign(MAX_FILENAME_LENGTH, 0);
+            int i = 0;
+            for (; i < name.length(); ++i) {
+                filename[i] = name[i];
+            }
+            filename[i] = '\0'; // set null byte to indicate end of filename
+            return filename;
+        }
+    }
+
+    std::streamsize
+    FolderEntry::doWrite(char const * buf, std::streampos n)
+    {
+        return m_folderData.write(buf, n);
+    }
+
+    std::streamsize
+    FolderEntry::doWriteFirstByteToEntryMetaData()
+    {
+        // set the first bit to indicate that this entry is in use
+        // it will point to a file and should not be written over
+        uint8_t byte = 0;
+        detail::setBitInByte(byte, 0);
+
+        // set second bit to indicate that its type file; folder will be type 0
+        detail::setBitInByte(byte, 1);
+
+        // write out first byte
+        (void)doWrite((char*)&byte, 1);
+    }
+
+    std::streamsize
+    FolderEntry::doWriteFilenameToEntryMetaData(std::string const &name)
+    {
+        // create a vector to hold filename
+        std::vector<uint8_t> filename = detail::createFileNameVector(name);
+
+        // write out filename
+        (void)doWrite((char*)&filename.front(), detail::MAX_FILENAME_LENGTH);
+    }
+
+    std::streamsize
+    FolderEntry::doWriteFirstBlockIndexToEntryMetaData(FileEntry const &entry)
+    {
+        // create bytes to represent first block
+        uint64_t firstBlock = entry.getStartBlockIndex();
+        uint8_t buf[8];
+        detail::convertUInt64ToInt8Array(firstBlock, buf);
+        (void)doWrite((char*)buf, 8);
+    }
+
     void
     FolderEntry::addFileEntry(std::string const &name)
     {
@@ -45,46 +101,22 @@ namespace bfs
         // seek right to end in order to append new entry
         (void)m_folderData.seek(0, std::ios_base::end);
 
-        // set the first bit to indicate that this entry is in use
-        // it will point to a file and should not be written over
-        uint8_t byte = 0;
-        detail::setBitInByte(byte, 0);
-
-        // set second bit to indicate that its type file; folder will be type 0
-        detail::setBitInByte(byte, 1);
-
-        // create a vector to hold filename
-        std::vector<uint8_t> filename;
-        filename.assign(detail::MAX_FILENAME_LENGTH, 0);
-        int i = 0;
-        for (; i < name.length(); ++i) {
-            filename[i] = name[i];
-        }
-        filename[i] = '\0'; // set null byte to indicate end of filename
+        // create and write first byte of filename metadata
+        (void)doWriteFirstByteToEntryMetaData();
 
         // Create a new file entry
         FileEntry entry(m_imagePath, m_totalBlocks, m_name);
 
-        // create bytes to represent first block
-        uint64_t firstBlock = entry.getStartBlockIndex();
-        uint8_t buf[8];
-        detail::convertUInt64ToInt8Array(firstBlock, buf);
+        // flushing also ensures that first block is registered as being allocated
+        entry.flush();
 
-        // indicate that first block of new file entry is in use. NOte at this
-        // point in time, it won't have any data. When data
-        // needs to be added to the file entry, it will be opened
-        // in append mode
-        // Also: we need to do this before adding data to the folder entry
-        // as data added to the folder entry might write over the block we
-        // allocated for file
-        std::fstream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-        detail::updateVolumeBitmapWithOne(out, firstBlock, m_totalBlocks);
-        out.close();
+        // create and write filename
+        (void)doWriteFilenameToEntryMetaData(name);
 
-        // write entry data to this folder
-        (void)m_folderData.write((char*)&byte, 1);
-        (void)m_folderData.write((char*)&filename.front(), detail::MAX_FILENAME_LENGTH);
-        (void)m_folderData.write((char*)buf, 8);
+        // write the first block index to the file entry metadata
+        (void)doWriteFirstBlockIndexToEntryMetaData(entry);
+
+        // make sure all data has been written
         m_folderData.flush();
 
         // need to reset the file entry to make sure in correct place

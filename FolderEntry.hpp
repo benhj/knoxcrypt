@@ -107,6 +107,35 @@ namespace bfs
          */
         std::string getEntryName(uint64_t const index) const;
 
+        /**
+         * @brief write metadata to this folder entry
+         * @note assumes in correct position
+         * @param buf
+         * @param n
+         * @return numberof bytes written
+         */
+        std::streamsize doWrite(char const * buf, std::streampos n);
+
+        /**
+         * @brief write the first byte of the file metadata data
+         * @note assumes in correct position
+         * @return
+         */
+        std::streamsize doWriteFirstByteToEntryMetaData();
+
+        /**
+         * @brief write filename file metadata
+         * @return number of bytes writeen
+         */
+        std::streamsize doWriteFilenameToEntryMetaData(std::string const &name);
+
+        /**
+         * @brief writes the first block index bytes to the file metadata
+         * @param entry the entry that stores the first block
+         * @return number of bytes written
+         */
+        std::streamsize doWriteFirstBlockIndexToEntryMetaData(FileEntry const &entry);
+
         // the path of the bfs image
         std::string const m_imagePath;
 
