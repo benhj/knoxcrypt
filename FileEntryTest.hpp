@@ -20,6 +20,8 @@ class FileEntryTest
     {
         boost::filesystem::create_directories(m_uniquePath);
         testFileSizeReportedCorrectly();
+        testBlocksAllocated();
+        testFileUnlink();
         testBigWriteFollowedByRead();
         testBigWriteFollowedBySmallAppend();
         testSmallWriteFollowedByBigAppend();
@@ -56,6 +58,85 @@ class FileEntryTest
             bfs::FileEntry entry(testPath.c_str(), blocks, uint64_t(1));
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "testFileSizeReportedCorrectly B");
         }
+    }
+
+    void testBlocksAllocated()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // test write get file size from same entry
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), BIG_SIZE);
+            entry.flush();
+
+            uint64_t startBlock = entry.getStartBlockIndex();
+            std::fstream in(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            ASSERT_EQUAL(true, bfs::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
+            bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
+            uint64_t nextBlock = block.getNextIndex();
+            while(nextBlock != startBlock) {
+                startBlock = nextBlock;
+                ASSERT_EQUAL(true, bfs::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
+                bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
+                nextBlock = block.getNextIndex();
+            }
+        }
+    }
+
+    void testFileUnlink()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // for storing block indices to make sure they've been deallocated after unlink
+        std::vector<uint64_t> blockIndices;
+
+        // test write followed by unlink
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), BIG_SIZE);
+            entry.flush();
+
+            // get allocated block indices
+            uint64_t startBlock = entry.getStartBlockIndex();
+            std::fstream in(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            blockIndices.push_back(startBlock);
+            bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
+            uint64_t nextBlock = block.getNextIndex();
+            while(nextBlock != startBlock) {
+                startBlock = nextBlock;
+                bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
+                blockIndices.push_back(startBlock);
+                nextBlock = block.getNextIndex();
+            }
+            in.close();
+
+            // no unlink and assert that file size is 0
+            entry.unlink();
+            ASSERT_EQUAL(0, entry.fileSize(), "testFileUnlink A");
+        }
+
+        // test that filesize is 0 when read back in
+        {
+            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            ASSERT_EQUAL(0, entry.fileSize(), "testFileUnlink B");
+
+            // test that blocks deallocated after unlink
+            std::vector<uint64_t>::iterator it = blockIndices.begin();
+            std::fstream in(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            for(; it != blockIndices.end(); ++it) {
+                ASSERT_EQUAL(false, bfs::detail::isBlockInUse(*it, blocks, in), "testFileUnlink: blockDeallocatedTest");
+            }
+            in.close();
+        }
+
+
     }
 
     void testBigWriteFollowedByRead()

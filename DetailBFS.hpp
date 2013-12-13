@@ -238,6 +238,39 @@ namespace bfs { namespace detail
     }
 
     /**
+     * @brief determines whether a file block is in use
+     * @param block the block to determine if in use
+     * @param blocks the total number of file blocks
+     * @param in the stream to read from
+     * @return true if allocated, false otherwise
+     */
+    inline bool isBlockInUse(uint64_t const block,
+                             uint64_t const blocks,
+                             std::fstream &in)
+    {
+        uint64_t bytes = blocks / uint64_t(8);
+        // read the bytes in to a buffer
+        std::vector<uint8_t> buf;
+        buf.assign(bytes, 0);
+        (void)in.seekg(8);
+        (void)in.read((char*)&buf.front(), bytes);
+
+        uint64_t byteThatStoresBit(0);
+        if (block < 8) {
+            uint8_t dat = buf[byteThatStoresBit];
+            return isBitSetInByte(dat, block);
+        } else {
+            //std::cout<<"here!"<<std::endl;
+            uint64_t const leftOver = block % 8;
+            uint64_t withoutLeftOver = block - leftOver;
+            byteThatStoresBit = (withoutLeftOver / 8) - 1;
+            ++byteThatStoresBit;
+            uint8_t &dat = buf[byteThatStoresBit];
+            return isBitSetInByte(dat, leftOver);
+        }
+    }
+
+    /**
      * @brief gets the the next available block
      * @param in the image stream
      * @return the next available block
@@ -356,11 +389,12 @@ namespace bfs { namespace detail
      */
     inline void updateVolumeBitmapWithOne(std::fstream &in,
                                           uint64_t const &blockUsed,
-                                          uint64_t const totalBlocks)
+                                          uint64_t const totalBlocks,
+                                          bool const set = true)
     {
         // how many bytes does this value fit in to?
         uint64_t bytes = totalBlocks / uint64_t(8);
-        setBlockToInUse(blockUsed, totalBlocks, in);
+        setBlockToInUse(blockUsed, totalBlocks, in, set);
     }
 
 }

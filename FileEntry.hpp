@@ -87,6 +87,11 @@ namespace bfs
          */
         void flush();
 
+        /**
+         * @brief deallocates blocks associated with this file entry; used
+         * in conjunction with deleting the file
+         */
+        void unlink();
 
       private:
 

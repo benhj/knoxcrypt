@@ -91,6 +91,8 @@ namespace bfs
         if (m_fileBlocks.empty()) {
             checkAndCreateWritableFileBlock();
             m_startBlock = m_currentBlock;
+        } else {
+            m_startBlock = m_fileBlocks[0].getIndex();
         }
         return m_startBlock;
     }
@@ -349,5 +351,21 @@ namespace bfs
         checkAndCreateWritableFileBlock();
         writeBufferedDataToBlock(m_buffer.size());
         m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
+    }
+
+    void
+    FileEntry::unlink()
+    {
+        // loop over all file blocks and update the volume bitmap indicating
+        // that block is no longer in use
+        std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
+        for(; it != m_fileBlocks.end(); ++it) {
+            uint64_t blockIndex = it->getIndex();
+            // false means to deallocate
+            detail::updateVolumeBitmapWithOne(stream, blockIndex, m_totalBlocks, false);
+        }
+        m_fileSize = 0;
+        stream.close();
     }
 }
