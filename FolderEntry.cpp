@@ -172,7 +172,7 @@ namespace bfs
     }
 
     FolderEntry
-    FolderEntry::getFolderEntry(std::string const &name)
+    FolderEntry::getFolderEntry(std::string const &name) const
     {
         // find out total number of entries. Should initialize this in constructor?
         uint64_t count = getNumberOfEntries();
@@ -216,12 +216,22 @@ namespace bfs
     {
         std::string const entryName = getEntryName(entryIndex);
         EntryType const entryType = getTypeForEntry(entryIndex);
-        FileEntry fe(getFileEntry(entryName));
+        uint64_t fileSize = 0;
+        uint64_t startBlock;
+        if(entryType == EntryType::FileType) {
+            FileEntry fe(getFileEntry(entryName));
+            fileSize = fe.fileSize();
+            startBlock = fe.getStartBlockIndex();
+        } else {
+            FolderEntry fe(getFolderEntry(entryName));
+            startBlock = fe.m_folderData.getStartBlockIndex();
+        }
+
         return EntryInfo(entryName,
-                        fe.fileSize(),
+                        fileSize,
                         entryType,
                         true, // writable
-                        fe.getStartBlockIndex(),
+                        startBlock,
                         entryIndex);
     }
 

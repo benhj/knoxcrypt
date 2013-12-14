@@ -62,7 +62,7 @@ namespace bfs
          * @param name the name of the entry to lookup
          * @return a copy of the FolderEntry with name
          */
-        FolderEntry getFolderEntry(std::string const &name);
+        FolderEntry getFolderEntry(std::string const &name) const;
 
         /**
          * @brief retrieves the name of this folder
