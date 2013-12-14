@@ -203,7 +203,10 @@ namespace bfs
         std::vector<EntryInfo> entries;
         uint64_t entryCount = getNumberOfEntries();
         for (long entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
-            entries.push_back(getEntryInfo(entryIndex));
+        	// only push back if the metadata is enabled
+        	if(entryMetaDataIsEnabled(entryIndex)) {
+        		entries.push_back(getEntryInfo(entryIndex));
+        	}
         }
         return entries;
     }
@@ -234,78 +237,105 @@ namespace bfs
         return detail::convertInt8ArrayToInt64(buf);
     }
 
+    namespace detail
+    {
+    	/**
+    	 * @brief checks if a given bit is set in the first byte of the
+    	 * entry metadata
+    	 * @param folderData the FileEntry data representing this folder entry
+    	 * @param n the entry metadata to look up about
+    	 * @param bit the bit to check
+    	 * @return true if bit is set, false otherwise
+    	 */
+    	bool checkMetaByte(FileEntry &folderData, int n, int bit)
+    	{
+            // note in the following the '1' represents first byte,
+            // the first bit of which indicates if entry is in use
+            // the '8' is number of bytes representing the first block index
+            // of the given file entry
+            uint32_t bufferSize = 1 + MAX_FILENAME_LENGTH + 8;
+
+            // note in the following the '8' bytes represent the number of
+            // entries in the folder
+            if (folderData.seek(8 + (n * bufferSize)) != -1) {
+                uint8_t byte;
+                folderData.read((char*)&byte, 1);
+                return (detail::isBitSetInByte(byte, bit));
+            }
+            throw std::runtime_error("Problem getting entry metaData enabled for index");
+    	}
+
+    	/**
+    	 * @brief retrieves data from the entry metadata
+    	 * @param folderData the metadata
+    	 * @param n index of the entry for which we want to retrieve the metadata of
+    	 * @param bufSize the size of the read buffer
+    	 * @param seekOff the seek offset
+    	 * @return the read meta data
+    	 */
+    	std::vector<uint8_t> doSeekAndReadOfEntryMetaData(FileEntry &folderData,
+    													  int n,
+    													  uint32_t bufSize = 0,
+    													  uint64_t seekOff = 0)
+		{
+            // note in the following the '1' represents first byte,
+            // the first bit of which indicates if entry is in use
+            // the '8' is number of bytes representing the first block index
+            // of the given file entry
+            uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
+
+            // note in the following the '8' bytes represent the number of
+            // entries in the folder
+            if (folderData.seek(8 + (n * bufferSize) + seekOff) != -1) {
+
+                std::vector<uint8_t> buffer;
+                buffer.resize(bufSize==0?bufferSize:bufSize);
+                folderData.read((char*)&buffer.front(), bufSize==0?bufferSize:bufSize);
+                return buffer;
+            }
+            throw std::runtime_error("Problem retrieving metadata");
+		}
+    }
+
+    bool
+    FolderEntry::entryMetaDataIsEnabled(uint64_t const n) const
+    {
+    	// the 0th bit indicates if metadata is in use. When a new
+    	// entry is created it is set to being in use. When deleted
+    	// it is unset
+    	return detail::checkMetaByte(m_folderData, n, 0);
+    }
+
     EntryType
     FolderEntry::getTypeForEntry(uint64_t const n) const
     {
-        // note in the following the '1' represents first byte,
-        // the first bit of which indicates if entry is in use
-        // the '8' is number of bytes representing the first block index
-        // of the given file entry
-        uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
-
-        // note in the following the '8' bytes represent the number of
-        // entries in the folder
-        if (m_folderData.seek(8 + (n * bufferSize)) != -1) {
-            uint8_t byte;
-            m_folderData.read((char*)&byte, 1);
-            return (detail::isBitSetInByte(byte, 1) ? EntryType::FileType : EntryType::FolderType);
-        }
-        throw std::runtime_error("Problem getting entry name for index");
+    	// the 1st bit indicates if metadata represents a file or a folder
+    	// if set, it represents a file; if unset, it represents a folder
+		return (detail::checkMetaByte(m_folderData, n, 1) ? EntryType::FileType : EntryType::FolderType);
     }
 
     std::string
-    FolderEntry::getEntryName(uint64_t const index) const
+    FolderEntry::getEntryName(uint64_t const n) const
     {
-        // note in the following the '1' represents first byte,
-        // the first bit of which indicates if entry is in use
-        // the '8' is number of bytes representing the first block index
-        // of the given file entry
-        uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
-
-        // note in the following the '8' bytes represent the number of
-        // entries in the folder
-        if (m_folderData.seek(8 + (index * bufferSize)) != -1) {
-
-            std::vector<uint8_t> buffer;
-            buffer.resize(bufferSize);
-            m_folderData.read((char*)&buffer.front(), bufferSize);
-            // read past the first byte up until the end minus the
-            // first block index bytes
-            std::string nameDat(buffer.begin() + 1, buffer.end() - 8);
-            std::string returnString;
-            int c = 0;
-            while (nameDat.at(c) != '\0') {
-                returnString.push_back(nameDat.at(c));
-                ++c;
-            }
-            return returnString;
-        }
-        throw std::runtime_error("Problem getting entry name for index");
+		std::vector<uint8_t> buffer = detail::doSeekAndReadOfEntryMetaData(m_folderData, n);
+		std::string nameDat(buffer.begin() + 1, buffer.end() - 8);
+		std::string returnString;
+		int c = 0;
+		while (nameDat.at(c) != '\0') {
+			returnString.push_back(nameDat.at(c));
+			++c;
+		}
+		return returnString;
     }
 
     uint64_t
     FolderEntry::getBlockIndexForEntry(uint64_t const n) const
     {
-
-        // note in the following, the '1' represents meta data for this
-        // filename descriptor and the 8 represents bytes storing the file
-        // entry offset. The values for the buffer are stored in the order
-        // in which they are given in the addition
-        uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
-
-        // note in the following the '8' bytes represent the number of
-        // entries in the folder so we seek past that bit; then we
-        // seek to the correct filename descriptor position given bufferSize
-        // Then, for the given descriptor that we've seeked to, we need to seek
-        // past the first byte which is descriptor metadata and past the actual
-        // filename data. We then end up at the start of the final 8 bytes which
-        // represents the offset of the first block making up the file entry
-        if (m_folderData.seek(8 + (n * bufferSize) + 1 + detail::MAX_FILENAME_LENGTH) != -1) {
-            uint8_t buf[8];
-            m_folderData.read((char*)&buf, 8);
-            return detail::convertInt8ArrayToInt64(buf);
-        }
-        throw std::runtime_error("Problem retrieving block index for file entry");
+		std::vector<uint8_t> buffer = detail::doSeekAndReadOfEntryMetaData(m_folderData,
+																		   n,
+																		   8,
+																		   (1 + detail::MAX_FILENAME_LENGTH));
+		return detail::convertInt8ArrayToInt64(&buffer.front());
     }
 
 }

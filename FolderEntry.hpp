@@ -143,6 +143,18 @@ namespace bfs
          */
         EntryType getTypeForEntry(uint64_t const n) const;
 
+        /**
+         * @brief determines if entry metadata is enabled. Entry metadata
+         * consists of one byte, the first bit of which determines if the
+         * metadata is in use or not. It won't be in use if the entry
+         * associated with the metadata has been deleted in whcih case
+         * this associated metadata can be overwritten when creating
+         * a new entry.
+         * @param n the entry for which we determine if in use
+         * @return a value indicating if specified entry metadata is in use
+         */
+        bool entryMetaDataIsEnabled(uint64_t const n) const;
+
         // the path of the bfs image
         std::string const m_imagePath;
 
