@@ -1,6 +1,7 @@
 #ifndef BFS_FILE_BLOCK_HPP__
 #define BFS_FILE_BLOCK_HPP__
 
+#include "BFSImageStream.hpp"
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
 
@@ -9,7 +10,6 @@
 #include <boost/iostreams/categories.hpp>  // sink_tag
 #include <iosfwd>                          // streamsize
 #include <string>
-#include <fstream>
 
 
 namespace bfs
@@ -39,7 +39,7 @@ namespace bfs
             , m_initialBytesWritten(0)
         {
             // set m_offset
-            std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
             m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks);
             (void)stream.seekp(m_offset);
 
@@ -76,7 +76,7 @@ namespace bfs
             , m_extraOffset(0)
         {
             // set m_offset
-            std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
             m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks);
             (void)stream.seekg(m_offset);
 
@@ -106,7 +106,7 @@ namespace bfs
         std::streamsize read(char * const buf, std::streamsize const n) const
         {
             // open the image stream for reading
-            std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
             (void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_extraOffset);
             (void)stream.read((char*)buf, n);
 
@@ -117,7 +117,7 @@ namespace bfs
         std::streamsize write(char const * const buf, std::streamsize const n) const
         {
             // open the image stream for writing
-            std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
             (void)stream.seekp(m_offset + detail::FILE_BLOCK_META + m_extraOffset);
             (void)stream.write((char*)buf, n);
 
@@ -176,7 +176,7 @@ namespace bfs
         void setNext(uint64_t const next)
         {
             m_next = next;
-            std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
             (void)stream.seekp(m_offset+4); // 4 indicate bytes written
             // update m_next
             uint8_t nextDat[8];
@@ -188,7 +188,7 @@ namespace bfs
 
         void registerBlockWithVolumeBitmap()
         {
-            std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
             detail::updateVolumeBitmapWithOne(stream, m_index, m_totalBlocks);
             stream.close();
         }

@@ -1,3 +1,4 @@
+#include "BFSImageStream.hpp"
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
 #include "FileEntry.hpp"
@@ -143,7 +144,7 @@ namespace bfs
 
     void FileEntry::newWritableFileBlock() const
     {
-        std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         std::vector<uint64_t> firstAndNext = detail::getNAvailableBlocks(stream, 2, m_totalBlocks);
         stream.close();
         FileBlock block(m_imagePath, m_totalBlocks, firstAndNext[0], firstAndNext[0]);
@@ -358,7 +359,7 @@ namespace bfs
     {
         // loop over all file blocks and update the volume bitmap indicating
         // that block is no longer in use
-        std::fstream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
         for(; it != m_fileBlocks.end(); ++it) {
             uint64_t blockIndex = it->getIndex();

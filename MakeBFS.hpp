@@ -1,6 +1,7 @@
 #ifndef BFS_MAKE_BFS_HPP__
 #define BFS_MAKE_BFS_HPP__
 
+#include "BFSImageStream.hpp"
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
 #include "FileBlock.hpp"
@@ -36,7 +37,7 @@ namespace bfs
             detail::convertUInt64ToInt8Array(fileCount, sizeBytes);
         }
 
-        void writeOutFileSpaceBytes(uint64_t const fileBlockCount, std::fstream &out)
+        void writeOutFileSpaceBytes(uint64_t const fileBlockCount, BFSImageStream &out)
         {
             for (uint64_t i(0); i < fileBlockCount ; ++i) {
                 std::vector<uint8_t> ints;
@@ -58,7 +59,7 @@ namespace bfs
          *
          * @param blocks
          */
-        void createVolumeBitMap(uint64_t const blocks, std::fstream &out)
+        void createVolumeBitMap(uint64_t const blocks, BFSImageStream &out)
         {
             //
             // each block will be represented by a bit. If allocated this
@@ -100,7 +101,7 @@ namespace bfs
 
             // write out size, and volume bitmap bytes
 
-            std::fstream out(imageName.c_str(), std::ios::out | std::ios::binary);
+            BFSImageStream out(imageName, std::ios::out | std::ios::binary);
             out.write((char*)sizeBytes, 8);
             createVolumeBitMap(blocks, out);
 

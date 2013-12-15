@@ -1,3 +1,4 @@
+#include "BFSImageStream.hpp"
 #include "DetailBFS.hpp"
 #include "DetailFolder.hpp"
 #include "FolderEntry.hpp"
@@ -238,7 +239,7 @@ namespace bfs
     uint64_t
     FolderEntry::getNumberOfEntries() const
     {
-        std::fstream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream out(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartBlockIndex(), m_totalBlocks);
         (void)out.seekg(offset + detail::FILE_BLOCK_META);
         uint8_t buf[8];

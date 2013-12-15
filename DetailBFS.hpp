@@ -1,9 +1,10 @@
 #ifndef BFS_BFS_DETAIL_BFS_HPP__
 #define BFS_BFS_DETAIL_BFS_HPP__
 
+#include "BFSImageStream.hpp"
+
 #include <boost/optional.hpp>
 
-#include <fstream>
 #include <iostream>
 #include <stdint.h>
 #include <vector>
@@ -56,9 +57,9 @@ namespace bfs { namespace detail
      * @param in the image stream
      * @return image size
      */
-    inline uint64_t getImageSize(std::fstream &in)
+    inline uint64_t getImageSize(bfs::BFSImageStream &in)
     {
-        in.seekg(0, in.end);
+        in.seekg(0, std::ios::end);
         uint64_t const bytes(in.tellg());
         return bytes;
     }
@@ -68,9 +69,9 @@ namespace bfs { namespace detail
      * @param in the image stream
      * @return amount of file space
      */
-    inline uint64_t getBlockCount(std::fstream &in)
+    inline uint64_t getBlockCount(bfs::BFSImageStream &in)
     {
-        in.seekg(0, in.beg);
+        in.seekg(0);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         return convertInt8ArrayToInt64(dat);
@@ -82,12 +83,12 @@ namespace bfs { namespace detail
      * @param totalFileBlocks total blocks in file space
      * @return the number of files
      */
-    inline uint64_t getFileCount(std::fstream &in, uint64_t const totalFileBlocks = 0)
+    inline uint64_t getFileCount(bfs::BFSImageStream &in, uint64_t const totalFileBlocks = 0)
     {
         uint64_t blockCount = totalFileBlocks;
         if (blockCount == 0) { // read in, in this case as should never be 0
             uint8_t blockCountBytes[8];
-            in.seekg(0, in.beg);
+            in.seekg(0);
             (void)in.read((char*)blockCountBytes, 8);
             blockCount = convertInt8ArrayToInt64(blockCountBytes);
         }
@@ -104,7 +105,7 @@ namespace bfs { namespace detail
      * @param totalFileBlocks total fs blocks
      * @param increment whether to increment (true) or decrement (false) the file count
      */
-    inline void incrementFileCount(std::fstream &in, uint64_t const totalFileBlocks, bool const increment = true)
+    inline void incrementFileCount(bfs::BFSImageStream &in, uint64_t const totalFileBlocks, bool const increment = true)
     {
         uint64_t numberOfFiles = getFileCount(in, totalFileBlocks);
         if (increment) {
@@ -126,9 +127,9 @@ namespace bfs { namespace detail
      * @param in the bfs image stream
      * @return the number of blocks
      */
-    inline uint64_t getNumberOfBlocks(std::fstream &in)
+    inline uint64_t getNumberOfBlocks(bfs::BFSImageStream &in)
     {
-        (void)in.seekg(0, in.beg);
+        (void)in.seekg(0);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         return convertInt8ArrayToInt64(dat);
@@ -139,9 +140,9 @@ namespace bfs { namespace detail
      * @param in the bfs image stream
      * @param blocksUsed the number of blocks to increment block usage by
      */
-    inline void setBlocksUsed(std::fstream &in, uint64_t const blocksUsed, bool increment = true)
+    inline void setBlocksUsed(bfs::BFSImageStream &in, uint64_t const blocksUsed, bool increment = true)
     {
-        (void)in.seekg(0, in.beg);
+        (void)in.seekg(0);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         uint64_t blockCountStore = convertInt8ArrayToInt64(dat);
@@ -151,7 +152,7 @@ namespace bfs { namespace detail
             blockCountStore -= blocksUsed;
         }
         convertUInt64ToInt8Array(blockCountStore, dat);
-        (void)in.seekp(0, in.beg);
+        (void)in.seekp(0);
         (void)in.write((char*)dat, 8);
 
     }
@@ -205,7 +206,7 @@ namespace bfs { namespace detail
      */
     inline void setBlockToInUse(uint64_t const block,
                                 uint64_t const blocks,
-                                std::fstream &in,
+                                bfs::BFSImageStream &in,
                                 bool const set = true)
     {
         uint64_t bytes = blocks / uint64_t(8);
@@ -246,7 +247,7 @@ namespace bfs { namespace detail
      */
     inline bool isBlockInUse(uint64_t const block,
                              uint64_t const blocks,
-                             std::fstream &in)
+                             bfs::BFSImageStream &in)
     {
         uint64_t bytes = blocks / uint64_t(8);
         // read the bytes in to a buffer
@@ -276,7 +277,7 @@ namespace bfs { namespace detail
      * @return the next available block
      */
     typedef boost::optional<uint64_t> OptionalBlock;
-    inline OptionalBlock getNextAvailableBlock(std::fstream &in, uint64_t const blocks_ = 0)
+    inline OptionalBlock getNextAvailableBlock(bfs::BFSImageStream &in, uint64_t const blocks_ = 0)
     {
         // get number of blocks that make up fs
         uint64_t blocks = blocks_;
@@ -330,7 +331,7 @@ namespace bfs { namespace detail
      * @param totalBlocks the total number of blocks in the bfs
      * @return a vector of available file block indices
      */
-    inline std::vector<uint64_t> getNAvailableBlocks(std::fstream &in,
+    inline std::vector<uint64_t> getNAvailableBlocks(bfs::BFSImageStream &in,
                                                      uint64_t const blocksRequired,
                                                      uint64_t const totalBlocks)
     {
@@ -369,7 +370,7 @@ namespace bfs { namespace detail
      * @param blocksUsed a vector of newly allocated file block indices
      * @param totalBlocks total number of fs blocks
      */
-    inline void updateVolumeBitmap(std::fstream &in,
+    inline void updateVolumeBitmap(BFSImageStream &in,
                                    std::vector<uint64_t> const &blocksUsed,
                                    uint64_t const totalBlocks)
     {
@@ -387,7 +388,7 @@ namespace bfs { namespace detail
      * @param blockUsed the used block
      * @param totalBlocks total number of fs blocks
      */
-    inline void updateVolumeBitmapWithOne(std::fstream &in,
+    inline void updateVolumeBitmapWithOne(BFSImageStream &in,
                                           uint64_t const &blockUsed,
                                           uint64_t const totalBlocks,
                                           bool const set = true)

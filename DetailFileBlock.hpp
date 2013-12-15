@@ -1,9 +1,9 @@
 #ifndef BFS_BFS_DETAIL_FILE_BLOCK_HPP__
 #define BFS_BFS_DETAIL_FILE_BLOCK_HPP__
 
+#include "BFSImageStream.hpp"
 #include "DetailBFS.hpp"
 
-#include <fstream>
 #include <iostream>
 #include <stdint.h>
 #include <vector>
@@ -33,7 +33,7 @@ namespace bfs { namespace detail
      * @param totalBlocks the total number of blocks in the bfs
      * @return the next file block index
      */
-    inline uint64_t getIndexOfNextFileBlockFromFileBlockN(std::fstream &in,
+    inline uint64_t getIndexOfNextFileBlockFromFileBlockN(bfs::BFSImageStream &in,
                                                           uint64_t const n,
                                                           uint64_t const totalBlocks)
     {
@@ -51,7 +51,7 @@ namespace bfs { namespace detail
      * @param totalBlocks the total number of blocks in the bfs
      * @return the next file block index
      */
-    inline uint32_t getNumberOfDataBytesWrittenToFileBlockN(std::fstream &in,
+    inline uint32_t getNumberOfDataBytesWrittenToFileBlockN(bfs::BFSImageStream &in,
                                                             uint64_t const n,
                                                             uint64_t const totalBlocks)
     {
@@ -62,7 +62,7 @@ namespace bfs { namespace detail
         return convertInt4ArrayToInt32(dat);
     }
 
-    inline void writeNumberOfDataBytesWrittenToFileBlockN(std::fstream &in,
+    inline void writeNumberOfDataBytesWrittenToFileBlockN(bfs::BFSImageStream &in,
                                                           uint64_t const n,
                                                           uint64_t const totalBlocks,
                                                           uint32_t const bytesWritten)
@@ -74,7 +74,7 @@ namespace bfs { namespace detail
         (void)in.write((char*)dat, 4);
     }
 
-    inline void writeIndexOfNextFileBlockFromFileBlockN(std::fstream &in,
+    inline void writeIndexOfNextFileBlockFromFileBlockN(bfs::BFSImageStream &in,
                                                         uint64_t const n,
                                                         uint64_t const totalBlocks,
                                                         uint32_t const nextIndex)

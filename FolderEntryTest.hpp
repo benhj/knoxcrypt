@@ -1,3 +1,4 @@
+#include "BFSImageStream.hpp"
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
 #include "FileEntry.hpp"
@@ -12,8 +13,6 @@
 
 #include <cassert>
 #include <sstream>
-#include <fstream>
-
 
 class FolderEntryTest
 {

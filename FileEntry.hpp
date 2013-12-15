@@ -10,7 +10,6 @@
 #include <boost/iostreams/positioning.hpp>  // stream_offset
 
 #include <string>
-#include <fstream>
 
 namespace bfs
 {

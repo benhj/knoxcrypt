@@ -1,3 +1,4 @@
+#include "BFSImageStream.hpp"
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
 #include "FileBlock.hpp"
@@ -11,7 +12,6 @@
 
 #include <cassert>
 #include <sstream>
-#include <fstream>
 
 class FileBlockTest
 {
@@ -45,7 +45,7 @@ class FileBlockTest
 
         // test that actual written correct
         assert(block.getDataBytesWritten() == 26);
-        std::fstream stream(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream stream(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         uint64_t size = bfs::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
         ASSERT_EQUAL(size, 26, "blockWriteAndReadTest: correctly returned block size");
 

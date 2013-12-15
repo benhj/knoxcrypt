@@ -1,9 +1,9 @@
 #ifndef BFS_BFS_DETAIL_FOLDER_HPP__
 #define BFS_BFS_DETAIL_FOLDER_HPP__
 
+#include "BFSImageStream.hpp"
 #include "DetailFileBlock.hpp"
 
-#include <fstream>
 #include <iostream>
 #include <stdint.h>
 #include <vector>
@@ -15,7 +15,7 @@ namespace bfs { namespace detail
                                    uint64_t const startBlock,
                                    uint64_t const totalBlocks)
     {
-        std::fstream out(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream out(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, totalBlocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
@@ -32,7 +32,7 @@ namespace bfs { namespace detail
                                    uint64_t const startBlock,
                                    uint64_t const totalBlocks)
     {
-        std::fstream out(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream out(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, totalBlocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
