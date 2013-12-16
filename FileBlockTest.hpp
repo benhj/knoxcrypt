@@ -58,9 +58,11 @@ class FileBlockTest
         // test that data can be read correctly
         std::vector<uint8_t> dat;
         dat.resize(size);
-        assert(block.read((char*)&dat.front(), size) == size);
+        block.seek(0);
+        std::streamsize bytesRead = block.read((char*)&dat.front(), size);
+        ASSERT_EQUAL(bytesRead, size, "blockWriteAndReadTest: data read bytes read check");
         std::string str(dat.begin(), dat.end());
-        ASSERT_EQUAL(str, testData, "blockWriteAndReadTest: data read");
+        ASSERT_EQUAL(str, testData, "blockWriteAndReadTest: data read content check");
     }
 
 };

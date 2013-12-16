@@ -225,6 +225,17 @@ namespace bfs
         // in this case the current block is exhausted so we need a new one
         if (!currentBlockHasAvailableSpace()) {
 
+            // if in overwrite mode, maybe we want to overwrite current bytes
+            if(m_writeMode == AppendOrOverwrite::Overwrite) {
+
+                // if the reported stream position in the block is less that
+                // the block's total capacity, then we don't create a new block
+                // we simple overwrite
+                if(m_fileBlocks[m_blockIndex].tell() < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+                    return;
+                }
+
+            }
             newWritableFileBlock();
 
             // update next index of last block
@@ -261,9 +272,8 @@ namespace bfs
         // make a new block to write to. Not necessarily the case that
         // we want a new file block if in append mode. Won't be in append
         // mode if no data bytes have yet been written
-        if (m_writeMode == AppendOrOverwrite::Append) {
-            checkAndCreateWritableFileBlock();
-        }
+        checkAndCreateWritableFileBlock();
+
 
         // if the buffer is full, then write
         uint32_t initialBytesWritten(getInitialBytesWrittenToCurrentFileBlock());
@@ -305,14 +315,14 @@ namespace bfs
         // or appending etc. starts
         std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
         for (; it != m_fileBlocks.end(); ++it) {
-            it->setExtraOffset(0);
+            it->seek(0);
         }
 
         // if at end just seek right to end and don't do anything else
         if (way == std::ios_base::end) {
             m_blockIndex = m_fileBlocks.size() - 1;
             uint32_t blockPosition = m_fileBlocks[m_blockIndex].getDataBytesWritten();
-            m_fileBlocks[m_blockIndex].setExtraOffset(blockPosition);
+            m_fileBlocks[m_blockIndex].seek(blockPosition);
             return off;
         }
 
@@ -356,7 +366,7 @@ namespace bfs
         } else {
             // set the position to seek to for given block
             // this will be the point from which we read or write
-            m_fileBlocks[m_blockIndex].setExtraOffset(blockPosition);
+            m_fileBlocks[m_blockIndex].seek(blockPosition);
         }
 
         return off;
@@ -365,9 +375,7 @@ namespace bfs
     void
     FileEntry::flush()
     {
-        if (m_writeMode == AppendOrOverwrite::Append) {
-            checkAndCreateWritableFileBlock();
-        }
+        checkAndCreateWritableFileBlock();
         writeBufferedDataToBlock(m_buffer.size());
         m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     }

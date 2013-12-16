@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <boost/iostreams/categories.hpp>  // sink_tag
+#include <boost/iostreams/positioning.hpp>  // stream_offset
 #include <iosfwd>                          // streamsize
 #include <string>
 
@@ -44,15 +45,14 @@ namespace bfs
                   uint64_t const index,
                   AppendOrOverwrite const appendOrOverwrite = AppendOrOverwrite::Append);
 
-        /**
-         * @brief in case needing to skip some bytes
-         * @param extraOffset the amount to update m_offset by
-         */
-        void setExtraOffset(uint64_t const extraOffset);
-
         std::streamsize read(char * const buf, std::streamsize const n) const;
 
         std::streamsize write(char const * const buf, std::streamsize const n) const;
+
+        boost::iostreams::stream_offset seek(boost::iostreams::stream_offset off,
+                                             std::ios_base::seekdir way = std::ios_base::beg);
+
+        boost::iostreams::stream_offset tell() const;
 
         uint32_t getDataBytesWritten() const;
 
@@ -79,7 +79,7 @@ namespace bfs
         mutable uint32_t m_initialBytesWritten;
         mutable uint64_t m_next;
         mutable uint64_t m_offset;
-        mutable uint64_t m_extraOffset;
+        mutable boost::iostreams::stream_offset m_seekPos;
         AppendOrOverwrite m_writeMode;
 
     };

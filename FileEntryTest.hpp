@@ -24,6 +24,7 @@ class FileEntryTest
         testFileUnlink();
         testBigWriteFollowedByRead();
         testBigWriteFollowedBySmallAppend();
+        testBigWriteFollowedBySmallOverwriteAtStart();
         testSmallWriteFollowedByBigAppend();
         testSeekAndReadSmallFile();
         testWriteBigDataAppendSmallStringSeekToAndReadAppendedString();
@@ -198,6 +199,42 @@ class FileEntryTest
             entry.read(&vec.front(), BIG_SIZE + appendString.length());
             std::string recovered(vec.begin(), vec.begin() + BIG_SIZE + appendString.length());
             ASSERT_EQUAL(recovered, expected, "testBigWriteFollowedBySmallAppend");
+        }
+    }
+
+    void testBigWriteFollowedBySmallOverwriteAtStart()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // initial big write
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), BIG_SIZE);
+            entry.flush();
+        }
+
+        // secondary overwrite
+        std::string testData("goodbye...!");
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1, bfs::AppendOrOverwrite::Overwrite);
+            entry.seek(0);
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
+            // ensure correct file size
+            ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwrite correct file size");
+        }
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            std::vector<uint8_t> readBackIn;
+            readBackIn.resize(testData.length());
+            entry.seek(0);
+            entry.read((char*)&readBackIn.front(), testData.length());
+            std::string result(readBackIn.begin(), readBackIn.end());
+            ASSERT_EQUAL(testData, result, "testBigWriteFollowedBySmallOverwrite correct content");
         }
     }
 

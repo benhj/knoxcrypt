@@ -15,7 +15,7 @@ namespace bfs
         , m_bytesWritten(0)
         , m_next(next)
         , m_offset(0)
-        , m_extraOffset(0)
+        , m_seekPos(0)
         , m_initialBytesWritten(0)
         , m_writeMode(appendOrOverwrite)
     {
@@ -49,7 +49,7 @@ namespace bfs
         , m_bytesWritten(0)
         , m_next(0)
         , m_offset(0)
-        , m_extraOffset(0)
+        , m_seekPos(0)
         , m_writeMode(appendOrOverwrite)
     {
         // set m_offset
@@ -71,10 +71,18 @@ namespace bfs
         stream.close();
     }
 
-    void
-    FileBlock::setExtraOffset(uint64_t const extraOffset)
+    boost::iostreams::stream_offset
+    FileBlock::tell() const
     {
-        m_extraOffset = extraOffset;
+        return m_seekPos;
+    }
+
+    boost::iostreams::stream_offset
+    FileBlock::seek(boost::iostreams::stream_offset off,
+                    std::ios_base::seekdir way)
+    {
+        m_seekPos = off;
+        return m_seekPos;
     }
 
     std::streamsize
@@ -82,7 +90,7 @@ namespace bfs
     {
         // open the image stream for reading
         BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        (void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_extraOffset);
+        (void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_seekPos);
         (void)stream.read((char*)buf, n);
         stream.close();
         return n;
@@ -93,7 +101,7 @@ namespace bfs
     {
         // open the image stream for writing
         BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        (void)stream.seekp(m_offset + detail::FILE_BLOCK_META + m_extraOffset);
+        (void)stream.seekp(m_offset + detail::FILE_BLOCK_META + m_seekPos);
         (void)stream.write((char*)buf, n);
 
         // do updates to file block metadata only if in append mode
@@ -111,7 +119,7 @@ namespace bfs
             detail::convertInt32ToInt4Array(m_bytesWritten, sizeDat);
             (void)stream.write((char*)sizeDat, 4);
 
-            if (n < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META || m_extraOffset > 0) {
+            if (n < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META || m_seekPos > 0) {
 
                 m_next = m_index;
                 // update m_next
@@ -123,6 +131,8 @@ namespace bfs
 
         stream.flush();
         stream.close();
+
+        m_seekPos += n;
 
         return n;
     }

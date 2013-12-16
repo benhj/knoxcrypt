@@ -2,6 +2,7 @@
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
 #include "MakeBFS.hpp"
+#include "TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -36,7 +37,7 @@ class MakeBFSTest
 
         // test that enough bytes are written
         bfs::BFSImageStream is(testPath.string(), std::ios::in | std::ios::binary);
-        assert(blocks == bfs::detail::getBlockCount(is));
+        ASSERT_EQUAL(blocks, bfs::detail::getBlockCount(is), "correctBlockCountIsReported");
         is.close();
     }
 
@@ -55,7 +56,7 @@ class MakeBFSTest
         // convert the byte array back to uint64 representation
         uint64_t reported = bfs::detail::getFileCount(is);
         is.close();
-        assert(reported == fileCount);
+        ASSERT_EQUAL(reported, fileCount, "correctNumberOfFilesIsReported");
     }
 
     void firstBlockIsReportedAsBeingFree()
@@ -68,6 +69,7 @@ class MakeBFSTest
         bfs::BFSImageStream is(testPath.string(), std::ios::in | std::ios::binary);
         bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
         assert(*p == 1);
+        ASSERT_EQUAL(*p, 1, "firstBlockIsReportedAsBeingFree");
         is.close();
     }
 
@@ -84,26 +86,31 @@ class MakeBFSTest
         assert(*p == 2);
 
         // check that rest of map can also be set correctly
+        bool broken = false;
         for (int i = 2; i < blocks - 1; ++i) {
             bfs::detail::setBlockToInUse(i, blocks, is);
             p = bfs::detail::getNextAvailableBlock(is);
-            assert(*p == i + 1);
+            if(*p != i + 1) {
+                broken = true;
+                break;
+            }
         }
+        ASSERT_EQUAL(broken, false, "blocksCanBeSetAndCleared A");
 
         // check that bit 25 (arbitrary) can be unset again
         bfs::detail::setBlockToInUse(25, blocks, is, false);
         p = bfs::detail::getNextAvailableBlock(is);
-        assert(*p == 25);
+        ASSERT_EQUAL(*p, 25, "blocksCanBeSetAndCleared B");
 
         // should still be 25 when blocks after 25 are also made available
         bfs::detail::setBlockToInUse(27, blocks, is, false);
         p = bfs::detail::getNextAvailableBlock(is);
-        assert(*p == 25);
+        ASSERT_EQUAL(*p, 25, "blocksCanBeSetAndCleared C");
 
         // should now be 27 since block 25 is made unavailable
         bfs::detail::setBlockToInUse(25, blocks, is);
         p = bfs::detail::getNextAvailableBlock(is);
-        assert(*p == 27);
+        ASSERT_EQUAL(*p, 27, "blocksCanBeSetAndCleared D");
 
         is.close();
     }
