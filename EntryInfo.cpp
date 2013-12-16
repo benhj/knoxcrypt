@@ -3,11 +3,11 @@
 namespace bfs
 {
     EntryInfo::EntryInfo(std::string const &fileName,
-              uint64_t const &fileSize,
-              EntryType const &entryType,
-              bool const writable,
-              uint64_t const firstFileBlock,
-              uint64_t const folderIndex)
+                         uint64_t const &fileSize,
+                         EntryType const &entryType,
+                         bool const writable,
+                         uint64_t const firstFileBlock,
+                         uint64_t const folderIndex)
         : m_fileName(fileName)
         , m_fileSize(fileSize)
         , m_entryType(entryType)
@@ -55,5 +55,3 @@ namespace bfs
     }
 
 }
-
-

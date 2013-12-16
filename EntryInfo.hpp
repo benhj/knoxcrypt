@@ -10,7 +10,7 @@ namespace bfs
 
     class EntryInfo
     {
-    public:
+      public:
         EntryInfo(std::string const &fileName,
                   uint64_t const &fileSize,
                   EntryType const &entryType,
@@ -30,7 +30,7 @@ namespace bfs
 
         uint64_t folderIndex() const;
 
-    private:
+      private:
         std::string m_fileName;
         uint64_t m_fileSize;
         EntryType m_entryType;

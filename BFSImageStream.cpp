@@ -23,26 +23,26 @@ namespace bfs
     }
 
     BFSImageStream&
-    BFSImageStream::seekg (std::streampos pos)
+    BFSImageStream::seekg(std::streampos pos)
     {
         (void)m_stream.seekg(pos);
         return *this;
     }
     BFSImageStream&
-    BFSImageStream::seekg (std::streamoff off, std::ios_base::seekdir way)
+    BFSImageStream::seekg(std::streamoff off, std::ios_base::seekdir way)
     {
         (void)m_stream.seekg(off, way);
         return *this;
     }
 
     BFSImageStream&
-    BFSImageStream::seekp (std::streampos pos)
+    BFSImageStream::seekp(std::streampos pos)
     {
         (void)m_stream.seekp(pos);
         return *this;
     }
     BFSImageStream&
-    BFSImageStream::seekp (std::streamoff off, std::ios_base::seekdir way)
+    BFSImageStream::seekp(std::streamoff off, std::ios_base::seekdir way)
     {
         (void)m_stream.seekp(off, way);
         return *this;

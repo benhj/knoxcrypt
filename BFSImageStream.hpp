@@ -9,28 +9,28 @@ namespace bfs
 
     class BFSImageStream
     {
-        public:
-            explicit BFSImageStream(std::string const &path,
-                    std::ios::openmode mode = std::ios::out | std::ios::binary);
+      public:
+        explicit BFSImageStream(std::string const &path,
+                                std::ios::openmode mode = std::ios::out | std::ios::binary);
 
-            BFSImageStream& read(char * const buf, std::streamsize const n);
+        BFSImageStream& read(char * const buf, std::streamsize const n);
 
-            BFSImageStream& write(char const * buf, std::streamsize const n);
+        BFSImageStream& write(char const * buf, std::streamsize const n);
 
-            BFSImageStream& seekg (std::streampos pos);
-            BFSImageStream& seekg (std::streamoff off, std::ios_base::seekdir way);
-            BFSImageStream& seekp (std::streampos pos);
-            BFSImageStream& seekp (std::streamoff off, std::ios_base::seekdir way);
-            std::streampos tellg();
-            std::streampos tellp();
+        BFSImageStream& seekg(std::streampos pos);
+        BFSImageStream& seekg(std::streamoff off, std::ios_base::seekdir way);
+        BFSImageStream& seekp(std::streampos pos);
+        BFSImageStream& seekp(std::streamoff off, std::ios_base::seekdir way);
+        std::streampos tellg();
+        std::streampos tellp();
 
-            void flush();
+        void flush();
 
-            void close();
+        void close();
 
-        private:
-            BFSImageStream();
-            std::fstream m_stream;
+      private:
+        BFSImageStream();
+        std::fstream m_stream;
     };
 
 }

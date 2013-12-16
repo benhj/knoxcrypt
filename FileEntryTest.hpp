@@ -78,7 +78,7 @@ class FileEntryTest
             ASSERT_EQUAL(true, bfs::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
             bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
             uint64_t nextBlock = block.getNextIndex();
-            while(nextBlock != startBlock) {
+            while (nextBlock != startBlock) {
                 startBlock = nextBlock;
                 ASSERT_EQUAL(true, bfs::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
                 bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
@@ -109,7 +109,7 @@ class FileEntryTest
             blockIndices.push_back(startBlock);
             bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
             uint64_t nextBlock = block.getNextIndex();
-            while(nextBlock != startBlock) {
+            while (nextBlock != startBlock) {
                 startBlock = nextBlock;
                 bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
                 blockIndices.push_back(startBlock);
@@ -130,7 +130,7 @@ class FileEntryTest
             // test that blocks deallocated after unlink
             std::vector<uint64_t>::iterator it = blockIndices.begin();
             bfs::BFSImageStream in(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-            for(; it != blockIndices.end(); ++it) {
+            for (; it != blockIndices.end(); ++it) {
                 ASSERT_EQUAL(false, bfs::detail::isBlockInUse(*it, blocks, in), "testFileUnlink: blockDeallocatedTest");
             }
             in.close();

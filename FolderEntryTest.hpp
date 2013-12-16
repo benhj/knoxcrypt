@@ -46,10 +46,10 @@ class FolderEntryTest
     {
         bfs::FolderEntry folder(p.string(), blocks, 0, "root");
         folder.addFileEntry("test.txt");
-        folder.addFileEntry("fucker.log");
+        folder.addFileEntry("some.log");
         folder.addFolderEntry("folderA");
-        folder.addFileEntry("crap.jpg");
-        folder.addFileEntry("shitter.mp3");
+        folder.addFileEntry("picture.jpg");
+        folder.addFileEntry("vai.mp3");
         folder.addFolderEntry("folderB");
         return folder;
     }
@@ -62,10 +62,10 @@ class FolderEntryTest
         {
             bfs::FolderEntry folder = createTestFolder(testPath, blocks);
             ASSERT_EQUAL(folder.getEntryInfo(0).filename(), "test.txt", "testAddEntryNameRetrieval A");
-            ASSERT_EQUAL(folder.getEntryInfo(1).filename(), "fucker.log", "testAddEntryNameRetrieval B");
+            ASSERT_EQUAL(folder.getEntryInfo(1).filename(), "some.log", "testAddEntryNameRetrieval B");
             ASSERT_EQUAL(folder.getEntryInfo(2).filename(), "folderA", "testAddEntryNameRetrieval B");
-            ASSERT_EQUAL(folder.getEntryInfo(3).filename(), "crap.jpg", "testAddEntryNameRetrieval C");
-            ASSERT_EQUAL(folder.getEntryInfo(4).filename(), "shitter.mp3", "testAddEntryNameRetrieval D");
+            ASSERT_EQUAL(folder.getEntryInfo(3).filename(), "picture.jpg", "testAddEntryNameRetrieval C");
+            ASSERT_EQUAL(folder.getEntryInfo(4).filename(), "vai.mp3", "testAddEntryNameRetrieval D");
             ASSERT_EQUAL(folder.getEntryInfo(5).filename(), "folderB", "testAddEntryNameRetrieval B");
         }
     }
@@ -79,10 +79,10 @@ class FolderEntryTest
         ASSERT_EQUAL(entries.size(), 6, "testListAllEntries: number of entries");
         std::vector<bfs::EntryInfo>::iterator it = entries.begin();
         ASSERT_EQUAL(entries[0].filename(), "test.txt", "testListAllEntries: filename A");
-        ASSERT_EQUAL(entries[1].filename(), "fucker.log", "testListAllEntries: filename B");
+        ASSERT_EQUAL(entries[1].filename(), "some.log", "testListAllEntries: filename B");
         ASSERT_EQUAL(entries[2].filename(), "folderA", "testListAllEntries: filename C");
-        ASSERT_EQUAL(entries[3].filename(), "crap.jpg", "testListAllEntries: filename D");
-        ASSERT_EQUAL(entries[4].filename(), "shitter.mp3", "testListAllEntries: filename E");
+        ASSERT_EQUAL(entries[3].filename(), "picture.jpg", "testListAllEntries: filename D");
+        ASSERT_EQUAL(entries[4].filename(), "vai.mp3", "testListAllEntries: filename E");
         ASSERT_EQUAL(entries[5].filename(), "folderB", "testListAllEntries: filename F");
     }
 
@@ -119,7 +119,7 @@ class FolderEntryTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
         bfs::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testData("some test data!");
-        bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+        bfs::FileEntry entry = folder.getFileEntry("some.log");
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), testData.length());
         entry.flush();
@@ -137,7 +137,7 @@ class FolderEntryTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
         bfs::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testString(createLargeStringToWrite());
-        bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+        bfs::FileEntry entry = folder.getFileEntry("some.log");
         std::vector<uint8_t> vec(testString.begin(), testString.end());
         entry.write((char*)&vec.front(), testString.length());
         entry.flush();
@@ -156,14 +156,14 @@ class FolderEntryTest
         std::string testData("some test data!");
         {
             bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
         }
         {
             std::string testString(createLargeStringToWrite());
-            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log");
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -185,12 +185,12 @@ class FolderEntryTest
         std::string testString(createLargeStringToWrite());
         {
             bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log");
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
         }
         {
-            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -211,7 +211,7 @@ class FolderEntryTest
         bfs::FolderEntry folder = createTestFolder(testPath, blocks);
         {
             std::string testData("some test data!");
-            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -223,7 +223,7 @@ class FolderEntryTest
 
         {
             std::string testString(createLargeStringToWrite());
-            bfs::FileEntry entry = folder.getFileEntry("crap.jpg");
+            bfs::FileEntry entry = folder.getFileEntry("picture.jpg");
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -243,7 +243,7 @@ class FolderEntryTest
 
         {
             std::string testString(createLargeStringToWrite());
-            bfs::FileEntry entry = folder.getFileEntry("crap.jpg");
+            bfs::FileEntry entry = folder.getFileEntry("picture.jpg");
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -254,7 +254,7 @@ class FolderEntryTest
         }
         {
             std::string testData("some test data!");
-            bfs::FileEntry entry = folder.getFileEntry("fucker.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();

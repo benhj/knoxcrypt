@@ -361,7 +361,7 @@ namespace bfs
         // that block is no longer in use
         bfs::BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
         std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
-        for(; it != m_fileBlocks.end(); ++it) {
+        for (; it != m_fileBlocks.end(); ++it) {
             uint64_t blockIndex = it->getIndex();
             // false means to deallocate
             detail::updateVolumeBitmapWithOne(stream, blockIndex, m_totalBlocks, false);
