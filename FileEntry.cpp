@@ -169,6 +169,8 @@ namespace bfs
 
         m_fileSize += block.getDataBytesWritten();
 
+
+
         m_fileBlocks.push_back(block);
 
         // seek to the very end block

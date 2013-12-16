@@ -25,6 +25,8 @@ class FileEntryTest
         testBigWriteFollowedByRead();
         testBigWriteFollowedBySmallAppend();
         testBigWriteFollowedBySmallOverwriteAtStart();
+        testBigWriteFollowedBySmallOverwriteAtEnd();
+        //testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength();
         testSmallWriteFollowedByBigAppend();
         testSeekAndReadSmallFile();
         testWriteBigDataAppendSmallStringSeekToAndReadAppendedString();
@@ -225,7 +227,7 @@ class FileEntryTest
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
             // ensure correct file size
-            ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwrite correct file size");
+            ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtStart correct file size");
         }
         {
             bfs::FileEntry entry(testPath.string(), blocks, 1);
@@ -234,8 +236,86 @@ class FileEntryTest
             entry.seek(0);
             entry.read((char*)&readBackIn.front(), testData.length());
             std::string result(readBackIn.begin(), readBackIn.end());
-            ASSERT_EQUAL(testData, result, "testBigWriteFollowedBySmallOverwrite correct content");
+            ASSERT_EQUAL(testData, result, "testBigWriteFollowedBySmallOverwriteAtStart correct content");
         }
+    }
+
+    void testBigWriteFollowedBySmallOverwriteAtEnd()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // initial big write
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), BIG_SIZE);
+            entry.flush();
+        }
+
+        // secondary overwrite
+        std::string testData("goodbye...!");
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1, bfs::AppendOrOverwrite::Overwrite);
+            entry.seek(BIG_SIZE - testData.length());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
+            // ensure correct file size
+            ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtEnd correct file size");
+        }
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            std::vector<uint8_t> readBackIn;
+            readBackIn.resize(testData.length());
+            entry.seek(BIG_SIZE - testData.length());
+            entry.read((char*)&readBackIn.front(), testData.length());
+            std::string result(readBackIn.begin(), readBackIn.end());
+            ASSERT_EQUAL(testData, result, "testBigWriteFollowedBySmallOverwriteAtEnd correct content");
+        }
+    }
+
+    void testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // initial big write
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), BIG_SIZE);
+            entry.flush();
+        }
+
+        // secondary overwrite
+        std::string testData("goodbye...!");
+        std::string testDataB("final bit!");
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1, bfs::AppendOrOverwrite::Overwrite);
+            entry.seek(BIG_SIZE - testData.length());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            std::vector<uint8_t> vecb(testDataB.begin(), testDataB.end());
+            entry.write((char*)&vecb.front(), testDataB.length());
+            entry.flush();
+        }
+
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            std::vector<uint8_t> readBackIn;
+            readBackIn.resize(testData.length() + testDataB.length());
+            entry.seek(BIG_SIZE - testData.length());
+            entry.read((char*)&readBackIn.front(), testData.length() + testDataB.length());
+            std::string result(readBackIn.begin(), readBackIn.end());
+            std::cout<<entry.fileSize()<<"\t"<<BIG_SIZE<<std::endl;
+            ASSERT_EQUAL(entry.fileSize(), BIG_SIZE + testDataB.length(), "testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength correct file size");
+            ASSERT_EQUAL(testData.append(testDataB), result, "testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength correct content");
+            exit(2);
+        }
+
     }
 
     void testSmallWriteFollowedByBigAppend()
