@@ -261,7 +261,6 @@ namespace bfs { namespace detail
             uint8_t dat = buf[byteThatStoresBit];
             return isBitSetInByte(dat, block);
         } else {
-            //std::cout<<"here!"<<std::endl;
             uint64_t const leftOver = block % 8;
             uint64_t withoutLeftOver = block - leftOver;
             byteThatStoresBit = (withoutLeftOver / 8) - 1;

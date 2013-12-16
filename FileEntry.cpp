@@ -5,7 +5,7 @@
 
 namespace bfs
 {
-    // for writing
+    // for writing a brand new entry where start block isn't known
     FileEntry::FileEntry(std::string const &imagePath, uint64_t const totalBlocks, std::string const &name)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
@@ -16,14 +16,16 @@ namespace bfs
         , m_currentBlock(0)
         , m_startBlock(0)
         , m_blockIndex(0)
+        , m_writeMode(AppendOrOverwrite::Append)
     {
     }
 
-    // for appending
+    // for appending or overwriting
     FileEntry::FileEntry(std::string const &imagePath,
                          uint64_t const totalBlocks,
                          std::string const &name,
-                         uint64_t const startBlock)
+                         uint64_t const startBlock,
+                         AppendOrOverwrite const appendOrOverwrite)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
         , m_name(name)
@@ -33,6 +35,7 @@ namespace bfs
         , m_currentBlock(startBlock)
         , m_startBlock(startBlock)
         , m_blockIndex(0)
+        , m_writeMode(appendOrOverwrite)
     {
         // store all file blocks associated with file in container
         // also updates the file size as it does this
@@ -58,6 +61,7 @@ namespace bfs
         , m_currentBlock(startBlock)
         , m_startBlock(startBlock)
         , m_blockIndex(0)
+        , m_writeMode(AppendOrOverwrite::Append)
     {
         // store all file blocks associated with file in container
         // also updates the file size as it does this
@@ -144,7 +148,7 @@ namespace bfs
 
     void FileEntry::newWritableFileBlock() const
     {
-        bfs::BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
         std::vector<uint64_t> firstAndNext = detail::getNAvailableBlocks(stream, 2, m_totalBlocks);
         stream.close();
         FileBlock block(m_imagePath, m_totalBlocks, firstAndNext[0], firstAndNext[0]);
@@ -158,7 +162,8 @@ namespace bfs
         // find very first block
         FileBlock block(m_imagePath,
                         m_totalBlocks,
-                        m_currentBlock);
+                        m_currentBlock,
+                        m_writeMode);
 
         uint64_t nextBlock = block.getNextIndex();
 
@@ -172,7 +177,8 @@ namespace bfs
             m_currentBlock = nextBlock;
             FileBlock newBlock(m_imagePath,
                                m_totalBlocks,
-                               m_currentBlock);
+                               m_currentBlock,
+                               m_writeMode);
             nextBlock = newBlock.getNextIndex();
 
             m_fileSize += newBlock.getDataBytesWritten();
@@ -255,7 +261,9 @@ namespace bfs
         // make a new block to write to. Not necessarily the case that
         // we want a new file block if in append mode. Won't be in append
         // mode if no data bytes have yet been written
-        checkAndCreateWritableFileBlock();
+        if (m_writeMode == AppendOrOverwrite::Append) {
+            checkAndCreateWritableFileBlock();
+        }
 
         // if the buffer is full, then write
         uint32_t initialBytesWritten(getInitialBytesWrittenToCurrentFileBlock());
@@ -275,7 +283,14 @@ namespace bfs
     FileEntry::write(const char* s, std::streamsize n)
     {
         for (int i = 0; i < n; ++i) {
-            ++m_fileSize;
+
+            // if in overwrite mode, filesize won't be updated
+            // since we're simply overwriting bytes that already exist
+            // NOTE: need to fix for when we start increasing size of file at end
+            if (m_writeMode == AppendOrOverwrite::Append) {
+                ++m_fileSize;
+            }
+
             bufferByteForWriting(s[i]);
         }
 
@@ -343,13 +358,16 @@ namespace bfs
             // this will be the point from which we read or write
             m_fileBlocks[m_blockIndex].setExtraOffset(blockPosition);
         }
+
         return off;
     }
 
     void
     FileEntry::flush()
     {
-        checkAndCreateWritableFileBlock();
+        if (m_writeMode == AppendOrOverwrite::Append) {
+            checkAndCreateWritableFileBlock();
+        }
         writeBufferedDataToBlock(m_buffer.size());
         m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     }
@@ -359,7 +377,7 @@ namespace bfs
     {
         // loop over all file blocks and update the volume bitmap indicating
         // that block is no longer in use
-        bfs::BFSImageStream stream(m_imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
         std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
         for (; it != m_fileBlocks.end(); ++it) {
             uint64_t blockIndex = it->getIndex();

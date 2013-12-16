@@ -15,7 +15,7 @@ namespace bfs { namespace detail
                                    uint64_t const startBlock,
                                    uint64_t const totalBlocks)
     {
-        bfs::BFSImageStream out(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream out(imagePath, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, totalBlocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
@@ -32,7 +32,7 @@ namespace bfs { namespace detail
                                    uint64_t const startBlock,
                                    uint64_t const totalBlocks)
     {
-        bfs::BFSImageStream out(imagePath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream out(imagePath, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, totalBlocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];

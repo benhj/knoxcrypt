@@ -31,6 +31,9 @@ class FolderEntryTest
         testEntryRetrievalAppendLargeFollowedByAppendSmall();
         testEntryRetrievalAppendSmallToFirstFileAndAppendLargeToSecond();
         testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond();
+        testFolderEntryRetrievalAddEntries();
+        testFolderEntryRetrievalAddEntriesAppendData();
+        testRemoveFileEntry();
     }
 
     ~FolderEntryTest()
@@ -264,6 +267,74 @@ class FolderEntryTest
             std::string result(vec.begin(), vec.end());
             ASSERT_EQUAL(result, testData, "testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond");
         }
+    }
+
+    void testFolderEntryRetrievalAddEntries()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        bfs::FolderEntry subFolder = folder.getFolderEntry("folderA");
+        subFolder.addFileEntry("subFileA");
+        subFolder.addFileEntry("subFileB");
+        subFolder.addFileEntry("subFileC");
+        subFolder.addFileEntry("subFileD");
+
+        // test root entries still intact
+        {
+            std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+            ASSERT_EQUAL(entries.size(), 6, "testFolderEntryRetrievalAddEntries: root number of entries");
+            std::vector<bfs::EntryInfo>::iterator it = entries.begin();
+            ASSERT_EQUAL(entries[0].filename(), "test.txt", "testFolderEntryRetrievalAddEntries: root filename A");
+            ASSERT_EQUAL(entries[1].filename(), "some.log", "testFolderEntryRetrievalAddEntries: root filename B");
+            ASSERT_EQUAL(entries[2].filename(), "folderA", "testFolderEntryRetrievalAddEntries: root filename C");
+            ASSERT_EQUAL(entries[3].filename(), "picture.jpg", "testFolderEntryRetrievalAddEntries: root filename D");
+            ASSERT_EQUAL(entries[4].filename(), "vai.mp3", "testFolderEntryRetrievalAddEntries: root filename E");
+            ASSERT_EQUAL(entries[5].filename(), "folderB", "testFolderEntryRetrievalAddEntries: root filename F");
+        }
+        // test sub folder entries exist
+        {
+            std::vector<bfs::EntryInfo> entries = subFolder.listAllEntries();
+            ASSERT_EQUAL(entries.size(), 4, "testFolderEntryRetrievalAddEntries: subfolder number of entries");
+            std::vector<bfs::EntryInfo>::iterator it = entries.begin();
+            ASSERT_EQUAL(entries[0].filename(), "subFileA", "testFolderEntryRetrievalAddEntries: subFolder filename A");
+            ASSERT_EQUAL(entries[1].filename(), "subFileB", "testFolderEntryRetrievalAddEntries: subFolder filename B");
+            ASSERT_EQUAL(entries[2].filename(), "subFileC", "testFolderEntryRetrievalAddEntries: subFolder filename C");
+            ASSERT_EQUAL(entries[3].filename(), "subFileD", "testFolderEntryRetrievalAddEntries: subFolder filename D");
+        }
+    }
+
+    void testFolderEntryRetrievalAddEntriesAppendData()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        bfs::FolderEntry subFolder = folder.getFolderEntry("folderA");
+        subFolder.addFileEntry("subFileA");
+        subFolder.addFileEntry("subFileB");
+        subFolder.addFileEntry("subFileC");
+        subFolder.addFileEntry("subFileD");
+
+        std::string testData("some test data!");
+        bfs::FileEntry entry = subFolder.getFileEntry("subFileB");
+        std::vector<uint8_t> vec(testData.begin(), testData.end());
+        entry.write((char*)&vec.front(), testData.length());
+        entry.flush();
+        entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
+        vec.resize(entry.fileSize());
+        entry.read((char*)&vec.front(), entry.fileSize());
+        std::string result(vec.begin(), vec.end());
+        ASSERT_EQUAL(result, testData, "testFolderEntryRetrievalAddEntriesAppendData");
+    }
+
+    void testRemoveFileEntry()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        folder.removeFileEntry("test.txt");
+        std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+        ASSERT_EQUAL(entries.size(), 5, "testRemoveFileEntry: number of entries after removal");
     }
 
 };

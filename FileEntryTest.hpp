@@ -45,7 +45,7 @@ class FileEntryTest
 
         // test write get file size from same entry
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -55,7 +55,7 @@ class FileEntryTest
 
         // test get file size different entry but same data
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, uint64_t(1));
+            bfs::FileEntry entry(testPath.string(), blocks, uint64_t(1));
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "testFileSizeReportedCorrectly B");
         }
     }
@@ -67,21 +67,21 @@ class FileEntryTest
 
         // test write get file size from same entry
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
             entry.flush();
 
             uint64_t startBlock = entry.getStartBlockIndex();
-            bfs::BFSImageStream in(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            bfs::BFSImageStream in(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
             ASSERT_EQUAL(true, bfs::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
-            bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
+            bfs::FileBlock block(testPath.string(), blocks, startBlock);
             uint64_t nextBlock = block.getNextIndex();
             while (nextBlock != startBlock) {
                 startBlock = nextBlock;
                 ASSERT_EQUAL(true, bfs::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
-                bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
+                bfs::FileBlock block(testPath.string(), blocks, startBlock);
                 nextBlock = block.getNextIndex();
             }
         }
@@ -97,7 +97,7 @@ class FileEntryTest
 
         // test write followed by unlink
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -105,13 +105,13 @@ class FileEntryTest
 
             // get allocated block indices
             uint64_t startBlock = entry.getStartBlockIndex();
-            bfs::BFSImageStream in(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            bfs::BFSImageStream in(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
             blockIndices.push_back(startBlock);
-            bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
+            bfs::FileBlock block(testPath.string(), blocks, startBlock);
             uint64_t nextBlock = block.getNextIndex();
             while (nextBlock != startBlock) {
                 startBlock = nextBlock;
-                bfs::FileBlock block(testPath.c_str(), blocks, startBlock);
+                bfs::FileBlock block(testPath.string(), blocks, startBlock);
                 blockIndices.push_back(startBlock);
                 nextBlock = block.getNextIndex();
             }
@@ -124,12 +124,12 @@ class FileEntryTest
 
         // test that filesize is 0 when read back in
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
             ASSERT_EQUAL(0, entry.fileSize(), "testFileUnlink B");
 
             // test that blocks deallocated after unlink
             std::vector<uint64_t>::iterator it = blockIndices.begin();
-            bfs::BFSImageStream in(testPath.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            bfs::BFSImageStream in(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
             for (; it != blockIndices.end(); ++it) {
                 ASSERT_EQUAL(false, bfs::detail::isBlockInUse(*it, blocks, in), "testFileUnlink: blockDeallocatedTest");
             }
@@ -146,7 +146,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -155,7 +155,7 @@ class FileEntryTest
 
         // test read
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, uint64_t(1));
+            bfs::FileEntry entry(testPath.string(), blocks, uint64_t(1));
             std::string expected(createLargeStringToWrite());
             std::vector<char> vec;
             vec.resize(entry.fileSize());
@@ -173,7 +173,7 @@ class FileEntryTest
 
         // initial big write
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -183,14 +183,14 @@ class FileEntryTest
         // small append
         std::string appendString("appended!");
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
 
         // test read
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, 1);
             std::string expected(createLargeStringToWrite());
             expected.append(appendString);
             std::vector<char> vec;
@@ -209,7 +209,7 @@ class FileEntryTest
         // initial small write
         std::string testData("small string");
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -218,14 +218,14 @@ class FileEntryTest
         // big append
         std::string appendString(createLargeStringToWrite());
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
 
         // test read
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, 1);
             std::string expected(testData.append(appendString));
             std::vector<char> vec;
             vec.resize(entry.fileSize());
@@ -242,7 +242,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
             std::string const testString("Hello and goodbye!");
             std::string testData(testString);
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -252,7 +252,7 @@ class FileEntryTest
 
         // test seek and read
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, 1);
             std::string expected("goodbye!");
             std::vector<char> vec;
             vec.resize(expected.size());
@@ -270,7 +270,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt");
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -280,13 +280,13 @@ class FileEntryTest
         // test seek of big file
         std::string appendString("appended!");
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, "test.txt", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
 
         {
-            bfs::FileEntry entry(testPath.c_str(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, 1);
             std::vector<char> vec;
             vec.resize(appendString.length());
             entry.seek(BIG_SIZE);

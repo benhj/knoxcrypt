@@ -84,6 +84,12 @@ namespace bfs
          */
         std::vector<EntryInfo> listAllEntries();
 
+        /**
+         * @brief does what it says
+         * @param name the name of the entry
+         */
+        void removeFileEntry(std::string const &name);
+
       private:
 
         FolderEntry();
@@ -106,6 +112,13 @@ namespace bfs
          * @return the name
          */
         std::string getEntryName(uint64_t const index) const;
+
+        /**
+         * @brief returns the entry index given the name
+         * @param name the name of the entry
+         * @return the index
+         */
+        uint64_t getMetaDataIndexForEntry(std::string const &name) const;
 
         /**
          * @brief write metadata to this folder entry
@@ -154,6 +167,13 @@ namespace bfs
          * @return a value indicating if specified entry metadata is in use
          */
         bool entryMetaDataIsEnabled(uint64_t const n) const;
+
+        /**
+         * @brief seeks to where the metadata should be written. If
+         * metadata for a previous entry has been deleted, we should
+         * use that position instead to write new data
+         */
+        void seekToPositionWhereMetaDataWillBeWritten();
 
         // the path of the bfs image
         std::string const m_imagePath;

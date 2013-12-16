@@ -1,6 +1,7 @@
 #ifndef BFS_FILE_ENTRY_HPP__
 #define BFS_FILE_ENTRY_HPP__
 
+#include "AppendOrOverwrite.hpp"
 #include "FileBlock.hpp"
 
 #include <vector>
@@ -18,7 +19,7 @@ namespace bfs
     {
       public:
         /**
-         * @brief when writing a file this constructor should be used
+         * @brief when writing a new file this constructor should be used
          * @param imagePath the path of the bfs image
          * @param totalBlocks the total number of blocks in the bfs
          * @param name the name of the file entry
@@ -26,16 +27,19 @@ namespace bfs
         FileEntry(std::string const &imagePath, uint64_t const totalBlocks, std::string const &name);
 
         /**
-         * @brief when appending to the end of a file this constructor should be used
+         * @brief when appending or overwriting to the end of a file
+         * this constructor should be used
          * @param imagePath the path of the bfs image
          * @param totalBlocks the total number of blocks in the bfs
          * @param name the name of the file entry
          * @param block the starting block of the file entry
+         * @param appendOrOverwrite type of write mode
          */
         FileEntry(std::string const &imagePath,
                   uint64_t const totalBlocks,
                   std::string const &name,
-                  uint64_t const startBlock);
+                  uint64_t const startBlock,
+                  AppendOrOverwrite const appendOrOverwrite = AppendOrOverwrite::Append);
 
         /**
          * @brief when reading a file this constructor should be used
@@ -45,7 +49,7 @@ namespace bfs
          */
         FileEntry(std::string const &imagePath, uint64_t const totalBlocks, uint64_t const startBlock);
 
-        typedef char                                                   char_type;
+        typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
 
         std::string filename() const;
@@ -123,6 +127,9 @@ namespace bfs
         // in comparison to m_currentBlock, this is where the block
         // exists in m_fileBlocks
         mutable uint64_t m_blockIndex;
+
+        // write mode when opened for writing
+        AppendOrOverwrite m_writeMode;
 
         /**
          * @brief buffers a byte for writing
