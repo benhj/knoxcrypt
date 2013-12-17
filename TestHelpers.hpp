@@ -22,11 +22,11 @@ inline boost::filesystem::path buildImage(boost::filesystem::path const &path, l
     return testPath;
 }
 
-std::string createLargeStringToWrite()
+std::string createLargeStringToWrite(std::string const &val="Hello, World!")
 {
     std::string theString("");
     for (int i = 0; i < HELLO_IT; ++i) {
-        theString.append("Hello, World!");
+        theString.append(val);
     }
     return theString;
 }
