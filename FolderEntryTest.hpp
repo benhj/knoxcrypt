@@ -24,6 +24,8 @@ class FolderEntryTest
         boost::filesystem::create_directories(m_uniquePath);
         testAddEntryNameRetrieval();
         testListAllEntries();
+        testListFileEntries();
+        testListFolderEntries();
         testAddEntryBlockIndexRetrieval();
         testEntryRetrievalAndAppendSmallData();
         testEntryRetrievalAndAppendLargeData();
@@ -89,6 +91,32 @@ class FolderEntryTest
         ASSERT_EQUAL(entries[3].filename(), "picture.jpg", "testListAllEntries: filename D");
         ASSERT_EQUAL(entries[4].filename(), "vai.mp3", "testListAllEntries: filename E");
         ASSERT_EQUAL(entries[5].filename(), "folderB", "testListAllEntries: filename F");
+    }
+
+    void testListFileEntries()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        std::vector<bfs::EntryInfo> entries = folder.listFileEntries();
+        ASSERT_EQUAL(entries.size(), 4, "testListFileEntries: number of entries");
+        std::vector<bfs::EntryInfo>::iterator it = entries.begin();
+        ASSERT_EQUAL(entries[0].filename(), "test.txt", "testListFileEntries: filename A");
+        ASSERT_EQUAL(entries[1].filename(), "some.log", "testListFileEntries: filename B");
+        ASSERT_EQUAL(entries[2].filename(), "picture.jpg", "testListFileEntries: filename D");
+        ASSERT_EQUAL(entries[3].filename(), "vai.mp3", "testListFileEntries: filename E");
+    }
+
+    void testListFolderEntries()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        std::vector<bfs::EntryInfo> entries = folder.listFolderEntries();
+        ASSERT_EQUAL(entries.size(), 2, "testListFolderEntries: number of entries");
+        std::vector<bfs::EntryInfo>::iterator it = entries.begin();
+        ASSERT_EQUAL(entries[0].filename(), "folderA", "testListFolderEntries: filename C");
+        ASSERT_EQUAL(entries[1].filename(), "folderB", "testListFolderEntries: filename F");
     }
 
     void testAddEntryBlockIndexRetrieval()

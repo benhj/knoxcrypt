@@ -79,10 +79,22 @@ namespace bfs
         EntryInfo getEntryInfo(uint64_t const index) const;
 
         /**
-         * @brief returns a vector of entry strings
-         * @return all entry names
+         * @brief returns a vector of all entry infos
+         * @return all entry infos
          */
         std::vector<EntryInfo> listAllEntries();
+
+        /**
+         * @brief returns a vector of file entry infos
+         * @return all file entry infos
+         */
+        std::vector<EntryInfo> listFileEntries();
+
+        /**
+         * @brief returns a vector of folder entry infos
+         * @return all folder entry infos
+         */
+        std::vector<EntryInfo> listFolderEntries();
 
         /**
          * @brief does what it says
@@ -180,6 +192,12 @@ namespace bfs
          * use that position instead to write new data
          */
         void seekToPositionWhereMetaDataWillBeWritten();
+
+        /**
+         * @brief lists a particular type of entry, file or folder
+         * @return a list of entries of specified type
+         */
+        std::vector<EntryInfo> doListEntriesBasedOnType(EntryType entryType);
 
         // the path of the bfs image
         std::string const m_imagePath;

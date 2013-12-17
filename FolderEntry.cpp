@@ -290,6 +290,33 @@ namespace bfs
         return entries;
     }
 
+    std::vector<EntryInfo>
+    FolderEntry::doListEntriesBasedOnType(EntryType entryType)
+    {
+        std::vector<EntryInfo> entries;
+        uint64_t entryCount = getNumberOfEntries();
+        for (long entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
+            // only push back if the metadata is enabled
+            if (entryMetaDataIsEnabled(entryIndex) &&
+                getTypeForEntry(entryIndex) == entryType) {
+                entries.push_back(getEntryInfo(entryIndex));
+            }
+        }
+        return entries;
+    }
+
+    std::vector<EntryInfo>
+    FolderEntry::listFileEntries()
+    {
+        return doListEntriesBasedOnType(EntryType::FileType);
+    }
+
+    std::vector<EntryInfo>
+    FolderEntry::listFolderEntries()
+    {
+        return doListEntriesBasedOnType(EntryType::FolderType);
+    }
+
     void
     FolderEntry::removeFileEntry(std::string const &name)
     {
