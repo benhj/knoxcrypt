@@ -106,7 +106,7 @@ namespace bfs
                              std::string const &name)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
-        , m_folderData(FileEntry(imagePath, totalBlocks, name, startBlock))
+        , m_folderData(imagePath, totalBlocks, name, startBlock)
         , m_startBlock(startBlock)
         , m_name(name)
     {
@@ -117,7 +117,7 @@ namespace bfs
                              std::string const &name)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
-        , m_folderData(m_imagePath, m_totalBlocks, m_name)
+        , m_folderData(imagePath, totalBlocks, name)
         , m_startBlock(m_folderData.getStartBlockIndex())
         , m_name(name)
     {

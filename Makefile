@@ -1,8 +1,7 @@
 CXX=clang++
 CXXFLAGS=-ggdb -I/usr/local/boost_1_53_0
 
-TEST_OBJS = test.o \
-            AppendOrOverwrite.o \
+BFS_OBJS =  AppendOrOverwrite.o \
             BFSImageStream.o \
             FileBlock.o \
             FileEntry.o \
@@ -12,13 +11,20 @@ TEST_OBJS = test.o \
             /usr/local/boost_1_53_0/stage/lib/libboost_filesystem.dylib \
             /usr/local/boost_1_53_0/stage/lib/libboost_system.dylib
 
+TEST_OBJS = test.o
+
+MAKE_BFS_OBJS = make_bfs.o
+
 .c.o:
 	$(CXX) -c $(CXXFLAGS) -arch x86_64 $*.cpp
 
 all: test
 
-test:  $(TEST_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $(TEST_OBJS)
+test:  $(TEST_OBJS) $(BFS_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(TEST_OBJS) $(BFS_OBJS)
+
+make_bfs:  $(MAKE_BFS_OBJS) $(BFS_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(MAKE_BFS_OBJS) $(BFS_OBJS)
 
 clean:
-	/bin/rm -f *.o *~ test
+	/bin/rm -f *.o *~ test make_bfs
