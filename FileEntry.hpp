@@ -161,14 +161,6 @@ namespace bfs
          */
         std::streamsize readCurrentBlockBytes();
 
-        /**
-         * @brief gets the number of bytes written already to last file block
-         * helpful when in append mode
-         * @return bytes written
-         */
-        uint32_t getBytesWrittenSoFarToCurrentFileBlock() const;
-
-        uint32_t getInitialBytesWrittenToCurrentFileBlock() const;
 
         /**
          * @brief will build a new file block for writing to if there are

@@ -26,7 +26,7 @@ class FileEntryTest
         testBigWriteFollowedBySmallAppend();
         testBigWriteFollowedBySmallOverwriteAtStart();
         testBigWriteFollowedBySmallOverwriteAtEnd();
-        //testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength();
+        testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength();
         testSmallWriteFollowedByBigAppend();
         testSeekAndReadSmallFile();
         testWriteBigDataAppendSmallStringSeekToAndReadAppendedString();
@@ -297,6 +297,8 @@ class FileEntryTest
             bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1, bfs::AppendOrOverwrite::Overwrite);
             entry.seek(BIG_SIZE - testData.length());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
+            // NOTE: the following write, flush, write, flush is a bug. We
+            // shouldn't have to flush twice after each write!!
             entry.write((char*)&vec.front(), testData.length());
             std::vector<uint8_t> vecb(testDataB.begin(), testDataB.end());
             entry.write((char*)&vecb.front(), testDataB.length());
@@ -310,10 +312,8 @@ class FileEntryTest
             entry.seek(BIG_SIZE - testData.length());
             entry.read((char*)&readBackIn.front(), testData.length() + testDataB.length());
             std::string result(readBackIn.begin(), readBackIn.end());
-            std::cout<<entry.fileSize()<<"\t"<<BIG_SIZE<<std::endl;
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE + testDataB.length(), "testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength correct file size");
             ASSERT_EQUAL(testData.append(testDataB), result, "testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength correct content");
-            exit(2);
         }
 
     }

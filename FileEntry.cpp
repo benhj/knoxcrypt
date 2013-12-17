@@ -106,7 +106,10 @@ namespace bfs
     FileEntry::readCurrentBlockBytes()
     {
 
-        uint32_t size =  m_fileBlocks[m_blockIndex].getDataBytesWritten();
+        // need to take into account the currently seeked-to position and
+        // subtract that because we then only want to read from the told position
+        uint32_t size =  m_fileBlocks[m_blockIndex].getDataBytesWritten() -
+                         m_fileBlocks[m_blockIndex].tell();
 
         std::vector<uint8_t>().swap(m_buffer);
         m_buffer.resize(size);
@@ -206,7 +209,9 @@ namespace bfs
     bool
     FileEntry::currentBlockHasAvailableSpace() const
     {
-        uint32_t const bytesWritten = getBytesWrittenSoFarToCurrentFileBlock();
+        // use tell to get bytes written so far as the read/write head position
+        // is always updates after reads/writes
+        uint32_t const bytesWritten = m_fileBlocks[m_blockIndex].tell();
 
         if (bytesWritten < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
             return true;
@@ -248,24 +253,6 @@ namespace bfs
 
     }
 
-    uint32_t
-    FileEntry::getBytesWrittenSoFarToCurrentFileBlock() const
-    {
-        if (!m_fileBlocks.empty()) {
-            return m_fileBlocks[m_blockIndex].getDataBytesWritten();
-        }
-        return uint32_t(0);
-    }
-
-    uint32_t
-    FileEntry::getInitialBytesWrittenToCurrentFileBlock() const
-    {
-        if (!m_fileBlocks.empty()) {
-            return m_fileBlocks[m_blockIndex].getInitialDataBytesWritten();
-        }
-        return uint32_t(0);
-    }
-
     void
     FileEntry::bufferByteForWriting(char const byte)
     {
@@ -276,16 +263,16 @@ namespace bfs
         // mode if no data bytes have yet been written
         checkAndCreateWritableFileBlock();
 
-
-        // if the buffer is full, then write
-        uint32_t initialBytesWritten(getInitialBytesWrittenToCurrentFileBlock());
+        // if given the stream position no more bytes can be written
+        // then write out buffer
+        uint32_t streamPosition(m_fileBlocks[m_blockIndex].tell());
 
         if (m_buffer.size() == (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
-            - initialBytesWritten) {
+            - streamPosition) {
 
             // write the data
             writeBufferedDataToBlock((detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
-                                     - initialBytesWritten);
+                                     - streamPosition);
 
             m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
         }

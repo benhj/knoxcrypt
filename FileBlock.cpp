@@ -93,6 +93,7 @@ namespace bfs
         (void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_seekPos);
         (void)stream.read((char*)buf, n);
         stream.close();
+        m_seekPos += n;
         return n;
     }
 
