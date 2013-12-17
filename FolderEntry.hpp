@@ -90,6 +90,12 @@ namespace bfs
          */
         void removeFileEntry(std::string const &name);
 
+        /**
+         * @brief removes a sub folder and all its content
+         * @param name the name of the entry
+         */
+        void removeFolderEntry(std::string const &name);
+
       private:
 
         FolderEntry();

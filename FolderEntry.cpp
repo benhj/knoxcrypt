@@ -305,6 +305,33 @@ namespace bfs
         assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
     }
 
+    void
+    FolderEntry::removeFolderEntry(std::string const &name)
+    {
+        FolderEntry entry = getFolderEntry(name);
+
+        // loop over entries unlinking files and recursing into sub folders
+        // and deleting their entries
+        std::vector<EntryInfo> infos = entry.listAllEntries();
+        std::vector<EntryInfo>::iterator it = infos.begin();
+        for(; it != infos.end(); ++it) {
+            if(it->type() == EntryType::FileType) {
+                entry.removeFileEntry(it->filename());
+            } else {
+                entry.removeFolderEntry(it->filename());
+            }
+        }
+
+        // second set the metadata to an out of use state; this metadata can
+        // then be later overwritten when a new entry is then added
+        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startBlock, AppendOrOverwrite::Overwrite);
+        detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
+        assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
+
+        // unlink entry's data
+        entry.m_folderData.unlink();
+    }
+
     EntryInfo
     FolderEntry::getEntryInfo(uint64_t const entryIndex) const
     {

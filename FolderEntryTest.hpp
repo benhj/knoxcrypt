@@ -34,6 +34,8 @@ class FolderEntryTest
         testFolderEntryRetrievalAddEntries();
         testFolderEntryRetrievalAddEntriesAppendData();
         testRemoveFileEntry();
+        testRemoveEmptySubFolder();
+        testRemoveNonEmptySubFolder();
     }
 
     ~FolderEntryTest()
@@ -335,6 +337,44 @@ class FolderEntryTest
         folder.removeFileEntry("test.txt");
         std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 5, "testRemoveFileEntry: number of entries after removal");
+    }
+
+    void testRemoveEmptySubFolder()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        folder.removeFolderEntry("folderA");
+        std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+        ASSERT_EQUAL(entries.size(), 5, "testRemoveEmptySubFolder: number of entries after removal");
+    }
+
+    void testRemoveNonEmptySubFolder()
+    {
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+            bfs::FolderEntry subFolder = folder.getFolderEntry("folderA");
+            subFolder.addFileEntry("subFileA");
+            subFolder.addFileEntry("subFileB");
+            subFolder.addFileEntry("subFileC");
+            subFolder.addFileEntry("subFileD");
+
+            std::string testData("some test data!");
+            bfs::FileEntry entry = subFolder.getFileEntry("subFileB");
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
+        }
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+            folder.removeFolderEntry("folderA");
+            std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+            ASSERT_EQUAL(entries.size(), 5, "testRemoveNonEmptySubFolder: number of entries after removal");
+        }
     }
 
 };
