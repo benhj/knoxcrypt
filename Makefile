@@ -1,5 +1,7 @@
 CXX=clang++
-CXXFLAGS=-ggdb -std=c++11 -I/usr/local/boost_1_53_0
+CXXFLAGS=-ggdb -std=c++11 -I/usr/local/boost_1_53_0 -Iinclude
+CPP_FILES := $(wildcard src/*.cpp)
+OBJ_FILES := $(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 
 BFS_OBJS =  BFSImageStream.o \
             FileBlock.o \
