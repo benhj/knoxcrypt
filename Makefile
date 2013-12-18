@@ -1,7 +1,7 @@
 CXX=clang++
 CXXFLAGS=-ggdb -std=c++11 -I/usr/local/boost_1_53_0 -Iinclude
 LDFLAGS=-L/usr/local/boost_1_53_0/stage/lib -lboost_filesystem -lboost_system
-SOURCES := $(wildcard src/*.cpp)
+SOURCES := $(wildcard src/bfs/*.cpp)
 MAKE_BFS_SRC := $(wildcard src/makebfs/*.cpp)
 TEST_SRC := $(wildcard src/test/*.cpp)
 OBJECTS := $(addprefix obj/,$(notdir $(SOURCES:.cpp=.o)))
@@ -10,7 +10,7 @@ OBJECTS_TEST := $(addprefix obj-test/,$(notdir $(TEST_SRC:.cpp=.o)))
 TEST_EXECUTABLE=test
 MAKEBFS_EXECUTABLE=makebfs
 
-obj/%.o: src/%.cpp
+obj/%.o: src/bfs/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 	
 obj-test/%.o: src/test/%.cpp

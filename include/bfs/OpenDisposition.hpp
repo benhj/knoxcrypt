@@ -1,9 +1,9 @@
 #ifndef BFS_OPEN_DISPOSITION_HPP__
 #define BFS_OPEN_DISPOSITION_HPP__
 
-#include "AppendOrOverwrite.hpp"
-#include "CreateOrDontCreate.hpp"
-#include "TruncateOrKeep.hpp"
+#include "bfs/AppendOrOverwrite.hpp"
+#include "bfs/CreateOrDontCreate.hpp"
+#include "bfs/TruncateOrKeep.hpp"
 
 namespace bfs
 {

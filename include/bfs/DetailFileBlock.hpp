@@ -1,8 +1,8 @@
 #ifndef BFS_BFS_DETAIL_FILE_BLOCK_HPP__
 #define BFS_BFS_DETAIL_FILE_BLOCK_HPP__
 
-#include "BFSImageStream.hpp"
-#include "DetailBFS.hpp"
+#include "bfs/BFSImageStream.hpp"
+#include "bfs/DetailBFS.hpp"
 
 #include <iostream>
 #include <stdint.h>

@@ -1,9 +1,9 @@
-#include "BFSImageStream.hpp"
-#include "DetailBFS.hpp"
-#include "DetailFileBlock.hpp"
-#include "FileEntry.hpp"
-#include "MakeBFS.hpp"
-#include "TestHelpers.hpp"
+#include "bfs/BFSImageStream.hpp"
+#include "bfs/DetailBFS.hpp"
+#include "bfs/DetailFileBlock.hpp"
+#include "bfs/FileEntry.hpp"
+#include "bfs/MakeBFS.hpp"
+#include "test/TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>

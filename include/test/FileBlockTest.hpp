@@ -1,10 +1,10 @@
-#include "BFSImageStream.hpp"
-#include "DetailBFS.hpp"
-#include "DetailFileBlock.hpp"
-#include "FileBlock.hpp"
-#include "MakeBFS.hpp"
-#include "OpenDisposition.hpp"
-#include "TestHelpers.hpp"
+#include "bfs/BFSImageStream.hpp"
+#include "bfs/DetailBFS.hpp"
+#include "bfs/DetailFileBlock.hpp"
+#include "bfs/FileBlock.hpp"
+#include "bfs/MakeBFS.hpp"
+#include "bfs/OpenDisposition.hpp"
+#include "test/TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>

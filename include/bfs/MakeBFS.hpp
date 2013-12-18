@@ -1,11 +1,11 @@
 #ifndef BFS_MAKE_BFS_HPP__
 #define BFS_MAKE_BFS_HPP__
 
-#include "BFSImageStream.hpp"
-#include "DetailBFS.hpp"
-#include "DetailFileBlock.hpp"
-#include "FileBlock.hpp"
-#include "FolderEntry.hpp"
+#include "bfs/BFSImageStream.hpp"
+#include "bfs/DetailBFS.hpp"
+#include "bfs/DetailFileBlock.hpp"
+#include "bfs/FileBlock.hpp"
+#include "bfs/FolderEntry.hpp"
 
 #include <string>
 #include <fstream>

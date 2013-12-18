@@ -1,8 +1,8 @@
-#include "FileBlockTest.hpp"
-#include "FileEntryTest.hpp"
-#include "MakeBFSTest.hpp"
-#include "FolderEntryTest.hpp"
-#include "TestHelpers.hpp"
+#include "test/FileBlockTest.hpp"
+#include "test/FileEntryTest.hpp"
+#include "test/MakeBFSTest.hpp"
+#include "test/FolderEntryTest.hpp"
+#include "test/TestHelpers.hpp"
 
 int main()
 {

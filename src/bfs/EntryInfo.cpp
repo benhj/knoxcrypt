@@ -1,4 +1,4 @@
-#include "EntryInfo.hpp"
+#include "bfs/EntryInfo.hpp"
 
 namespace bfs
 {

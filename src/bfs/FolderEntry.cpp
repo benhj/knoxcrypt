@@ -1,7 +1,7 @@
-#include "BFSImageStream.hpp"
-#include "DetailBFS.hpp"
-#include "DetailFolder.hpp"
-#include "FolderEntry.hpp"
+#include "bfs/BFSImageStream.hpp"
+#include "bfs/DetailBFS.hpp"
+#include "bfs/DetailFolder.hpp"
+#include "bfs/FolderEntry.hpp"
 #include <stdexcept>
 
 namespace bfs

@@ -1,8 +1,8 @@
 #ifndef BFS_FOLDER_ENTRY_HPP__
 #define BFS_FOLDER_ENTRY_HPP__
 
-#include "EntryInfo.hpp"
-#include "FileEntry.hpp"
+#include "bfs/EntryInfo.hpp"
+#include "bfs/FileEntry.hpp"
 
 namespace bfs
 {

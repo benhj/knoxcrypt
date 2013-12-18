@@ -1,10 +1,10 @@
 #ifndef BFS_FILE_BLOCK_HPP__
 #define BFS_FILE_BLOCK_HPP__
 
-#include "BFSImageStream.hpp"
-#include "DetailBFS.hpp"
-#include "DetailFileBlock.hpp"
-#include "OpenDisposition.hpp"
+#include "bfs/BFSImageStream.hpp"
+#include "bfs/DetailBFS.hpp"
+#include "bfs/DetailFileBlock.hpp"
+#include "bfs/OpenDisposition.hpp"
 
 #include <vector>
 

@@ -1,4 +1,4 @@
-#include "BFSImageStream.hpp"
+#include "bfs/BFSImageStream.hpp"
 
 namespace bfs
 {

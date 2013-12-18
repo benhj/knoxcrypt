@@ -1,8 +1,8 @@
 #ifndef BFS_FILE_ENTRY_HPP__
 #define BFS_FILE_ENTRY_HPP__
 
-#include "FileBlock.hpp"
-#include "OpenDisposition.hpp"
+#include "bfs/FileBlock.hpp"
+#include "bfs/OpenDisposition.hpp"
 
 #include <vector>
 

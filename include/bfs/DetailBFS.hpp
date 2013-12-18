@@ -1,7 +1,7 @@
 #ifndef BFS_BFS_DETAIL_BFS_HPP__
 #define BFS_BFS_DETAIL_BFS_HPP__
 
-#include "BFSImageStream.hpp"
+#include "bfs/BFSImageStream.hpp"
 
 #include <boost/optional.hpp>
 

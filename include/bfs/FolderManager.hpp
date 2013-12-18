@@ -1,8 +1,8 @@
 #ifndef BFS_FOLDER_MANAGER_HPP__
 #define BFS_FOLDER_MANAGER_HPP__
 
-#include "FileEntry.hpp"
-#include "FolderEntry.hpp"
+#include "bfs/FileEntry.hpp"
+#include "bfs/FolderEntry.hpp"
 
 namespace bfs
 {

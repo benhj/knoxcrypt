@@ -1,7 +1,7 @@
 #ifndef BFS_ENTRY_INFO_HPP__
 #define BFS_ENTRY_INFO_HPP__
 
-#include "EntryType.hpp"
+#include "bfs/EntryType.hpp"
 
 #include <string>
 
