@@ -121,7 +121,6 @@ class FileBlockTest
             // assert that any exception was thrown
             ASSERT_EQUAL(pass, true, "FileBlockTest::testReadingFromNonReadableThrows() B");
         }
-
     }
 
 };
