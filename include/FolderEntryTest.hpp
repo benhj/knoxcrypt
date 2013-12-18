@@ -17,7 +17,6 @@
 class FolderEntryTest
 {
 
-
   public:
     FolderEntryTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
@@ -152,7 +151,7 @@ class FolderEntryTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
         bfs::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testData("some test data!");
-        bfs::FileEntry entry = folder.getFileEntry("some.log");
+        bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), testData.length());
         entry.flush();
@@ -170,7 +169,7 @@ class FolderEntryTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
         bfs::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testString(createLargeStringToWrite());
-        bfs::FileEntry entry = folder.getFileEntry("some.log");
+        bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testString.begin(), testString.end());
         entry.write((char*)&vec.front(), testString.length());
         entry.flush();
@@ -189,14 +188,14 @@ class FolderEntryTest
         std::string testData("some test data!");
         {
             bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-            bfs::FileEntry entry = folder.getFileEntry("some.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
         }
         {
             std::string testString(createLargeStringToWrite());
-            bfs::FileEntry entry = folder.getFileEntry("some.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -218,12 +217,12 @@ class FolderEntryTest
         std::string testString(createLargeStringToWrite());
         {
             bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
-            bfs::FileEntry entry = folder.getFileEntry("some.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
         }
         {
-            bfs::FileEntry entry = folder.getFileEntry("some.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -244,7 +243,7 @@ class FolderEntryTest
         bfs::FolderEntry folder = createTestFolder(testPath, blocks);
         {
             std::string testData("some test data!");
-            bfs::FileEntry entry = folder.getFileEntry("some.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -256,7 +255,7 @@ class FolderEntryTest
 
         {
             std::string testString(createLargeStringToWrite());
-            bfs::FileEntry entry = folder.getFileEntry("picture.jpg");
+            bfs::FileEntry entry = folder.getFileEntry("picture.jpg", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -276,7 +275,7 @@ class FolderEntryTest
 
         {
             std::string testString(createLargeStringToWrite());
-            bfs::FileEntry entry = folder.getFileEntry("picture.jpg");
+            bfs::FileEntry entry = folder.getFileEntry("picture.jpg", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -287,7 +286,7 @@ class FolderEntryTest
         }
         {
             std::string testData("some test data!");
-            bfs::FileEntry entry = folder.getFileEntry("some.log");
+            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -346,7 +345,7 @@ class FolderEntryTest
         subFolder.addFileEntry("subFileD");
 
         std::string testData("some test data!");
-        bfs::FileEntry entry = subFolder.getFileEntry("subFileB");
+        bfs::FileEntry entry = subFolder.getFileEntry("subFileB", bfs::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), testData.length());
         entry.flush();
@@ -390,7 +389,7 @@ class FolderEntryTest
             subFolder.addFileEntry("subFileD");
 
             std::string testData("some test data!");
-            bfs::FileEntry entry = subFolder.getFileEntry("subFileB");
+            bfs::FileEntry entry = subFolder.getFileEntry("subFileB", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();

@@ -1,8 +1,8 @@
 #ifndef BFS_FILE_ENTRY_HPP__
 #define BFS_FILE_ENTRY_HPP__
 
-#include "AppendOrOverwrite.hpp"
 #include "FileBlock.hpp"
+#include "OpenDisposition.hpp"
 
 #include <vector>
 
@@ -33,13 +33,13 @@ namespace bfs
          * @param totalBlocks the total number of blocks in the bfs
          * @param name the name of the file entry
          * @param block the starting block of the file entry
-         * @param appendOrOverwrite type of write mode
+         * @param openDisposition open mode
          */
         FileEntry(std::string const &imagePath,
                   uint64_t const totalBlocks,
                   std::string const &name,
                   uint64_t const startBlock,
-                  AppendOrOverwrite const appendOrOverwrite = AppendOrOverwrite::Append);
+                  OpenDisposition const &openDisposition);
 
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
@@ -120,8 +120,8 @@ namespace bfs
         // exists in m_fileBlocks
         mutable uint64_t m_blockIndex;
 
-        // write mode when opened for writing
-        AppendOrOverwrite m_writeMode;
+        // open mode
+        OpenDisposition m_openDisposition;
 
         /**
          * @brief buffers a byte for writing

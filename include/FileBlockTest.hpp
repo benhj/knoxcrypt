@@ -3,6 +3,7 @@
 #include "DetailFileBlock.hpp"
 #include "FileBlock.hpp"
 #include "MakeBFS.hpp"
+#include "OpenDisposition.hpp"
 #include "TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>
@@ -38,7 +39,8 @@ class FileBlockTest
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
-        bfs::FileBlock block(testPath.string(), blocks, uint64_t(0), uint64_t(0));
+        bfs::FileBlock block(testPath.string(), blocks, uint64_t(0), uint64_t(0),
+                             bfs::OpenDisposition::buildAppendDisposition());
         std::string testData("Hello, world!Hello, world!");
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         block.write((char*)&vec.front(), testData.length());

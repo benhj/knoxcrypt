@@ -8,7 +8,7 @@ namespace bfs
                          uint64_t const totalBlocks,
                          uint64_t const index,
                          uint64_t const next,
-                         AppendOrOverwrite const appendOrOverwrite)
+                         OpenDisposition const &openDisposition)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
         , m_index(index)
@@ -17,7 +17,7 @@ namespace bfs
         , m_offset(0)
         , m_seekPos(0)
         , m_initialBytesWritten(0)
-        , m_writeMode(appendOrOverwrite)
+        , m_openDisposition(openDisposition)
     {
         // set m_offset
         BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
@@ -42,7 +42,7 @@ namespace bfs
     FileBlock::FileBlock(std::string const &imagePath,
                          uint64_t const totalBlocks,
                          uint64_t const index,
-                         AppendOrOverwrite const appendOrOverwrite)
+                         OpenDisposition const &openDisposition)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
         , m_index(index)
@@ -50,7 +50,7 @@ namespace bfs
         , m_next(0)
         , m_offset(0)
         , m_seekPos(0)
-        , m_writeMode(appendOrOverwrite)
+        , m_openDisposition(openDisposition)
     {
         // set m_offset
         BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
@@ -106,7 +106,7 @@ namespace bfs
         (void)stream.write((char*)buf, n);
 
         // do updates to file block metadata only if in append mode
-        if (m_writeMode == AppendOrOverwrite::Append) {
+        if (m_openDisposition.append() == AppendOrOverwrite::Append) {
 
             // check if we need to update m_bytesWritten and m_next. This will be different
             // probably if the number of bytes read is not consistent with the

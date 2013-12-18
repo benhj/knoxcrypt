@@ -1,10 +1,10 @@
 #ifndef BFS_FILE_BLOCK_HPP__
 #define BFS_FILE_BLOCK_HPP__
 
-#include "AppendOrOverwrite.hpp"
 #include "BFSImageStream.hpp"
 #include "DetailBFS.hpp"
 #include "DetailFileBlock.hpp"
+#include "OpenDisposition.hpp"
 
 #include <vector>
 
@@ -27,23 +27,25 @@ namespace bfs
          * @param totalBlocks the total number of blocks in the fs image
          * @param index the index of this file block
          * @param next the index of the next file block that makes up the file
+         * @param openDisposition open mode
          */
         FileBlock(std::string const &imagePath,
                   uint64_t const totalBlocks,
                   uint64_t const index,
                   uint64_t const next,
-                  AppendOrOverwrite const appendOrOverwrite = AppendOrOverwrite::Append);
+                  OpenDisposition const &openDisposition);
 
         /**
          * @brief for when a file block needs to be read or written use this constructor
          * @param index the index of the file block
+         * @param openDisposition open mode
          * @note other params like size and next will be initialized when
          * the block is actually read
          */
         FileBlock(std::string const &imagePath,
                   uint64_t const totalBlocks,
                   uint64_t const index,
-                  AppendOrOverwrite const appendOrOverwrite = AppendOrOverwrite::Append);
+                  OpenDisposition const &openDisposition);
 
         std::streamsize read(char * const buf, std::streamsize const n) const;
 
@@ -80,7 +82,7 @@ namespace bfs
         mutable uint64_t m_next;
         mutable uint64_t m_offset;
         mutable boost::iostreams::stream_offset m_seekPos;
-        AppendOrOverwrite m_writeMode;
+        OpenDisposition m_openDisposition;
 
     };
 

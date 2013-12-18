@@ -59,7 +59,8 @@ class FileEntryTest
 
         // test get file size different entry but same data
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1));
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1),
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "testFileSizeReportedCorrectly B");
         }
     }
@@ -80,12 +81,14 @@ class FileEntryTest
             uint64_t startBlock = entry.getStartBlockIndex();
             bfs::BFSImageStream in(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
             ASSERT_EQUAL(true, bfs::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
-            bfs::FileBlock block(testPath.string(), blocks, startBlock);
+            bfs::FileBlock block(testPath.string(), blocks, startBlock,
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             uint64_t nextBlock = block.getNextIndex();
             while (nextBlock != startBlock) {
                 startBlock = nextBlock;
                 ASSERT_EQUAL(true, bfs::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
-                bfs::FileBlock block(testPath.string(), blocks, startBlock);
+                bfs::FileBlock block(testPath.string(), blocks, startBlock,
+                                    bfs::OpenDisposition::buildReadOnlyDisposition());
                 nextBlock = block.getNextIndex();
             }
         }
@@ -111,11 +114,13 @@ class FileEntryTest
             uint64_t startBlock = entry.getStartBlockIndex();
             bfs::BFSImageStream in(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
             blockIndices.push_back(startBlock);
-            bfs::FileBlock block(testPath.string(), blocks, startBlock);
+            bfs::FileBlock block(testPath.string(), blocks, startBlock,
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             uint64_t nextBlock = block.getNextIndex();
             while (nextBlock != startBlock) {
                 startBlock = nextBlock;
-                bfs::FileBlock block(testPath.string(), blocks, startBlock);
+                bfs::FileBlock block(testPath.string(), blocks, startBlock,
+                                     bfs::OpenDisposition::buildReadOnlyDisposition());
                 blockIndices.push_back(startBlock);
                 nextBlock = block.getNextIndex();
             }
@@ -159,7 +164,8 @@ class FileEntryTest
 
         // test read
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1));
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1),
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             entry.seek(0);
             std::string expected(createLargeStringToWrite());
             std::vector<char> vec;
@@ -188,14 +194,16 @@ class FileEntryTest
         // small append
         std::string appendString("appended!");
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
 
         // test read
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
             entry.seek(0);
             std::string expected(createLargeStringToWrite());
             expected.append(appendString);
@@ -224,7 +232,8 @@ class FileEntryTest
         // secondary overwrite
         std::string testData("goodbye...!");
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1, bfs::AppendOrOverwrite::Overwrite);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(0);
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -233,7 +242,8 @@ class FileEntryTest
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtStart correct file size");
         }
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
             entry.seek(0);
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length());
@@ -261,7 +271,8 @@ class FileEntryTest
         // secondary overwrite
         std::string testData("goodbye...!");
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1, bfs::AppendOrOverwrite::Overwrite);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - testData.length());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -270,7 +281,8 @@ class FileEntryTest
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtEnd correct file size");
         }
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
             entry.seek(0);
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length());
@@ -299,7 +311,8 @@ class FileEntryTest
         std::string testData("goodbye...!");
         std::string testDataB("final bit!");
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1, bfs::AppendOrOverwrite::Overwrite);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - testData.length());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -309,7 +322,8 @@ class FileEntryTest
         }
 
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1,
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             entry.seek(0);
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length() + testDataB.length());
@@ -337,7 +351,8 @@ class FileEntryTest
 
         // secondary overwrite
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1, bfs::AppendOrOverwrite::Overwrite);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - 50);
             std::string testData(createLargeStringToWrite("abcdefghijklm"));
             entry.write(testData.c_str(), testData.length());
@@ -345,7 +360,8 @@ class FileEntryTest
         }
 
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(BIG_SIZE + BIG_SIZE - 50);
             entry.seek(0);
@@ -376,14 +392,16 @@ class FileEntryTest
         // big append
         std::string appendString(createLargeStringToWrite());
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
 
         // test read
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
             entry.seek(0);
             std::string expected(testData.append(appendString));
             std::vector<char> vec;
@@ -411,7 +429,8 @@ class FileEntryTest
 
         // test seek and read
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
             std::string expected("goodbye!");
             std::vector<char> vec;
             vec.resize(expected.size());
@@ -439,13 +458,15 @@ class FileEntryTest
         // test seek of big file
         std::string appendString("appended!");
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
 
         {
-            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
             std::vector<char> vec;
             vec.resize(appendString.length());
             entry.seek(BIG_SIZE);

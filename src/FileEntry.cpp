@@ -16,7 +16,9 @@ namespace bfs
         , m_currentBlock(0)
         , m_startBlock(0)
         , m_blockIndex(0)
-        , m_writeMode(AppendOrOverwrite::Append)
+        , m_openDisposition(AppendOrOverwrite::Append,
+                            CreateOrDontCreate::Create,
+                            TruncateOrKeep::Keep)
     {
     }
 
@@ -25,7 +27,7 @@ namespace bfs
                          uint64_t const totalBlocks,
                          std::string const &name,
                          uint64_t const startBlock,
-                         AppendOrOverwrite const appendOrOverwrite)
+                         OpenDisposition const &openDisposition)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
         , m_name(name)
@@ -35,7 +37,7 @@ namespace bfs
         , m_currentBlock(startBlock)
         , m_startBlock(startBlock)
         , m_blockIndex(0)
-        , m_writeMode(appendOrOverwrite)
+        , m_openDisposition(openDisposition)
     {
         // store all file blocks associated with file in container
         // also updates the file size as it does this
@@ -136,7 +138,9 @@ namespace bfs
         bfs::BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
         std::vector<uint64_t> firstAndNext = detail::getNAvailableBlocks(stream, 2, m_totalBlocks);
         stream.close();
-        FileBlock block(m_imagePath, m_totalBlocks, firstAndNext[0], firstAndNext[0]);
+        // note building a new block to write to should always be in append mode
+        FileBlock block(m_imagePath, m_totalBlocks, firstAndNext[0], firstAndNext[0],
+                        bfs::OpenDisposition::buildAppendDisposition());
         m_fileBlocks.push_back(block);
         m_blockIndex = m_fileBlocks.size() - 1;
         m_currentBlock = firstAndNext[0];
@@ -149,7 +153,7 @@ namespace bfs
         FileBlock block(m_imagePath,
                         m_totalBlocks,
                         m_currentBlock,
-                        m_writeMode);
+                        m_openDisposition);
 
         uint64_t nextBlock = block.getNextIndex();
 
@@ -166,7 +170,7 @@ namespace bfs
             FileBlock newBlock(m_imagePath,
                                m_totalBlocks,
                                m_currentBlock,
-                               m_writeMode);
+                               m_openDisposition);
             nextBlock = newBlock.getNextIndex();
 
             m_fileSize += newBlock.getDataBytesWritten();
@@ -216,7 +220,7 @@ namespace bfs
         if (!currentBlockHasAvailableSpace()) {
 
             // if in overwrite mode, maybe we want to overwrite current bytes
-            if(m_writeMode == AppendOrOverwrite::Overwrite) {
+            if(m_openDisposition.append() == AppendOrOverwrite::Overwrite) {
 
                 // if the reported stream position in the block is less that
                 // the block's total capacity, then we don't create a new block
@@ -267,7 +271,7 @@ namespace bfs
             // if in overwrite mode, filesize won't be updated
             // since we're simply overwriting bytes that already exist
             // NOTE: need to fix for when we start increasing size of file at end
-            if (m_writeMode == AppendOrOverwrite::Append) {
+            if (m_openDisposition.append() == AppendOrOverwrite::Append) {
                 ++m_fileSize;
             }
 

@@ -106,7 +106,11 @@ namespace bfs
                              std::string const &name)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
-        , m_folderData(imagePath, totalBlocks, name, startBlock)
+        , m_folderData(imagePath,
+                       totalBlocks,
+                       name,
+                       startBlock,
+                       OpenDisposition::buildAppendDisposition())
         , m_startBlock(startBlock)
         , m_name(name)
     {
@@ -199,7 +203,8 @@ namespace bfs
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
-        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startBlock);
+        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startBlock,
+                                 OpenDisposition::buildAppendDisposition());
     }
 
     void
@@ -228,11 +233,13 @@ namespace bfs
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
-        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startBlock);
+        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startBlock,
+                                 OpenDisposition::buildAppendDisposition());
     }
 
     FileEntry
-    FolderEntry::getFileEntry(std::string const &name) const
+    FolderEntry::getFileEntry(std::string const &name,
+                              OpenDisposition const &openDisposition) const
     {
         // find out total number of entries. Should initialize this in constructor?
         uint64_t count = getNumberOfEntries();
@@ -243,7 +250,7 @@ namespace bfs
             std::string entryName(getEntryName(i));
             if (entryName == name && getTypeForEntry(i) == EntryType::FileType) {
                 uint64_t n = getBlockIndexForEntry(i);
-                return FileEntry(m_imagePath, m_totalBlocks, name, n);
+                return FileEntry(m_imagePath, m_totalBlocks, name, n, openDisposition);
             }
         }
 
@@ -321,13 +328,14 @@ namespace bfs
     FolderEntry::removeFileEntry(std::string const &name)
     {
         // first unlink; this deallocates the file blocks, updating the
-        // volume bitmap accordingly
-        FileEntry entry = getFileEntry(name);
+        // volume bitmap accordingly; note doesn't matter what opendisposition is here
+        FileEntry entry = getFileEntry(name, OpenDisposition::buildAppendDisposition());
         entry.unlink();
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startBlock, AppendOrOverwrite::Overwrite);
+        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startBlock,
+                       OpenDisposition::buildOverwriteDisposition());
         detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
         assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
     }
@@ -351,7 +359,10 @@ namespace bfs
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startBlock, AppendOrOverwrite::Overwrite);
+        OpenDisposition openDisposition(AppendOrOverwrite::Overwrite,
+                                        CreateOrDontCreate::Create,
+                                        TruncateOrKeep::Keep);
+        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startBlock, openDisposition);
         detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
         assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
 
@@ -367,7 +378,8 @@ namespace bfs
         uint64_t fileSize = 0;
         uint64_t startBlock;
         if (entryType == EntryType::FileType) {
-            FileEntry fe(getFileEntry(entryName));
+            // note disposition doesn't matter here, can be anything
+            FileEntry fe(getFileEntry(entryName, OpenDisposition::buildAppendDisposition()));
             fileSize = fe.fileSize();
             startBlock = fe.getStartBlockIndex();
         } else {

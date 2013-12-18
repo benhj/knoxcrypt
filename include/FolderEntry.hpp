@@ -53,9 +53,11 @@ namespace bfs
         /**
          * @brief retrieves a FileEntry with specific name
          * @param name the name of the entry to lookup
+         * @param openDisposition open mode
          * @return a copy of the FileEntry with name
          */
-        FileEntry getFileEntry(std::string const &name) const;
+        FileEntry getFileEntry(std::string const &name,
+                               OpenDisposition const &openDisposition) const;
 
         /**
          * @brief retrieves a FolderEntry with specific name
