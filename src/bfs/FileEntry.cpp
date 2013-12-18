@@ -3,6 +3,8 @@
 #include "bfs/DetailFileBlock.hpp"
 #include "bfs/FileEntry.hpp"
 
+#include <stdexcept>
+
 namespace bfs
 {
     // for writing a brand new entry where start block isn't known
@@ -44,10 +46,23 @@ namespace bfs
         // essentially seek right to the very last block
         m_blockIndex = m_fileBlocks.size() - 1;
 
-        // update the starting write position of the end block to how many
-        // bytes have been written to it so far so that we start from this
-        // position when appending extra bytes
-        this->seek(0, std::ios_base::end);
+        // by default seek to 0 position
+        this->seek(0);
+
+        // set up for specific write-mode
+        if(m_openDisposition.readWrite() != ReadOrWriteOrBoth::ReadOnly) {
+
+            // if in trunc, unlink
+            if(m_openDisposition.trunc() == TruncateOrKeep::Truncate) {
+                this->unlink();
+
+            } else {
+                // only if in append mode do we seek to end.
+                if(m_openDisposition.append() == AppendOrOverwrite::Append) {
+                    this->seek(0, std::ios::end);
+                }
+            }
+        }
     }
 
     std::string
@@ -108,6 +123,11 @@ namespace bfs
     std::streamsize
     FileEntry::read(char* s, std::streamsize n)
     {
+
+        if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
+            throw std::runtime_error("Error, can't read when write-only");
+        }
+
         // read block data
         uint32_t read(0);
         uint64_t offset(0);
@@ -264,6 +284,11 @@ namespace bfs
     std::streamsize
     FileEntry::write(const char* s, std::streamsize n)
     {
+
+        if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::ReadOnly) {
+            throw std::runtime_error("Error, can't write when write-only");
+        }
+
         for (int i = 0; i < n; ++i) {
 
             // if in overwrite mode, filesize won't be updated
@@ -363,6 +388,7 @@ namespace bfs
             // false means to deallocate
             detail::updateVolumeBitmapWithOne(stream, blockIndex, m_totalBlocks, false);
         }
+        std::vector<FileBlock>().swap(m_fileBlocks);
         m_fileSize = 0;
         stream.close();
     }

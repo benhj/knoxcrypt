@@ -166,7 +166,6 @@ class FileEntryTest
         {
             bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
-            entry.seek(0);
             std::string expected(createLargeStringToWrite());
             std::vector<char> vec;
             vec.resize(entry.fileSize());
@@ -203,8 +202,7 @@ class FileEntryTest
         // test read
         {
             bfs::FileEntry entry(testPath.string(), blocks, "entry", 1,
-                                 bfs::OpenDisposition::buildAppendDisposition());
-            entry.seek(0);
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(createLargeStringToWrite());
             expected.append(appendString);
             std::vector<char> vec;
@@ -234,7 +232,6 @@ class FileEntryTest
         {
             bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
                                  bfs::OpenDisposition::buildOverwriteDisposition());
-            entry.seek(0);
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -243,11 +240,9 @@ class FileEntryTest
         }
         {
             bfs::FileEntry entry(testPath.string(), blocks, "entry", 1,
-                                 bfs::OpenDisposition::buildAppendDisposition());
-            entry.seek(0);
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length());
-            entry.seek(0);
             entry.read((char*)&readBackIn.front(), testData.length());
             std::string result(readBackIn.begin(), readBackIn.end());
             ASSERT_EQUAL(testData, result, "testBigWriteFollowedBySmallOverwriteAtStart correct content");
@@ -282,8 +277,7 @@ class FileEntryTest
         }
         {
             bfs::FileEntry entry(testPath.string(), blocks, "entry", 1,
-                                 bfs::OpenDisposition::buildAppendDisposition());
-            entry.seek(0);
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length());
             entry.seek(BIG_SIZE - testData.length());
@@ -324,7 +318,6 @@ class FileEntryTest
         {
             bfs::FileEntry entry(testPath.string(), blocks, "entry", 1,
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
-            entry.seek(0);
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length() + testDataB.length());
             entry.seek(BIG_SIZE - testData.length());
@@ -361,10 +354,9 @@ class FileEntryTest
 
         {
             bfs::FileEntry entry(testPath.string(), blocks, "entry", 1,
-                                 bfs::OpenDisposition::buildAppendDisposition());
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(BIG_SIZE + BIG_SIZE - 50);
-            entry.seek(0);
             entry.read((char*)&readBackIn.front(), BIG_SIZE + BIG_SIZE - 50);
             std::string result(readBackIn.begin(), readBackIn.end());
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE + BIG_SIZE - 50, "testBigWriteFollowedByBigOverwriteAtEndThatGoesOverOriginalLength correct file size");
@@ -401,8 +393,7 @@ class FileEntryTest
         // test read
         {
             bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
-                                 bfs::OpenDisposition::buildAppendDisposition());
-            entry.seek(0);
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(testData.append(appendString));
             std::vector<char> vec;
             vec.resize(entry.fileSize());
@@ -430,7 +421,7 @@ class FileEntryTest
         // test seek and read
         {
             bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
-                                 bfs::OpenDisposition::buildAppendDisposition());
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
             std::string expected("goodbye!");
             std::vector<char> vec;
             vec.resize(expected.size());

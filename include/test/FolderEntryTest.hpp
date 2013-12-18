@@ -160,7 +160,6 @@ class FolderEntryTest
         entry.read((char*)&vec.front(), entry.fileSize());
         std::string result(vec.begin(), vec.end());
         ASSERT_EQUAL(result, testData, "testEntryRetrievalAndAppendSmallData");
-
     }
 
     void testEntryRetrievalAndAppendLargeData()
@@ -225,7 +224,6 @@ class FolderEntryTest
             bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
-            entry.flush();
             entry.flush();
             entry.seek(0); // seek to start since retrieving from folder automatically seeks to end
             vec.resize(entry.fileSize());
