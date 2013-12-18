@@ -1,17 +1,46 @@
 CXX=clang++
 CXXFLAGS=-ggdb -std=c++11 -I/usr/local/boost_1_53_0 -Iinclude
-LDFLAGS=-L/usr/local/boost_1_53_0/stage/lib
+LDFLAGS=-L/usr/local/boost_1_53_0/stage/lib -lboost_filesystem -lboost_system
 SOURCES := $(wildcard src/*.cpp)
+MAKE_BFS_SRC := $(wildcard src/makebfs/*.cpp)
+TEST_SRC := $(wildcard src/test/*.cpp)
 OBJECTS := $(addprefix obj/,$(notdir $(SOURCES:.cpp=.o)))
+OBJECTS_UTIL := $(addprefix obj-makebfs/,$(notdir $(MAKE_BFS_SRC:.cpp=.o)))
+OBJECTS_TEST := $(addprefix obj-test/,$(notdir $(TEST_SRC:.cpp=.o)))
 TEST_EXECUTABLE=test
+MAKEBFS_EXECUTABLE=makebfs
 
 obj/%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 	
-all: $(SOURCES) $(TEST_EXECUTABLE)
+obj-test/%.o: src/test/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	
+obj-makebfs/%.o: src/makebfs/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	
+all: $(SOURCES) $(TEST_SRC) $(TEST_EXECUTABLE)
 
-$(TEST_EXECUTABLE): $(OBJECTS) 
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
+makebfs: $(SOURCES) $(MAKE_BFS_SRC) $(MAKEBFS_EXECUTABLE)
+
+$(TEST_EXECUTABLE): directoryObj directoryObjTest $(OBJECTS) $(OBJECTS_TEST)
+	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJECTS_TEST) -o $@
+	
+$(MAKEBFS_EXECUTABLE): directoryObj directoryObjMakeBfs $(OBJECTS) $(OBJECTS_UTIL)
+	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJECTS_UTIL) -o $@
 
 clean:
-	/bin/rm -fr obj test make_bfs
+	/bin/rm -fr obj obj-makebfs obj-test test makebfs
+	
+directoryObj: 
+	/bin/mkdir -p obj
+	
+directoryObjTest: 
+	/bin/mkdir -p obj-test
+	
+directoryObjMakeBfs: 
+	/bin/mkdir -p obj-makebfs
+	
+    
+    
+    
