@@ -40,6 +40,14 @@ namespace bfs
                                        TruncateOrKeep::Keep);
             }
 
+            static OpenDisposition buildWriteOnlyDisposition()
+            {
+                return OpenDisposition(ReadOrWriteOrBoth::WriteOnly,
+                                       AppendOrOverwrite::Append,
+                                       CreateOrDontCreate::DontCreate,
+                                       TruncateOrKeep::Keep);
+            }
+
             static OpenDisposition buildOverwriteDisposition()
             {
                 return OpenDisposition(ReadOrWriteOrBoth::ReadWrite,

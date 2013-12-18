@@ -2,6 +2,7 @@
 #include "bfs/DetailBFS.hpp"
 #include "bfs/DetailFileBlock.hpp"
 #include "bfs/FileEntry.hpp"
+#include "bfs/FileEntryException.hpp"
 
 #include <stdexcept>
 
@@ -118,37 +119,6 @@ namespace bfs
         }
 
         return size;
-    }
-
-    std::streamsize
-    FileEntry::read(char* s, std::streamsize n)
-    {
-
-        if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
-            throw std::runtime_error("Error, can't read when write-only");
-        }
-
-        // read block data
-        uint32_t read(0);
-        uint64_t offset(0);
-        while (read < n) {
-
-            uint32_t count = readCurrentBlockBytes();
-
-            // check that we don't read too much!
-            if (read + count >= n) {
-                count -= (read + count - n);
-            }
-
-            read += count;
-
-            for (int b = 0; b < count; ++b) {
-                s[offset + b] = m_buffer[b];
-            }
-
-            offset += count;
-        }
-        return n;
     }
 
     void FileEntry::newWritableFileBlock() const
@@ -282,11 +252,42 @@ namespace bfs
     }
 
     std::streamsize
+    FileEntry::read(char* s, std::streamsize n)
+    {
+
+        if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
+            throw FileEntryException(FileEntryError::NotReadable);
+        }
+
+        // read block data
+        uint32_t read(0);
+        uint64_t offset(0);
+        while (read < n) {
+
+            uint32_t count = readCurrentBlockBytes();
+
+            // check that we don't read too much!
+            if (read + count >= n) {
+                count -= (read + count - n);
+            }
+
+            read += count;
+
+            for (int b = 0; b < count; ++b) {
+                s[offset + b] = m_buffer[b];
+            }
+
+            offset += count;
+        }
+        return n;
+    }
+
+    std::streamsize
     FileEntry::write(const char* s, std::streamsize n)
     {
 
         if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::ReadOnly) {
-            throw std::runtime_error("Error, can't write when write-only");
+            throw FileEntryException(FileEntryError::NotWritable);
         }
 
         for (int i = 0; i < n; ++i) {

@@ -2,6 +2,7 @@
 #include "bfs/DetailBFS.hpp"
 #include "bfs/DetailFileBlock.hpp"
 #include "bfs/FileEntry.hpp"
+#include "bfs/FileEntryException.hpp"
 #include "bfs/MakeBFS.hpp"
 #include "test/TestHelpers.hpp"
 
@@ -22,6 +23,8 @@ class FileEntryTest
         testFileSizeReportedCorrectly();
         testBlocksAllocated();
         testFileUnlink();
+        testReadingFromNonReadableThrows();
+        testWritingToNonWritableThrows();
         testBigWriteFollowedByRead();
         testBigWriteFollowedBySmallAppend();
         testBigWriteFollowedBySmallOverwriteAtStart();
@@ -144,8 +147,72 @@ class FileEntryTest
             }
             in.close();
         }
+    }
 
+    void testReadingFromNonReadableThrows()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
+        // test write get file size from same entry
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), BIG_SIZE);
+            entry.flush();
+        }
+
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1),
+                                 bfs::OpenDisposition::buildWriteOnlyDisposition());
+            std::vector<uint8_t> vec(entry.fileSize());
+
+            bool pass = false;
+            // assert correct exception was thrown
+            try {
+                entry.read((char*)&vec.front(), entry.fileSize());
+            } catch (bfs::FileEntryException const &e) {
+                ASSERT_EQUAL(e, bfs::FileEntryException(bfs::FileEntryError::NotReadable), "testReadingFromNonReadableThrows A");
+                pass = true;
+            }
+            // assert that any exception was thrown
+            ASSERT_EQUAL(pass, true, "testReadingFromNonReadableThrows B");
+        }
+    }
+
+    void testWritingToNonWritableThrows()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // test write get file size from same entry
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), BIG_SIZE);
+            entry.flush();
+        }
+
+        // write some more
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1),
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+
+            bool pass = false;
+            // assert correct exception was thrown
+            try {
+                entry.write((char*)&vec.front(), BIG_SIZE);
+            } catch (bfs::FileEntryException const &e) {
+                ASSERT_EQUAL(e, bfs::FileEntryException(bfs::FileEntryError::NotWritable), "testWritingToNonWritableThrows A");
+                pass = true;
+            }
+            // assert that any exception was thrown
+            ASSERT_EQUAL(pass, true, "testWritingToNonWritableThrows B");
+        }
     }
 
     void testBigWriteFollowedByRead()
