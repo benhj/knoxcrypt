@@ -20,6 +20,7 @@ namespace bfs
         , m_startBlock(0)
         , m_blockIndex(0)
         , m_openDisposition(OpenDisposition::buildAppendDisposition())
+        , m_pos(0)
     {
     }
 
@@ -39,6 +40,7 @@ namespace bfs
         , m_startBlock(startBlock)
         , m_blockIndex(0)
         , m_openDisposition(openDisposition)
+        , m_pos(0)
     {
         // store all file blocks associated with file in container
         // also updates the file size as it does this
@@ -279,6 +281,10 @@ namespace bfs
 
             offset += count;
         }
+
+        // update stream position
+        m_pos += n;
+
         return n;
     }
 
@@ -301,6 +307,9 @@ namespace bfs
 
             bufferByteForWriting(s[i]);
         }
+
+        // update stream position
+        m_pos += n;
 
         return n;
     }
@@ -367,7 +376,14 @@ namespace bfs
             m_fileBlocks[m_blockIndex].seek(blockPosition);
         }
 
+        m_pos = off;
         return off;
+    }
+
+    boost::iostreams::stream_offset
+    FileEntry::tell() const
+    {
+        return m_pos;
     }
 
     void

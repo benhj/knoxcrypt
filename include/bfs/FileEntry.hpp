@@ -78,6 +78,12 @@ namespace bfs
                                              std::ios_base::seekdir way = std::ios_base::beg);
 
         /**
+         * @brief indicates the stream position
+         * @return the current stream position
+         */
+        boost::iostreams::stream_offset tell() const;
+
+        /**
          * @brief flushes any remaining data
          */
         void flush();
@@ -122,6 +128,9 @@ namespace bfs
 
         // open mode
         OpenDisposition m_openDisposition;
+
+        // the current 'stream position' of file entry
+        std::streamoff m_pos;
 
         /**
          * @brief buffers a byte for writing
