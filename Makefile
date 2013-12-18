@@ -1,30 +1,17 @@
 CXX=clang++
 CXXFLAGS=-ggdb -std=c++11 -I/usr/local/boost_1_53_0 -Iinclude
-CPP_FILES := $(wildcard src/*.cpp)
-OBJ_FILES := $(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
+LDFLAGS=-L/usr/local/boost_1_53_0/stage/lib
+SOURCES := $(wildcard src/*.cpp)
+OBJECTS := $(addprefix obj/,$(notdir $(SOURCES:.cpp=.o)))
+TEST_EXECUTABLE=test
 
-BFS_OBJS =  BFSImageStream.o \
-            FileBlock.o \
-            FileEntry.o \
-            FolderEntry.o \
-            EntryInfo.o \
-            /usr/local/boost_1_53_0/stage/lib/libboost_filesystem.dylib \
-            /usr/local/boost_1_53_0/stage/lib/libboost_system.dylib
+obj/%.o: src/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	
+all: $(SOURCES) $(TEST_EXECUTABLE)
 
-TEST_OBJS = test.o
-
-MAKE_BFS_OBJS = make_bfs.o
-
-.c.o:
-	$(CXX) -c $(CXXFLAGS) -arch x86_64 $*.cpp
-
-all: test
-
-test:  $(TEST_OBJS) $(BFS_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $(TEST_OBJS) $(BFS_OBJS)
-
-make_bfs:  $(MAKE_BFS_OBJS) $(BFS_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $(MAKE_BFS_OBJS) $(BFS_OBJS)
+$(TEST_EXECUTABLE): $(OBJECTS) 
+	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
 
 clean:
-	/bin/rm -f *.o *~ test make_bfs
+	/bin/rm -fr obj test make_bfs
