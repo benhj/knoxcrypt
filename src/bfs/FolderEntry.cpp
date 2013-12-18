@@ -359,10 +359,8 @@ namespace bfs
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        OpenDisposition openDisposition(AppendOrOverwrite::Overwrite,
-                                        CreateOrDontCreate::Create,
-                                        TruncateOrKeep::Keep);
-        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startBlock, openDisposition);
+        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startBlock,
+                       OpenDisposition::buildOverwriteDisposition());
         detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
         assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
 

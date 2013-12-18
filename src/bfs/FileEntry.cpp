@@ -16,9 +16,7 @@ namespace bfs
         , m_currentBlock(0)
         , m_startBlock(0)
         , m_blockIndex(0)
-        , m_openDisposition(AppendOrOverwrite::Append,
-                            CreateOrDontCreate::Create,
-                            TruncateOrKeep::Keep)
+        , m_openDisposition(OpenDisposition::buildAppendDisposition())
     {
     }
 

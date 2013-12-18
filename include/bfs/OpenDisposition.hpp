@@ -3,6 +3,7 @@
 
 #include "bfs/AppendOrOverwrite.hpp"
 #include "bfs/CreateOrDontCreate.hpp"
+#include "bfs/ReadOrWriteOrBoth.hpp"
 #include "bfs/TruncateOrKeep.hpp"
 
 namespace bfs
@@ -10,10 +11,12 @@ namespace bfs
     class OpenDisposition
     {
         public:
-            OpenDisposition(AppendOrOverwrite const &append,
+            OpenDisposition(ReadOrWriteOrBoth const &readWrite,
+                            AppendOrOverwrite const &append,
                             CreateOrDontCreate const &create,
                             TruncateOrKeep const &trunc)
-                : m_append(append)
+                : m_readWrite(readWrite)
+                , m_append(append)
                 , m_create(create)
                 , m_trunc(trunc)
             {
@@ -21,23 +24,33 @@ namespace bfs
 
             static OpenDisposition buildAppendDisposition()
             {
-                return OpenDisposition(AppendOrOverwrite::Append,
+                return OpenDisposition(ReadOrWriteOrBoth::ReadWrite,
+                                       AppendOrOverwrite::Append,
                                        CreateOrDontCreate::Create,
                                        TruncateOrKeep::Keep);
             }
 
             static OpenDisposition buildReadOnlyDisposition()
             {
-                return OpenDisposition(AppendOrOverwrite::Append,
-                                       CreateOrDontCreate::Create,
+                // note it only matters that the first paramter is readonly
+                // the others don't matter and can be anything
+                return OpenDisposition(ReadOrWriteOrBoth::ReadOnly,
+                                       AppendOrOverwrite::Append,
+                                       CreateOrDontCreate::DontCreate,
                                        TruncateOrKeep::Keep);
             }
 
             static OpenDisposition buildOverwriteDisposition()
             {
-                return OpenDisposition(AppendOrOverwrite::Overwrite,
+                return OpenDisposition(ReadOrWriteOrBoth::ReadWrite,
+                                       AppendOrOverwrite::Overwrite,
                                        CreateOrDontCreate::DontCreate,
                                        TruncateOrKeep::Keep);
+            }
+
+            ReadOrWriteOrBoth readWrite() const
+            {
+                return m_readWrite;
             }
 
             AppendOrOverwrite append() const
@@ -56,6 +69,7 @@ namespace bfs
             }
 
         private:
+            ReadOrWriteOrBoth m_readWrite;
             AppendOrOverwrite m_append;
             CreateOrDontCreate m_create;
             TruncateOrKeep m_trunc;
