@@ -1,12 +1,10 @@
 CXX=clang++
-CXXFLAGS=-ggdb -I/usr/local/boost_1_53_0
+CXXFLAGS=-ggdb -std=c++11 -I/usr/local/boost_1_53_0
 
-BFS_OBJS =  AppendOrOverwrite.o \
-            BFSImageStream.o \
+BFS_OBJS =  BFSImageStream.o \
             FileBlock.o \
             FileEntry.o \
             FolderEntry.o \
-            EntryType.o \
             EntryInfo.o \
             /usr/local/boost_1_53_0/stage/lib/libboost_filesystem.dylib \
             /usr/local/boost_1_53_0/stage/lib/libboost_system.dylib

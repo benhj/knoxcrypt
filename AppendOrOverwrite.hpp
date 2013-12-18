@@ -3,23 +3,7 @@
 
 namespace bfs
 {
-    class AppendOrOverwrite
-    {
-      private:
-        typedef enum {APPEND, OVERWRITE} AppendOrOverwriteEnum;
-        AppendOrOverwriteEnum m_Value;
-
-        AppendOrOverwrite();
-      public:
-
-        static const AppendOrOverwriteEnum Append;
-        static const AppendOrOverwriteEnum Overwrite;
-
-        AppendOrOverwrite(AppendOrOverwriteEnum const value) : m_Value(value) {}
-
-        bool operator==(AppendOrOverwrite const& rhs) const { return m_Value == rhs.m_Value; }
-        bool operator!=(AppendOrOverwrite const& rhs) const { return m_Value != rhs.m_Value; }
-    };
+    enum class AppendOrOverwrite { Append, Overwrite };
 }
 
 
