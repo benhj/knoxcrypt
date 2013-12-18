@@ -24,7 +24,7 @@ namespace bfs
                 }
 
                 if(m_error == FileEntryError::NotWritable) {
-                    return "File entry not readable";
+                    return "File entry not writable";
                 }
 
                 return "File entry unknown error";

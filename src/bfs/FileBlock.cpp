@@ -1,5 +1,6 @@
 
 #include "bfs/FileBlock.hpp"
+#include "bfs/FileBlockException.hpp"
 
 namespace bfs
 {
@@ -88,18 +89,31 @@ namespace bfs
     std::streamsize
     FileBlock::read(char * const buf, std::streamsize const n) const
     {
+
+        if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
+            throw FileBlockException(FileBlockError::NotReadable);
+        }
+
         // open the image stream for reading
         BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
         (void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_seekPos);
         (void)stream.read((char*)buf, n);
         stream.close();
+
+        // update the stream position
         m_seekPos += n;
+
         return n;
     }
 
     std::streamsize
     FileBlock::write(char const * const buf, std::streamsize const n) const
     {
+
+        if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::ReadOnly) {
+            throw FileBlockException(FileBlockError::NotWritable);
+        }
+
         // open the image stream for writing
         BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
         (void)stream.seekp(m_offset + detail::FILE_BLOCK_META + m_seekPos);
@@ -133,6 +147,7 @@ namespace bfs
         stream.flush();
         stream.close();
 
+        // update the stream position
         m_seekPos += n;
 
         return n;

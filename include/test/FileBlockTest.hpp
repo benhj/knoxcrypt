@@ -2,6 +2,7 @@
 #include "bfs/DetailBFS.hpp"
 #include "bfs/DetailFileBlock.hpp"
 #include "bfs/FileBlock.hpp"
+#include "bfs/FileBlockException.hpp"
 #include "bfs/MakeBFS.hpp"
 #include "bfs/OpenDisposition.hpp"
 #include "test/TestHelpers.hpp"
@@ -23,6 +24,8 @@ class FileBlockTest
     {
         boost::filesystem::create_directories(m_uniquePath);
         blockWriteAndReadTest();
+        testWritingToNonWritableThrows();
+        testReadingFromNonReadableThrows();
     }
 
     ~FileBlockTest()
@@ -49,22 +52,76 @@ class FileBlockTest
         assert(block.getDataBytesWritten() == 26);
         bfs::BFSImageStream stream(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
         uint64_t size = bfs::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
-        ASSERT_EQUAL(size, 26, "blockWriteAndReadTest: correctly returned block size");
+        ASSERT_EQUAL(size, 26, "FileBlockTest::blockWriteAndReadTest(): correctly returned block size");
 
         // test that reported next index correct
         assert(block.getNextIndex() == 0);
         uint64_t next = bfs::detail::getIndexOfNextFileBlockFromFileBlockN(stream, 0, blocks);
         stream.close();
-        ASSERT_EQUAL(next, 0, "blockWriteAndReadTest: correct block index");
+        ASSERT_EQUAL(next, 0, "FileBlockTest::blockWriteAndReadTest(): correct block index");
 
         // test that data can be read correctly
         std::vector<uint8_t> dat;
         dat.resize(size);
         block.seek(0);
         std::streamsize bytesRead = block.read((char*)&dat.front(), size);
-        ASSERT_EQUAL(bytesRead, size, "blockWriteAndReadTest: data read bytes read check");
+        ASSERT_EQUAL(bytesRead, size, "FileBlockTest::blockWriteAndReadTest(): data read bytes read check");
         std::string str(dat.begin(), dat.end());
-        ASSERT_EQUAL(str, testData, "blockWriteAndReadTest: data read content check");
+        ASSERT_EQUAL(str, testData, "FileBlockTest::blockWriteAndReadTest(): data read content check");
+    }
+
+    void testWritingToNonWritableThrows()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        {
+            bfs::FileBlock block(testPath.string(), blocks, uint64_t(0), uint64_t(0),
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
+            std::string testData("Hello, world!Hello, world!");
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            bool pass = false;
+            // assert correct exception was thrown
+            try {
+                block.write((char*)&vec.front(), testData.length());
+            } catch (bfs::FileBlockException const &e) {
+                ASSERT_EQUAL(e, bfs::FileBlockException(bfs::FileBlockError::NotWritable), "FileBlockTest::testWritingToNonWritableThrows() A");
+                pass = true;
+            }
+            // assert that any exception was thrown
+            ASSERT_EQUAL(pass, true, "FileBlockTest::testWritingToNonWritableThrows() B");
+        }
+    }
+
+    void testReadingFromNonReadableThrows()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        {
+            bfs::FileBlock block(testPath.string(), blocks, uint64_t(0), uint64_t(0),
+                                 bfs::OpenDisposition::buildWriteOnlyDisposition());
+            std::string testData("Hello, world!Hello, world!");
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            block.write((char*)&vec.front(), testData.length());
+        }
+
+        {
+            bfs::FileBlock block(testPath.string(), blocks, uint64_t(0),
+                                 bfs::OpenDisposition::buildWriteOnlyDisposition());
+            std::vector<uint8_t> vec(block.getInitialDataBytesWritten());
+            // assert correct exception was thrown
+            bool pass = false;
+            try {
+                block.read((char*)&vec.front(), block.getInitialDataBytesWritten());
+            } catch (bfs::FileBlockException const &e) {
+                ASSERT_EQUAL(e, bfs::FileBlockException(bfs::FileBlockError::NotReadable), "FileBlockTest::testReadingFromNonReadableThrows() A");
+                pass = true;
+            }
+            // assert that any exception was thrown
+            ASSERT_EQUAL(pass, true, "FileBlockTest::testReadingFromNonReadableThrows() B");
+        }
+
     }
 
 };
