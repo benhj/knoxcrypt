@@ -158,6 +158,7 @@ namespace bfs
         m_fileBlocks.push_back(block);
         m_blockIndex = m_fileBlocks.size() - 1;
         m_currentBlock = firstAndNext[0];
+        m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     }
 
     void FileEntry::setBlocks()
@@ -273,8 +274,6 @@ namespace bfs
             // write the data
             writeBufferedDataToBlock((detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
                                      - streamPosition);
-
-            m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
         }
     }
 
@@ -366,7 +365,6 @@ namespace bfs
     {
         checkAndCreateWritableFileBlock();
         writeBufferedDataToBlock(m_buffer.size());
-        m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     }
 
     void
