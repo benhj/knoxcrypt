@@ -19,7 +19,7 @@ namespace bfs
     {
       public:
         /**
-         * @brief when writing a new file this constructor should be used
+         * @brief when creating a new file this constructor should be used
          * @param imagePath the path of the bfs image
          * @param totalBlocks the total number of blocks in the bfs
          * @param name the name of the file entry
@@ -27,7 +27,7 @@ namespace bfs
         FileEntry(std::string const &imagePath, uint64_t const totalBlocks, std::string const &name);
 
         /**
-         * @brief when appending or overwriting to the end of a file
+         * @brief when reading or appending or overwriting to the end of a file
          * this constructor should be used
          * @param imagePath the path of the bfs image
          * @param totalBlocks the total number of blocks in the bfs
@@ -40,14 +40,6 @@ namespace bfs
                   std::string const &name,
                   uint64_t const startBlock,
                   AppendOrOverwrite const appendOrOverwrite = AppendOrOverwrite::Append);
-
-        /**
-         * @brief when reading a file this constructor should be used
-         * @param imagePath the path of the bfs image
-         * @param totalBlocks the total number of blocks in the bfs
-         * @param startBlock the starting block of the file to be read
-         */
-        FileEntry(std::string const &imagePath, uint64_t const totalBlocks, uint64_t const startBlock);
 
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;

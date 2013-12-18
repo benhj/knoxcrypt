@@ -50,24 +50,6 @@ namespace bfs
         this->seek(0, std::ios_base::end);
     }
 
-    // for reading
-    FileEntry::FileEntry(std::string const &imagePath, uint64_t const totalBlocks, uint64_t const startBlock)
-        : m_imagePath(imagePath)
-        , m_totalBlocks(totalBlocks)
-        , m_name()
-        , m_fileSize(0)
-        , m_fileBlocks()
-        , m_buffer()
-        , m_currentBlock(startBlock)
-        , m_startBlock(startBlock)
-        , m_blockIndex(0)
-        , m_writeMode(AppendOrOverwrite::Append)
-    {
-        // store all file blocks associated with file in container
-        // also updates the file size as it does this
-        setBlocks();
-    }
-
     std::string
     FileEntry::filename() const
     {

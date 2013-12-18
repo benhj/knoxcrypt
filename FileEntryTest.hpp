@@ -59,7 +59,7 @@ class FileEntryTest
 
         // test get file size different entry but same data
         {
-            bfs::FileEntry entry(testPath.string(), blocks, uint64_t(1));
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1));
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "testFileSizeReportedCorrectly B");
         }
     }
@@ -159,7 +159,8 @@ class FileEntryTest
 
         // test read
         {
-            bfs::FileEntry entry(testPath.string(), blocks, uint64_t(1));
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1));
+            entry.seek(0);
             std::string expected(createLargeStringToWrite());
             std::vector<char> vec;
             vec.resize(entry.fileSize());
@@ -194,7 +195,8 @@ class FileEntryTest
 
         // test read
         {
-            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1);
+            entry.seek(0);
             std::string expected(createLargeStringToWrite());
             expected.append(appendString);
             std::vector<char> vec;
@@ -231,7 +233,8 @@ class FileEntryTest
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtStart correct file size");
         }
         {
-            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1);
+            entry.seek(0);
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length());
             entry.seek(0);
@@ -267,7 +270,8 @@ class FileEntryTest
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtEnd correct file size");
         }
         {
-            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1);
+            entry.seek(0);
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length());
             entry.seek(BIG_SIZE - testData.length());
@@ -305,7 +309,8 @@ class FileEntryTest
         }
 
         {
-            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1);
+            entry.seek(0);
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length() + testDataB.length());
             entry.seek(BIG_SIZE - testData.length());
@@ -340,7 +345,7 @@ class FileEntryTest
         }
 
         {
-            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", 1);
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(BIG_SIZE + BIG_SIZE - 50);
             entry.seek(0);
@@ -378,7 +383,8 @@ class FileEntryTest
 
         // test read
         {
-            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
+            entry.seek(0);
             std::string expected(testData.append(appendString));
             std::vector<char> vec;
             vec.resize(entry.fileSize());
@@ -405,7 +411,7 @@ class FileEntryTest
 
         // test seek and read
         {
-            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
             std::string expected("goodbye!");
             std::vector<char> vec;
             vec.resize(expected.size());
@@ -439,7 +445,7 @@ class FileEntryTest
         }
 
         {
-            bfs::FileEntry entry(testPath.string(), blocks, 1);
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1);
             std::vector<char> vec;
             vec.resize(appendString.length());
             entry.seek(BIG_SIZE);
