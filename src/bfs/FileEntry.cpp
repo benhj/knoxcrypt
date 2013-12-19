@@ -377,6 +377,7 @@ namespace bfs
                            int64_t blockIndex,
                            boost::iostreams::stream_offset indexedBlockPosition)
     {
+
         // find what file block the offset would relate to and set extra offset in file block
         // to that position
         uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
@@ -386,29 +387,45 @@ namespace bfs
 
         if(addition >= 0 && addition <= blockSize) {
             return std::make_pair(blockIndex, addition);
-        }
+        } else {
 
-        if(addition > blockSize) {
-            SeekPair treatLikeBegin = getPositionFromBegin(addition);
-            return std::make_pair(treatLikeBegin.first + blockIndex,
-                                  treatLikeBegin.second + indexedBlockPosition);
-        }
+            boost::iostreams::stream_offset const leftOver = abs(addition) % blockSize;
 
-        // default addition < 0 case
-        SeekPair treatLikeEnd = getPositionFromEnd(addition, blockIndex, indexedBlockPosition);
-        return std::make_pair(blockIndex - treatLikeEnd.first,
-                              indexedBlockPosition - treatLikeEnd.second);
+            int64_t sumValue = 0;
+
+            boost::iostreams::stream_offset roundedDown = addition - leftOver;
+
+            if(abs(roundedDown) > (blockSize)) {
+                sumValue = abs(roundedDown) / blockSize;
+
+                // hacky bit to get working
+                if((addition < 0) && ((blockSize - leftOver) > indexedBlockPosition)){
+                   sumValue++;
+                }
+            } else {
+                sumValue = 1;
+            }
+
+            uint16_t const theBlock = (addition < 0) ? (blockIndex - sumValue) :
+                                      (blockIndex + sumValue);
+            boost::iostreams::stream_offset offset = (addition < 0) ? (blockSize - leftOver) :
+                                                     leftOver;
+
+            return std::make_pair(theBlock, offset);
+        }
     }
 
     boost::iostreams::stream_offset
     FileEntry::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
     {
-        // reset any offset values to zero. An offset value determines
-        // an offset point within a file block from which reading or writing
-        // or appending etc. starts
-        std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
-        for (; it != m_fileBlocks.end(); ++it) {
-            it->seek(0);
+        // reset any offset values to zero but only if not seeking from the current
+        // position. When seeking from the current position, we need to keep
+        // track of the original block offset
+        if(way != std::ios_base::cur) {
+            std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
+            for (; it != m_fileBlocks.end(); ++it) {
+                it->seek(0);
+            }
         }
 
         // if at end just seek right to end and don't do anything else
@@ -418,6 +435,7 @@ namespace bfs
             size_t endBlock = m_fileBlocks.size() - 1;
             seekPair = getPositionFromEnd(off, endBlock,
                                            m_fileBlocks[endBlock].getDataBytesWritten());
+
         }
 
         // pass in the current offset, the current block and the current
@@ -429,7 +447,8 @@ namespace bfs
         }
         // seek relative to the current position
         if(way == std::ios_base::cur) {
-            seekPair = getPositionFromCurrent(off, m_blockIndex, m_fileBlocks[m_blockIndex].tell());
+            seekPair = getPositionFromCurrent(off, m_blockIndex,
+                                              m_fileBlocks[m_blockIndex].tell());
         }
 
         // check bounds and error if too big
@@ -443,9 +462,24 @@ namespace bfs
             // set the position to seek to for given block
             // this will be the point from which we read or write
             m_fileBlocks[m_blockIndex].seek(seekPair.second);
+
+            switch(way)
+            {
+            case std::ios_base::cur:
+                m_pos = m_pos + off;
+                break;
+            case std::ios_base::end:
+                m_pos = m_fileSize + off;
+                break;
+            case std::ios_base::beg:
+                m_pos = off;
+                break;
+            default:
+                break;
+            }
+
         }
 
-        m_pos = off;
         return off;
     }
 
