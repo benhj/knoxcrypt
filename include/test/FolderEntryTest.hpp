@@ -129,20 +129,10 @@ class FolderEntryTest
         uint64_t b3 = folder.getEntryInfo(2).firstFileBlock();
         uint64_t b4 = folder.getEntryInfo(3).firstFileBlock();
 
-        //
-        // when entry 0 added to root folder, root folder block starts at 0
-        // this creates a new file entry at block 1
-        // when entry 1 added, still at block 0, this creates a new file entry
-        // at block 2; folder entry ends up also writing to block 3
-        // when entry 2 added, root folder at block 3, this creates a new file
-        // entry at block 4
-        // when entry 3 added, root folder still at block 3, this creates a new
-        // file entry at block 5. Root folder ends up also writing to block 6
-        //
         ASSERT_EQUAL(b1, 1, "testAddEntryBlockIndexRetrieval A");
-        ASSERT_EQUAL(b2, 2, "testAddEntryBlockIndexRetrieval B");
+        ASSERT_EQUAL(b2, 3, "testAddEntryBlockIndexRetrieval B");
         ASSERT_EQUAL(b3, 4, "testAddEntryBlockIndexRetrieval C");
-        ASSERT_EQUAL(b4, 5, "testAddEntryBlockIndexRetrieval D");
+        ASSERT_EQUAL(b4, 6, "testAddEntryBlockIndexRetrieval D");
     }
 
     void testEntryRetrievalAndAppendSmallData()

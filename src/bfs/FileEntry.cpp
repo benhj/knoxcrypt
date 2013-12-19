@@ -215,11 +215,19 @@ namespace bfs
 
                 // if the reported stream position in the block is less that
                 // the block's total capacity, then we don't create a new block
-                // we simple overwrite
+                // we simply overwrite
                 if(m_fileBlocks[m_blockIndex].tell() < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
                     return;
                 }
 
+                // edge case; if right at the very end of the block, need to
+                // iterate the block index and return if possible
+                if(m_fileBlocks[m_blockIndex].tell() == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+                    if(m_blockIndex < m_fileBlocks.size() - 1) {
+                        ++m_blockIndex;
+                        return;
+                    }
+                }
             }
             newWritableFileBlock();
 
@@ -305,7 +313,6 @@ namespace bfs
             if (m_openDisposition.append() == AppendOrOverwrite::Append) {
                 ++m_fileSize;
             }
-
             bufferByteForWriting(s[i]);
         }
 
@@ -492,7 +499,6 @@ namespace bfs
     void
     FileEntry::flush()
     {
-        checkAndCreateWritableFileBlock();
         writeBufferedDataToBlock(m_buffer.size());
     }
 

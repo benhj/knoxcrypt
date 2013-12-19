@@ -183,14 +183,11 @@ namespace bfs
         // create and write first byte of filename metadata
         (void)doWriteFirstByteToEntryMetaData(EntryType::FileType);
 
-        // Create a new file entry
-        FileEntry entry(m_imagePath, m_totalBlocks, m_name);
-
-        // flushing also ensures that first block is registered as being allocated
-        entry.flush();
-
         // create and write filename
         (void)doWriteFilenameToEntryMetaData(name);
+
+        // Create a new file entry
+        FileEntry entry(m_imagePath, m_totalBlocks, m_name);
 
         // write the first block index to the file entry metadata
         (void)doWriteFirstBlockIndexToEntryMetaData(entry);
@@ -216,11 +213,11 @@ namespace bfs
         // create and write first byte of filename metadata
         (void)doWriteFirstByteToEntryMetaData(EntryType::FolderType);
 
-        // Create a new sub-folder entry
-        FolderEntry entry(m_imagePath, m_totalBlocks, m_name);
-
         // create and write filename
         (void)doWriteFilenameToEntryMetaData(name);
+
+        // Create a new sub-folder entry
+        FolderEntry entry(m_imagePath, m_totalBlocks, m_name);
 
         // write the first block index to the file entry metadata
         (void)doWriteFirstBlockIndexToEntryMetaData(entry.m_folderData);

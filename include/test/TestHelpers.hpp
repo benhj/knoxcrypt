@@ -9,6 +9,7 @@
 
 int const HELLO_IT = 1000;
 int const BIG_SIZE = HELLO_IT * 13;
+int const A_STRING_SIZE = 998;
 
 int testFailures = 0;
 int passedPoints = 0;
@@ -27,6 +28,15 @@ std::string createLargeStringToWrite(std::string const &val="Hello, World!")
     std::string theString("");
     for (int i = 0; i < HELLO_IT; ++i) {
         theString.append(val);
+    }
+    return theString;
+}
+
+std::string createAString()
+{
+    std::string theString("");
+    for (int i = 0; i < A_STRING_SIZE; ++i) {
+        theString.append("a");
     }
     return theString;
 }

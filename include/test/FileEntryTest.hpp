@@ -37,6 +37,8 @@ class FileEntryTest
         testSeekingFromEnd();
         testSeekingFromCurrentNegative();
         testSeekingFromCurrentPositive();
+        testEdgeCaseEndOfBlockOverWrite();
+        testEdgeCaseEndOfBlockAppend();
     }
 
     ~FileEntryTest()
@@ -647,6 +649,78 @@ class FileEntryTest
             std::string recovered(vec.begin() + finalPosition,
                                   vec.begin() + finalPosition + testData.length());
             ASSERT_EQUAL(recovered, testData, "FileEntryTest::testSeekingFromCurrentPositive()");
+        }
+    }
+
+    void testEdgeCaseEndOfBlockOverWrite()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // test write
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
+            std::string testData(createAString());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
+        }
+
+        int seekPos = 499; // overwrite to begin at very end
+        std::string testData("goodbye!");
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildOverwriteDisposition());
+            entry.seek(seekPos);
+            entry.write(testData.c_str(), testData.length());
+            entry.flush();
+        }
+
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1),
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
+            std::vector<uint8_t> vec;
+            vec.resize(entry.fileSize());
+            entry.read((char*)&vec.front(), entry.fileSize());
+            std::string recovered(vec.begin() + seekPos,
+                                  vec.begin() + seekPos + testData.length());
+            ASSERT_EQUAL(recovered, testData, "FileEntryTest::testEdgeCaseEndOfBlockOverwrite()");
+        }
+    }
+
+    void testEdgeCaseEndOfBlockAppend()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // test write
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
+            std::string testData(createAString());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
+        }
+
+        std::string testData("goodbye!");
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt", 1,
+                                 bfs::OpenDisposition::buildAppendDisposition());
+            entry.write(testData.c_str(), testData.length());
+            entry.flush();
+        }
+
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1),
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
+
+            ASSERT_EQUAL(entry.fileSize(), A_STRING_SIZE + testData.length(), "FileEntryTest::testEdgeCaseEndOfBlockAppend() filesize");
+            std::vector<uint8_t> vec;
+            vec.resize(A_STRING_SIZE + testData.length());
+            entry.read((char*)&vec.front(), A_STRING_SIZE + testData.length());
+            std::string recovered(vec.begin() + 998,
+                                  vec.begin() + 998 + testData.length());
+            ASSERT_EQUAL(recovered, testData, "FileEntryTest:: testEdgeCaseEndOfBlockAppend() content");
         }
     }
 
