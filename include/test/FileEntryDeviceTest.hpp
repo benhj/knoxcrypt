@@ -22,6 +22,7 @@ class FileEntryDeviceTest
     {
         boost::filesystem::create_directories(m_uniquePath);
         testWriteReportsCorrectFileSize();
+        testWriteFollowedByRead();
     }
 
     ~FileEntryDeviceTest()
@@ -46,7 +47,32 @@ class FileEntryDeviceTest
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "FileStreamTest::testWriteReportsCorrectFileSize()");
         }
+    }
 
+    void testWriteFollowedByRead()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
+        // test write get file size from same entry
+        std::string testData(createLargeStringToWrite());
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
+            bfs::FileEntryDevice device(entry);
+            std::streampos bytesWrote = device.write(testData.c_str(), testData.length());
+            ASSERT_EQUAL(BIG_SIZE, bytesWrote, "FileStreamTest::testWriteFollowedByRead() bytes wrote");
+        }
+        {
+            bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1),
+                                 bfs::OpenDisposition::buildReadOnlyDisposition());
+            std::vector<uint8_t> buffer;
+            buffer.resize(entry.fileSize());
+            bfs::FileEntryDevice device(entry);
+            std::streamsize readBytes = device.read((char*)&buffer.front(), entry.fileSize());
+            ASSERT_EQUAL(BIG_SIZE, readBytes, "FileStreamTest::testWriteFollowedByRead() bytes read");
+            std::string recovered(buffer.begin(), buffer.end());
+            ASSERT_EQUAL(recovered, testData, "FileStreamTest::testWriteFollowedByRead() content check");
+        }
     }
 
   private:
