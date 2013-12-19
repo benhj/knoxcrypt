@@ -2,6 +2,7 @@
 #include "bfs/DetailBFS.hpp"
 #include "bfs/FileEntry.hpp"
 #include "bfs/FileEntryDevice.hpp"
+#include "bfs/FileStreamPtr.hpp"
 #include "bfs/MakeBFS.hpp"
 #include "bfs/OpenDisposition.hpp"
 #include "test/TestHelpers.hpp"
@@ -36,10 +37,9 @@ class FileEntryDeviceTest
         // test write get file size from same entry
         {
             bfs::FileEntry entry(testPath.string(), blocks, "test.txt");
-            bfs::FileEntryDevice fileStream(entry);
-            boost::iostreams::stream<bfs::FileEntryDevice> stream(fileStream);
+            bfs::FileStreamPtr stream(new bfs::FileStream(bfs::FileEntryDevice(entry)));
             std::string testData(createLargeStringToWrite());
-            stream << testData.c_str();
+            (*stream) << testData.c_str();
         }
         {
             bfs::FileEntry entry(testPath.string(), blocks, "entry", uint64_t(1),
