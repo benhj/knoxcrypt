@@ -7,8 +7,6 @@
 #include <vector>
 
 #include <iosfwd>                           // streamsize, seekdir
-#include <boost/iostreams/categories.hpp>   // seekable_device_tag
-#include <boost/iostreams/positioning.hpp>  // stream_offset
 
 #include <string>
 
@@ -48,9 +46,9 @@ namespace bfs
 
         uint64_t fileSize() const;
 
-        uint64_t getCurrentBlockIndex();
+        uint64_t getCurrentVolumeBlockIndex();
 
-        uint64_t getStartBlockIndex() const;
+        uint64_t getStartVolumeBlockIndex() const;
 
         /**
          * @brief for reading
@@ -116,15 +114,15 @@ namespace bfs
 
         // the index of the current file block being read from or written to
         // note, this is the position of the block in the bfs
-        mutable uint64_t m_currentBlock;
+        mutable uint64_t m_currentVolumeBlock;
 
         // the start file block index
-        mutable uint64_t m_startBlock;
+        mutable uint64_t m_startVolumeBlock;
 
         // the index of the block in the actual blocks container;
         // in comparison to m_currentBlock, this is where the block
         // exists in m_fileBlocks
-        mutable uint64_t m_blockIndex;
+        mutable int64_t m_blockIndex;
 
         // open mode
         OpenDisposition m_openDisposition;

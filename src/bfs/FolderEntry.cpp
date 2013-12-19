@@ -122,7 +122,7 @@ namespace bfs
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
         , m_folderData(imagePath, totalBlocks, name)
-        , m_startBlock(m_folderData.getStartBlockIndex())
+        , m_startBlock(m_folderData.getStartVolumeBlockIndex())
         , m_name(name)
     {
         // set initial number of entries; there will be none to begin with
@@ -168,7 +168,7 @@ namespace bfs
     FolderEntry::doWriteFirstBlockIndexToEntryMetaData(FileEntry const &entry)
     {
         // create bytes to represent first block
-        uint64_t firstBlock = entry.getStartBlockIndex();
+        uint64_t firstBlock = entry.getStartVolumeBlockIndex();
         uint8_t buf[8];
         detail::convertUInt64ToInt8Array(firstBlock, buf);
         return doWrite((char*)buf, 8);
@@ -199,7 +199,7 @@ namespace bfs
         m_folderData.flush();
 
         // increment entry count
-        detail::incrementFolderEntryCount(m_imagePath, m_folderData.getStartBlockIndex(), m_totalBlocks);
+        detail::incrementFolderEntryCount(m_imagePath, m_folderData.getStartVolumeBlockIndex(), m_totalBlocks);
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
@@ -229,7 +229,7 @@ namespace bfs
         m_folderData.flush();
 
         // increment entry count
-        detail::incrementFolderEntryCount(m_imagePath, m_folderData.getStartBlockIndex(), m_totalBlocks);
+        detail::incrementFolderEntryCount(m_imagePath, m_folderData.getStartVolumeBlockIndex(), m_totalBlocks);
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
@@ -379,10 +379,10 @@ namespace bfs
             // note disposition doesn't matter here, can be anything
             FileEntry fe(getFileEntry(entryName, OpenDisposition::buildAppendDisposition()));
             fileSize = fe.fileSize();
-            startBlock = fe.getStartBlockIndex();
+            startBlock = fe.getStartVolumeBlockIndex();
         } else {
             FolderEntry fe(getFolderEntry(entryName));
-            startBlock = fe.m_folderData.getStartBlockIndex();
+            startBlock = fe.m_folderData.getStartVolumeBlockIndex();
         }
 
         return EntryInfo(entryName,
@@ -397,7 +397,7 @@ namespace bfs
     FolderEntry::getNumberOfEntries() const
     {
         bfs::BFSImageStream out(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartBlockIndex(), m_totalBlocks);
+        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartVolumeBlockIndex(), m_totalBlocks);
         (void)out.seekg(offset + detail::FILE_BLOCK_META);
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);

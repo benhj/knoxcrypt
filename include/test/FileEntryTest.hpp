@@ -81,7 +81,7 @@ class FileEntryTest
             entry.write((char*)&vec.front(), BIG_SIZE);
             entry.flush();
 
-            uint64_t startBlock = entry.getStartBlockIndex();
+            uint64_t startBlock = entry.getStartVolumeBlockIndex();
             bfs::BFSImageStream in(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
             ASSERT_EQUAL(true, bfs::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
             bfs::FileBlock block(testPath.string(), blocks, startBlock,
@@ -114,7 +114,7 @@ class FileEntryTest
             entry.flush();
 
             // get allocated block indices
-            uint64_t startBlock = entry.getStartBlockIndex();
+            uint64_t startBlock = entry.getStartVolumeBlockIndex();
             bfs::BFSImageStream in(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
             blockIndices.push_back(startBlock);
             bfs::FileBlock block(testPath.string(), blocks, startBlock,

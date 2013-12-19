@@ -16,8 +16,8 @@ namespace bfs
         , m_fileSize(0)
         , m_fileBlocks()
         , m_buffer()
-        , m_currentBlock(0)
-        , m_startBlock(0)
+        , m_currentVolumeBlock(0)
+        , m_startVolumeBlock(0)
         , m_blockIndex(0)
         , m_openDisposition(OpenDisposition::buildAppendDisposition())
         , m_pos(0)
@@ -36,8 +36,8 @@ namespace bfs
         , m_fileSize(0)
         , m_fileBlocks()
         , m_buffer()
-        , m_currentBlock(startBlock)
-        , m_startBlock(startBlock)
+        , m_currentVolumeBlock(startBlock)
+        , m_startVolumeBlock(startBlock)
         , m_blockIndex(0)
         , m_openDisposition(openDisposition)
         , m_pos(0)
@@ -81,25 +81,25 @@ namespace bfs
     }
 
     uint64_t
-    FileEntry::getCurrentBlockIndex()
+    FileEntry::getCurrentVolumeBlockIndex()
     {
         if (m_fileBlocks.empty()) {
             checkAndCreateWritableFileBlock();
-            m_startBlock = m_currentBlock;
+            m_startVolumeBlock = m_currentVolumeBlock;
         }
-        return m_currentBlock;
+        return m_currentVolumeBlock;
     }
 
     uint64_t
-    FileEntry::getStartBlockIndex() const
+    FileEntry::getStartVolumeBlockIndex() const
     {
         if (m_fileBlocks.empty()) {
             checkAndCreateWritableFileBlock();
-            m_startBlock = m_currentBlock;
+            m_startVolumeBlock = m_currentVolumeBlock;
         } else {
-            m_startBlock = m_fileBlocks[0].getIndex();
+            m_startVolumeBlock = m_fileBlocks[0].getIndex();
         }
-        return m_startBlock;
+        return m_startVolumeBlock;
     }
 
     std::streamsize
@@ -117,7 +117,7 @@ namespace bfs
 
         if (m_blockIndex + 1 < m_fileBlocks.size()) {
             ++m_blockIndex;
-            m_currentBlock = m_fileBlocks[m_blockIndex].getIndex();
+            m_currentVolumeBlock = m_fileBlocks[m_blockIndex].getIndex();
         }
 
         return size;
@@ -133,7 +133,7 @@ namespace bfs
                         bfs::OpenDisposition::buildAppendDisposition());
         m_fileBlocks.push_back(block);
         m_blockIndex = m_fileBlocks.size() - 1;
-        m_currentBlock = firstAndNext[0];
+        m_currentVolumeBlock = firstAndNext[0];
         m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     }
 
@@ -142,7 +142,7 @@ namespace bfs
         // find very first block
         FileBlock block(m_imagePath,
                         m_totalBlocks,
-                        m_currentBlock,
+                        m_currentVolumeBlock,
                         m_openDisposition);
 
         uint64_t nextBlock = block.getNextIndex();
@@ -154,12 +154,12 @@ namespace bfs
         m_fileBlocks.push_back(block);
 
         // seek to the very end block
-        while (nextBlock != m_currentBlock) {
+        while (nextBlock != m_currentVolumeBlock) {
 
-            m_currentBlock = nextBlock;
+            m_currentVolumeBlock = nextBlock;
             FileBlock newBlock(m_imagePath,
                                m_totalBlocks,
-                               m_currentBlock,
+                               m_currentVolumeBlock,
                                m_openDisposition);
             nextBlock = newBlock.getNextIndex();
 
@@ -179,8 +179,9 @@ namespace bfs
     void
     FileEntry::setNextOfLastBlockToIndexOfNewBlock() const
     {
-        uint64_t lastIndex(m_blockIndex - 1);
-        m_fileBlocks[lastIndex].setNext(m_currentBlock);
+        int64_t lastIndex(m_blockIndex - 1);
+        assert(lastIndex >= 0);
+        m_fileBlocks[lastIndex].setNext(m_currentVolumeBlock);
     }
 
     bool
@@ -314,32 +315,17 @@ namespace bfs
         return n;
     }
 
-    boost::iostreams::stream_offset
-    FileEntry::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
+    typedef std::pair<int64_t, boost::iostreams::stream_offset> SeekPair;
+    SeekPair
+    getPositionFromBegin(boost::iostreams::stream_offset off)
     {
-        // reset any offset values to zero. An offset value determines
-        // an offset point within a file block from which reading or writing
-        // or appending etc. starts
-        std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
-        for (; it != m_fileBlocks.end(); ++it) {
-            it->seek(0);
-        }
-
-        // if at end just seek right to end and don't do anything else
-        if (way == std::ios_base::end) {
-            m_blockIndex = m_fileBlocks.size() - 1;
-            uint32_t blockPosition = m_fileBlocks[m_blockIndex].getDataBytesWritten();
-            m_fileBlocks[m_blockIndex].seek(blockPosition);
-            return off;
-        }
-
         // find what file block the offset would relate to and set extra offset in file block
         // to that position
-        uint64_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
-        uint64_t casted = uint64_t(off);
-        uint64_t const leftOver = casted % blockSize;
-        uint64_t block = 0;
-        uint32_t blockPosition = 0;
+        uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+        boost::iostreams::stream_offset casted = off;
+        boost::iostreams::stream_offset const leftOver = casted % blockSize;
+        int64_t block = 0;
+        boost::iostreams::stream_offset blockPosition = 0;
         if (off > blockSize) {
             if (leftOver > 0) {
 
@@ -363,17 +349,100 @@ namespace bfs
             // index at 0 and the position for the zero block at offset
             blockPosition = off;
         }
+        return std::make_pair(block, blockPosition);
+    }
 
-        // update block where we start reading/writing from
-        m_blockIndex = block;
+    SeekPair
+    getPositionFromEnd(boost::iostreams::stream_offset off, int64_t endBlockIndex,
+                       boost::iostreams::stream_offset bytesWrittenToEnd)
+    {
+        // treat like begin and then 'inverse'
+        SeekPair treatLikeBegin = getPositionFromBegin(abs(off));
+
+        int64_t block = endBlockIndex - treatLikeBegin.first;
+        boost::iostreams::stream_offset blockPosition = bytesWrittenToEnd - treatLikeBegin.second;
+
+        if(blockPosition < 0) {
+            uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+            blockPosition = blockSize + blockPosition;
+            --block;
+        }
+
+        return std::make_pair(block, blockPosition);
+
+    }
+
+    SeekPair
+    getPositionFromCurrent(boost::iostreams::stream_offset off,
+                           int64_t blockIndex,
+                           boost::iostreams::stream_offset indexedBlockPosition)
+    {
+        // find what file block the offset would relate to and set extra offset in file block
+        // to that position
+        uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+        boost::iostreams::stream_offset const casted = off;
+
+        boost::iostreams::stream_offset addition = casted + indexedBlockPosition;
+
+        if(addition >= 0 && addition <= blockSize) {
+            return std::make_pair(blockIndex, addition);
+        }
+
+        if(addition > blockSize) {
+            SeekPair treatLikeBegin = getPositionFromBegin(addition);
+            return std::make_pair(treatLikeBegin.first + blockIndex,
+                                  treatLikeBegin.second + indexedBlockPosition);
+        }
+
+        // default addition < 0 case
+        SeekPair treatLikeEnd = getPositionFromEnd(addition, blockIndex, indexedBlockPosition);
+        return std::make_pair(blockIndex - treatLikeEnd.first,
+                              indexedBlockPosition - treatLikeEnd.second);
+    }
+
+    boost::iostreams::stream_offset
+    FileEntry::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
+    {
+        // reset any offset values to zero. An offset value determines
+        // an offset point within a file block from which reading or writing
+        // or appending etc. starts
+        std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
+        for (; it != m_fileBlocks.end(); ++it) {
+            it->seek(0);
+        }
+
+        // if at end just seek right to end and don't do anything else
+        SeekPair seekPair;
+        if (way == std::ios_base::end) {
+
+            size_t endBlock = m_fileBlocks.size() - 1;
+            seekPair = getPositionFromEnd(off, endBlock,
+                                           m_fileBlocks[endBlock].getDataBytesWritten());
+        }
+
+        // pass in the current offset, the current block and the current
+        // block position. Note both of these latter two params will be 0
+        // if seeking from the beginning
+
+        if(way == std::ios_base::beg) {
+            seekPair = getPositionFromBegin(off);
+        }
+        // seek relative to the current position
+        if(way == std::ios_base::cur) {
+            seekPair = getPositionFromCurrent(off, m_blockIndex, m_fileBlocks[m_blockIndex].tell());
+        }
 
         // check bounds and error if too big
-        if (m_blockIndex >= m_fileBlocks.size()) {
+        if (seekPair.first >= m_fileBlocks.size() || seekPair.first < 0) {
             return -1; // fail
         } else {
+
+            // update block where we start reading/writing from
+            m_blockIndex = seekPair.first;
+
             // set the position to seek to for given block
             // this will be the point from which we read or write
-            m_fileBlocks[m_blockIndex].seek(blockPosition);
+            m_fileBlocks[m_blockIndex].seek(seekPair.second);
         }
 
         m_pos = off;
