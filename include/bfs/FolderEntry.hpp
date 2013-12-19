@@ -210,7 +210,7 @@ namespace bfs
         // the underlying file blocks storing the folder entry data
         mutable FileEntry m_folderData;
 
-        uint64_t m_startBlock;
+        uint64_t m_startVolumeBlock;
 
         // stores the name of this folder
         std::string m_name;

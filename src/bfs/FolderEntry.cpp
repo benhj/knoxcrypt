@@ -102,16 +102,16 @@ namespace bfs
 
     FolderEntry::FolderEntry(std::string const &imagePath,
                              uint64_t const totalBlocks,
-                             uint64_t const startBlock,
+                             uint64_t const startVolumeBlock,
                              std::string const &name)
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
         , m_folderData(imagePath,
                        totalBlocks,
                        name,
-                       startBlock,
+                       startVolumeBlock,
                        OpenDisposition::buildAppendDisposition())
-        , m_startBlock(startBlock)
+        , m_startVolumeBlock(startVolumeBlock)
         , m_name(name)
     {
     }
@@ -122,7 +122,7 @@ namespace bfs
         : m_imagePath(imagePath)
         , m_totalBlocks(totalBlocks)
         , m_folderData(imagePath, totalBlocks, name)
-        , m_startBlock(m_folderData.getStartVolumeBlockIndex())
+        , m_startVolumeBlock(m_folderData.getStartVolumeBlockIndex())
         , m_name(name)
     {
         // set initial number of entries; there will be none to begin with
@@ -203,7 +203,7 @@ namespace bfs
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
-        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startBlock,
+        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startVolumeBlock,
                                  OpenDisposition::buildAppendDisposition());
     }
 
@@ -233,7 +233,7 @@ namespace bfs
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
-        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startBlock,
+        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startVolumeBlock,
                                  OpenDisposition::buildAppendDisposition());
     }
 
@@ -334,7 +334,7 @@ namespace bfs
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startBlock,
+        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startVolumeBlock,
                        OpenDisposition::buildOverwriteDisposition());
         detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
         assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
@@ -359,7 +359,7 @@ namespace bfs
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startBlock,
+        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startVolumeBlock,
                        OpenDisposition::buildOverwriteDisposition());
         detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
         assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
