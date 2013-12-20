@@ -1,6 +1,6 @@
 CXX=clang++
-CXXFLAGS=-ggdb -std=c++11 -I/usr/local/boost_1_53_0 -Iinclude
-LDFLAGS=-L/usr/local/boost_1_53_0/stage/lib -lboost_filesystem -lboost_system
+CXXFLAGS=-std=c++11 -I/usr/local/boost_1_53_0 -Iinclude 
+LDFLAGS=-L/usr/local/boost_1_53_0/stage/lib -std=c++11 -lboost_filesystem -lboost_system
 SOURCES := $(wildcard src/bfs/*.cpp)
 MAKE_BFS_SRC := $(wildcard src/makebfs/*.cpp)
 TEST_SRC := $(wildcard src/test/*.cpp)

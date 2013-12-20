@@ -1,10 +1,12 @@
 #ifndef BFS_BFS_HPP__
 #define BFS_BFS_HPP__
 
-#include "bfs/EntryType.hpp"
 #include "bfs/BFSException.hpp"
+#include "bfs/EntryType.hpp"
+#include "bfs/FileEntryDevice.hpp"
 #include "bfs/FolderEntry.hpp"
 #include "bfs/FolderRemovalType.hpp"
+#include "bfs/OpenDisposition.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/optional.hpp>
@@ -161,6 +163,33 @@ namespace bfs
                 }
 
                 parentEntry->removeFolderEntry(pathToRemove.filename().string());
+            }
+
+            FileEntryDevice openFile(std::string const &path, OpenDisposition const &openMode)
+            {
+                char ch = *path.rbegin();
+                if(ch == '/') {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                boost::filesystem::path openPath(path);
+                boost::filesystem::path parentPath(openPath.parent_path());
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                if(!parentEntry) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(openPath.filename().string());
+                if(!childInfo) {
+                    throw BFSException(BFSError::NotFound);
+                }
+                if(childInfo->type() == EntryType::FolderType) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                FileEntry fe = parentEntry->getFileEntry(openPath.filename().string(), openMode);
+
+                return FileEntryDevice(fe);
             }
 
         private:

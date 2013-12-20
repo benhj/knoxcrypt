@@ -5,6 +5,9 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/iostreams/copy.hpp>
+
+#include <sstream>
 
 
 class BFSTest
@@ -29,6 +32,7 @@ class BFSTest
             testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty();
             testRemoveNonEmptyFolder();
             testRemoveNonExistingFolderThrows();
+            testWriteToStream();
         }
 
         ~BFSTest()
@@ -336,5 +340,31 @@ class BFSTest
                         "BFSTest::testRemoveNonExistingFolderThrows() asserting error type");
             }
             ASSERT_EQUAL(true, caught, "BFSTest::testRemoveNonExistingFolderThrows() caught");
+        }
+
+        void testWriteToStream()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+            bfs::BFS theBFS(testPath.string(), blocks);
+
+            // open file and append to end of it
+            std::string const &testString(createLargeStringToWrite());
+
+            bfs::FileEntryDevice device = theBFS.openFile("folderA/subFolderA/fileX",
+                                                          bfs::OpenDisposition::buildAppendDisposition());
+
+            std::streampos wrote = device.write(testString.c_str(), testString.length());
+            ASSERT_EQUAL(wrote, testString.length(), "BFSTest::testWriteToStream() bytesWrote");
+            (void)device.seek(0, std::ios_base::beg);
+
+            // check content
+            std::vector<uint8_t> buffer;
+            buffer.resize(testString.length());
+            std::streampos bytesRead = device.read((char*)&buffer.front(), testString.length());
+            ASSERT_EQUAL(testString.length(), bytesRead, "BFSTest::testWriteToStream() bytesRead");
+            std::string recovered(buffer.begin(), buffer.end());
+            ASSERT_EQUAL(testString, recovered, "BFSTest::testWriteToStream() content");
         }
 };

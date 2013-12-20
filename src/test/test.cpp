@@ -10,11 +10,11 @@
 int main()
 {
     BFSTest();
-//    MakeBFSTest();
-//    FileEntryDeviceTest();
-//    FileBlockTest();
-//    FileEntryTest();
-//    FolderEntryTest();
+    MakeBFSTest();
+    FileEntryDeviceTest();
+    FileBlockTest();
+    FileEntryTest();
+    FolderEntryTest();
 
     std::cout<<"\n\nThere were "<<testFailures<<"/"<<passedPoints<<" assertion failures\n\n"<<std::endl;
     if (testFailures > 0) {
