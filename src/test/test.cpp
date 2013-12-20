@@ -1,3 +1,4 @@
+#include "test/BFSTest.hpp"
 #include "test/FileBlockTest.hpp"
 #include "test/FileEntryTest.hpp"
 #include "test/FileEntryDeviceTest.hpp"
@@ -5,13 +6,15 @@
 #include "test/FolderEntryTest.hpp"
 #include "test/TestHelpers.hpp"
 
+
 int main()
 {
-    MakeBFSTest();
-    FileBlockTest();
-    FileEntryTest();
-    FileEntryDeviceTest();
-    FolderEntryTest();
+    BFSTest();
+//    MakeBFSTest();
+//    FileEntryDeviceTest();
+//    FileBlockTest();
+//    FileEntryTest();
+//    FolderEntryTest();
 
     std::cout<<"\n\nThere were "<<testFailures<<"/"<<passedPoints<<" assertion failures\n\n"<<std::endl;
     if (testFailures > 0) {

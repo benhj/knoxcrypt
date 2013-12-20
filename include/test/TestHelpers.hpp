@@ -1,6 +1,8 @@
 #ifndef BFS_TEST_HELPERS_HPP__
 #define BFS_TEST_HELPERS_HPP__
 
+#include "bfs/MakeBFS.hpp"
+
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 

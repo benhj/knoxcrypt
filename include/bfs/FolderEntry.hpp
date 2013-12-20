@@ -4,8 +4,12 @@
 #include "bfs/EntryInfo.hpp"
 #include "bfs/FileEntry.hpp"
 
+#include <boost/optional.hpp>
+
 namespace bfs
 {
+
+    typedef boost::optional<EntryInfo> OptionalEntryInfo;
 
     class FolderEntry
     {
@@ -35,6 +39,7 @@ namespace bfs
                     uint64_t const totalBlocks,
                     uint64_t const startBlock,
                     std::string const &name = "root");
+
 
         /**
          * @brief appends a new file entry and start index to the entry data
@@ -81,22 +86,36 @@ namespace bfs
         EntryInfo getEntryInfo(uint64_t const index) const;
 
         /**
+         * @brief retrieves an entry info it exists
+         * @param name the name of the info
+         * @return an entry info if it exsist
+         */
+        OptionalEntryInfo getEntryInfo(std::string const &name) const;
+
+        /**
+         * @brief retrieves an entry info of a file if it exists
+         * @param name the name of the info
+         * @return an entry info if it exsist
+         */
+        OptionalEntryInfo getFolderEntryInfo(std::string const &name) const;
+
+        /**
          * @brief returns a vector of all entry infos
          * @return all entry infos
          */
-        std::vector<EntryInfo> listAllEntries();
+        std::vector<EntryInfo> listAllEntries() const;
 
         /**
          * @brief returns a vector of file entry infos
          * @return all file entry infos
          */
-        std::vector<EntryInfo> listFileEntries();
+        std::vector<EntryInfo> listFileEntries() const;
 
         /**
          * @brief returns a vector of folder entry infos
          * @return all folder entry infos
          */
-        std::vector<EntryInfo> listFolderEntries();
+        std::vector<EntryInfo> listFolderEntries() const;
 
         /**
          * @brief does what it says
@@ -199,13 +218,13 @@ namespace bfs
          * @brief lists a particular type of entry, file or folder
          * @return a list of entries of specified type
          */
-        std::vector<EntryInfo> doListEntriesBasedOnType(EntryType entryType);
+        std::vector<EntryInfo> doListEntriesBasedOnType(EntryType entryType) const;
 
         // the path of the bfs image
-        std::string const m_imagePath;
+        std::string m_imagePath;
 
         // total file blocks in the bfs image
-        uint64_t const m_totalBlocks;
+        uint64_t m_totalBlocks;
 
         // the underlying file blocks storing the folder entry data
         mutable FileEntry m_folderData;

@@ -281,7 +281,7 @@ namespace bfs
     }
 
     std::vector<EntryInfo>
-    FolderEntry::listAllEntries()
+    FolderEntry::listAllEntries() const
     {
         std::vector<EntryInfo> entries;
         uint64_t entryCount = getNumberOfEntries();
@@ -295,7 +295,7 @@ namespace bfs
     }
 
     std::vector<EntryInfo>
-    FolderEntry::doListEntriesBasedOnType(EntryType entryType)
+    FolderEntry::doListEntriesBasedOnType(EntryType entryType) const
     {
         std::vector<EntryInfo> entries;
         uint64_t entryCount = getNumberOfEntries();
@@ -310,13 +310,13 @@ namespace bfs
     }
 
     std::vector<EntryInfo>
-    FolderEntry::listFileEntries()
+    FolderEntry::listFileEntries() const
     {
         return doListEntriesBasedOnType(EntryType::FileType);
     }
 
     std::vector<EntryInfo>
-    FolderEntry::listFolderEntries()
+    FolderEntry::listFolderEntries() const
     {
         return doListEntriesBasedOnType(EntryType::FolderType);
     }
@@ -363,6 +363,33 @@ namespace bfs
 
         // unlink entry's data
         entry.m_folderData.unlink();
+    }
+
+    struct EntryFinder
+    {
+        EntryFinder(std::string const &name)
+            : m_name(name)
+        {
+        }
+
+        bool operator()(EntryInfo const &info)
+        {
+            return m_name == info.filename();
+        }
+
+        std::string m_name;
+    };
+
+    OptionalEntryInfo
+    FolderEntry::getEntryInfo(std::string const &name) const
+    {
+        std::vector<EntryInfo> infos(listAllEntries());
+        EntryFinder entryFinder(name);
+        std::vector<EntryInfo>::iterator it = std::find_if(infos.begin(), infos.end(), entryFinder);
+        if(it != infos.end()) {
+            return OptionalEntryInfo(*it);
+        }
+        return OptionalEntryInfo();
     }
 
     EntryInfo
