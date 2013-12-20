@@ -15,6 +15,12 @@ class BFSTest
             boost::filesystem::create_directories(m_uniquePath);
             testFileExists();
             testFolderExists();
+            testAddFileEntry();
+            testAddFolderEntry();
+            testAddFileThrowsIfParentNotFound();
+            testAddFolderThrowsIfParentNotFound();
+            testAddFileThrowsIfAlreadyExists();
+            testAddFolderThrowsIfAlreadyExists();
         }
 
         ~BFSTest()
@@ -83,5 +89,109 @@ class BFSTest
 
             ASSERT_EQUAL(true, theBFS.folderExists(testPositive), "BFSTest::testFolderExists() positive case");
             ASSERT_EQUAL(false, theBFS.folderExists(testNegative), "BFSTest::testFolderExists() negative case");
+        }
+
+        void testAddFileEntry()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+
+            bfs::BFS theBFS(testPath.string(), blocks);
+            theBFS.addFile("folderA/subFolderA/subFolderC/testAdded.txt");
+            bfs::FolderEntry parent = root.getFolderEntry("folderA").getFolderEntry("subFolderA").getFolderEntry("subFolderC");
+            bfs::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
+            bool good = entryInfo ? true : false;
+            ASSERT_EQUAL(true, good, "BFSTest::testAddFileEntry() getting info");
+            ASSERT_EQUAL(bfs::EntryType::FileType, entryInfo->type(), "BFSTest::testAddFileEntry() info type");
+            ASSERT_EQUAL("testAdded.txt", entryInfo->filename(), "BFSTest::testAddFileEntry() info name");
+        }
+
+        void testAddFolderEntry()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+
+            bfs::BFS theBFS(testPath.string(), blocks);
+            theBFS.addFolder("folderA/subFolderA/subFolderC/testAdded");
+            bfs::FolderEntry parent = root.getFolderEntry("folderA").getFolderEntry("subFolderA").getFolderEntry("subFolderC");
+            bfs::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded");
+            bool good = entryInfo ? true : false;
+            ASSERT_EQUAL(true, good, "BFSTest::testAddFolderEntry() getting info");
+            ASSERT_EQUAL(bfs::EntryType::FolderType, entryInfo->type(), "BFSTest::testAddFolderEntry() info type");
+            ASSERT_EQUAL("testAdded", entryInfo->filename(), "BFSTest::testAddFolderEntry() info name");
+        }
+
+        void testAddFileThrowsIfParentNotFound()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+
+            bfs::BFS theBFS(testPath.string(), blocks);
+            bool caught = false;
+            try {
+                theBFS.addFile("folderA/subFolderA/subFolderX/testAdded");
+            } catch (bfs::BFSException const &e) {
+                caught = true;
+                ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
+                        "BFSTest::testAddFileThrowIfParentNotFound() asserting error type");
+            }
+            ASSERT_EQUAL(true, caught, "BFSTest::testAddFileThrowIfParentNotFound() caught");
+        }
+
+        void testAddFolderThrowsIfParentNotFound()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+
+            bfs::BFS theBFS(testPath.string(), blocks);
+            bool caught = false;
+            try {
+                theBFS.addFolder("folderA/subFolderQ/testAdded");
+            } catch (bfs::BFSException const &e) {
+                caught = true;
+                ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
+                        "BFSTest::testAddFolderThrowsIfParentNotFound() asserting error type");
+            }
+            ASSERT_EQUAL(true, caught, "BFSTest::testAddFolderThrowsIfParentNotFound() caught");
+        }
+
+        void testAddFileThrowsIfAlreadyExists()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+
+            bfs::BFS theBFS(testPath.string(), blocks);
+            bool caught = false;
+            try {
+                theBFS.addFile("folderA/subFolderA/subFolderC/finalFile.txt");
+            } catch (bfs::BFSException const &e) {
+                caught = true;
+                ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::AlreadyExists), e,
+                        "BFSTest::testAddFileThrowsIfAlreadyExists() asserting error type");
+            }
+            ASSERT_EQUAL(true, caught, "BFSTest::testAddFileThrowsIfAlreadyExists() caught");
+        }
+
+        void testAddFolderThrowsIfAlreadyExists()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+
+            bfs::BFS theBFS(testPath.string(), blocks);
+            bool caught = false;
+            try {
+                theBFS.addFolder("folderA/subFolderA/subFolderC/finalFile.txt");
+            } catch (bfs::BFSException const &e) {
+                caught = true;
+                ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::AlreadyExists), e,
+                        "BFSTest::testAddFolderThrowsIfAlreadyExists() asserting error type");
+            }
+            ASSERT_EQUAL(true, caught, "BFSTest::testAddFolderThrowsIfAlreadyExists() caught");
         }
 };
