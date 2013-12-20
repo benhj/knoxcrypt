@@ -5,6 +5,7 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/format.hpp>
 
 #include <string>
 #include <vector>
@@ -43,14 +44,14 @@ std::string createAString()
     return theString;
 }
 
-#define ASSERT_EQUAL(A, B, C)                   \
-    if(A == B) {                                \
-        std::cout<<C<<"...passed"<<std::endl;   \
-        ++passedPoints;                         \
-    } else {                                    \
-        std::cout<<C<<"...failed"<<std::endl;   \
-        ++testFailures;                         \
-        failingTestPoints.push_back(C);         \
+#define ASSERT_EQUAL(A, B, C)                                          \
+    if(A == B) {                                                       \
+        std::cout<<boost::format("%1% %|100t|%2%\n") % C % "passed";   \
+        ++passedPoints;                                                \
+    } else {                                                           \
+        std::cout<<boost::format("%1% %|100t|%2%\n") % C % "failed";   \
+        ++testFailures;                                                \
+        failingTestPoints.push_back(C);                                \
     }
 
 #endif
