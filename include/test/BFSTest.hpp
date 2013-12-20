@@ -21,6 +21,14 @@ class BFSTest
             testAddFolderThrowsIfParentNotFound();
             testAddFileThrowsIfAlreadyExists();
             testAddFolderThrowsIfAlreadyExists();
+            testRemoveFileEntry();
+            testRemoveFileEntryThrowsIfBadParent();
+            testRemoveFileThrowsIfNotFound();
+            testRemoveFileThrowsIfFolder();
+            testRemoveEmptyFolder();
+            testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty();
+            testRemoveNonEmptyFolder();
+            testRemoveNonExistingFolderThrows();
         }
 
         ~BFSTest()
@@ -193,5 +201,140 @@ class BFSTest
                         "BFSTest::testAddFolderThrowsIfAlreadyExists() asserting error type");
             }
             ASSERT_EQUAL(true, caught, "BFSTest::testAddFolderThrowsIfAlreadyExists() caught");
+        }
+
+        void testRemoveFileEntry()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+            bfs::BFS theBFS(testPath.string(), blocks);
+            theBFS.removeFile("folderA/subFolderA/subFolderC/finalFile.txt");
+            bfs::OptionalEntryInfo info = root.getFolderEntry("folderA")
+                                              .getFolderEntry("subFolderA")
+                                              .getFolderEntry("subFolderC")
+                                              .getEntryInfo("finalFile.txt");
+            bool exists = info ? true : false;
+            ASSERT_EQUAL(false, exists, "BFSTest::testRemoveFileEntry()");
+        }
+
+        void testRemoveFileEntryThrowsIfBadParent()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+
+            bfs::BFS theBFS(testPath.string(), blocks);
+            bool caught = false;
+            try {
+                theBFS.removeFile("folderA/subFolderA/subFolderX/finalFile.txt");
+            } catch (bfs::BFSException const &e) {
+                caught = true;
+                ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
+                        "BFSTest::testRemoveFileEntryThrowsIfBadParent() asserting error type");
+            }
+            ASSERT_EQUAL(true, caught, "BFSTest::testRemoveFileEntryThrowsIfBadParent() caught");
+        }
+
+        void testRemoveFileThrowsIfNotFound()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+
+            bfs::BFS theBFS(testPath.string(), blocks);
+            bool caught = false;
+            try {
+                theBFS.removeFile("folderA/subFolderA/subFolderC/finalFileB.txt");
+            } catch (bfs::BFSException const &e) {
+                caught = true;
+                ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
+                        "BFSTest::testRemoveFileThrowsIfNotFound() asserting error type");
+            }
+            ASSERT_EQUAL(true, caught, "BFSTest::testRemoveFileThrowsIfNotFound() caught");
+        }
+
+        void testRemoveFileThrowsIfFolder()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+
+            bfs::BFS theBFS(testPath.string(), blocks);
+            bool caught = false;
+            try {
+                theBFS.removeFile("folderA/subFolderA/subFolderC/finalFolder");
+            } catch (bfs::BFSException const &e) {
+                caught = true;
+                ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
+                        "BFSTest::testRemoveFileThrowsIfFolder() asserting error type");
+            }
+            ASSERT_EQUAL(true, caught, "BFSTest::testRemoveFileThrowsIfFolder() caught");
+        }
+
+        void testRemoveEmptyFolder()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+            bfs::BFS theBFS(testPath.string(), blocks);
+            theBFS.removeFolder("folderA/subFolderA/subFolderC/finalFolder",
+                                bfs::FolderRemovalType::MustBeEmpty);
+            bfs::OptionalEntryInfo info = root.getFolderEntry("folderA")
+                                              .getFolderEntry("subFolderA")
+                                              .getFolderEntry("subFolderC")
+                                              .getEntryInfo("finalFolder");
+            bool exists = info ? true : false;
+            ASSERT_EQUAL(false, exists, "BFSTest::testRemoveEmptyFolder()");
+        }
+
+        void testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+            bfs::BFS theBFS(testPath.string(), blocks);
+            bool caught = false;
+            try {
+                theBFS.removeFolder("folderA/subFolderA/",
+                                    bfs::FolderRemovalType::MustBeEmpty);
+            } catch (bfs::BFSException const &e) {
+                caught = true;
+                ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::FolderNotEmpty), e,
+                        "BFSTest::testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty() asserting error type");
+            }
+            ASSERT_EQUAL(true, caught, "BFSTest::testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty() caught");
+        }
+
+        void testRemoveNonEmptyFolder()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+            bfs::BFS theBFS(testPath.string(), blocks);
+            theBFS.removeFolder("folderA/subFolderA/",
+                                bfs::FolderRemovalType::Recursive);
+            bfs::OptionalEntryInfo info = root.getFolderEntry("folderA")
+                                              .getEntryInfo("subFolderA");
+            bool exists = info ? true : false;
+            ASSERT_EQUAL(false, exists, "BFSTest::testRemoveNonEmptyFolder()");
+        }
+
+        void testRemoveNonExistingFolderThrows()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::FolderEntry root = createTestFolder(testPath, blocks);
+            bfs::BFS theBFS(testPath.string(), blocks);
+            bool caught = false;
+            try {
+                theBFS.removeFolder("folderA/subFolderQ/",
+                                    bfs::FolderRemovalType::MustBeEmpty);
+            } catch (bfs::BFSException const &e) {
+                caught = true;
+                ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
+                        "BFSTest::testRemoveNonExistingFolderThrows() asserting error type");
+            }
+            ASSERT_EQUAL(true, caught, "BFSTest::testRemoveNonExistingFolderThrows() caught");
         }
 };

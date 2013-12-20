@@ -4,6 +4,7 @@
 #include "bfs/EntryType.hpp"
 #include "bfs/BFSException.hpp"
 #include "bfs/FolderEntry.hpp"
+#include "bfs/FolderRemovalType.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/optional.hpp>
@@ -90,6 +91,76 @@ namespace bfs
                 }
 
                 parentEntry->addFolderEntry(pathToAdd.filename().string());
+            }
+
+            void removeFile(std::string const &path)
+            {
+
+                std::string thePath(path);
+                char ch = *path.rbegin();
+                // ignore trailing slash, but only if folder type
+                // an entry of file type should never have a trailing
+                // slash and is allowed to fail in this case
+                if(ch == '/') {
+                    std::string(path.begin(), path.end() - 1).swap(thePath);
+                }
+
+                boost::filesystem::path pathToRemove(thePath);
+                boost::filesystem::path parentPath(pathToRemove.parent_path());
+
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                if(!parentEntry) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(pathToRemove.filename().string());
+                if(!childInfo) {
+                    throw BFSException(BFSError::NotFound);
+                }
+                if(childInfo->type() == EntryType::FolderType) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                parentEntry->removeFileEntry(pathToRemove.filename().string());
+            }
+
+            void removeFolder(std::string const &path, FolderRemovalType const &removalType)
+            {
+
+                std::string thePath(path);
+                char ch = *path.rbegin();
+                // ignore trailing slash, but only if folder type
+                // an entry of file type should never have a trailing
+                // slash and is allowed to fail in this case
+                if(ch == '/') {
+                    std::string(path.begin(), path.end() - 1).swap(thePath);
+                }
+
+                boost::filesystem::path pathToRemove(thePath);
+                boost::filesystem::path parentPath(pathToRemove.parent_path());
+
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                if(!parentEntry) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(pathToRemove.filename().string());
+                if(!childInfo) {
+                    throw BFSException(BFSError::NotFound);
+                }
+                if(childInfo->type() == EntryType::FileType) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                if(removalType == FolderRemovalType::MustBeEmpty) {
+
+                    FolderEntry childEntry = parentEntry->getFolderEntry(pathToRemove.filename().string());
+                    if(!childEntry.listAllEntries().empty()) {
+                        throw BFSException(BFSError::FolderNotEmpty);
+                    }
+                }
+
+                parentEntry->removeFolderEntry(pathToRemove.filename().string());
             }
 
         private:

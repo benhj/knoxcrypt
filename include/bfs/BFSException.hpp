@@ -6,7 +6,7 @@
 namespace bfs
 {
 
-    enum class BFSError { NotFound, AlreadyExists, IllegalFilename };
+    enum class BFSError { NotFound, AlreadyExists, IllegalFilename, FolderNotEmpty };
 
     class BFSException : public std::exception
     {
@@ -29,6 +29,10 @@ namespace bfs
 
                 if(m_error == BFSError::IllegalFilename) {
                     return "BFS: illegal filename";
+                }
+
+                if(m_error == BFSError::FolderNotEmpty) {
+                    return "BFS: Folder not empty";
                 }
 
                 return "BFS: Unknown error";
