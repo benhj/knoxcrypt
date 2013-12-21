@@ -192,6 +192,27 @@ namespace bfs
                 return FileEntryDevice(fe);
             }
 
+            void truncateFile(std::string const &path, std::ios_base::streamoff offset)
+            {
+                boost::filesystem::path openPath(path);
+                boost::filesystem::path parentPath(openPath.parent_path());
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                if(!parentEntry) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(openPath.filename().string());
+                if(!childInfo) {
+                    throw BFSException(BFSError::NotFound);
+                }
+                if(childInfo->type() == EntryType::FolderType) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                FileEntry fe = parentEntry->getFileEntry(openPath.filename().string(), OpenDisposition::buildOverwriteDisposition());
+                fe.truncate(offset);
+            }
+
         private:
             // the path of the bfs image
             std::string m_imagePath;
