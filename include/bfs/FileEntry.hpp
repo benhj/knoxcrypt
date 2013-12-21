@@ -51,6 +51,13 @@ namespace bfs
         uint64_t getStartVolumeBlockIndex() const;
 
         /**
+         * @brief truncates a file to new size
+         * @param name name of the file to truncate
+         * @param newSize the new fileSize
+         */
+        void truncate(std::string const& name, std::ios_base::streamoff newSize);
+
+        /**
          * @brief for reading
          * @param s
          * @param n

@@ -181,7 +181,7 @@ namespace bfs
     {
         int64_t lastIndex(m_blockIndex - 1);
         assert(lastIndex >= 0);
-        m_fileBlocks[lastIndex].setNext(m_currentVolumeBlock);
+        m_fileBlocks[lastIndex].setNextIndex(m_currentVolumeBlock);
     }
 
     bool
@@ -320,6 +320,41 @@ namespace bfs
         m_pos += n;
 
         return n;
+    }
+
+    void
+    FileEntry::truncate(std::string const& name, std::ios_base::streamoff newSize)
+    {
+        uint64_t blockCount = m_fileBlocks.size();
+
+        // compute number of block required
+        uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+
+        // edge case
+        if(newSize < blockSize) {
+            m_fileBlocks[0].setSize(newSize);
+            m_fileBlocks[0].setNextIndex(m_fileBlocks[0].getIndex());
+            return;
+        }
+
+        boost::iostreams::stream_offset const leftOver = newSize % blockSize;
+
+        boost::iostreams::stream_offset const roundedDown = newSize - leftOver;
+
+        uint64_t blocksRequired = roundedDown / blockSize;
+
+        // edge case
+        if(leftOver == 0) {
+            --blocksRequired;
+            m_fileBlocks[blocksRequired].setSize(blockSize);
+        } else {
+            m_fileBlocks[blocksRequired].setSize(leftOver);
+        }
+
+        m_fileBlocks[blocksRequired].setNextIndex(m_fileBlocks[blocksRequired].getIndex());
+
+        std::vector<FileBlock> tempBlocks(m_fileBlocks.begin(), m_fileBlocks.begin() + blocksRequired);
+        tempBlocks.swap(m_fileBlocks);
     }
 
     typedef std::pair<int64_t, boost::iostreams::stream_offset> SeekPair;

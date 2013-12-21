@@ -129,18 +129,13 @@ namespace bfs
             m_bytesWritten += uint32_t(n);
 
             // update m_bytesWritten
-            (void)stream.seekp(m_offset);
-            uint8_t sizeDat[4];
-            detail::convertInt32ToInt4Array(m_bytesWritten, sizeDat);
-            (void)stream.write((char*)sizeDat, 4);
+            doSetSize(stream, m_bytesWritten);
 
             if (n < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META || m_seekPos > 0) {
 
                 m_next = m_index;
                 // update m_next
-                uint8_t nextDat[8];
-                detail::convertUInt64ToInt8Array(m_next, nextDat);
-                (void)stream.write((char*)nextDat, 8);
+                doSetNextIndex(stream, m_next);
             }
         }
 
@@ -184,24 +179,51 @@ namespace bfs
     }
 
     void
-    FileBlock::setNext(uint64_t const next)
-    {
-        m_next = next;
-        BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        (void)stream.seekp(m_offset+4); // 4 indicate bytes written
-        // update m_next
-        uint8_t nextDat[8];
-        detail::convertUInt64ToInt8Array(m_next, nextDat);
-        (void)stream.write((char*)nextDat, 8);
-        stream.flush();
-        stream.close();
-    }
-
-    void
     FileBlock::registerBlockWithVolumeBitmap()
     {
         BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
         detail::updateVolumeBitmapWithOne(stream, m_index, m_totalBlocks);
         stream.close();
+    }
+
+    void
+    FileBlock::setSize(std::ios_base::streamoff size) const
+    {
+        BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
+        doSetSize(stream, size);
+        m_initialBytesWritten = size;
+        m_bytesWritten = size;
+        stream.flush();
+        stream.close();
+    }
+
+    void
+    FileBlock::doSetSize(BFSImageStream &stream, std::ios_base::streamoff size) const
+    {
+        // update m_bytesWritten
+        (void)stream.seekp(m_offset);
+        uint8_t sizeDat[4];
+        detail::convertInt32ToInt4Array(size, sizeDat);
+        (void)stream.write((char*)sizeDat, 4);
+    }
+
+    void
+    FileBlock::setNextIndex(uint64_t nextIndex) const
+    {
+        BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
+        doSetNextIndex(stream, nextIndex);
+        m_next = nextIndex;
+        stream.flush();
+        stream.close();
+    }
+
+    void
+    FileBlock::doSetNextIndex(BFSImageStream &stream, uint64_t nextIndex) const
+    {
+        // update m_next
+        (void)stream.seekp(m_offset + 4);
+        uint8_t nextDat[8];
+        detail::convertUInt64ToInt8Array(nextIndex, nextDat);
+        (void)stream.write((char*)nextDat, 8);
     }
 }

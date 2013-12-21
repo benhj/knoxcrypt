@@ -66,13 +66,37 @@ namespace bfs
 
         uint64_t getIndex() const;
 
-        void setNext(uint64_t const next);
-
         void registerBlockWithVolumeBitmap();
+
+        /**
+         * @brief when we want to set number of bytes written
+         * useful when truncating
+         * @param size the number of bytes written
+         */
+        void setSize(std::ios_base::streamoff size) const;
+
+        /**
+         * @brief sets the next index of 'this'
+         * @param nextIndex the next index to set this to
+         */
+        void setNextIndex(uint64_t nextIndex) const;
 
       private:
 
         FileBlock();
+
+        /**
+         * @brief sets number of bytes written
+         * @param size
+         */
+        void doSetSize(BFSImageStream &stream, std::ios_base::streamoff size) const;
+
+        /**
+         * @brief sets the next index of the block
+         * @param stream the image stream to operate over
+         * @param nextIndex the next index to set next of this to
+         */
+        void doSetNextIndex(BFSImageStream &stream, uint64_t nextIndex) const;
 
         std::string m_imagePath;
         uint64_t m_totalBlocks;
