@@ -24,8 +24,50 @@ namespace bfs
             BFS(std::string const &imagePath, uint64_t const totalBlocks)
             : m_imagePath(imagePath)
             , m_rootFolder(imagePath, totalBlocks, 0, "root")
+            , m_currentFolder(m_rootFolder)
             {
 
+            }
+
+            void setFolder(std::string const &path)
+            {
+                std::string thePath(path);
+                char ch = *path.rbegin();
+                // ignore trailing slash, but only if folder type
+                // an entry of file type should never have a trailing
+                // slash and is allowed to fail in this case
+                if(ch == '/') {
+                    std::string(path.begin(), path.end() - 1).swap(thePath);
+                }
+
+                char beg = *path.begin();
+                if(beg == '/') {
+                    std::string(thePath.begin()+1, thePath.end()).swap(thePath);
+                }
+
+                boost::filesystem::path pathToSet(thePath);
+                boost::filesystem::path parentPath(pathToSet.parent_path());
+
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(pathToSet.string());
+                if(!parentEntry) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(pathToSet.filename().string());
+                if(!childInfo) {
+                    throw BFSException(BFSError::NotFound);
+                }
+                if(childInfo->type() == EntryType::FileType) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                m_currentFolder = parentEntry->getFolderEntry(pathToSet.filename().string());
+
+            }
+
+            FolderEntry getCurrentFolder() const
+            {
+                return m_currentFolder;
             }
 
             bool fileExists(std::string const &path) const
@@ -45,6 +87,11 @@ namespace bfs
                 // file entries with trailing slash should throw
                 if(ch == '/') {
                     throw BFSException(BFSError::IllegalFilename);
+                }
+
+                char beg = *path.begin();
+                if(beg == '/') {
+                    std::string(thePath.begin()+1, thePath.end()).swap(thePath);
                 }
 
                 boost::filesystem::path pathToAdd(thePath);
@@ -74,6 +121,11 @@ namespace bfs
                 // ignore trailing slash
                 if(ch == '/') {
                     std::string(path.begin(), path.end() - 1).swap(thePath);
+                }
+
+                char beg = *path.begin();
+                if(beg == '/') {
+                    std::string(thePath.begin()+1, thePath.end()).swap(thePath);
                 }
 
                 boost::filesystem::path pathToAdd(thePath);
@@ -107,6 +159,11 @@ namespace bfs
                     std::string(path.begin(), path.end() - 1).swap(thePath);
                 }
 
+                char beg = *path.begin();
+                if(beg == '/') {
+                    std::string(thePath.begin()+1, thePath.end()).swap(thePath);
+                }
+
                 boost::filesystem::path pathToRemove(thePath);
                 boost::filesystem::path parentPath(pathToRemove.parent_path());
 
@@ -136,6 +193,11 @@ namespace bfs
                 // slash and is allowed to fail in this case
                 if(ch == '/') {
                     std::string(path.begin(), path.end() - 1).swap(thePath);
+                }
+
+                char beg = *path.begin();
+                if(beg == '/') {
+                    std::string(thePath.begin()+1, thePath.end()).swap(thePath);
                 }
 
                 boost::filesystem::path pathToRemove(thePath);
@@ -171,8 +233,13 @@ namespace bfs
                 if(ch == '/') {
                     throw BFSException(BFSError::NotFound);
                 }
+                std::string thePath(path);
+                char beg = *path.begin();
+                if(beg == '/') {
+                    std::string(path.begin()+1, path.end()).swap(thePath);
+                }
 
-                boost::filesystem::path openPath(path);
+                boost::filesystem::path openPath(thePath);
                 boost::filesystem::path parentPath(openPath.parent_path());
                 OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
                 if(!parentEntry) {
@@ -219,6 +286,8 @@ namespace bfs
 
             // the root of the filesystem
             bfs::FolderEntry m_rootFolder;
+
+            bfs::FolderEntry m_currentFolder;
 
             BFS(); // not required
 
@@ -276,6 +345,11 @@ namespace bfs
                 // slash and is allowed to fail in this case
                 if(ch == '/' && entryType == EntryType::FolderType) {
                     std::string(path.begin(), path.end() - 1).swap(thePath);
+                }
+
+                char beg = *path.begin();
+                if(beg == '/') {
+                    std::string(thePath.begin()+1, thePath.end()).swap(thePath);
                 }
 
                 boost::filesystem::path pathToCheck(thePath);

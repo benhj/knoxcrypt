@@ -23,6 +23,7 @@ class FolderEntryTest
         boost::filesystem::create_directories(m_uniquePath);
         testAddEntryNameRetrieval();
         testListAllEntries();
+        testListAllEntriesEmpty();
         testListFileEntries();
         testListFolderEntries();
         testAddEntryBlockIndexRetrieval();
@@ -90,6 +91,15 @@ class FolderEntryTest
         ASSERT_EQUAL(entries[3].filename(), "picture.jpg", "testListAllEntries: filename D");
         ASSERT_EQUAL(entries[4].filename(), "vai.mp3", "testListAllEntries: filename E");
         ASSERT_EQUAL(entries[5].filename(), "folderB", "testListAllEntries: filename F");
+    }
+
+    void testListAllEntriesEmpty()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+        std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+        ASSERT_EQUAL(entries.size(), 0, "testListAllEntriesEmpty: number of entries");
     }
 
     void testListFileEntries()

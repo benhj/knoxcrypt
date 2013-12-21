@@ -1,4 +1,4 @@
-#include "MakeBFS.hpp"
+#include "bfs/MakeBFS.hpp"
 
 #include <iostream>
 #include <string>

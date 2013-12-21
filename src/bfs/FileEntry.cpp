@@ -323,7 +323,7 @@ namespace bfs
     }
 
     void
-    FileEntry::truncate(std::string const& name, std::ios_base::streamoff newSize)
+    FileEntry::truncate(std::ios_base::streamoff newSize)
     {
         uint64_t blockCount = m_fileBlocks.size();
 
