@@ -1,6 +1,6 @@
 CXX=clang++
-CXXFLAGS=-ggdb -std=c++11 -stdlib=libc++ -I/usr/local/include/boost -Iinclude
-CXXFLAGS_FUSE=-I/usr/local/include/osxfuse  -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=26
+CXXFLAGS=-ggdb -std=c++11 -stdlib=libc++ -I/usr/local/include/boost -Iinclude -D_FILE_OFFSET_BITS=64
+CXXFLAGS_FUSE=-I/usr/local/include/osxfuse  -DFUSE_USE_VERSION=26
 LDFLAGS=-L/usr/local/lib -stdlib=libc++ -lboost_filesystem -lboost_system -losxfuse
 SOURCES := $(wildcard src/bfs/*.cpp)
 MAKE_BFS_SRC := $(wildcard src/makebfs/*.cpp)
@@ -12,7 +12,7 @@ OBJECTS_TEST := $(addprefix obj-test/,$(notdir $(TEST_SRC:.cpp=.o)))
 OBJECTS_FUSE := $(addprefix obj-fuse/,$(notdir $(FUSE_SRC:.cpp=.o)))
 TEST_EXECUTABLE=test
 MAKEBFS_EXECUTABLE=makebfs
-FUSE_LAYER=bfs
+FUSE_LAYER=bfs_
 
 obj/%.o: src/bfs/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

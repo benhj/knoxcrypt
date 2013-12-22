@@ -33,6 +33,7 @@ class BFSTest
             testRemoveNonEmptyFolder();
             testRemoveNonExistingFolderThrows();
             testWriteToStream();
+            testListAllEntriesEmpty();
         }
 
         ~BFSTest()
@@ -366,5 +367,15 @@ class BFSTest
             ASSERT_EQUAL(testString.length(), bytesRead, "BFSTest::testWriteToStream() bytesRead");
             std::string recovered(buffer.begin(), buffer.end());
             ASSERT_EQUAL(testString, recovered, "BFSTest::testWriteToStream() content");
+        }
+
+        void testListAllEntriesEmpty()
+        {
+            long const blocks = 2048;
+            boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::FolderEntry fe = theBFS.getCurrentFolder();
+            std::vector<bfs::EntryInfo> infos = fe.listAllEntries();
+            ASSERT_EQUAL(infos.empty(), true, "BFSTest::testListAllEntriesEmpty()");
         }
 };
