@@ -12,6 +12,17 @@
 
 #define BFS_DATA ((bfs::BFS*) fuse_get_context()->private_data)
 
+int exceptionDispatch(bfs::BFSException const &ex)
+{
+    if(ex == bfs::BFSException(bfs::BFSError::NotFound)) {
+        return -ENOENT;
+    }
+    if(ex == bfs::BFSException(bfs::BFSError::AlreadyExists)) {
+        return -EEXIST;
+    }
+
+    return 0;
+}
 
 static int
 bfs_getattr(const char *path, struct stat *stbuf)
@@ -23,11 +34,8 @@ bfs_getattr(const char *path, struct stat *stbuf)
         stbuf->st_nlink = 3;
         return 0;
     } else {
-
         try {
-
             bfs::EntryInfo info = BFS_DATA->getInfo(path);
-
             if(info.type() == bfs::EntryType::FolderType){
                 stbuf->st_mode = S_IFDIR | 0777;
                 stbuf->st_nlink = 3;
@@ -41,7 +49,7 @@ bfs_getattr(const char *path, struct stat *stbuf)
                return -ENOENT;
             }
         } catch (bfs::BFSException const &e) {
-            return -ENOENT;
+            return exceptionDispatch(e);
         }
     }
 
@@ -49,26 +57,25 @@ bfs_getattr(const char *path, struct stat *stbuf)
 }
 
 
-// create a file
-static int bfs_mknod(const char *path, mode_t mode, dev_t dev)
-{
-
-    BFS_DATA->addFile(path);
-
-    return 0;
-}
-
 // Create a directory
 static int bfs_mkdir(const char *path, mode_t mode)
 {
-    BFS_DATA->addFolder(path);
+    try {
+        BFS_DATA->addFolder(path);
+    } catch (bfs::BFSException const &e) {
+        return exceptionDispatch(e);
+    }
     return 0;
 }
 
 // Remove a file
 static int bfs_unlink(const char *path)
 {
-    BFS_DATA->removeFile(path);
+    try {
+        BFS_DATA->removeFile(path);
+    } catch (bfs::BFSException const &e) {
+        return exceptionDispatch(e);
+    }
 
     return 0;
 }
@@ -76,7 +83,11 @@ static int bfs_unlink(const char *path)
 // Remove a folder
 static int bfs_rmdir(const char *path)
 {
-    BFS_DATA->removeFolder(path, bfs::FolderRemovalType::Recursive);
+    try {
+        BFS_DATA->removeFolder(path, bfs::FolderRemovalType::Recursive);
+    } catch (bfs::BFSException const &e) {
+        return exceptionDispatch(e);
+    }
 
     return 0;
 }
@@ -84,38 +95,56 @@ static int bfs_rmdir(const char *path)
 // truncate a file
 static int bfs_truncate(const char *path, off_t newsize)
 {
-    BFS_DATA->truncateFile(path, newsize);
+    try {
+        BFS_DATA->truncateFile(path, newsize);
+    } catch (bfs::BFSException const &e) {
+        return exceptionDispatch(e);
+    }
 
     return 0;
 }
 
-// open a file
+// open a file.. dont do anything here as all reading
+// and writing are deferred to the respective functions
 static int bfs_open(const char *path, struct fuse_file_info *fi)
 {
-    BFS_DATA->openFile(path, bfs::OpenDisposition::buildOverwriteDisposition());
+
+    // need to properly check mode here
+    // as a quick hack to get this stuff working we assume that if
+    // the user is trying to open a file but it doesn't yet exist
+    // then the user is trying to create a new file in which case
+    // it needs to first be added
+    if(!BFS_DATA->fileExists(path)) {
+        try {
+            BFS_DATA->addFile(path);
+        } catch (bfs::BFSException const &e) {
+            return exceptionDispatch(e);
+        }
+    }
+
+    try {
+        bfs::EntryInfo info = BFS_DATA->getInfo(path);
+    } catch (bfs::BFSException const &e) {
+        return exceptionDispatch(e);
+    }
+
     return 0;
 }
 
 static int bfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
 
-    bfs::FileEntryDevice device = BFS_DATA->openFile(path, bfs::OpenDisposition::buildReadOnlyDisposition());
+    bfs::FileEntryDevice device = BFS_DATA->openFile(path, bfs::OpenDisposition::buildAppendDisposition());
     device.seek(offset, std::ios_base::beg);
-    if(device.read(buf, size) < 0) {
-        return -1;
-    }
-    return 0;
+    return device.read(buf, size);
 }
 
 static int bfs_write(const char *path, const char *buf, size_t size, off_t offset,
-         struct fuse_file_info *fi)
+                     struct fuse_file_info *fi)
 {
     bfs::FileEntryDevice device = BFS_DATA->openFile(path, bfs::OpenDisposition::buildAppendDisposition());
     device.seek(offset, std::ios_base::beg);
-    if(device.write(buf, size) < 0) {
-        return -1;
-    }
-    return 0;
+    return device.write(buf, size);
 }
 
 static void *bfs_init(struct fuse_conn_info *conn)
@@ -125,42 +154,56 @@ static void *bfs_init(struct fuse_conn_info *conn)
 
 static int bfs_create(const char *path, mode_t mode, struct fuse_file_info *fi)
 {
-    BFS_DATA->addFile(path);
+    try {
+        BFS_DATA->addFile(path);
+    } catch (bfs::BFSException const &e) {
+        return exceptionDispatch(e);
+    }
     return 0;
 }
 
 static int bfs_ftruncate(const char *path, off_t offset, struct fuse_file_info *fi)
 {
-    BFS_DATA->truncateFile(path, offset);
+    try {
+        BFS_DATA->truncateFile(path, offset);
+    } catch (bfs::BFSException const &e) {
+        return exceptionDispatch(e);
+    }
     return 0;
 }
 
+// not sure what this does. Not figured out if we need it yet
+// but I think its called a bunch of times
 static int bfs_opendir(const char *path, struct fuse_file_info *fi)
 {
     return 0;
 }
 
+
+// list the directory contents
 static int bfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
                          off_t offset, struct fuse_file_info *fi)
 {
+    try {
+        bfs::FolderEntry folder = BFS_DATA->getCurrent(path);
 
-    bfs::FolderEntry folder = BFS_DATA->getCurrent(path);
+        std::vector<bfs::EntryInfo> infos = folder.listAllEntries();
+        std::vector<bfs::EntryInfo>::iterator it = infos.begin();
 
-    std::vector<bfs::EntryInfo> infos = folder.listAllEntries();
-    std::vector<bfs::EntryInfo>::iterator it = infos.begin();
+        filler(buf, ".", NULL, 0);           /* Current directory (.)  */
+        filler(buf, "..", NULL, 0);
 
-    filler(buf, ".", NULL, 0);           /* Current directory (.)  */
-    filler(buf, "..", NULL, 0);
-
-    for(; it != infos.end(); ++it) {
-        filler(buf, it->filename().c_str(), NULL, 0);
+        for(; it != infos.end(); ++it) {
+            filler(buf, it->filename().c_str(), NULL, 0);
+        }
+    } catch (bfs::BFSException const &e) {
+        return exceptionDispatch(e);
     }
 
     return 0;
 }
 
 static struct fuse_operations bfs_oper = {
-  .mknod = bfs_mknod,
   .mkdir = bfs_mkdir,
   .unlink = bfs_unlink,
   .rmdir = bfs_rmdir,
@@ -185,9 +228,9 @@ int main(int argc, char *argv[])
     bfs::BFS *bfsPtr = new bfs::BFS(argv[1], atoi(argv[2]));
 
     argc -= 2;
-    argv[1] = argv[3];
-    argv[2] = argv[4];
-    argv[3] = argv[5];
+    for(int i = 0; i<argc;++i) {
+        argv[i+1] = argv[i+3];
+    }
 
     // turn over control to fuse
     fprintf(stderr, "about to call fuse_main\n");
