@@ -81,8 +81,8 @@ class BFSTest
             }
             bfs::BFS theBFS(testPath.string(), blocks);
 
-            std::string testPositive("folderA/subFolderA/subFolderC/finalFile.txt");
-            std::string testNegative("folderA/hello.log");
+            std::string testPositive("/folderA/subFolderA/subFolderC/finalFile.txt");
+            std::string testNegative("/folderA/hello.log");
 
             ASSERT_EQUAL(true, theBFS.fileExists(testPositive), "BFSTest::testFileExists() positive case");
             ASSERT_EQUAL(false, theBFS.fileExists(testNegative), "BFSTest::testFileExists() negative case");
@@ -97,8 +97,8 @@ class BFSTest
             }
             bfs::BFS theBFS(testPath.string(), blocks);
 
-            std::string testPositive("folderA/subFolderA/");
-            std::string testNegative("folderA/subFolderA/subFolderX");
+            std::string testPositive("/folderA/subFolderA/");
+            std::string testNegative("/folderA/subFolderA/subFolderX");
 
             ASSERT_EQUAL(true, theBFS.folderExists(testPositive), "BFSTest::testFolderExists() positive case");
             ASSERT_EQUAL(false, theBFS.folderExists(testNegative), "BFSTest::testFolderExists() negative case");
@@ -111,7 +111,7 @@ class BFSTest
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
             bfs::BFS theBFS(testPath.string(), blocks);
-            theBFS.addFile("folderA/subFolderA/subFolderC/testAdded.txt");
+            theBFS.addFile("/folderA/subFolderA/subFolderC/testAdded.txt");
             bfs::FolderEntry parent = root.getFolderEntry("folderA").getFolderEntry("subFolderA").getFolderEntry("subFolderC");
             bfs::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
             bool good = entryInfo ? true : false;
@@ -127,7 +127,7 @@ class BFSTest
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
             bfs::BFS theBFS(testPath.string(), blocks);
-            theBFS.addFolder("folderA/subFolderA/subFolderC/testAdded");
+            theBFS.addFolder("/folderA/subFolderA/subFolderC/testAdded");
             bfs::FolderEntry parent = root.getFolderEntry("folderA").getFolderEntry("subFolderA").getFolderEntry("subFolderC");
             bfs::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded");
             bool good = entryInfo ? true : false;
@@ -145,7 +145,7 @@ class BFSTest
             bfs::BFS theBFS(testPath.string(), blocks);
             bool caught = false;
             try {
-                theBFS.addFile("folderA/subFolderA/subFolderX/testAdded");
+                theBFS.addFile("/folderA/subFolderA/subFolderX/testAdded");
             } catch (bfs::BFSException const &e) {
                 caught = true;
                 ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
@@ -163,7 +163,7 @@ class BFSTest
             bfs::BFS theBFS(testPath.string(), blocks);
             bool caught = false;
             try {
-                theBFS.addFolder("folderA/subFolderQ/testAdded");
+                theBFS.addFolder("/folderA/subFolderQ/testAdded");
             } catch (bfs::BFSException const &e) {
                 caught = true;
                 ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
@@ -181,7 +181,7 @@ class BFSTest
             bfs::BFS theBFS(testPath.string(), blocks);
             bool caught = false;
             try {
-                theBFS.addFile("folderA/subFolderA/subFolderC/finalFile.txt");
+                theBFS.addFile("/folderA/subFolderA/subFolderC/finalFile.txt");
             } catch (bfs::BFSException const &e) {
                 caught = true;
                 ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::AlreadyExists), e,
@@ -199,7 +199,7 @@ class BFSTest
             bfs::BFS theBFS(testPath.string(), blocks);
             bool caught = false;
             try {
-                theBFS.addFolder("folderA/subFolderA/subFolderC/finalFile.txt");
+                theBFS.addFolder("/folderA/subFolderA/subFolderC/finalFile.txt");
             } catch (bfs::BFSException const &e) {
                 caught = true;
                 ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::AlreadyExists), e,
@@ -214,7 +214,7 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
             bfs::BFS theBFS(testPath.string(), blocks);
-            theBFS.removeFile("folderA/subFolderA/subFolderC/finalFile.txt");
+            theBFS.removeFile("/folderA/subFolderA/subFolderC/finalFile.txt");
             bfs::OptionalEntryInfo info = root.getFolderEntry("folderA")
                                               .getFolderEntry("subFolderA")
                                               .getFolderEntry("subFolderC")
@@ -232,7 +232,7 @@ class BFSTest
             bfs::BFS theBFS(testPath.string(), blocks);
             bool caught = false;
             try {
-                theBFS.removeFile("folderA/subFolderA/subFolderX/finalFile.txt");
+                theBFS.removeFile("/folderA/subFolderA/subFolderX/finalFile.txt");
             } catch (bfs::BFSException const &e) {
                 caught = true;
                 ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
@@ -250,7 +250,7 @@ class BFSTest
             bfs::BFS theBFS(testPath.string(), blocks);
             bool caught = false;
             try {
-                theBFS.removeFile("folderA/subFolderA/subFolderC/finalFileB.txt");
+                theBFS.removeFile("/folderA/subFolderA/subFolderC/finalFileB.txt");
             } catch (bfs::BFSException const &e) {
                 caught = true;
                 ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
@@ -268,7 +268,7 @@ class BFSTest
             bfs::BFS theBFS(testPath.string(), blocks);
             bool caught = false;
             try {
-                theBFS.removeFile("folderA/subFolderA/subFolderC/finalFolder");
+                theBFS.removeFile("/folderA/subFolderA/subFolderC/finalFolder");
             } catch (bfs::BFSException const &e) {
                 caught = true;
                 ASSERT_EQUAL(bfs::BFSException(bfs::BFSError::NotFound), e,
@@ -283,7 +283,7 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
             bfs::BFS theBFS(testPath.string(), blocks);
-            theBFS.removeFolder("folderA/subFolderA/subFolderC/finalFolder",
+            theBFS.removeFolder("/folderA/subFolderA/subFolderC/finalFolder",
                                 bfs::FolderRemovalType::MustBeEmpty);
             bfs::OptionalEntryInfo info = root.getFolderEntry("folderA")
                                               .getFolderEntry("subFolderA")
@@ -301,7 +301,7 @@ class BFSTest
             bfs::BFS theBFS(testPath.string(), blocks);
             bool caught = false;
             try {
-                theBFS.removeFolder("folderA/subFolderA/",
+                theBFS.removeFolder("/folderA/subFolderA/",
                                     bfs::FolderRemovalType::MustBeEmpty);
             } catch (bfs::BFSException const &e) {
                 caught = true;
@@ -317,7 +317,7 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
             bfs::BFS theBFS(testPath.string(), blocks);
-            theBFS.removeFolder("folderA/subFolderA/",
+            theBFS.removeFolder("/folderA/subFolderA/",
                                 bfs::FolderRemovalType::Recursive);
             bfs::OptionalEntryInfo info = root.getFolderEntry("folderA")
                                               .getEntryInfo("subFolderA");
@@ -333,7 +333,7 @@ class BFSTest
             bfs::BFS theBFS(testPath.string(), blocks);
             bool caught = false;
             try {
-                theBFS.removeFolder("folderA/subFolderQ/",
+                theBFS.removeFolder("/folderA/subFolderQ/",
                                     bfs::FolderRemovalType::MustBeEmpty);
             } catch (bfs::BFSException const &e) {
                 caught = true;
@@ -353,7 +353,7 @@ class BFSTest
             // open file and append to end of it
             std::string const &testString(createLargeStringToWrite());
 
-            bfs::FileEntryDevice device = theBFS.openFile("folderA/subFolderA/fileX",
+            bfs::FileEntryDevice device = theBFS.openFile("/folderA/subFolderA/fileX",
                                                           bfs::OpenDisposition::buildAppendDisposition());
 
             std::streampos wrote = device.write(testString.c_str(), testString.length());
@@ -374,7 +374,7 @@ class BFSTest
             long const blocks = 2048;
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::BFS theBFS(testPath.string(), blocks);
-            bfs::FolderEntry fe = theBFS.getCurrentFolder();
+            bfs::FolderEntry fe = theBFS.getCurrent("/");
             std::vector<bfs::EntryInfo> infos = fe.listAllEntries();
             ASSERT_EQUAL(infos.empty(), true, "BFSTest::testListAllEntriesEmpty()");
         }

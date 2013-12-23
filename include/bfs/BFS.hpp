@@ -27,15 +27,15 @@ namespace bfs
         public:
             BFS(std::string const &imagePath, uint64_t const totalBlocks)
             : m_imagePath(imagePath)
-            , m_rootFolder(imagePath, totalBlocks, 0, "root")
-            , m_currentFolder(imagePath, totalBlocks, 0, "root")
+            , m_blocks(totalBlocks)
             , m_accessMutex()
             {
 
             }
 
-            void setFolder(std::string const &path)
+            FolderEntry getCurrent(std::string const &path)
             {
+                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // ignore trailing slash, but only if folder type
@@ -45,36 +45,26 @@ namespace bfs
                     std::string(path.begin(), path.end() - 1).swap(thePath);
                 }
 
-                // edge case
-                if(path == "/") {
-                    m_currentFolder = m_rootFolder;
-                    return;
-                }
-
-                boost::filesystem::path pathToSet(boost::filesystem::path(thePath).relative_path());
-
-                std::cout<<pathToSet.string()<<std::endl;
-
-                boost::filesystem::path parentPath(pathToSet.parent_path());
-
-                OptionalFolderEntry parentEntry = doGetParentFolderEntry(pathToSet.string());
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(thePath, rootFolder);
                 if(!parentEntry) {
-                    throw BFSException(BFSError::NotFound);
+                    return rootFolder;
                 }
 
-                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(pathToSet.filename().string());
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
                 if(!childInfo) {
                     throw BFSException(BFSError::NotFound);
                 }
                 if(childInfo->type() == EntryType::FileType) {
                     throw BFSException(BFSError::NotFound);
                 }
+                return parentEntry->getFolderEntry(boost::filesystem::path(path).filename().string());
 
-                m_currentFolder = parentEntry->getFolderEntry(pathToSet.filename().string());
+
             }
 
             EntryInfo getInfo(std::string const &path)
             {
+                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // ignore trailing slash, but only if folder type
@@ -84,39 +74,36 @@ namespace bfs
                     std::string(path.begin(), path.end() - 1).swap(thePath);
                 }
 
-                boost::filesystem::path pathToGet(boost::filesystem::path(thePath).relative_path());
-                boost::filesystem::path parentPath(pathToGet.parent_path());
-
-                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(thePath, rootFolder);
                 if(!parentEntry) {
                     throw BFSException(BFSError::NotFound);
                 }
 
-                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(pathToGet.filename().string());
+                std::string fname = boost::filesystem::path(thePath).filename().string();
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
+
                 if(!childInfo) {
                     throw BFSException(BFSError::NotFound);
                 }
                 return *childInfo;
             }
 
-            FolderEntry getCurrentFolder() const
-            {
-                LockType lock(m_accessMutex);
-                return m_currentFolder;
-            }
 
             bool fileExists(std::string const &path) const
             {
-                return doFileExists(path);
+                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                return doFileExists(path, rootFolder);
             }
 
             bool folderExists(std::string const &path)
             {
-                return doFolderExists(path);
+                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                return doFolderExists(path, rootFolder);
             }
 
             void addFile(std::string const &path)
             {
+                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // file entries with trailing slash should throw
@@ -124,28 +111,21 @@ namespace bfs
                     throw BFSException(BFSError::IllegalFilename);
                 }
 
-                boost::filesystem::path pathToAdd(boost::filesystem::path(thePath).relative_path());
-                boost::filesystem::path parentPath(pathToAdd.parent_path());
-
-                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(thePath, rootFolder);
                 if(!parentEntry) {
                     throw BFSException(BFSError::NotFound);
                 }
 
                 // throw if already exists
-                if(doFileExists(pathToAdd.string())) {
-                    throw BFSException(BFSError::AlreadyExists);
-                }
-                if(doFolderExists(pathToAdd.string())) {
-                    throw BFSException(BFSError::AlreadyExists);
-                }
+                throwIfAlreadyExists(path, rootFolder);
 
-                parentEntry->addFileEntry(pathToAdd.filename().string());
+                parentEntry->addFileEntry(boost::filesystem::path(thePath).filename().string());
 
             }
 
             void addFolder(std::string const &path) const
             {
+                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // ignore trailing slash
@@ -153,28 +133,20 @@ namespace bfs
                     std::string(path.begin(), path.end() - 1).swap(thePath);
                 }
 
-                boost::filesystem::path pathToAdd(boost::filesystem::path(thePath).relative_path());
-                boost::filesystem::path parentPath(pathToAdd.parent_path());
-
-                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(thePath, rootFolder);
                 if(!parentEntry) {
                     throw BFSException(BFSError::NotFound);
                 }
 
                 // throw if already exists
-                if(doFileExists(pathToAdd.string())) {
-                    throw BFSException(BFSError::AlreadyExists);
-                }
-                if(doFolderExists(pathToAdd.string())) {
-                    throw BFSException(BFSError::AlreadyExists);
-                }
+                throwIfAlreadyExists(path, rootFolder);
 
-                parentEntry->addFolderEntry(pathToAdd.filename().string());
+                parentEntry->addFolderEntry(boost::filesystem::path(thePath).filename().string());
             }
 
             void removeFile(std::string const &path)
             {
-
+                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // ignore trailing slash, but only if folder type
@@ -184,15 +156,12 @@ namespace bfs
                     std::string(path.begin(), path.end() - 1).swap(thePath);
                 }
 
-                boost::filesystem::path pathToRemove(boost::filesystem::path(thePath).relative_path());
-                boost::filesystem::path parentPath(pathToRemove.parent_path());
-
-                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(thePath, rootFolder);
                 if(!parentEntry) {
                     throw BFSException(BFSError::NotFound);
                 }
 
-                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(pathToRemove.filename().string());
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
                 if(!childInfo) {
                     throw BFSException(BFSError::NotFound);
                 }
@@ -200,12 +169,12 @@ namespace bfs
                     throw BFSException(BFSError::NotFound);
                 }
 
-                parentEntry->removeFileEntry(pathToRemove.filename().string());
+                parentEntry->removeFileEntry(boost::filesystem::path(thePath).filename().string());
             }
 
             void removeFolder(std::string const &path, FolderRemovalType const &removalType)
             {
-
+                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // ignore trailing slash, but only if folder type
@@ -215,15 +184,12 @@ namespace bfs
                     std::string(path.begin(), path.end() - 1).swap(thePath);
                 }
 
-                boost::filesystem::path pathToRemove(boost::filesystem::path(thePath).relative_path());
-                boost::filesystem::path parentPath(pathToRemove.parent_path());
-
-                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(thePath, rootFolder);
                 if(!parentEntry) {
                     throw BFSException(BFSError::NotFound);
                 }
 
-                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(pathToRemove.filename().string());
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
                 if(!childInfo) {
                     throw BFSException(BFSError::NotFound);
                 }
@@ -233,31 +199,29 @@ namespace bfs
 
                 if(removalType == FolderRemovalType::MustBeEmpty) {
 
-                    FolderEntry childEntry = parentEntry->getFolderEntry(pathToRemove.filename().string());
+                    FolderEntry childEntry = parentEntry->getFolderEntry(boost::filesystem::path(thePath).filename().string());
                     if(!childEntry.listAllEntries().empty()) {
                         throw BFSException(BFSError::FolderNotEmpty);
                     }
                 }
 
-                parentEntry->removeFolderEntry(pathToRemove.filename().string());
+                parentEntry->removeFolderEntry(boost::filesystem::path(thePath).filename().string());
             }
 
             FileEntryDevice openFile(std::string const &path, OpenDisposition const &openMode)
             {
+                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
                 char ch = *path.rbegin();
                 if(ch == '/') {
                     throw BFSException(BFSError::NotFound);
                 }
-                std::string thePath(path);
 
-                boost::filesystem::path openPath(boost::filesystem::path(thePath).relative_path());
-                boost::filesystem::path parentPath(openPath.parent_path());
-                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(path, rootFolder);
                 if(!parentEntry) {
                     throw BFSException(BFSError::NotFound);
                 }
 
-                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(openPath.filename().string());
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
                 if(!childInfo) {
                     throw BFSException(BFSError::NotFound);
                 }
@@ -265,21 +229,20 @@ namespace bfs
                     throw BFSException(BFSError::NotFound);
                 }
 
-                FileEntry fe = parentEntry->getFileEntry(openPath.filename().string(), openMode);
+                FileEntry fe = parentEntry->getFileEntry(boost::filesystem::path(path).filename().string(), openMode);
 
                 return FileEntryDevice(fe);
             }
 
             void truncateFile(std::string const &path, std::ios_base::streamoff offset)
             {
-                boost::filesystem::path openPath(boost::filesystem::path(path).relative_path());
-                boost::filesystem::path parentPath(openPath.parent_path());
-                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(path, rootFolder);
                 if(!parentEntry) {
                     throw BFSException(BFSError::NotFound);
                 }
 
-                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(openPath.filename().string());
+                OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
                 if(!childInfo) {
                     throw BFSException(BFSError::NotFound);
                 }
@@ -287,7 +250,7 @@ namespace bfs
                     throw BFSException(BFSError::NotFound);
                 }
 
-                FileEntry fe = parentEntry->getFileEntry(openPath.filename().string(), OpenDisposition::buildOverwriteDisposition());
+                FileEntry fe = parentEntry->getFileEntry(boost::filesystem::path(path).filename().string(), OpenDisposition::buildOverwriteDisposition());
                 fe.truncate(offset);
             }
 
@@ -295,33 +258,49 @@ namespace bfs
             // the path of the bfs image
             std::string m_imagePath;
 
-            // the root of the filesystem
-            bfs::FolderEntry m_rootFolder;
-
-            bfs::FolderEntry m_currentFolder;
+            // number of file blocks
+            uint64_t m_blocks;
 
             mutable boost::mutex m_accessMutex;
             typedef boost::lock_guard<boost::mutex> LockType;
 
             BFS(); // not required
 
-            bool doFileExists(std::string const &path) const
+            void throwIfAlreadyExists(std::string const &path, FolderEntry &fe) const
             {
-                return doExistanceCheck(path, EntryType::FileType);
+                // throw if already exists
+                boost::filesystem::path processedPath(path);
+                if(doFileExists(processedPath.relative_path().string(), fe)) {
+                    throw BFSException(BFSError::AlreadyExists);
+                }
+                if(doFolderExists(processedPath.relative_path().string(), fe)) {
+                    throw BFSException(BFSError::AlreadyExists);
+                }
             }
 
-            bool doFolderExists(std::string const &path) const
+            bool doFileExists(std::string const &path, FolderEntry &fe) const
             {
-                return doExistanceCheck(path, EntryType::FolderType);
+                return doExistanceCheck(path, EntryType::FileType, fe);
             }
 
-            OptionalFolderEntry doGetParentFolderEntry(std::string const &path) const
+            bool doFolderExists(std::string const &path, FolderEntry &fe) const
+            {
+                return doExistanceCheck(path, EntryType::FolderType, fe);
+            }
+
+            OptionalFolderEntry doGetParentFolderEntry(std::string const &path, FolderEntry &fe) const
             {
                 boost::filesystem::path pathToCheck(path);
 
+                if(pathToCheck.parent_path().string() == "/") {
+                    return OptionalFolderEntry(fe);
+                }
+
+                pathToCheck = pathToCheck.relative_path().parent_path();
+
                 // iterate over path parts extracting sub folders along the way
                 boost::filesystem::path::iterator it = pathToCheck.begin();
-                FolderEntry folderOfInterest = m_rootFolder;
+                FolderEntry folderOfInterest = fe;
                 boost::filesystem::path pathBuilder;
                 for(; it != pathToCheck.end(); ++it) {
 
@@ -350,7 +329,7 @@ namespace bfs
 
             }
 
-            bool doExistanceCheck(std::string const &path, EntryType const &entryType) const
+            bool doExistanceCheck(std::string const &path, EntryType const &entryType, FolderEntry &fe) const
             {
                 std::string thePath(path);
                 char ch = *path.rbegin();
@@ -361,14 +340,12 @@ namespace bfs
                     std::string(path.begin(), path.end() - 1).swap(thePath);
                 }
 
-                boost::filesystem::path pathToCheck(boost::filesystem::path(thePath).relative_path());
-                boost::filesystem::path parentPath(pathToCheck.parent_path());
-                OptionalFolderEntry parentEntry = doGetParentFolderEntry(parentPath.string());
+                OptionalFolderEntry parentEntry = doGetParentFolderEntry(thePath, fe);
                 if(!parentEntry) {
                     return false;
                 }
 
-                std::string filename = pathToCheck.filename().string();
+                std::string filename = boost::filesystem::path(thePath).filename().string();
 
                 OptionalEntryInfo entryInfo = parentEntry->getEntryInfo(filename);
 
