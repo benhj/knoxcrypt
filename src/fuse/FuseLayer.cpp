@@ -152,6 +152,7 @@ static void *bfs_init(struct fuse_conn_info *conn)
     return BFS_DATA;
 }
 
+// create file; comment for git test
 static int bfs_create(const char *path, mode_t mode, struct fuse_file_info *fi)
 {
     try {
