@@ -92,7 +92,6 @@ static int bfs_truncate(const char *path, off_t newsize)
 // open a file
 static int bfs_open(const char *path, struct fuse_file_info *fi)
 {
-    BFS_DATA->addFile(path);
     BFS_DATA->openFile(path, bfs::OpenDisposition::buildOverwriteDisposition());
     return 0;
 }
