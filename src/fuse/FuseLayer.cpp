@@ -18,22 +18,15 @@ bfs_getattr(const char *path, struct stat *stbuf)
 {
     memset(stbuf, 0, sizeof(struct stat));
 
-    std::cout<<"in getattr"<<std::endl;
-
     if (strcmp(path, "/") == 0) { /* The root directory of our file system. */
         stbuf->st_mode = S_IFDIR | 0777;
         stbuf->st_nlink = 3;
-        std::cout<<"got info root"<<std::endl;
         return 0;
     } else {
 
         try {
 
-            std::cout<<"getting info other for path "<<path<<std::endl;
-
             bfs::EntryInfo info = BFS_DATA->getInfo(path);
-
-            std::cout<<"got info other"<<std::endl;
 
             if(info.type() == bfs::EntryType::FolderType){
                 stbuf->st_mode = S_IFDIR | 0777;
@@ -60,7 +53,6 @@ bfs_getattr(const char *path, struct stat *stbuf)
 static int bfs_mknod(const char *path, mode_t mode, dev_t dev)
 {
 
-    std::cout<<"hello mknod!"<<std::endl;
     BFS_DATA->addFile(path);
 
     return 0;
@@ -69,10 +61,7 @@ static int bfs_mknod(const char *path, mode_t mode, dev_t dev)
 // Create a directory
 static int bfs_mkdir(const char *path, mode_t mode)
 {
-    printf("hello mkdir\n");
-    std::cout<<"path: "<<path<<std::endl;
     BFS_DATA->addFolder(path);
-
     return 0;
 }
 
@@ -132,7 +121,6 @@ static void *bfs_init(struct fuse_conn_info *conn)
 
 static int bfs_create(const char *path, mode_t mode, struct fuse_file_info *fi)
 {
-    std::cout<<"hello!"<<std::endl;
     BFS_DATA->addFile(path);
     return 0;
 }
@@ -145,8 +133,6 @@ static int bfs_ftruncate(const char *path, off_t offset, struct fuse_file_info *
 
 static int bfs_opendir(const char *path, struct fuse_file_info *fi)
 {
-    std::cout<<"bfs_opendir"<<std::endl;
-    //BFS_DATA->setFolder(path);
     return 0;
 }
 
@@ -167,17 +153,6 @@ static int bfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
         filler(buf, it->filename().c_str(), NULL, 0);
     }
 
-    /*
-    while ((de = readdir(dp)) != NULL) {
-        struct stat st;
-        memset(&st, 0, sizeof(st));
-        st.st_ino = de->d_ino;
-        st.st_mode = de->d_type << 12;
-        if (filler(buf, de->d_name, &st, 0))
-            break;
-    }
-
-    closedir(dp);*/
     return 0;
 }
 
