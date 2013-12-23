@@ -270,10 +270,10 @@ namespace bfs
             {
                 // throw if already exists
                 boost::filesystem::path processedPath(path);
-                if(doFileExists(processedPath.relative_path().string(), fe)) {
+                if(doFileExists(processedPath.string(), fe)) {
                     throw BFSException(BFSError::AlreadyExists);
                 }
-                if(doFolderExists(processedPath.relative_path().string(), fe)) {
+                if(doFolderExists(processedPath.string(), fe)) {
                     throw BFSException(BFSError::AlreadyExists);
                 }
             }

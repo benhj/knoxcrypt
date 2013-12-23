@@ -101,7 +101,10 @@ static int bfs_read(const char *path, char *buf, size_t size, off_t offset, stru
 {
 
     bfs::FileEntryDevice device = BFS_DATA->openFile(path, bfs::OpenDisposition::buildReadOnlyDisposition());
-    (void)device.read(buf, size);
+    device.seek(offset, std::ios_base::beg);
+    if(device.read(buf, size) < 0) {
+        return -1;
+    }
     return 0;
 }
 
@@ -110,7 +113,9 @@ static int bfs_write(const char *path, const char *buf, size_t size, off_t offse
 {
     bfs::FileEntryDevice device = BFS_DATA->openFile(path, bfs::OpenDisposition::buildAppendDisposition());
     device.seek(offset, std::ios_base::beg);
-    (void)device.write(buf, size);
+    if(device.write(buf, size) < 0) {
+        return -1;
+    }
     return 0;
 }
 
@@ -141,7 +146,6 @@ static int bfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 {
 
     bfs::FolderEntry folder = BFS_DATA->getCurrent(path);
-
 
     std::vector<bfs::EntryInfo> infos = folder.listAllEntries();
     std::vector<bfs::EntryInfo>::iterator it = infos.begin();
