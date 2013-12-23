@@ -194,7 +194,18 @@ static int bfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
         filler(buf, "..", NULL, 0);
 
         for(; it != infos.end(); ++it) {
-            filler(buf, it->filename().c_str(), NULL, 0);
+            struct stat stbuf;
+            if(it->type() == bfs::EntryType::FileType) {
+                stbuf.st_mode = S_IFREG | 0755;
+                stbuf.st_nlink = 1;
+                stbuf.st_size = it->size();
+            } else {
+                stbuf.st_mode = S_IFDIR | 0744;
+                stbuf.st_nlink = 3;
+            }
+
+            filler(buf, it->filename().c_str(), &stbuf, 0);
+
         }
     } catch (bfs::BFSException const &e) {
         return exceptionDispatch(e);
