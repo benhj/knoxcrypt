@@ -1,6 +1,8 @@
 #ifndef BFS_BFS_IMAGE_STREAM_HPP__
 #define BFS_BFS_IMAGE_STREAM_HPP__
 
+#include "cipher/StreamCipher.hpp"
+
 #include <fstream>
 #include <string>
 
