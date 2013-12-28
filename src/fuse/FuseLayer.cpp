@@ -4,6 +4,7 @@
  */
 
 #include "bfs/BFS.hpp"
+#include "cipher/StreamCipher.hpp"
 //#include "bfs/FolderRemovalType.hpp"
 
 #include <fuse.h>
