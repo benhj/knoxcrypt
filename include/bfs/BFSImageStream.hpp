@@ -33,6 +33,7 @@ namespace bfs
       private:
         BFSImageStream();
         std::fstream m_stream;
+        cipher::StreamCipher m_cipher;
     };
 
 }

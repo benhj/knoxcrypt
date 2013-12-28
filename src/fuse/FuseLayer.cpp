@@ -104,16 +104,10 @@ static int bfs_truncate(const char *path, off_t newsize)
     return 0;
 }
 
-// open a file.. dont do anything here as all reading
-// and writing are deferred to the respective functions
+// open a file.. note most reading and writing functionality
+// is deferred to the respective functions
 static int bfs_open(const char *path, struct fuse_file_info *fi)
 {
-
-    // need to properly check mode here
-    // as a quick hack to get this stuff working we assume that if
-    // the user is trying to open a file but it doesn't yet exist
-    // then the user is trying to create a new file in which case
-    // it needs to first be added
     if(!BFS_DATA->fileExists(path)) {
         try {
             BFS_DATA->addFile(path);
@@ -133,8 +127,7 @@ static int bfs_open(const char *path, struct fuse_file_info *fi)
 
 static int bfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-
-    bfs::FileEntryDevice device = BFS_DATA->openFile(path, bfs::OpenDisposition::buildAppendDisposition());
+    bfs::FileEntryDevice device = BFS_DATA->openFile(path, bfs::OpenDisposition::buildReadOnlyDisposition());
     device.seek(offset, std::ios_base::beg);
     return device.read(buf, size);
 }
@@ -142,7 +135,29 @@ static int bfs_read(const char *path, char *buf, size_t size, off_t offset, stru
 static int bfs_write(const char *path, const char *buf, size_t size, off_t offset,
                      struct fuse_file_info *fi)
 {
-    bfs::FileEntryDevice device = BFS_DATA->openFile(path, bfs::OpenDisposition::buildAppendDisposition());
+
+    bfs::ReadOrWriteOrBoth openMode = bfs::ReadOrWriteOrBoth::ReadWrite;
+
+    /*
+    if((fi->flags & O_RDWR) == O_RDWR) {
+        openMode = bfs::ReadOrWriteOrBoth::ReadWrite;
+    }*/
+
+    bfs::AppendOrOverwrite appendType = bfs::AppendOrOverwrite::Append;
+
+    if((fi->flags & O_APPEND) == O_APPEND) {
+        appendType = bfs::AppendOrOverwrite::Append;
+    }
+
+    bfs::TruncateOrKeep truncateType = bfs::TruncateOrKeep::Keep;
+
+    if((fi->flags & O_TRUNC) == O_TRUNC) {
+        truncateType = bfs::TruncateOrKeep::Truncate;
+    }
+
+    bfs::OpenDisposition od(openMode, appendType, bfs::CreateOrDontCreate::Create, truncateType);
+
+    bfs::FileEntryDevice device = BFS_DATA->openFile(path, od);
     device.seek(offset, std::ios_base::beg);
     return device.write(buf, size);
 }

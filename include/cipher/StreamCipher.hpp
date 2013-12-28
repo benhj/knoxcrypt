@@ -3,13 +3,16 @@
 #ifndef BFS_CIPHER_STREAM_CIPHER_HPP__
 #define BFS_CIPHER_STREAM_CIPHER_HPP__
 
+
 #include <string>
 #include <vector>
+#include <cassert>
+#include <iostream>
 
 namespace bfs { namespace cipher
 {
 
-    inline void swapints(int *array, int ndx1, int ndx2)
+    inline void swapints(long *array, long ndx1, long ndx2)
     {
         int temp = array[ndx1];
         array[ndx1] = array[ndx2];
@@ -20,36 +23,77 @@ namespace bfs { namespace cipher
     {
         public:
             StreamCipher(std::string const &password)
+                : m_password(password)
             {
                 initKeyAndSbox(password);
                 setSBox();
             }
 
-            void transform(std::vector<char> &in, std::vector<char> &out,
-                           int startPosition,
-                           int length)
+            void transform(char *in, char *out,
+                           std::ios_base::streamoff startPosition,
+                           long length)
             {
-                std::vector<int> sbox;
-                sbox.assign(m_sbox, m_sbox + 256);
-                int i = 0, j = 0, k = 0;
-                for (int a=0; a < startPosition; a++) {
-                    i = (i + 1) % 256;
-                    j = (j + sbox[i]) % 256;
-                    swapints(&sbox.front(), i, j);
-                    k = sbox[(sbox[i] + sbox[j]) % 256];
+/*
+                long sbox[256];
+                for(int i = 0;i<256;++i){
+                    sbox[i]=m_sbox[i];
                 }
-                for (int a=0; a < length; a++) {
+
+                int i = 0, j = 0, k = 0;
+                for (int a=0; a < startPosition; ++a) {
                     i = (i + 1) % 256;
                     j = (j + sbox[i]) % 256;
-                    swapints(&sbox.front(), i, j);
+                    swapints(sbox, i, j);
+                }
+
+
+
+                for (int a=0; a < length; ++a) {
+                    i = (i + 1) % 256;
+                    j = (j + sbox[i]) % 256;
+                    swapints(sbox, i, j);
                     k = sbox[(sbox[i] + sbox[j]) % 256];
+                    out[a] = in[a] ^ k;
+                }
+                */
+                /*
+                long sbox[256];
+                for(int i = 0;i<256;++i){
+                    sbox[i] = m_sbox[i];
+                }
+                long i = startPosition, j = startPosition, k = 0;
+                for (int a=0; a < length; ++a) {
+                    i = ((startPosition) + (a+1)) % 256;
+                    j = (j + sbox[i]) % 256;
+                    swapints(sbox, i, j);
+                    k = sbox[(sbox[i] + sbox[j]) % 256];
+                    out[a] = in[a] ^ k;
+                }*/
+
+//                long i = startPosition % 256;
+  //              long j = (startPosition - 1 + sbox[i]) % 256;
+
+                //std::cout<<"c"<<std::endl;
+
+                //--startPosition;
+                /*
+                long sbox[256];
+                for(int i = 0;i<256;++i){
+                    sbox[i] = m_sbox[i];
+                }*/
+                long j = 0;
+                for (long a=0; a < length; a++) {
+                    long i = ((startPosition) + (a+1)) % 256;
+                    long j = ((startPosition) + (a+1) + m_sbox[i]) % 256;
+                    long k = m_sbox[(m_sbox[i] + m_sbox[j]) % 256];
                     out[a] = in[a] ^ k;
                 }
             }
 
         private:
-            int m_sbox[256];
-            int m_key[256];
+            std::string m_password;
+            long m_sbox[256];
+            long m_key[256];
 
             void initKeyAndSbox(std::string const &password)
             {
