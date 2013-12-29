@@ -1,33 +1,27 @@
 bfs
 ===
 
-A custom container format that I'm experimenting with.
+A custom fuse filesystem that I'm experimenting with.
 
-One of the problems with the zip container is that files can only be appended. 
-This is because files are stored sequentially, so when removed, the underlying
-space cannot be easily reused or reclaimed.
-
-This container format will work more like a filesystem: files will be stored
-as blocks and a volume bitmap will indicate those blocks that are allocated.
-
-(Note, this is very similar to how the HFS filesystem works)
+The basic idea is that file are stored as 512 byte blocks. Blocks are assigned
+to files as they are written. Allocated blocks are stored in a volume bitmap
+in much the same way as HFS.
 
 For example, a 1MB file contains 2048x512 byte blocks. Thus 2048 bits will indicate
 which blocks are allocated. This will constitute the volume bitmap. 
 The size of this bitmap is then dependent on the number of blocks in the container. 
 
-Idea
-====
-
-When a file is created the associated bits in the bitmap are set and the volume
-bitmap is updated. When a file is deleted the associated bits are cleared, the 
-map is updated and the blocks are free to be used in the storage of other files.
-
-Folder entries will also be treated as file entries that are constructed from file 
-blocks. Their data will be formed of file name and other folder name entries that
-link to the respective index values of the first file block making up a given file.
+Folder entries are also stored as file data. A folder entry's file data is basically
+a description of its contents. One entry descriptor is a metadata byte describing 
+if the entry is in use and its type (one bit for each; other bits can be assigned
+for other things, e.g. if entry is read-only). The next 256 bytes describe the entry's
+filename. The final 8 bytes represents a 64 bit pointer to the entry's first file block.
 
 When the file system container is created, the root directory is automatically
 added which is set to having zero entries. As files and folders are added to
-the container, the root directory entry is accordingly updated. In a similar
+the container, the root directory is accordingly updated. In a similar
 manner, any sub folders will also be accordingly updated.
+
+The whole filesystem image is also encrypted although currently the
+implementation is not even as good as ARCFOUR and ARCFOUR is known
+to be pretty bad in light of recent developments.
