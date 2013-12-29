@@ -3,9 +3,9 @@
 namespace bfs
 {
 
-    BFSImageStream::BFSImageStream(std::string const &path, std::ios::openmode mode)
-        : m_stream(path.c_str(), mode)
-        , m_cipher("abcd1234")
+    BFSImageStream::BFSImageStream(CoreBFSIO const &io, std::ios::openmode mode)
+        : m_stream(io.path, mode)
+        , m_cipher(io.password)
     {
     }
 

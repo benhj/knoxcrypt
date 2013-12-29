@@ -40,7 +40,7 @@ class MakeBFSTest
         io.password = "abcd1234";
 
         // test that enough bytes are written
-        bfs::BFSImageStream is(io.path, std::ios::in | std::ios::binary);
+        bfs::BFSImageStream is(io, std::ios::in | std::ios::binary);
         ASSERT_EQUAL(blocks, bfs::detail::getBlockCount(is), "correctBlockCountIsReported");
         is.close();
     }
@@ -58,7 +58,7 @@ class MakeBFSTest
         io.blocks = blocks;
         io.password = "abcd1234";
 
-        bfs::BFSImageStream is(io.path, std::ios::in | std::ios::binary);
+        bfs::BFSImageStream is(io, std::ios::in | std::ios::binary);
 
         // convert the byte array back to uint64 representation
         uint64_t reported = bfs::detail::getFileCount(is);
@@ -76,7 +76,7 @@ class MakeBFSTest
         io.blocks = blocks;
         io.password = "abcd1234";
 
-        bfs::BFSImageStream is(io.path, std::ios::in | std::ios::binary);
+        bfs::BFSImageStream is(io, std::ios::in | std::ios::binary);
         bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
         assert(*p == 1);
         ASSERT_EQUAL(*p, 1, "firstBlockIsReportedAsBeingFree");
@@ -93,7 +93,7 @@ class MakeBFSTest
         io.blocks = blocks;
         io.password = "abcd1234";
 
-        bfs::BFSImageStream is(io.path, std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
         bfs::detail::setBlockToInUse(1, blocks, is);
         bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
         assert(*p == 2);
@@ -139,7 +139,7 @@ class MakeBFSTest
         io.path = testPath.string();
         io.blocks = blocks;
         io.password = "abcd1234";
-        bfs::BFSImageStream is(io.path, std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
         is.seekg(offset + bfs::detail::FILE_BLOCK_META);
         uint8_t bytes[8];
         (void)is.read((char*)bytes, 8);

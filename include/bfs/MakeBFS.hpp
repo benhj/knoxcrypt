@@ -102,7 +102,7 @@ namespace bfs
 
             // write out size, and volume bitmap bytes
 
-            BFSImageStream out(io.path, std::ios::out | std::ios::binary);
+            BFSImageStream out(io, std::ios::out | std::ios::binary);
             out.write((char*)sizeBytes, 8);
             createVolumeBitMap(io.blocks, out);
 

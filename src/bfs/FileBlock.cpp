@@ -19,7 +19,7 @@ namespace bfs
         , m_openDisposition(openDisposition)
     {
         // set m_offset
-        BFSImageStream stream(io.path, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
         m_offset = detail::getOffsetOfFileBlock(m_index, io.blocks);
         (void)stream.seekp(m_offset);
 
@@ -50,7 +50,7 @@ namespace bfs
         , m_openDisposition(openDisposition)
     {
         // set m_offset
-        BFSImageStream stream(io.path, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
         m_offset = detail::getOffsetOfFileBlock(m_index, io.blocks);
         (void)stream.seekg(m_offset);
 
@@ -91,7 +91,7 @@ namespace bfs
         }
 
         // open the image stream for reading
-        BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
         (void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_seekPos);
         (void)stream.read((char*)buf, n);
         stream.close();
@@ -111,7 +111,7 @@ namespace bfs
         }
 
         // open the image stream for writing
-        BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
         (void)stream.seekp(m_offset + detail::FILE_BLOCK_META + m_seekPos);
         (void)stream.write((char*)buf, n);
 
@@ -177,7 +177,7 @@ namespace bfs
     void
     FileBlock::registerBlockWithVolumeBitmap()
     {
-        BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
         detail::updateVolumeBitmapWithOne(stream, m_index, m_io.blocks);
         stream.close();
     }
@@ -185,7 +185,7 @@ namespace bfs
     void
     FileBlock::setSize(std::ios_base::streamoff size) const
     {
-        BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
         doSetSize(stream, size);
         m_initialBytesWritten = size;
         m_bytesWritten = size;
@@ -206,7 +206,7 @@ namespace bfs
     void
     FileBlock::setNextIndex(uint64_t nextIndex) const
     {
-        BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
         doSetNextIndex(stream, nextIndex);
         m_next = nextIndex;
         stream.flush();

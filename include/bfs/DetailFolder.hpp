@@ -15,7 +15,7 @@ namespace bfs { namespace detail
     void incrementFolderEntryCount(CoreBFSIO const &io,
                                    uint64_t const startBlock)
     {
-        bfs::BFSImageStream out(io.path, std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, io.blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
@@ -31,7 +31,7 @@ namespace bfs { namespace detail
     void decrementFolderEntryCount(CoreBFSIO const &io,
                                    uint64_t const startBlock)
     {
-        bfs::BFSImageStream out(io.path, std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, io.blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];

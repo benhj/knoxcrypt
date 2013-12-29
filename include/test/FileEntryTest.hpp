@@ -99,7 +99,7 @@ class FileEntryTest
             entry.flush();
 
             uint64_t startBlock = entry.getStartVolumeBlockIndex();
-            bfs::BFSImageStream in(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
+            bfs::BFSImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             ASSERT_EQUAL(true, bfs::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
             bfs::FileBlock block(io, startBlock,
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
@@ -136,7 +136,7 @@ class FileEntryTest
 
             // get allocated block indices
             uint64_t startBlock = entry.getStartVolumeBlockIndex();
-            bfs::BFSImageStream in(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
+            bfs::BFSImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             blockIndices.push_back(startBlock);
 
             bfs::FileBlock block(io, startBlock,
@@ -167,7 +167,7 @@ class FileEntryTest
 
             // test that blocks deallocated after unlink
             std::vector<uint64_t>::iterator it = blockIndices.begin();
-            bfs::BFSImageStream in(io.path, std::ios::in | std::ios::out | std::ios::binary);
+            bfs::BFSImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             for (; it != blockIndices.end(); ++it) {
                 ASSERT_EQUAL(false, bfs::detail::isBlockInUse(*it, blocks, in), "testFileUnlink: blockDeallocatedTest");
             }

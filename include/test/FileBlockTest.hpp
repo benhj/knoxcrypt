@@ -55,7 +55,7 @@ class FileBlockTest
 
         // test that actual written correct
         assert(block.getDataBytesWritten() == 26);
-        bfs::BFSImageStream stream(testPath.string(), std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t size = bfs::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
         ASSERT_EQUAL(size, 26, "FileBlockTest::blockWriteAndReadTest(): correctly returned block size");
 

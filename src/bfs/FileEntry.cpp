@@ -122,7 +122,7 @@ namespace bfs
 
     void FileEntry::newWritableFileBlock() const
     {
-        bfs::BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
         std::vector<uint64_t> firstAndNext = detail::getNAvailableBlocks(stream, 2, m_io.blocks);
         stream.close();
         // note building a new block to write to should always be in append mode
@@ -537,7 +537,7 @@ namespace bfs
     {
         // loop over all file blocks and update the volume bitmap indicating
         // that block is no longer in use
-        bfs::BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
         std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
         for (; it != m_fileBlocks.end(); ++it) {
             uint64_t blockIndex = it->getIndex();
