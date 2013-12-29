@@ -123,6 +123,49 @@ namespace bfs
 
             }
 
+            void renameEntry(std::string const &src, std::string const &dst)
+            {
+                std::string srcPath(src);
+                char ch = *src.rbegin();
+                // ignore trailing slash
+                if(ch == '/') {
+                    std::string(src.begin(), src.end() - 1).swap(srcPath);
+                }
+                std::string dstPath(dst);
+                char chDst = *dst.rbegin();
+                // ignore trailing slash
+                if(chDst == '/') {
+                    std::string(dst.begin(), dst.end() - 1).swap(dstPath);
+                }
+                FolderEntry rootFolder(m_io, 0, "root");
+
+                // throw if source parent doesn't exist
+                OptionalFolderEntry parentSrc = doGetParentFolderEntry(srcPath, rootFolder);
+                if(!parentSrc) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                // throw if destination parent doesn't exist
+                OptionalFolderEntry parentDst = doGetParentFolderEntry(dstPath, rootFolder);
+                if(!parentSrc) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                // throw if destination already exists
+                throwIfAlreadyExists(dstPath, rootFolder);
+
+                // throw if source doesn't exist
+                OptionalEntryInfo childInfo = parentSrc->getEntryInfo(boost::filesystem::path(srcPath).filename().string());
+                if(!childInfo) {
+                    throw BFSException(BFSError::NotFound);
+                }
+
+                // do moving / renaming
+                // (i) Replace original entry metadata with new file name
+
+
+            }
+
             void addFolder(std::string const &path) const
             {
                 FolderEntry rootFolder(m_io, 0, "root");
