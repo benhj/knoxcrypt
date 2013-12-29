@@ -3,9 +3,9 @@ bfs
 
 A custom fuse filesystem that I'm experimenting with.
 
-The basic idea is that file are stored as 512 byte blocks. Blocks are assigned
-to files as they are written. Allocated blocks are stored in a volume bitmap
-in much the same way as HFS.
+File are stored as 512 byte blocks. 
+Blocks are assigned to files as they are written. 
+Allocated blocks are represented as bits set in a volume bitmap.
 
 For example, a 1MB file contains 2048x512 byte blocks. Thus 2048 bits will indicate
 which blocks are allocated. This will constitute the volume bitmap. 
