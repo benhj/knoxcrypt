@@ -5,13 +5,11 @@
 namespace bfs
 {
 
-    FileBlock::FileBlock(std::string const &imagePath,
-                         uint64_t const totalBlocks,
+    FileBlock::FileBlock(CoreBFSIO const &io,
                          uint64_t const index,
                          uint64_t const next,
                          OpenDisposition const &openDisposition)
-        : m_imagePath(imagePath)
-        , m_totalBlocks(totalBlocks)
+        : m_io(io)
         , m_index(index)
         , m_bytesWritten(0)
         , m_next(next)
@@ -21,8 +19,8 @@ namespace bfs
         , m_openDisposition(openDisposition)
     {
         // set m_offset
-        BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks);
+        BFSImageStream stream(io.path, std::ios::in | std::ios::out | std::ios::binary);
+        m_offset = detail::getOffsetOfFileBlock(m_index, io.blocks);
         (void)stream.seekp(m_offset);
 
         // write m_bytesWritten
@@ -40,12 +38,10 @@ namespace bfs
         stream.close();
     }
 
-    FileBlock::FileBlock(std::string const &imagePath,
-                         uint64_t const totalBlocks,
+    FileBlock::FileBlock(CoreBFSIO const &io,
                          uint64_t const index,
                          OpenDisposition const &openDisposition)
-        : m_imagePath(imagePath)
-        , m_totalBlocks(totalBlocks)
+        : m_io(io)
         , m_index(index)
         , m_bytesWritten(0)
         , m_next(0)
@@ -54,8 +50,8 @@ namespace bfs
         , m_openDisposition(openDisposition)
     {
         // set m_offset
-        BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        m_offset = detail::getOffsetOfFileBlock(m_index, m_totalBlocks);
+        BFSImageStream stream(io.path, std::ios::in | std::ios::out | std::ios::binary);
+        m_offset = detail::getOffsetOfFileBlock(m_index, io.blocks);
         (void)stream.seekg(m_offset);
 
         // read m_bytesWritten
@@ -95,7 +91,7 @@ namespace bfs
         }
 
         // open the image stream for reading
-        BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
         (void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_seekPos);
         (void)stream.read((char*)buf, n);
         stream.close();
@@ -115,7 +111,7 @@ namespace bfs
         }
 
         // open the image stream for writing
-        BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
         (void)stream.seekp(m_offset + detail::FILE_BLOCK_META + m_seekPos);
         (void)stream.write((char*)buf, n);
 
@@ -181,15 +177,15 @@ namespace bfs
     void
     FileBlock::registerBlockWithVolumeBitmap()
     {
-        BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        detail::updateVolumeBitmapWithOne(stream, m_index, m_totalBlocks);
+        BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
+        detail::updateVolumeBitmapWithOne(stream, m_index, m_io.blocks);
         stream.close();
     }
 
     void
     FileBlock::setSize(std::ios_base::streamoff size) const
     {
-        BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
         doSetSize(stream, size);
         m_initialBytesWritten = size;
         m_bytesWritten = size;
@@ -210,7 +206,7 @@ namespace bfs
     void
     FileBlock::setNextIndex(uint64_t nextIndex) const
     {
-        BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
+        BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
         doSetNextIndex(stream, nextIndex);
         m_next = nextIndex;
         stream.flush();

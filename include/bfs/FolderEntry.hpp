@@ -1,6 +1,7 @@
 #ifndef BFS_FOLDER_ENTRY_HPP__
 #define BFS_FOLDER_ENTRY_HPP__
 
+#include "bfs/CoreBFSIO.hpp"
 #include "bfs/EntryInfo.hpp"
 #include "bfs/FileEntry.hpp"
 
@@ -23,8 +24,7 @@ namespace bfs
          * @param writable if data entries can be added to folder
          * @param name the name of the entry
          */
-        FolderEntry(std::string const &imagePath,
-                    uint64_t const totalBlocks,
+        FolderEntry(CoreBFSIO const &io,
                     std::string const &name = "root");
 
         /**
@@ -35,8 +35,7 @@ namespace bfs
          * @param writable if data entries can be added to folder
          * @param name the name of the entry
          */
-        FolderEntry(std::string const &imagePath,
-                    uint64_t const totalBlocks,
+        FolderEntry(CoreBFSIO const &io,
                     uint64_t const startBlock,
                     std::string const &name = "root");
 
@@ -220,11 +219,7 @@ namespace bfs
          */
         std::vector<EntryInfo> doListEntriesBasedOnType(EntryType entryType) const;
 
-        // the path of the bfs image
-        std::string m_imagePath;
-
-        // total file blocks in the bfs image
-        uint64_t m_totalBlocks;
+        CoreBFSIO m_io;
 
         // the underlying file blocks storing the folder entry data
         mutable FileEntry m_folderData;

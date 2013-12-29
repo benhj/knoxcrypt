@@ -1,6 +1,7 @@
 
 
 #include "bfs/BFS.hpp"
+#include "bfs/CoreBFSIO.hpp"
 #include "test/TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>
@@ -43,7 +44,11 @@ class BFSTest
 
         bfs::FolderEntry createTestFolder(boost::filesystem::path const &p, long const blocks)
         {
-            bfs::FolderEntry folder(p.string(), blocks, 0, "root");
+            bfs::CoreBFSIO io;
+            io.path = p.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::FolderEntry folder(io, 0, "root");
             folder.addFileEntry("test.txt");
             folder.addFileEntry("some.log");
             folder.addFolderEntry("folderA");
@@ -79,7 +84,11 @@ class BFSTest
             {
                 (void)createTestFolder(testPath, blocks);
             }
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
 
             std::string testPositive("/folderA/subFolderA/subFolderC/finalFile.txt");
             std::string testNegative("/folderA/hello.log");
@@ -95,7 +104,11 @@ class BFSTest
             {
                 (void)createTestFolder(testPath, blocks);
             }
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
 
             std::string testPositive("/folderA/subFolderA/");
             std::string testNegative("/folderA/subFolderA/subFolderX");
@@ -110,7 +123,12 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
+
             theBFS.addFile("/folderA/subFolderA/subFolderC/testAdded.txt");
             bfs::FolderEntry parent = root.getFolderEntry("folderA").getFolderEntry("subFolderA").getFolderEntry("subFolderC");
             bfs::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
@@ -126,7 +144,12 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
+
             theBFS.addFolder("/folderA/subFolderA/subFolderC/testAdded");
             bfs::FolderEntry parent = root.getFolderEntry("folderA").getFolderEntry("subFolderA").getFolderEntry("subFolderC");
             bfs::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded");
@@ -142,7 +165,12 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
+
             bool caught = false;
             try {
                 theBFS.addFile("/folderA/subFolderA/subFolderX/testAdded");
@@ -160,7 +188,12 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
+
             bool caught = false;
             try {
                 theBFS.addFolder("/folderA/subFolderQ/testAdded");
@@ -178,7 +211,12 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
+
             bool caught = false;
             try {
                 theBFS.addFile("/folderA/subFolderA/subFolderC/finalFile.txt");
@@ -196,7 +234,12 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
+
             bool caught = false;
             try {
                 theBFS.addFolder("/folderA/subFolderA/subFolderC/finalFile.txt");
@@ -213,7 +256,11 @@ class BFSTest
             long const blocks = 2048;
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
             theBFS.removeFile("/folderA/subFolderA/subFolderC/finalFile.txt");
             bfs::OptionalEntryInfo info = root.getFolderEntry("folderA")
                                               .getFolderEntry("subFolderA")
@@ -229,7 +276,11 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
             bool caught = false;
             try {
                 theBFS.removeFile("/folderA/subFolderA/subFolderX/finalFile.txt");
@@ -247,7 +298,11 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
             bool caught = false;
             try {
                 theBFS.removeFile("/folderA/subFolderA/subFolderC/finalFileB.txt");
@@ -265,7 +320,11 @@ class BFSTest
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
 
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
             bool caught = false;
             try {
                 theBFS.removeFile("/folderA/subFolderA/subFolderC/finalFolder");
@@ -282,7 +341,11 @@ class BFSTest
             long const blocks = 2048;
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
             theBFS.removeFolder("/folderA/subFolderA/subFolderC/finalFolder",
                                 bfs::FolderRemovalType::MustBeEmpty);
             bfs::OptionalEntryInfo info = root.getFolderEntry("folderA")
@@ -298,7 +361,11 @@ class BFSTest
             long const blocks = 2048;
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
             bool caught = false;
             try {
                 theBFS.removeFolder("/folderA/subFolderA/",
@@ -316,7 +383,11 @@ class BFSTest
             long const blocks = 2048;
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
             theBFS.removeFolder("/folderA/subFolderA/",
                                 bfs::FolderRemovalType::Recursive);
             bfs::OptionalEntryInfo info = root.getFolderEntry("folderA")
@@ -330,7 +401,11 @@ class BFSTest
             long const blocks = 2048;
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
             bool caught = false;
             try {
                 theBFS.removeFolder("/folderA/subFolderQ/",
@@ -348,7 +423,11 @@ class BFSTest
             long const blocks = 2048;
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
             bfs::FolderEntry root = createTestFolder(testPath, blocks);
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
 
             // open file and append to end of it
             std::string const &testString(createLargeStringToWrite());
@@ -373,7 +452,11 @@ class BFSTest
         {
             long const blocks = 2048;
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-            bfs::BFS theBFS(testPath.string(), blocks);
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::BFS theBFS(io);
             bfs::FolderEntry fe = theBFS.getCurrent("/");
             std::vector<bfs::EntryInfo> infos = fe.listAllEntries();
             ASSERT_EQUAL(infos.empty(), true, "BFSTest::testListAllEntriesEmpty()");

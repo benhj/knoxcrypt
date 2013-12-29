@@ -4,8 +4,8 @@
  */
 
 #include "bfs/BFS.hpp"
+#include "bfs/CoreBFSIO.hpp"
 #include "cipher/StreamCipher.hpp"
-//#include "bfs/FolderRemovalType.hpp"
 
 #include <fuse.h>
 
@@ -253,7 +253,12 @@ int main(int argc, char *argv[])
 
     int fuse_stat;
 
-    bfs::BFS *bfsPtr = new bfs::BFS(argv[1], atoi(argv[2]));
+    bfs::CoreBFSIO io;
+    io.path = argv[1];
+    io.blocks = atoi(argv[2]);
+    io.password = "abcd1234";
+
+    bfs::BFS *bfsPtr = new bfs::BFS(io);
 
     argc -= 2;
     for(int i = 0; i<argc;++i) {

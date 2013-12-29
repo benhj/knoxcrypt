@@ -1,6 +1,7 @@
 #ifndef BFS_FILE_ENTRY_HPP__
 #define BFS_FILE_ENTRY_HPP__
 
+#include "bfs/CoreBFSIO.hpp"
 #include "bfs/FileBlock.hpp"
 #include "bfs/OpenDisposition.hpp"
 
@@ -22,7 +23,7 @@ namespace bfs
          * @param totalBlocks the total number of blocks in the bfs
          * @param name the name of the file entry
          */
-        FileEntry(std::string const &imagePath, uint64_t const totalBlocks, std::string const &name);
+        FileEntry(CoreBFSIO const &io, std::string const &name);
 
         /**
          * @brief when reading or appending or overwriting to the end of a file
@@ -33,8 +34,7 @@ namespace bfs
          * @param block the starting block of the file entry
          * @param openDisposition open mode
          */
-        FileEntry(std::string const &imagePath,
-                  uint64_t const totalBlocks,
+        FileEntry(CoreBFSIO const &io,
                   std::string const &name,
                   uint64_t const startBlock,
                   OpenDisposition const &openDisposition);
@@ -100,11 +100,7 @@ namespace bfs
 
       private:
 
-        // the path of the bfs image
-        std::string m_imagePath;
-
-        // the total number of file blocks making up with bfs
-        uint64_t m_totalBlocks;
+        CoreBFSIO m_io;
 
         // the name of the file entry
         std::string m_name;

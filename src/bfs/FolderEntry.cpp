@@ -100,14 +100,11 @@ namespace bfs
         }
     }
 
-    FolderEntry::FolderEntry(std::string const &imagePath,
-                             uint64_t const totalBlocks,
+    FolderEntry::FolderEntry(CoreBFSIO const &io,
                              uint64_t const startVolumeBlock,
                              std::string const &name)
-        : m_imagePath(imagePath)
-        , m_totalBlocks(totalBlocks)
-        , m_folderData(imagePath,
-                       totalBlocks,
+        : m_io(io)
+        , m_folderData(io,
                        name,
                        startVolumeBlock,
                        OpenDisposition::buildAppendDisposition())
@@ -116,12 +113,10 @@ namespace bfs
     {
     }
 
-    FolderEntry::FolderEntry(std::string const &imagePath,
-                             uint64_t const totalBlocks,
+    FolderEntry::FolderEntry(CoreBFSIO const &io,
                              std::string const &name)
-        : m_imagePath(imagePath)
-        , m_totalBlocks(totalBlocks)
-        , m_folderData(imagePath, totalBlocks, name)
+        : m_io(io)
+        , m_folderData(m_io, name)
         , m_startVolumeBlock(m_folderData.getStartVolumeBlockIndex())
         , m_name(name)
     {
@@ -187,7 +182,7 @@ namespace bfs
         (void)doWriteFilenameToEntryMetaData(name);
 
         // Create a new file entry
-        FileEntry entry(m_imagePath, m_totalBlocks, m_name);
+        FileEntry entry(m_io, m_name);
 
         // write the first block index to the file entry metadata
         (void)doWriteFirstBlockIndexToEntryMetaData(entry);
@@ -196,11 +191,11 @@ namespace bfs
         m_folderData.flush();
 
         // increment entry count
-        detail::incrementFolderEntryCount(m_imagePath, m_folderData.getStartVolumeBlockIndex(), m_totalBlocks);
+        detail::incrementFolderEntryCount(m_io, m_folderData.getStartVolumeBlockIndex());
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
-        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startVolumeBlock,
+        m_folderData = FileEntry(m_io, m_name, m_startVolumeBlock,
                                  OpenDisposition::buildAppendDisposition());
     }
 
@@ -217,7 +212,7 @@ namespace bfs
         (void)doWriteFilenameToEntryMetaData(name);
 
         // Create a new sub-folder entry
-        FolderEntry entry(m_imagePath, m_totalBlocks, m_name);
+        FolderEntry entry(m_io, m_name);
 
         // write the first block index to the file entry metadata
         (void)doWriteFirstBlockIndexToEntryMetaData(entry.m_folderData);
@@ -226,11 +221,11 @@ namespace bfs
         m_folderData.flush();
 
         // increment entry count
-        detail::incrementFolderEntryCount(m_imagePath, m_folderData.getStartVolumeBlockIndex(), m_totalBlocks);
+        detail::incrementFolderEntryCount(m_io, m_folderData.getStartVolumeBlockIndex());
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
-        m_folderData = FileEntry(m_imagePath, m_totalBlocks, m_name, m_startVolumeBlock,
+        m_folderData = FileEntry(m_io, m_name, m_startVolumeBlock,
                                  OpenDisposition::buildAppendDisposition());
     }
 
@@ -247,7 +242,7 @@ namespace bfs
             std::string entryName(getEntryName(i));
             if (entryName == name && getTypeForEntry(i) == EntryType::FileType) {
                 uint64_t n = getBlockIndexForEntry(i);
-                return FileEntry(m_imagePath, m_totalBlocks, name, n, openDisposition);
+                return FileEntry(m_io, name, n, openDisposition);
             }
         }
 
@@ -267,7 +262,7 @@ namespace bfs
             std::string entryName(getEntryName(i));
             if (entryName == name && getTypeForEntry(i) == EntryType::FolderType) {
                 uint64_t n = getBlockIndexForEntry(i);
-                return FolderEntry(m_imagePath, m_totalBlocks, n, name);
+                return FolderEntry(m_io, n, name);
             }
         }
 
@@ -331,7 +326,7 @@ namespace bfs
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startVolumeBlock,
+        FileEntry temp(m_io, m_name, m_startVolumeBlock,
                        OpenDisposition::buildOverwriteDisposition());
         detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
         assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
@@ -356,7 +351,7 @@ namespace bfs
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        FileEntry temp(m_imagePath, m_totalBlocks, m_name, m_startVolumeBlock,
+        FileEntry temp(m_io, m_name, m_startVolumeBlock,
                        OpenDisposition::buildOverwriteDisposition());
         detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
         assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
@@ -420,8 +415,8 @@ namespace bfs
     uint64_t
     FolderEntry::getNumberOfEntries() const
     {
-        bfs::BFSImageStream out(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartVolumeBlockIndex(), m_totalBlocks);
+        bfs::BFSImageStream out(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
+        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartVolumeBlockIndex(), m_io.blocks);
         (void)out.seekg(offset + detail::FILE_BLOCK_META);
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);

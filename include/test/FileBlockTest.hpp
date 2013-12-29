@@ -42,7 +42,12 @@ class FileBlockTest
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
-        bfs::FileBlock block(testPath.string(), blocks, uint64_t(0), uint64_t(0),
+        bfs::CoreBFSIO io;
+        io.path = testPath.string();
+        io.blocks = blocks;
+        io.password = "abcd1234";
+
+        bfs::FileBlock block(io, uint64_t(0), uint64_t(0),
                              bfs::OpenDisposition::buildAppendDisposition());
         std::string testData("Hello, world!Hello, world!");
         std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -76,7 +81,11 @@ class FileBlockTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
         {
-            bfs::FileBlock block(testPath.string(), blocks, uint64_t(0), uint64_t(0),
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::FileBlock block(io, uint64_t(0), uint64_t(0),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::string testData("Hello, world!Hello, world!");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -99,7 +108,11 @@ class FileBlockTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
         {
-            bfs::FileBlock block(testPath.string(), blocks, uint64_t(0), uint64_t(0),
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::FileBlock block(io, uint64_t(0), uint64_t(0),
                                  bfs::OpenDisposition::buildWriteOnlyDisposition());
             std::string testData("Hello, world!Hello, world!");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -107,7 +120,11 @@ class FileBlockTest
         }
 
         {
-            bfs::FileBlock block(testPath.string(), blocks, uint64_t(0),
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::FileBlock block(io, uint64_t(0),
                                  bfs::OpenDisposition::buildWriteOnlyDisposition());
             std::vector<uint8_t> vec(block.getInitialDataBytesWritten());
             // assert correct exception was thrown

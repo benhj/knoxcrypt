@@ -2,6 +2,7 @@
 #define BFS_FILE_BLOCK_HPP__
 
 #include "bfs/BFSImageStream.hpp"
+#include "bfs/CoreBFSIO.hpp"
 #include "bfs/DetailBFS.hpp"
 #include "bfs/DetailFileBlock.hpp"
 #include "bfs/OpenDisposition.hpp"
@@ -29,8 +30,7 @@ namespace bfs
          * @param next the index of the next file block that makes up the file
          * @param openDisposition open mode
          */
-        FileBlock(std::string const &imagePath,
-                  uint64_t const totalBlocks,
+        FileBlock(CoreBFSIO const &io,
                   uint64_t const index,
                   uint64_t const next,
                   OpenDisposition const &openDisposition);
@@ -42,8 +42,7 @@ namespace bfs
          * @note other params like size and next will be initialized when
          * the block is actually read
          */
-        FileBlock(std::string const &imagePath,
-                  uint64_t const totalBlocks,
+        FileBlock(CoreBFSIO const &io,
                   uint64_t const index,
                   OpenDisposition const &openDisposition);
 
@@ -98,8 +97,7 @@ namespace bfs
          */
         void doSetNextIndex(BFSImageStream &stream, uint64_t nextIndex) const;
 
-        std::string m_imagePath;
-        uint64_t m_totalBlocks;
+        CoreBFSIO m_io;
         uint64_t m_index;
         mutable uint32_t m_bytesWritten;
         mutable uint32_t m_initialBytesWritten;

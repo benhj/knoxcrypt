@@ -2,6 +2,7 @@
 #define BFS_MAKE_BFS_HPP__
 
 #include "bfs/BFSImageStream.hpp"
+#include "bfs/CoreBFSIO.hpp"
 #include "bfs/DetailBFS.hpp"
 #include "bfs/DetailFileBlock.hpp"
 #include "bfs/FileBlock.hpp"
@@ -19,9 +20,9 @@ namespace bfs
     {
       public:
 
-        MakeBFS(std::string const &imageName, uint64_t const blocks)
+        explicit MakeBFS(CoreBFSIO const &io)
         {
-            buildImage(imageName, blocks);
+            buildImage(io);
         }
 
       private:
@@ -90,20 +91,20 @@ namespace bfs
          * @param imageName the name of the image
          * @param blocks the number of blocks in the file system
          */
-        void buildImage(std::string const &imageName, uint64_t const blocks)
+        void buildImage(CoreBFSIO const &io)
         {
 
             //
             // store the number of blocks in the first 8 bytes of the superblock
             //
             uint8_t sizeBytes[8];
-            buildBlockBytes(blocks, sizeBytes);
+            buildBlockBytes(io.blocks, sizeBytes);
 
             // write out size, and volume bitmap bytes
 
-            BFSImageStream out(imageName, std::ios::out | std::ios::binary);
+            BFSImageStream out(io.path, std::ios::out | std::ios::binary);
             out.write((char*)sizeBytes, 8);
-            createVolumeBitMap(blocks, out);
+            createVolumeBitMap(io.blocks, out);
 
             // file count will always be 0 upon initialization
             uint64_t fileCount(0);
@@ -114,7 +115,7 @@ namespace bfs
             out.write((char*)countBytes, 8);
 
             // write out the file space bytes
-            writeOutFileSpaceBytes(blocks, out);
+            writeOutFileSpaceBytes(io.blocks, out);
 
             out.flush();
             out.close();
@@ -124,7 +125,7 @@ namespace bfs
             // automatically set the initial root block and set the initial
             // number of entries to zero. Note, the initial root block will
             // always be block 0
-            FolderEntry rootDir(imageName, blocks, "root");
+            FolderEntry rootDir(io, "root");
         }
     };
 }

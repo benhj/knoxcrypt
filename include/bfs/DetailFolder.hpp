@@ -2,6 +2,7 @@
 #define BFS_BFS_DETAIL_FOLDER_HPP__
 
 #include "bfs/BFSImageStream.hpp"
+#include "bfs/CoreBFSIO.hpp"
 #include "bfs/DetailFileBlock.hpp"
 
 #include <iostream>
@@ -11,12 +12,11 @@
 namespace bfs { namespace detail
 {
 
-    void incrementFolderEntryCount(std::string const imagePath,
-                                   uint64_t const startBlock,
-                                   uint64_t const totalBlocks)
+    void incrementFolderEntryCount(CoreBFSIO const &io,
+                                   uint64_t const startBlock)
     {
-        bfs::BFSImageStream out(imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = getOffsetOfFileBlock(startBlock, totalBlocks);
+        bfs::BFSImageStream out(io.path, std::ios::in | std::ios::out | std::ios::binary);
+        uint64_t const offset = getOffsetOfFileBlock(startBlock, io.blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);
@@ -28,12 +28,11 @@ namespace bfs { namespace detail
         out.close();
     }
 
-    void decrementFolderEntryCount(std::string const imagePath,
-                                   uint64_t const startBlock,
-                                   uint64_t const totalBlocks)
+    void decrementFolderEntryCount(CoreBFSIO const &io,
+                                   uint64_t const startBlock)
     {
-        bfs::BFSImageStream out(imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = getOffsetOfFileBlock(startBlock, totalBlocks);
+        bfs::BFSImageStream out(io.path, std::ios::in | std::ios::out | std::ios::binary);
+        uint64_t const offset = getOffsetOfFileBlock(startBlock, io.blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);

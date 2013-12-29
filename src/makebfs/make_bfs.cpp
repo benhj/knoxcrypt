@@ -1,3 +1,4 @@
+#include "bfs/CoreBFSIO.hpp"
 #include "bfs/MakeBFS.hpp"
 
 #include <iostream>
@@ -12,7 +13,12 @@ int main(int argc, char *argv[])
 
     int blocks = atoi(argv[1]);
 
-    bfs::MakeBFS bfs(argv[2], blocks);
+    bfs::CoreBFSIO io;
+    io.path = argv[2];
+    io.blocks = blocks;
+    io.password = "abcd1234";
+
+    bfs::MakeBFS bfs(io);
 
     return 0;
 }

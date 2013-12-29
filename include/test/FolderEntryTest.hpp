@@ -1,4 +1,5 @@
 #include "bfs/BFSImageStream.hpp"
+#include "bfs/CoreBFSIO.hpp"
 #include "bfs/DetailBFS.hpp"
 #include "bfs/DetailFileBlock.hpp"
 #include "bfs/FileEntry.hpp"
@@ -51,7 +52,11 @@ class FolderEntryTest
 
     bfs::FolderEntry createTestFolder(boost::filesystem::path const &p, long const blocks)
     {
-        bfs::FolderEntry folder(p.string(), blocks, 0, "root");
+        bfs::CoreBFSIO io;
+        io.path = p.string();
+        io.blocks = blocks;
+        io.password = "abcd1234";
+        bfs::FolderEntry folder(io, 0, "root");
         folder.addFileEntry("test.txt");
         folder.addFileEntry("some.log");
         folder.addFolderEntry("folderA");
@@ -97,7 +102,11 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+        bfs::CoreBFSIO io;
+        io.path = testPath.string();
+        io.blocks = blocks;
+        io.password = "abcd1234";
+        bfs::FolderEntry folder(io, 0, "root");
         std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 0, "testListAllEntriesEmpty: number of entries");
     }
@@ -186,7 +195,11 @@ class FolderEntryTest
         bfs::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testData("some test data!");
         {
-            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::FolderEntry folder(io, 0, "root");
             bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -215,7 +228,11 @@ class FolderEntryTest
         std::string testData("some test data!");
         std::string testString(createLargeStringToWrite());
         {
-            bfs::FolderEntry folder(testPath.string(), blocks, 0, "root");
+            bfs::CoreBFSIO io;
+            io.path = testPath.string();
+            io.blocks = blocks;
+            io.password = "abcd1234";
+            bfs::FolderEntry folder(io, 0, "root");
             bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());

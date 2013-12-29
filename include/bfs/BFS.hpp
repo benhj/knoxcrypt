@@ -2,6 +2,7 @@
 #define BFS_BFS_HPP__
 
 #include "bfs/BFSException.hpp"
+#include "bfs/CoreBFSIO.hpp"
 #include "bfs/EntryType.hpp"
 #include "bfs/FileEntryDevice.hpp"
 #include "bfs/FolderEntry.hpp"
@@ -25,9 +26,8 @@ namespace bfs
             typedef boost::optional<FolderEntry> OptionalFolderEntry;
 
         public:
-            BFS(std::string const &imagePath, uint64_t const totalBlocks)
-            : m_imagePath(imagePath)
-            , m_blocks(totalBlocks)
+            explicit BFS(CoreBFSIO const &io)
+            : m_io(io)
             , m_accessMutex()
             {
 
@@ -35,7 +35,7 @@ namespace bfs
 
             FolderEntry getCurrent(std::string const &path)
             {
-                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                FolderEntry rootFolder(m_io, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // ignore trailing slash, but only if folder type
@@ -64,7 +64,7 @@ namespace bfs
 
             EntryInfo getInfo(std::string const &path)
             {
-                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                FolderEntry rootFolder(m_io, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // ignore trailing slash, but only if folder type
@@ -91,19 +91,19 @@ namespace bfs
 
             bool fileExists(std::string const &path) const
             {
-                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                FolderEntry rootFolder(m_io, 0, "root");
                 return doFileExists(path, rootFolder);
             }
 
             bool folderExists(std::string const &path)
             {
-                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                FolderEntry rootFolder(m_io, 0, "root");
                 return doFolderExists(path, rootFolder);
             }
 
             void addFile(std::string const &path)
             {
-                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                FolderEntry rootFolder(m_io, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // file entries with trailing slash should throw
@@ -125,7 +125,7 @@ namespace bfs
 
             void addFolder(std::string const &path) const
             {
-                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                FolderEntry rootFolder(m_io, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // ignore trailing slash
@@ -146,7 +146,7 @@ namespace bfs
 
             void removeFile(std::string const &path)
             {
-                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                FolderEntry rootFolder(m_io, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // ignore trailing slash, but only if folder type
@@ -174,7 +174,7 @@ namespace bfs
 
             void removeFolder(std::string const &path, FolderRemovalType const &removalType)
             {
-                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                FolderEntry rootFolder(m_io, 0, "root");
                 std::string thePath(path);
                 char ch = *path.rbegin();
                 // ignore trailing slash, but only if folder type
@@ -210,7 +210,7 @@ namespace bfs
 
             FileEntryDevice openFile(std::string const &path, OpenDisposition const &openMode)
             {
-                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                FolderEntry rootFolder(m_io, 0, "root");
                 char ch = *path.rbegin();
                 if(ch == '/') {
                     throw BFSException(BFSError::NotFound);
@@ -236,7 +236,7 @@ namespace bfs
 
             void truncateFile(std::string const &path, std::ios_base::streamoff offset)
             {
-                FolderEntry rootFolder(m_imagePath, m_blocks, 0, "root");
+                FolderEntry rootFolder(m_io, 0, "root");
                 OptionalFolderEntry parentEntry = doGetParentFolderEntry(path, rootFolder);
                 if(!parentEntry) {
                     throw BFSException(BFSError::NotFound);
@@ -255,11 +255,8 @@ namespace bfs
             }
 
         private:
-            // the path of the bfs image
-            std::string m_imagePath;
 
-            // number of file blocks
-            uint64_t m_blocks;
+            CoreBFSIO m_io;
 
             mutable boost::mutex m_accessMutex;
             typedef boost::lock_guard<boost::mutex> LockType;

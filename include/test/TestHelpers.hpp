@@ -1,6 +1,7 @@
 #ifndef BFS_TEST_HELPERS_HPP__
 #define BFS_TEST_HELPERS_HPP__
 
+#include "bfs/CoreBFSIO.hpp"
 #include "bfs/MakeBFS.hpp"
 
 #include <boost/filesystem/path.hpp>
@@ -22,7 +23,11 @@ inline boost::filesystem::path buildImage(boost::filesystem::path const &path, l
 {
     std::string testImage(boost::filesystem::unique_path().string());
     boost::filesystem::path testPath = path / testImage;
-    bfs::MakeBFS bfs(testPath.string(), blockCount);
+    bfs::CoreBFSIO io;
+    io.path = testPath.string();
+    io.blocks = blockCount;
+    io.password = "abcd1234";
+    bfs::MakeBFS bfs(io);
     return testPath;
 }
 

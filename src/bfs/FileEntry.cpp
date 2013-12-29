@@ -9,9 +9,8 @@
 namespace bfs
 {
     // for writing a brand new entry where start block isn't known
-    FileEntry::FileEntry(std::string const &imagePath, uint64_t const totalBlocks, std::string const &name)
-        : m_imagePath(imagePath)
-        , m_totalBlocks(totalBlocks)
+    FileEntry::FileEntry(CoreBFSIO const &io, std::string const &name)
+        : m_io(io)
         , m_name(name)
         , m_fileSize(0)
         , m_fileBlocks()
@@ -25,13 +24,11 @@ namespace bfs
     }
 
     // for appending or overwriting
-    FileEntry::FileEntry(std::string const &imagePath,
-                         uint64_t const totalBlocks,
+    FileEntry::FileEntry(CoreBFSIO const &io,
                          std::string const &name,
                          uint64_t const startBlock,
                          OpenDisposition const &openDisposition)
-        : m_imagePath(imagePath)
-        , m_totalBlocks(totalBlocks)
+        : m_io(io)
         , m_name(name)
         , m_fileSize(0)
         , m_fileBlocks()
@@ -125,11 +122,11 @@ namespace bfs
 
     void FileEntry::newWritableFileBlock() const
     {
-        bfs::BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
-        std::vector<uint64_t> firstAndNext = detail::getNAvailableBlocks(stream, 2, m_totalBlocks);
+        bfs::BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
+        std::vector<uint64_t> firstAndNext = detail::getNAvailableBlocks(stream, 2, m_io.blocks);
         stream.close();
         // note building a new block to write to should always be in append mode
-        FileBlock block(m_imagePath, m_totalBlocks, firstAndNext[0], firstAndNext[0],
+        FileBlock block(m_io, firstAndNext[0], firstAndNext[0],
                         bfs::OpenDisposition::buildAppendDisposition());
         m_fileBlocks.push_back(block);
         m_blockIndex = m_fileBlocks.size() - 1;
@@ -140,8 +137,7 @@ namespace bfs
     void FileEntry::setBlocks()
     {
         // find very first block
-        FileBlock block(m_imagePath,
-                        m_totalBlocks,
+        FileBlock block(m_io,
                         m_currentVolumeBlock,
                         m_openDisposition);
 
@@ -157,8 +153,7 @@ namespace bfs
         while (nextBlock != m_currentVolumeBlock) {
 
             m_currentVolumeBlock = nextBlock;
-            FileBlock newBlock(m_imagePath,
-                               m_totalBlocks,
+            FileBlock newBlock(m_io,
                                m_currentVolumeBlock,
                                m_openDisposition);
             nextBlock = newBlock.getNextIndex();
@@ -542,12 +537,12 @@ namespace bfs
     {
         // loop over all file blocks and update the volume bitmap indicating
         // that block is no longer in use
-        bfs::BFSImageStream stream(m_imagePath, std::ios::in | std::ios::out | std::ios::binary);
+        bfs::BFSImageStream stream(m_io.path, std::ios::in | std::ios::out | std::ios::binary);
         std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
         for (; it != m_fileBlocks.end(); ++it) {
             uint64_t blockIndex = it->getIndex();
             // false means to deallocate
-            detail::updateVolumeBitmapWithOne(stream, blockIndex, m_totalBlocks, false);
+            detail::updateVolumeBitmapWithOne(stream, blockIndex, m_io.blocks, false);
         }
         std::vector<FileBlock>().swap(m_fileBlocks);
         m_fileSize = 0;
