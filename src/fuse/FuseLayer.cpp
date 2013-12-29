@@ -57,6 +57,15 @@ bfs_getattr(const char *path, struct stat *stbuf)
     return 0;
 }
 
+int bfs_rename(const char *path, const char *newpath)
+{
+    try {
+        BFS_DATA->renameEntry(path, newpath);
+    } catch (bfs::BFSException const &e) {
+        return exceptionDispatch(e);
+    }
+    return 0;
+}
 
 // Create a directory
 static int bfs_mkdir(const char *path, mode_t mode)
@@ -244,7 +253,8 @@ static struct fuse_operations bfs_oper = {
   .opendir = bfs_opendir,
   .init = bfs_init,
   .readdir = bfs_readdir,
-  .getattr = bfs_getattr
+  .getattr = bfs_getattr,
+  .rename = bfs_rename
 };
 
 

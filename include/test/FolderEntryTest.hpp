@@ -149,9 +149,9 @@ class FolderEntryTest
         uint64_t b4 = folder.getEntryInfo(3).firstFileBlock();
 
         ASSERT_EQUAL(b1, 1, "testAddEntryBlockIndexRetrieval A");
-        ASSERT_EQUAL(b2, 3, "testAddEntryBlockIndexRetrieval B");
+        ASSERT_EQUAL(b2, 2, "testAddEntryBlockIndexRetrieval B");
         ASSERT_EQUAL(b3, 4, "testAddEntryBlockIndexRetrieval C");
-        ASSERT_EQUAL(b4, 6, "testAddEntryBlockIndexRetrieval D");
+        ASSERT_EQUAL(b4, 5, "testAddEntryBlockIndexRetrieval D");
     }
 
     void testEntryRetrievalAndAppendSmallData()

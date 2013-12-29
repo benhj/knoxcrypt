@@ -155,14 +155,18 @@ namespace bfs
                 throwIfAlreadyExists(dstPath, rootFolder);
 
                 // throw if source doesn't exist
-                OptionalEntryInfo childInfo = parentSrc->getEntryInfo(boost::filesystem::path(srcPath).filename().string());
+                std::string const filename = boost::filesystem::path(srcPath).filename().string();
+                OptionalEntryInfo childInfo = parentSrc->getEntryInfo(filename);
                 if(!childInfo) {
                     throw BFSException(BFSError::NotFound);
                 }
 
                 // do moving / renaming
-                // (i) Replace original entry metadata with new file name
-
+                // (i) Remove original entry metadata entry
+                // (ii) Add new metadata entry with new file name
+                parentSrc->putMetaDataOutOfUse(filename);
+                std::string dstFilename = boost::filesystem::path(dstPath).filename().string();
+                parentDst->writeNewMetaDataForEntry(dstFilename, childInfo->type(), childInfo->firstFileBlock());
 
             }
 

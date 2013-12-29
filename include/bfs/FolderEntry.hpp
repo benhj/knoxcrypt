@@ -126,9 +126,41 @@ namespace bfs
          */
         void removeFolderEntry(std::string const &name);
 
+        /**
+         * @brief puts metadata for given entry out of use
+         * @param name name of entry
+         */
+        void putMetaDataOutOfUse(std::string const &name);
+
+        /**
+         * @brief for writing new entry metadata
+         * @param name name of entry
+         * @param entryType the type of the entry
+         * @param startBlock start block of entry
+         */
+        void writeNewMetaDataForEntry(std::string const &name,
+                                      EntryType const& entryType,
+                                      uint64_t startBlock);
+
       private:
 
         FolderEntry();
+
+        /**
+         * @brief for writing new entry metadata
+         * @param name name of entry
+         * @param entryType the type of the entry
+         * @param startBlock start block of entry
+         */
+        void doWriteNewMetaDataForEntry(std::string const &name,
+                                        EntryType const& entryType,
+                                        uint64_t startBlock);
+
+        /**
+         * @brief puts metadata for given entry out of use
+         * @param name name of entry
+         */
+        void doPutMetaDataOutOfUse(std::string const &name);
 
         /**
          * @brief retrieves the starting block index of a given entry
@@ -180,10 +212,10 @@ namespace bfs
 
         /**
          * @brief writes the first block index bytes to the file metadata
-         * @param entry the entry that stores the first block
+         * @param first block, the block index of the file entry
          * @return number of bytes written
          */
-        std::streamsize doWriteFirstBlockIndexToEntryMetaData(FileEntry const &entry);
+        std::streamsize doWriteFirstBlockIndexToEntryMetaData(uint64_t firstBlock);
 
         /**
          * @brief retrieves the type of a given entry
@@ -208,8 +240,10 @@ namespace bfs
          * @brief seeks to where the metadata should be written. If
          * metadata for a previous entry has been deleted, we should
          * use that position instead to write new data
+         * @return true if pre-existing metadata is to be overwritten,
+         * false otherwise
          */
-        void seekToPositionWhereMetaDataWillBeWritten();
+        bool seekToPositionWhereMetaDataWillBeWritten();
 
         /**
          * @brief lists a particular type of entry, file or folder

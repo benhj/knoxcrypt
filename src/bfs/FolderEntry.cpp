@@ -138,7 +138,6 @@ namespace bfs
     FolderEntry::doWriteFirstByteToEntryMetaData(EntryType const &entryType)
     {
         // set the first bit to indicate that this entry is in use
-        // it will point to a file and should not be written over
         uint8_t byte = 0;
         detail::setBitInByte(byte, 0);
 
@@ -160,38 +159,54 @@ namespace bfs
     }
 
     std::streamsize
-    FolderEntry::doWriteFirstBlockIndexToEntryMetaData(FileEntry const &entry)
+    FolderEntry::doWriteFirstBlockIndexToEntryMetaData(uint64_t firstBlock)
     {
         // create bytes to represent first block
-        uint64_t firstBlock = entry.getStartVolumeBlockIndex();
         uint8_t buf[8];
         detail::convertUInt64ToInt8Array(firstBlock, buf);
         return doWrite((char*)buf, 8);
     }
 
     void
-    FolderEntry::addFileEntry(std::string const &name)
+    FolderEntry::writeNewMetaDataForEntry(std::string const &name,
+                                          EntryType const &entryType,
+                                          uint64_t startBlock)
     {
-        // seek to correct position
-        seekToPositionWhereMetaDataWillBeWritten();
+        this->doWriteNewMetaDataForEntry(name, entryType, startBlock);
+    }
 
+    void
+    FolderEntry::doWriteNewMetaDataForEntry(std::string const &name,
+                                          EntryType const &entryType,
+                                          uint64_t startBlock)
+    {
+        bool overWroteOld = seekToPositionWhereMetaDataWillBeWritten();
         // create and write first byte of filename metadata
-        (void)doWriteFirstByteToEntryMetaData(EntryType::FileType);
+        (void)doWriteFirstByteToEntryMetaData(entryType);
 
         // create and write filename
         (void)doWriteFilenameToEntryMetaData(name);
 
-        // Create a new file entry
-        FileEntry entry(m_io, m_name);
-
         // write the first block index to the file entry metadata
-        (void)doWriteFirstBlockIndexToEntryMetaData(entry);
+        (void)doWriteFirstBlockIndexToEntryMetaData(startBlock);
 
         // make sure all data has been written
         m_folderData.flush();
 
-        // increment entry count
-        detail::incrementFolderEntryCount(m_io, m_folderData.getStartVolumeBlockIndex());
+        // increment entry count, but only if brand new
+        if(!overWroteOld) {
+            detail::incrementFolderEntryCount(m_io, m_folderData.getStartVolumeBlockIndex());
+        }
+    }
+
+    void
+    FolderEntry::addFileEntry(std::string const &name)
+    {
+        // Create a new file entry
+        FileEntry entry(m_io, m_name);
+
+        // write the first block index to the file entry metadata
+        this->doWriteNewMetaDataForEntry(name, EntryType::FileType, entry.getStartVolumeBlockIndex());
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
@@ -202,26 +217,11 @@ namespace bfs
     void
     FolderEntry::addFolderEntry(std::string const &name)
     {
-        // seek to correct position
-        seekToPositionWhereMetaDataWillBeWritten();
-
-        // create and write first byte of filename metadata
-        (void)doWriteFirstByteToEntryMetaData(EntryType::FolderType);
-
-        // create and write filename
-        (void)doWriteFilenameToEntryMetaData(name);
-
         // Create a new sub-folder entry
         FolderEntry entry(m_io, m_name);
 
         // write the first block index to the file entry metadata
-        (void)doWriteFirstBlockIndexToEntryMetaData(entry.m_folderData);
-
-        // make sure all data has been written
-        m_folderData.flush();
-
-        // increment entry count
-        detail::incrementFolderEntryCount(m_io, m_folderData.getStartVolumeBlockIndex());
+        this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry.m_folderData.getStartVolumeBlockIndex());
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
@@ -317,6 +317,23 @@ namespace bfs
     }
 
     void
+    FolderEntry::doPutMetaDataOutOfUse(std::string const &name)
+    {
+        // second set the metadata to an out of use state; this metadata can
+        // then be later overwritten when a new entry is then added
+        FileEntry temp(m_io, m_name, m_startVolumeBlock,
+                       OpenDisposition::buildOverwriteDisposition());
+        detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
+        assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
+    }
+
+    void
+    FolderEntry::putMetaDataOutOfUse(std::string const &name)
+    {
+        this->doPutMetaDataOutOfUse(name);
+    }
+
+    void
     FolderEntry::removeFileEntry(std::string const &name)
     {
         // first unlink; this deallocates the file blocks, updating the
@@ -326,10 +343,7 @@ namespace bfs
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        FileEntry temp(m_io, m_name, m_startVolumeBlock,
-                       OpenDisposition::buildOverwriteDisposition());
-        detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
-        assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
+        this->doPutMetaDataOutOfUse(name);
     }
 
     void
@@ -351,10 +365,7 @@ namespace bfs
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        FileEntry temp(m_io, m_name, m_startVolumeBlock,
-                       OpenDisposition::buildOverwriteDisposition());
-        detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
-        assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
+        this->doPutMetaDataOutOfUse(name);
 
         // unlink entry's data
         entry.m_folderData.unlink();
@@ -479,7 +490,7 @@ namespace bfs
         return detail::convertInt8ArrayToInt64(&buffer.front());
     }
 
-    void
+    bool
     FolderEntry::seekToPositionWhereMetaDataWillBeWritten()
     {
         // make sure we start in correct position
@@ -493,12 +504,13 @@ namespace bfs
             if (!entryMetaDataIsEnabled(entryIndex)) {
                 uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
                 m_folderData.seek(8 + (entryIndex * bufferSize));
-                return;
+                return true;
             }
         }
 
         // free entry not found so seek right to end
         m_folderData.seek(0, std::ios_base::end);
+        return false;
     }
 
 }
