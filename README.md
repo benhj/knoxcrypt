@@ -1,6 +1,9 @@
 BFS: A fuse-based encrypted filesystem
 ======================================
 
+Basic idea
+----------
+
 - Files are stored as 512 byte blocks. 
 - Blocks are assigned to files as they are written. 
 - Allocated blocks are represented as bits set in a volume bitmap.
