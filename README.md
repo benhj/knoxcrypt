@@ -46,4 +46,31 @@ added which is set to having zero entries. As files and folders are added to
 the container, the root directory is accordingly updated. In a similar
 manner, any sub folders will also be accordingly updated.
 
+Encryption
+----------
+
 The whole filesystem image can also be encrypted for extra security. 
+
+Compiling
+---------
+
+- Requires boost filesystem libraries and boost headers.
+- Makefile needs to be updated according to where boost is installed
+
+Then
+
+make test 
+
+./test
+
+The above will run the test suite
+
+make makebfs
+
+Will compile the tool for creating a bfs image
+
+make bfs
+
+Will compilte the bfs fuse layer.
+
+More details to follow.
