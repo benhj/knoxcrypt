@@ -1,8 +1,8 @@
 BFS: A fuse-based encrypted filesystem
 ======================================
 
-Basic idea
-----------
+### Basic idea
+
 
 - Files are stored as 512 byte blocks. 
 - Blocks are assigned to files as they are written. 
@@ -11,16 +11,14 @@ Basic idea
 For example, a 1MB file contains 2048x512 byte blocks so a volume bitmap
 of size 2048.
 
-File blocks
------------
+### File blocks
 
 - File blocks are 512 bytes in length
 - The first 4 bytes represents a 32 bit value describing the number of bytes represented by the fileblock
 - The next 8 bytes represent a 64 bit pointer to the next file block making up a given file entry
 - The remaining 500 bytes represent actual file data
 
-Folder entries
---------------
+### Folder entries
 
 - folder entries are also stored as file data (and so are alos composed of file blocks)
 - a folder entry's file data is basically a description of its contents. 
@@ -31,8 +29,7 @@ Folder entries
 - the next 255 bytes describe the entry's filename. 
 - the final 8 bytes represents a 64 bit pointer to the entry's first file block.
 
-The BFS image
--------------
+### The BFS image
 
 - The whole bfs filesystem is represented as a file image
 - The first 8 bytes represent a 64 bit count of how many file blocks exist
@@ -46,8 +43,7 @@ added which is set to having zero entries. As files and folders are added to
 the container, the root directory is accordingly updated. In a similar
 manner, any sub folders will also be accordingly updated.
 
-Encryption
-----------
+### Encryption
 
 The whole filesystem image can also be encrypted for extra security. 
 
@@ -57,20 +53,16 @@ Compiling
 - Requires boost filesystem libraries and boost headers.
 - Makefile needs to be updated according to where boost is installed
 
-Then
+`make test` will compile the test binary used to unit test the functionality
 
-make test 
+`./test` will run the unit test suite
 
-./test
+`make makebfs` will compile the tool used to build a bfs image
 
-The above will run the test suite
+`./makebfs 204800 image.bfs` will create a 100MB bfs image
 
-make makebfs
+`make bfs` will compile the fuse layer
 
-Will compile the tool for creating a bfs image
-
-make bfs
-
-Will compilte the bfs fuse layer.
+`./bfs_ image.bfs 204800 testMount -o debug` will launch and mount image.bfs under the directory test mount in single-threaded mode.
 
 More details to follow.
