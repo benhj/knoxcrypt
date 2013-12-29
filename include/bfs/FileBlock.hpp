@@ -24,8 +24,7 @@ namespace bfs
         /**
          * @brief for when a file block needs to be written for the first time
          * use this constructor
-         * @param imagePath the path of the bfs image
-         * @param totalBlocks the total number of blocks in the fs image
+         * @param io the core bfs io (path, blocks, password)
          * @param index the index of this file block
          * @param next the index of the next file block that makes up the file
          * @param openDisposition open mode
@@ -37,6 +36,7 @@ namespace bfs
 
         /**
          * @brief for when a file block needs to be read or written use this constructor
+         * @param io the core bfs io (path, blocks, password)
          * @param index the index of the file block
          * @param openDisposition open mode
          * @note other params like size and next will be initialized when

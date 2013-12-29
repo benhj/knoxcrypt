@@ -19,8 +19,7 @@ namespace bfs
       public:
         /**
          * @brief when creating a new file this constructor should be used
-         * @param imagePath the path of the bfs image
-         * @param totalBlocks the total number of blocks in the bfs
+         * @param io the core bfs io (path, blocks, password)
          * @param name the name of the file entry
          */
         FileEntry(CoreBFSIO const &io, std::string const &name);
@@ -28,8 +27,7 @@ namespace bfs
         /**
          * @brief when reading or appending or overwriting to the end of a file
          * this constructor should be used
-         * @param imagePath the path of the bfs image
-         * @param totalBlocks the total number of blocks in the bfs
+         * @param io the core bfs io (path, blocks, password)
          * @param name the name of the file entry
          * @param block the starting block of the file entry
          * @param openDisposition open mode
@@ -100,6 +98,7 @@ namespace bfs
 
       private:
 
+        // the core bfs io (path, blocks, password)
         CoreBFSIO m_io;
 
         // the name of the file entry

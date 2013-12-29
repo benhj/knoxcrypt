@@ -256,6 +256,7 @@ namespace bfs
 
         private:
 
+            // the core bfs io (path, blocks, password)
             CoreBFSIO m_io;
 
             mutable boost::mutex m_accessMutex;

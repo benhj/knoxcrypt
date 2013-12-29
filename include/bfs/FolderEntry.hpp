@@ -18,8 +18,7 @@ namespace bfs
         /**
          * @brief constructs a FolderEntry to write to. In this case the
          * starting block is unknown
-         * @param imagePath path of the bfs image
-         * @param totalBlocks total file blocks in the bfs image
+         * @param the core bfs io (path, blocks, password)
          * @param startBlock the index of the starting file block making up entry data
          * @param writable if data entries can be added to folder
          * @param name the name of the entry
@@ -29,8 +28,7 @@ namespace bfs
 
         /**
          * @brief constructs a FolderEntry to read from
-         * @param imagePath path of the bfs image
-         * @param totalBlocks total file blocks in the bfs image
+         * @param the core bfs io (path, blocks, password)
          * @param startBlock the index of the starting file block making up entry data
          * @param writable if data entries can be added to folder
          * @param name the name of the entry
@@ -219,6 +217,7 @@ namespace bfs
          */
         std::vector<EntryInfo> doListEntriesBasedOnType(EntryType entryType) const;
 
+        // the core bfs io (path, blocks, password)
         CoreBFSIO m_io;
 
         // the underlying file blocks storing the folder entry data
