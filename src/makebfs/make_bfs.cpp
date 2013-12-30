@@ -27,6 +27,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <string>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <termios.h>
+
 int main(int argc, char *argv[])
 {
     if(argc < 2) {
@@ -39,7 +43,35 @@ int main(int argc, char *argv[])
     bfs::CoreBFSIO io;
     io.path = argv[2];
     io.blocks = blocks;
-    io.password = "abcd1234";
+
+    // reading echoless password, based on solution here:
+    // http://stackoverflow.com/questions/1196418/getting-a-password-in-c-without-using-getpass-3
+    // read password in
+    struct termios oflags, nflags;
+    char password[64];
+
+    // disabling echo
+    tcgetattr(fileno(stdin), &oflags);
+    nflags = oflags;
+    nflags.c_lflag &= ~ECHO;
+    nflags.c_lflag |= ECHONL;
+
+    if (tcsetattr(fileno(stdin), TCSANOW, &nflags) != 0) {
+      perror("tcsetattr");
+      return EXIT_FAILURE;
+    }
+
+    printf("password: ");
+    fgets(password, sizeof(password), stdin);
+    password[strlen(password) - 1] = 0;
+
+    // restore terminal
+    if (tcsetattr(fileno(stdin), TCSANOW, &oflags) != 0) {
+      perror("tcsetattr");
+      return EXIT_FAILURE;
+    }
+
+    io.password.append(password);
 
     bfs::MakeBFS bfs(io);
 

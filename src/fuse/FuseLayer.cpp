@@ -32,7 +32,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <fuse.h>
 
-#include <memory>
+#include <stdio.h>
+#include <stdlib.h>
+#include <termios.h>
 
 #define BFS_DATA ((bfs::BFS*) fuse_get_context()->private_data)
 
@@ -289,7 +291,35 @@ int main(int argc, char *argv[])
     bfs::CoreBFSIO io;
     io.path = argv[1];
     io.blocks = atoi(argv[2]);
-    io.password = "abcd1234";
+
+    // reading echoless password, based on solution here:
+    // http://stackoverflow.com/questions/1196418/getting-a-password-in-c-without-using-getpass-3
+    // read password in
+    struct termios oflags, nflags;
+    char password[64];
+
+    // disabling echo
+    tcgetattr(fileno(stdin), &oflags);
+    nflags = oflags;
+    nflags.c_lflag &= ~ECHO;
+    nflags.c_lflag |= ECHONL;
+
+    if (tcsetattr(fileno(stdin), TCSANOW, &nflags) != 0) {
+      perror("tcsetattr");
+      return EXIT_FAILURE;
+    }
+
+    printf("password: ");
+    fgets(password, sizeof(password), stdin);
+    password[strlen(password) - 1] = 0;
+
+    // restore terminal
+    if (tcsetattr(fileno(stdin), TCSANOW, &oflags) != 0) {
+      perror("tcsetattr");
+      return EXIT_FAILURE;
+    }
+
+    io.password.append(password);
 
     bfs::BFS *bfsPtr = new bfs::BFS(io);
 
