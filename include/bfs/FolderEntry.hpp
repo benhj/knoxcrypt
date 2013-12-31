@@ -266,7 +266,8 @@ namespace bfs
          * @return true if pre-existing metadata is to be overwritten,
          * false otherwise
          */
-        bool seekToPositionWhereMetaDataWillBeWritten();
+        std::pair<bool, std::ios_base::streamoff>
+        seekToPositionWhereMetaDataWillBeWritten();
 
         /**
          * @brief lists a particular type of entry, file or folder
