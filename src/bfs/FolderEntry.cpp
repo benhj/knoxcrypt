@@ -203,13 +203,14 @@ namespace bfs
                                           EntryType const &entryType,
                                           uint64_t startBlock)
     {
-        std::pair<bool, std::ios_base::streamoff> overWroteOld = seekToPositionWhereMetaDataWillBeWritten();
+        std::pair<bool, std::ios_base::streamoff> overWroteOld = findOffsetWhereMetaDataShouldBeWritten();
 
         if(overWroteOld.first) {
             m_folderData = FileEntry(m_io, m_name, m_startVolumeBlock,
                                      OpenDisposition::buildOverwriteDisposition());
-            m_folderData.seek(overWroteOld.second);
         }
+
+        m_folderData.seek(overWroteOld.second);
 
         // create and write first byte of filename metadata
         (void)doWriteFirstByteToEntryMetaData(entryType);
@@ -521,10 +522,8 @@ namespace bfs
     }
 
     std::pair<bool, std::ios_base::streamoff>
-    FolderEntry::seekToPositionWhereMetaDataWillBeWritten()
+    FolderEntry::findOffsetWhereMetaDataShouldBeWritten()
     {
-        // make sure we start in correct position
-        (void)m_folderData.seek(0);
 
         // loop over all entries and try and find a previously deleted one
         // If its deleted, the first bit of the entry metadata will be unset
@@ -535,13 +534,11 @@ namespace bfs
             if (!entryMetaDataIsEnabled(entryIndex)) {
                 uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
                 std::ios_base::streamoff offset = (8 + (entryIndex * bufferSize));
-                m_folderData.seek(offset);
                 return std::make_pair(true, offset);
             }
         }
 
         // free entry not found so seek right to end
-        m_folderData.seek(0, std::ios_base::end);
         return std::make_pair(false, 0);
     }
 

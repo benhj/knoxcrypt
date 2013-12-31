@@ -32,12 +32,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 int main()
 {
-    BFSTest();
+    //BFSTest();
     MakeBFSTest();
     FileEntryDeviceTest();
     FileBlockTest();
     FileEntryTest();
-    FolderEntryTest();
+    //FolderEntryTest();
 
     std::cout<<"\n\nThere were "<<testFailures<<"/"<<passedPoints<<" assertion failures\n\n"<<std::endl;
     if (testFailures > 0) {

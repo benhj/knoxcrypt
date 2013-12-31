@@ -267,7 +267,7 @@ namespace bfs
          * false otherwise
          */
         std::pair<bool, std::ios_base::streamoff>
-        seekToPositionWhereMetaDataWillBeWritten();
+        findOffsetWhereMetaDataShouldBeWritten();
 
         /**
          * @brief lists a particular type of entry, file or folder
