@@ -63,6 +63,7 @@ namespace bfs
          */
         bool checkMetaByte(FileEntry folderData, int n, int bit)
         {
+
             // note in the following the '1' represents first byte,
             // the first bit of which indicates if entry is in use
             // the '8' is number of bytes representing the first block index
@@ -203,14 +204,15 @@ namespace bfs
                                           EntryType const &entryType,
                                           uint64_t startBlock)
     {
-        std::pair<bool, std::ios_base::streamoff> overWroteOld = findOffsetWhereMetaDataShouldBeWritten();
+        OptionalOffset overWroteOld = findOffsetWhereMetaDataShouldBeWritten();
 
-        if(overWroteOld.first) {
+        if(overWroteOld) {
             m_folderData = FileEntry(m_io, m_name, m_startVolumeBlock,
                                      OpenDisposition::buildOverwriteDisposition());
+            m_folderData.seek(*overWroteOld);
+        } else {
+            m_folderData.seek(0, std::ios_base::end);
         }
-
-        m_folderData.seek(overWroteOld.second);
 
         // create and write first byte of filename metadata
         (void)doWriteFirstByteToEntryMetaData(entryType);
@@ -225,7 +227,7 @@ namespace bfs
         m_folderData.flush();
 
         // increment entry count, but only if brand new
-        if(!overWroteOld.first) {
+        if(!overWroteOld) {
             detail::incrementFolderEntryCount(m_io, m_folderData.getStartVolumeBlockIndex());
         }
     }
@@ -253,6 +255,7 @@ namespace bfs
 
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry.m_folderData.getStartVolumeBlockIndex());
+
 
         // need to reset the file entry to make sure in correct place
         // NOTE: could probably optimize to not have to do this
@@ -521,7 +524,7 @@ namespace bfs
         return detail::convertInt8ArrayToInt64(&buffer.front());
     }
 
-    std::pair<bool, std::ios_base::streamoff>
+    OptionalOffset
     FolderEntry::findOffsetWhereMetaDataShouldBeWritten()
     {
 
@@ -529,17 +532,19 @@ namespace bfs
         // If its deleted, the first bit of the entry metadata will be unset
 
         uint64_t entryCount = getNumberOfEntries();
+
         for (long entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
             // only push back if the metadata is enabled
             if (!entryMetaDataIsEnabled(entryIndex)) {
                 uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
                 std::ios_base::streamoff offset = (8 + (entryIndex * bufferSize));
-                return std::make_pair(true, offset);
+                return OptionalOffset(offset);
             }
         }
 
-        // free entry not found so seek right to end
-        return std::make_pair(false, 0);
+        // free entry not found so signify that we should seek right to
+        // end by returning an empty optional
+        return OptionalOffset();
     }
 
 }

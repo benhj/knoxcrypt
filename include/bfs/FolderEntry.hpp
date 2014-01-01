@@ -34,6 +34,7 @@ namespace bfs
 {
 
     typedef boost::optional<EntryInfo> OptionalEntryInfo;
+    typedef boost::optional<std::ios_base::streamoff> OptionalOffset;
 
     class FolderEntry
     {
@@ -266,7 +267,8 @@ namespace bfs
          * @return true if pre-existing metadata is to be overwritten,
          * false otherwise
          */
-        std::pair<bool, std::ios_base::streamoff>
+
+        OptionalOffset
         findOffsetWhereMetaDataShouldBeWritten();
 
         /**

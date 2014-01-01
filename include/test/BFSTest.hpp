@@ -39,23 +39,23 @@ class BFSTest
         {
             boost::filesystem::create_directories(m_uniquePath);
             testFileExists();
-//            testFolderExists();
-//            testAddFileEntry();
-//            testAddFolderEntry();
-//            testAddFileThrowsIfParentNotFound();
-//            testAddFolderThrowsIfParentNotFound();
-//            testAddFileThrowsIfAlreadyExists();
-//            testAddFolderThrowsIfAlreadyExists();
-//            testRemoveFileEntry();
-//            testRemoveFileEntryThrowsIfBadParent();
-//            testRemoveFileThrowsIfNotFound();
-//            testRemoveFileThrowsIfFolder();
-//            testRemoveEmptyFolder();
-//            testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty();
-//            testRemoveNonEmptyFolder();
-//            testRemoveNonExistingFolderThrows();
-//            testWriteToStream();
-//            testListAllEntriesEmpty();
+            testFolderExists();
+            testAddFileEntry();
+            testAddFolderEntry();
+            testAddFileThrowsIfParentNotFound();
+            testAddFolderThrowsIfParentNotFound();
+            testAddFileThrowsIfAlreadyExists();
+            testAddFolderThrowsIfAlreadyExists();
+            testRemoveFileEntry();
+            testRemoveFileEntryThrowsIfBadParent();
+            testRemoveFileThrowsIfNotFound();
+            testRemoveFileThrowsIfFolder();
+            testRemoveEmptyFolder();
+            testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty();
+            testRemoveNonEmptyFolder();
+            testRemoveNonExistingFolderThrows();
+            testWriteToStream();
+            testListAllEntriesEmpty();
         }
 
         ~BFSTest()
@@ -91,6 +91,8 @@ class BFSTest
             bfs::FolderEntry subFolderC = subFolderA.getFolderEntry("subFolderC");
             subFolderC.addFolderEntry("finalFolder");
             subFolderC.addFileEntry("finalFile.txt");
+
+
 
             return folder;
         }
