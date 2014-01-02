@@ -52,6 +52,7 @@ namespace bfs
         explicit BFS(CoreBFSIO const &io)
             : m_io(io)
             , m_accessMutex()
+            , m_rootFolder(m_io, 0, "root")
         {
 
         }
@@ -331,6 +332,8 @@ namespace bfs
 
         mutable boost::mutex m_accessMutex;
         typedef boost::lock_guard<boost::mutex> LockType;
+
+        mutable FolderEntry m_rootFolder;
 
         BFS(); // not required
 

@@ -106,6 +106,7 @@ namespace bfs
          */
         EntryInfo getEntryInfo(uint64_t const index) const;
 
+
         /**
          * @brief retrieves an entry info it exists
          * @param name the name of the info
@@ -181,6 +182,14 @@ namespace bfs
                                         uint64_t startBlock);
 
         /**
+         * @brief a private accessor for getting file entry from metadata
+         * @param metaData the entry metadata
+         * @param index the index of the entry
+         * @return the info metadata in entry info struct
+         */
+        EntryInfo doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const index) const;
+
+        /**
          * @brief puts metadata for given entry out of use
          * @param name name of entry
          */
@@ -188,29 +197,29 @@ namespace bfs
 
         /**
          * @brief retrieves the starting block index of a given entry
-         * @param n the entry to retrieve the block index of
+         * @param metaData the metadata that contains the block index
          * @return the starting block index
          */
-        uint64_t getBlockIndexForEntry(uint64_t const n) const;
+        uint64_t doGetBlockIndexForEntry(std::vector<uint8_t> const &metaData) const;
 
         /**
          * @brief retrieves the number of entries in folder entry
          * @return the number of folder entries
          */
-        uint64_t getNumberOfEntries() const;
+        uint64_t doGetNumberOfEntries() const;
 
         /**
          * @brief retrieves the name of an entry with given index
          * @return the name
          */
-        std::string getEntryName(uint64_t const index) const;
+        std::string doGetEntryName(uint64_t const index) const;
 
         /**
          * @brief returns the entry index given the name
          * @param name the name of the entry
          * @return the index
          */
-        uint64_t getMetaDataIndexForEntry(std::string const &name) const;
+        uint64_t doGetMetaDataIndexForEntry(std::string const &name) const;
 
         /**
          * @brief write metadata to this folder entry
@@ -243,10 +252,10 @@ namespace bfs
 
         /**
          * @brief retrieves the type of a given entry
-         * @param n the entry to retrieve the type of
+         * @param metaData the metadata that contains the block index
          * @return the type of the entry
          */
-        EntryType getTypeForEntry(uint64_t const n) const;
+        EntryType doGetTypeForEntry(std::vector<uint8_t> const &metaData) const;
 
         /**
          * @brief determines if entry metadata is enabled. Entry metadata
@@ -255,10 +264,17 @@ namespace bfs
          * associated with the metadata has been deleted in whcih case
          * this associated metadata can be overwritten when creating
          * a new entry.
-         * @param n the entry for which we determine if in use
+         * @param metaData the metadata
          * @return a value indicating if specified entry metadata is in use
          */
-        bool entryMetaDataIsEnabled(uint64_t const n) const;
+        bool doEntryMetaDataIsEnabled(std::vector<uint8_t> const &metaData) const;
+
+        /**
+         * @brief private accessor for getting entry name from metadata
+         * @param metaData the metadata
+         * @return name extracted from metadata
+         */
+        std::string doGetEntryName(std::vector<uint8_t> const &metaData) const;
 
         /**
          * @brief seeks to where the metadata should be written. If
@@ -267,9 +283,8 @@ namespace bfs
          * @return true if pre-existing metadata is to be overwritten,
          * false otherwise
          */
-
         OptionalOffset
-        findOffsetWhereMetaDataShouldBeWritten();
+        doFindOffsetWhereMetaDataShouldBeWritten();
 
         /**
          * @brief lists a particular type of entry, file or folder
@@ -287,6 +302,10 @@ namespace bfs
 
         // stores the name of this folder
         std::string m_name;
+
+        // as an optimization, store the number of entries so that we
+        // don't have to read each time (read once during construction)
+        uint64_t m_entryCount;
 
     };
 

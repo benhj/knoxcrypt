@@ -71,16 +71,18 @@ namespace bfs
                 uint64_t offset = detail::getOffsetOfFileBlock(i, io.blocks);
                 (void)out.seekp(offset);
 
-                // write m_bytesWritten
+                // write m_bytesWritten; 0 to begin with
                 uint8_t sizeDat[4];
                 uint32_t size = 0;
                 detail::convertInt32ToInt4Array(size, sizeDat);
                 (void)out.write((char*)sizeDat, 4);
 
-                // write m_next
+                // write m_next; begins as same as index
                 uint8_t nextDat[8];
                 detail::convertUInt64ToInt8Array(i, nextDat);
                 (void)out.write((char*)nextDat, 8);
+
+                // write data bytes
                 (void)out.write((char*)&ints.front(), detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
             }
         }

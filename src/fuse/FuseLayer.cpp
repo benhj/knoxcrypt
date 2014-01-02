@@ -58,6 +58,7 @@ bfs_getattr(const char *path, struct stat *stbuf)
     if (strcmp(path, "/") == 0) { /* The root directory of our file system. */
         stbuf->st_mode = S_IFDIR | 0777;
         stbuf->st_nlink = 3;
+        stbuf->st_blksize = 500;
         return 0;
     } else {
         try {
@@ -65,11 +66,13 @@ bfs_getattr(const char *path, struct stat *stbuf)
             if (info.type() == bfs::EntryType::FolderType) {
                 stbuf->st_mode = S_IFDIR | 0777;
                 stbuf->st_nlink = 3;
+                stbuf->st_blksize = 500;
                 return 0;
             } else if (info.type() == bfs::EntryType::FileType) {
                 stbuf->st_mode = S_IFREG | 0777;
                 stbuf->st_nlink = 1;
                 stbuf->st_size = info.size();
+                stbuf->st_blksize = 500;
                 return 0;
             } else {
                 return -ENOENT;
@@ -170,6 +173,8 @@ static int bfs_read(const char *path, char *buf, size_t size, off_t offset, stru
 static int bfs_write(const char *path, const char *buf, size_t size, off_t offset,
                      struct fuse_file_info *fi)
 {
+
+    std::cout<<"size: "<<size<<std::endl;
 
     bfs::ReadOrWriteOrBoth openMode = bfs::ReadOrWriteOrBoth::ReadWrite;
 

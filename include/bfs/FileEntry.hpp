@@ -34,6 +34,8 @@
 
 #include <string>
 
+#include <deque>
+
 namespace bfs
 {
 
@@ -153,6 +155,9 @@ namespace bfs
 
         // the current 'stream position' of file entry
         std::streamoff m_pos;
+
+        // make a pool to hold on to indices
+        mutable std::deque<uint64_t> m_blockIndexPool;
 
         /**
          * @brief buffers a byte for writing

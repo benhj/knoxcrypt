@@ -36,7 +36,8 @@ namespace bfs { namespace detail
 {
 
     void incrementFolderEntryCount(CoreBFSIO const &io,
-                                   uint64_t const startBlock)
+                                   uint64_t const startBlock,
+                                   uint64_t const inc = 1)
     {
         bfs::BFSImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, io.blocks);
@@ -44,7 +45,7 @@ namespace bfs { namespace detail
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);
         uint64_t count = convertInt8ArrayToInt64(buf);
-        ++count;
+        count += inc;
         (void)out.seekp(offset + FILE_BLOCK_META);
         convertUInt64ToInt8Array(count, buf);
         (void)out.write((char*)buf, 8);
@@ -52,7 +53,8 @@ namespace bfs { namespace detail
     }
 
     void decrementFolderEntryCount(CoreBFSIO const &io,
-                                   uint64_t const startBlock)
+                                   uint64_t const startBlock,
+                                   uint64_t const dec = 1)
     {
         bfs::BFSImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, io.blocks);
@@ -60,7 +62,7 @@ namespace bfs { namespace detail
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);
         uint64_t count = convertInt8ArrayToInt64(buf);
-        --count;
+        count -= dec;
         (void)out.seekp(offset + FILE_BLOCK_META);
         convertUInt64ToInt8Array(count, buf);
         (void)out.write((char*)buf, 8);

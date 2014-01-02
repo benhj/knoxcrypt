@@ -332,6 +332,8 @@ class BFSTest
         bfs::BFS theBFS(io);
         theBFS.removeFolder("/folderA/subFolderA/subFolderC/finalFolder",
                             bfs::FolderRemovalType::MustBeEmpty);
+
+
         bfs::OptionalEntryInfo info = root.getFolderEntry("folderA")
             .getFolderEntry("subFolderA")
             .getFolderEntry("subFolderC")

@@ -146,13 +146,25 @@ namespace bfs
     void FileEntry::newWritableFileBlock() const
     {
         bfs::BFSImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t volumeBlockIndex = *detail::getNextAvailableBlock(stream, m_io.blocks);
+
+        if(m_blockIndexPool.empty()) {
+
+            std::vector<uint64_t> indices = detail::getNAvailableBlocks(stream, 500, m_io.blocks);
+            m_blockIndexPool.assign(indices.begin(), indices.end());
+
+        }
+
         stream.close();
+
         // note building a new block to write to should always be in append mode
-        FileBlock block(m_io, volumeBlockIndex, volumeBlockIndex, bfs::OpenDisposition::buildAppendDisposition());
+        uint64_t id = m_blockIndexPool[0];
+        m_blockIndexPool.pop_front();
+        FileBlock block(m_io, id, id, bfs::OpenDisposition::buildAppendDisposition());
+
+
         m_fileBlocks.push_back(block);
         m_blockIndex = m_fileBlocks.size() - 1;
-        m_currentVolumeBlock = volumeBlockIndex;
+        m_currentVolumeBlock = id;
         m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     }
 
@@ -167,8 +179,6 @@ namespace bfs
 
         m_fileSize += block.getDataBytesWritten();
 
-
-
         m_fileBlocks.push_back(block);
 
         // seek to the very end block
@@ -178,12 +188,12 @@ namespace bfs
             FileBlock newBlock(m_io,
                                m_currentVolumeBlock,
                                m_openDisposition);
+
             nextBlock = newBlock.getNextIndex();
 
             m_fileSize += newBlock.getDataBytesWritten();
             m_fileBlocks.push_back(newBlock);
         }
-
     }
 
     void
@@ -480,6 +490,7 @@ namespace bfs
         // reset any offset values to zero but only if not seeking from the current
         // position. When seeking from the current position, we need to keep
         // track of the original block offset
+
         if (way != std::ios_base::cur) {
             std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
             for (; it != m_fileBlocks.end(); ++it) {
@@ -551,6 +562,7 @@ namespace bfs
     FileEntry::flush()
     {
         writeBufferedDataToBlock(m_buffer.size());
+        std::deque<uint64_t>().swap(m_blockIndexPool);
     }
 
     void

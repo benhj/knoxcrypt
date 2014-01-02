@@ -52,35 +52,6 @@ namespace bfs
         }
 
         /**
-         * @brief checks if a given bit is set in the first byte of the
-         * entry metadata
-         * @param folderData the FileEntry data representing this folder entry
-         * @note folderData needs to be passed in by copy so that it doesn't
-         * disrupt the udnerlying file data
-         * @param n the entry metadata to look up about
-         * @param bit the bit to check
-         * @return true if bit is set, false otherwise
-         */
-        bool checkMetaByte(FileEntry folderData, int n, int bit)
-        {
-
-            // note in the following the '1' represents first byte,
-            // the first bit of which indicates if entry is in use
-            // the '8' is number of bytes representing the first block index
-            // of the given file entry
-            uint32_t bufferSize = 1 + MAX_FILENAME_LENGTH + 8;
-
-            // note in the following the '8' bytes represent the number of
-            // entries in the folder
-            if (folderData.seek(8 + (n * bufferSize)) != -1) {
-                uint8_t byte;
-                folderData.read((char*)&byte, 1);
-                return (detail::isBitSetInByte(byte, bit));
-            }
-            throw std::runtime_error("Problem getting entry metaData enabled for index");
-        }
-
-        /**
          * @brief retrieves data from the entry metadata
          * @param folderData the metadata
          * @param n index of the entry for which we want to retrieve the metadata of
@@ -103,10 +74,10 @@ namespace bfs
             // entries in the folder
             if (folderData.seek(8 + (n * bufferSize) + seekOff) != -1) {
 
-                std::vector<uint8_t> buffer;
-                buffer.resize(bufSize==0?bufferSize:bufSize);
-                folderData.read((char*)&buffer.front(), bufSize==0?bufferSize:bufSize);
-                return buffer;
+                std::vector<uint8_t> metaData;
+                metaData.resize(bufSize==0?bufferSize:bufSize);
+                folderData.read((char*)&metaData.front(), bufSize==0?bufferSize:bufSize);
+                return metaData;
             }
             throw std::runtime_error("Problem retrieving metadata");
         }
@@ -134,6 +105,7 @@ namespace bfs
                        OpenDisposition::buildAppendDisposition())
         , m_startVolumeBlock(startVolumeBlock)
         , m_name(name)
+        , m_entryCount(doGetNumberOfEntries())
     {
     }
 
@@ -143,6 +115,7 @@ namespace bfs
         , m_folderData(m_io, name)
         , m_startVolumeBlock(m_folderData.getStartVolumeBlockIndex())
         , m_name(name)
+        , m_entryCount(0)
     {
         // set initial number of entries; there will be none to begin with
         uint64_t startCount(0);
@@ -204,7 +177,7 @@ namespace bfs
                                             EntryType const &entryType,
                                             uint64_t startBlock)
     {
-        OptionalOffset overWroteOld = findOffsetWhereMetaDataShouldBeWritten();
+        OptionalOffset overWroteOld = doFindOffsetWhereMetaDataShouldBeWritten();
 
         if (overWroteOld) {
             m_folderData = FileEntry(m_io, m_name, m_startVolumeBlock,
@@ -229,6 +202,7 @@ namespace bfs
         // increment entry count, but only if brand new
         if (!overWroteOld) {
             detail::incrementFolderEntryCount(m_io, m_folderData.getStartVolumeBlockIndex());
+            ++m_entryCount;
         }
     }
 
@@ -240,11 +214,6 @@ namespace bfs
 
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FileType, entry.getStartVolumeBlockIndex());
-
-        // need to reset the file entry to make sure in correct place
-        // NOTE: could probably optimize to not have to do this
-        m_folderData = FileEntry(m_io, m_name, m_startVolumeBlock,
-                                 OpenDisposition::buildAppendDisposition());
     }
 
     void
@@ -255,27 +224,22 @@ namespace bfs
 
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry.m_folderData.getStartVolumeBlockIndex());
-
-
-        // need to reset the file entry to make sure in correct place
-        // NOTE: could probably optimize to not have to do this
-        m_folderData = FileEntry(m_io, m_name, m_startVolumeBlock,
-                                 OpenDisposition::buildAppendDisposition());
     }
 
     FileEntry
     FolderEntry::getFileEntry(std::string const &name,
                               OpenDisposition const &openDisposition) const
     {
-        // find out total number of entries. Should initialize this in constructor?
-        uint64_t count = getNumberOfEntries();
+
         uint64_t i(0);
 
         // loop over entries until name found
-        for (; i < count; ++i) {
-            std::string entryName(getEntryName(i));
-            if (entryName == name && getTypeForEntry(i) == EntryType::FileType) {
-                uint64_t n = getBlockIndexForEntry(i);
+        for (; i < m_entryCount; ++i) {
+            // read all metadata
+            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, i);
+            std::string entryName(doGetEntryName(metaData));
+            if (entryName == name && doGetTypeForEntry(metaData) == EntryType::FileType) {
+                uint64_t n = doGetBlockIndexForEntry(metaData);
                 return FileEntry(m_io, name, n, openDisposition);
             }
         }
@@ -286,16 +250,15 @@ namespace bfs
     FolderEntry
     FolderEntry::getFolderEntry(std::string const &name) const
     {
-        // find out total number of entries. Should initialize this in constructor?
-        uint64_t count = getNumberOfEntries();
 
         uint64_t i(0);
 
         // loop over entries until name found
-        for (; i < count; ++i) {
-            std::string entryName(getEntryName(i));
-            if (entryName == name && getTypeForEntry(i) == EntryType::FolderType) {
-                uint64_t n = getBlockIndexForEntry(i);
+        for (; i < m_entryCount; ++i) {
+            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, i);
+            std::string entryName(doGetEntryName(metaData));
+            if (entryName == name && doGetTypeForEntry(metaData) == EntryType::FolderType) {
+                uint64_t n = doGetBlockIndexForEntry(metaData);
                 return FolderEntry(m_io, n, name);
             }
         }
@@ -313,11 +276,13 @@ namespace bfs
     FolderEntry::listAllEntries() const
     {
         std::vector<EntryInfo> entries;
-        uint64_t entryCount = getNumberOfEntries();
-        for (long entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
-            // only push back if the metadata is enabled
-            if (entryMetaDataIsEnabled(entryIndex)) {
-                entries.push_back(getEntryInfo(entryIndex));
+
+        for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
+
+            // read all metadata
+            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
+            if (doEntryMetaDataIsEnabled(metaData)) {
+                entries.push_back(doGetEntryInfo(metaData, entryIndex));
             }
         }
         return entries;
@@ -327,12 +292,13 @@ namespace bfs
     FolderEntry::doListEntriesBasedOnType(EntryType entryType) const
     {
         std::vector<EntryInfo> entries;
-        uint64_t entryCount = getNumberOfEntries();
-        for (long entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
+        for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
             // only push back if the metadata is enabled
-            if (entryMetaDataIsEnabled(entryIndex) &&
-                getTypeForEntry(entryIndex) == entryType) {
-                entries.push_back(getEntryInfo(entryIndex));
+            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
+
+            if (doEntryMetaDataIsEnabled(metaData) &&
+                doGetTypeForEntry(metaData) == entryType) {
+                entries.push_back(doGetEntryInfo(metaData, entryIndex));
             }
         }
         return entries;
@@ -357,8 +323,7 @@ namespace bfs
         // then be later overwritten when a new entry is then added
         FileEntry temp(m_io, m_name, m_startVolumeBlock,
                        OpenDisposition::buildOverwriteDisposition());
-        detail::putMetaDataOutOfUse(temp, getMetaDataIndexForEntry(name));
-        assert(!entryMetaDataIsEnabled(getMetaDataIndexForEntry(name)));
+        detail::putMetaDataOutOfUse(temp, doGetMetaDataIndexForEntry(name));
     }
 
     void
@@ -405,29 +370,19 @@ namespace bfs
         entry.m_folderData.unlink();
     }
 
-    struct EntryFinder
-    {
-        EntryFinder(std::string const &name)
-            : m_name(name)
-        {
-        }
-
-        bool operator()(EntryInfo const &info)
-        {
-            return m_name == info.filename();
-        }
-
-        std::string m_name;
-    };
-
     OptionalEntryInfo
     FolderEntry::getEntryInfo(std::string const &name) const
     {
-        std::vector<EntryInfo> infos(listAllEntries());
-        EntryFinder entryFinder(name);
-        std::vector<EntryInfo>::iterator it = std::find_if(infos.begin(), infos.end(), entryFinder);
-        if (it != infos.end()) {
-            return OptionalEntryInfo(*it);
+        for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
+
+            // read all metadata
+            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
+            if (doEntryMetaDataIsEnabled(metaData)) {
+                EntryInfo info = doGetEntryInfo(metaData, entryIndex);
+                if(info.filename() == name) {
+                    return OptionalEntryInfo(info);
+                }
+            }
         }
         return OptionalEntryInfo();
     }
@@ -435,17 +390,26 @@ namespace bfs
     EntryInfo
     FolderEntry::getEntryInfo(uint64_t const entryIndex) const
     {
-        std::string const entryName = getEntryName(entryIndex);
-        EntryType const entryType = getTypeForEntry(entryIndex);
+        std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
+        return doGetEntryInfo(metaData, entryIndex);
+    }
+
+    EntryInfo
+    FolderEntry::doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const entryIndex) const
+    {
+        std::string const entryName = doGetEntryName(metaData);
+        EntryType const entryType = doGetTypeForEntry(metaData);
         uint64_t fileSize = 0;
         uint64_t startBlock;
         if (entryType == EntryType::FileType) {
             // note disposition doesn't matter here, can be anything
-            FileEntry fe(getFileEntry(entryName, OpenDisposition::buildAppendDisposition()));
+            uint64_t n = doGetBlockIndexForEntry(metaData);
+            FileEntry fe(m_io, entryName, n, OpenDisposition::buildAppendDisposition());
             fileSize = fe.fileSize();
             startBlock = fe.getStartVolumeBlockIndex();
         } else {
-            FolderEntry fe(getFolderEntry(entryName));
+            uint64_t n = doGetBlockIndexForEntry(metaData);
+            FolderEntry fe(m_io, n, entryName);
             startBlock = fe.m_folderData.getStartVolumeBlockIndex();
         }
 
@@ -458,7 +422,7 @@ namespace bfs
     }
 
     uint64_t
-    FolderEntry::getNumberOfEntries() const
+    FolderEntry::doGetNumberOfEntries() const
     {
         bfs::BFSImageStream out(m_io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartVolumeBlockIndex(), m_io.blocks);
@@ -472,42 +436,44 @@ namespace bfs
 
 
     bool
-    FolderEntry::entryMetaDataIsEnabled(uint64_t const n) const
+    FolderEntry::doEntryMetaDataIsEnabled(std::vector<uint8_t> const &bytes) const
     {
-        // the 0th bit indicates if metadata is in use. When a new
-        // entry is created it is set to being in use. When deleted
-        // it is unset
-        return detail::checkMetaByte(m_folderData, n, 0);
+        uint8_t byte = bytes[0];
+        return detail::isBitSetInByte(byte, 0);
     }
 
     EntryType
-    FolderEntry::getTypeForEntry(uint64_t const n) const
+    FolderEntry::doGetTypeForEntry(std::vector<uint8_t> const &bytes) const
     {
-        // the 1st bit indicates if metadata represents a file or a folder
-        // if set, it represents a file; if unset, it represents a folder
-        return (detail::checkMetaByte(m_folderData, n, 1) ? EntryType::FileType : EntryType::FolderType);
+        uint8_t byte = bytes[0];
+        return (detail::isBitSetInByte(byte, 1) ? EntryType::FileType : EntryType::FolderType);
     }
 
     std::string
-    FolderEntry::getEntryName(uint64_t const n) const
+    FolderEntry::doGetEntryName(uint64_t const n) const
     {
-        std::vector<uint8_t> buffer = detail::doSeekAndReadOfEntryMetaData(m_folderData, n);
-        std::string nameDat(buffer.begin() + 1, buffer.end() - 8);
+        std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, n);
+        return doGetEntryName(metaData);
+    }
+
+    std::string
+    FolderEntry::doGetEntryName(std::vector<uint8_t> const &metaData) const
+    {
+        std::string nameDat(metaData.begin() + 1, metaData.end() - 8);
         std::string returnString;
         int c = 0;
-        while (nameDat.at(c) != '\0') {
-            returnString.push_back(nameDat.at(c));
+        while (nameDat[c] != '\0') {
+            returnString.push_back(nameDat[c]);
             ++c;
         }
         return returnString;
     }
 
     uint64_t
-    FolderEntry::getMetaDataIndexForEntry(std::string const &name) const
+    FolderEntry::doGetMetaDataIndexForEntry(std::string const &name) const
     {
-        uint64_t entryCount = getNumberOfEntries();
-        for (long entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
-            if (name == getEntryName(entryIndex)) {
+        for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
+            if (name == doGetEntryName(entryIndex)) {
                 return entryIndex;
             }
         }
@@ -515,27 +481,22 @@ namespace bfs
     }
 
     uint64_t
-    FolderEntry::getBlockIndexForEntry(uint64_t const n) const
+    FolderEntry::doGetBlockIndexForEntry(std::vector<uint8_t> const &metaData) const
     {
-        std::vector<uint8_t> buffer = detail::doSeekAndReadOfEntryMetaData(m_folderData,
-                                                                           n,
-                                                                           8,
-                                                                           (1 + detail::MAX_FILENAME_LENGTH));
-        return detail::convertInt8ArrayToInt64(&buffer.front());
+        std::vector<uint8_t> theBuffer(metaData.begin() + detail::MAX_FILENAME_LENGTH + 1, metaData.end());
+        return detail::convertInt8ArrayToInt64(&theBuffer.front());
     }
 
     OptionalOffset
-    FolderEntry::findOffsetWhereMetaDataShouldBeWritten()
+    FolderEntry::doFindOffsetWhereMetaDataShouldBeWritten()
     {
 
         // loop over all entries and try and find a previously deleted one
         // If its deleted, the first bit of the entry metadata will be unset
 
-        uint64_t entryCount = getNumberOfEntries();
-
-        for (long entryIndex = 0; entryIndex < entryCount; ++entryIndex) {
-            // only push back if the metadata is enabled
-            if (!entryMetaDataIsEnabled(entryIndex)) {
+        for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
+            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
+            if (!doEntryMetaDataIsEnabled(metaData)) {
                 uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
                 std::ios_base::streamoff offset = (8 + (entryIndex * bufferSize));
                 return OptionalOffset(offset);
