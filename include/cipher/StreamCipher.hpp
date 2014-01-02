@@ -1,24 +1,24 @@
 /*
-The MIT License (MIT)
+  The MIT License (MIT)
 
-Copyright (c) 2013 Ben H.D. Jones
+  Copyright (c) 2013 Ben H.D. Jones
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 // will implement some variant of ARCFOUR
@@ -63,35 +63,35 @@ namespace bfs { namespace cipher
 
     class StreamCipher
     {
-        public:
-            StreamCipher(std::string const &password)
-                : m_password(password)
-            {
-                static bool init = false;
-                if(!init) {
-                    g_password = password;
-                    initKeyAndSbox(m_key);
-                    setSBox(m_key);
-                    init = true;
-                }
+      public:
+        StreamCipher(std::string const &password)
+            : m_password(password)
+        {
+            static bool init = false;
+            if (!init) {
+                g_password = password;
+                initKeyAndSbox(m_key);
+                setSBox(m_key);
+                init = true;
             }
+        }
 
-            void transform(char *in, char *out,
-                           std::ios_base::streamoff startPosition,
-                           long length)
-            {
-                long j = 0;
-                for (long a=0; a < length; a++) {
-                    long i = ((startPosition) + (a+1)) % 256;
-                    long j = ((startPosition) + (a+1) + g_sbox[i]) % 256;
-                    long k = g_sbox[(g_sbox[i] + g_sbox[j]) % 256];
-                    out[a] = in[a] ^ k;
-                }
+        void transform(char *in, char *out,
+                       std::ios_base::streamoff startPosition,
+                       long length)
+        {
+            long j = 0;
+            for (long a=0; a < length; a++) {
+                long i = ((startPosition) + (a+1)) % 256;
+                long j = ((startPosition) + (a+1) + g_sbox[i]) % 256;
+                long k = g_sbox[(g_sbox[i] + g_sbox[j]) % 256];
+                out[a] = in[a] ^ k;
             }
+        }
 
-        private:
-            std::string m_password;
-            long m_key[256];
+      private:
+        std::string m_password;
+        long m_key[256];
     };
 
 }

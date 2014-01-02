@@ -1,24 +1,24 @@
 /*
-The MIT License (MIT)
+  The MIT License (MIT)
 
-Copyright (c) 2013 Ben H.D. Jones
+  Copyright (c) 2013 Ben H.D. Jones
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "bfs/BFSImageStream.hpp"
@@ -73,15 +73,15 @@ namespace bfs
         this->seek(0);
 
         // set up for specific write-mode
-        if(m_openDisposition.readWrite() != ReadOrWriteOrBoth::ReadOnly) {
+        if (m_openDisposition.readWrite() != ReadOrWriteOrBoth::ReadOnly) {
 
             // if in trunc, unlink
-            if(m_openDisposition.trunc() == TruncateOrKeep::Truncate) {
+            if (m_openDisposition.trunc() == TruncateOrKeep::Truncate) {
                 this->unlink();
 
             } else {
                 // only if in append mode do we seek to end.
-                if(m_openDisposition.append() == AppendOrOverwrite::Append) {
+                if (m_openDisposition.append() == AppendOrOverwrite::Append) {
                     this->seek(0, std::ios::end);
                 }
             }
@@ -129,7 +129,7 @@ namespace bfs
         // need to take into account the currently seeked-to position and
         // subtract that because we then only want to read from the told position
         uint32_t size =  m_fileBlocks[m_blockIndex].getDataBytesWritten() -
-                         m_fileBlocks[m_blockIndex].tell();
+            m_fileBlocks[m_blockIndex].tell();
 
         std::vector<uint8_t>().swap(m_buffer);
         m_buffer.resize(size);
@@ -229,19 +229,19 @@ namespace bfs
         if (!currentBlockHasAvailableSpace()) {
 
             // if in overwrite mode, maybe we want to overwrite current bytes
-            if(m_openDisposition.append() == AppendOrOverwrite::Overwrite) {
+            if (m_openDisposition.append() == AppendOrOverwrite::Overwrite) {
 
                 // if the reported stream position in the block is less that
                 // the block's total capacity, then we don't create a new block
                 // we simply overwrite
-                if(m_fileBlocks[m_blockIndex].tell() < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+                if (m_fileBlocks[m_blockIndex].tell() < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
                     return;
                 }
 
                 // edge case; if right at the very end of the block, need to
                 // iterate the block index and return if possible
-                if(m_fileBlocks[m_blockIndex].tell() == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
-                    if(m_blockIndex < m_fileBlocks.size() - 1) {
+                if (m_fileBlocks[m_blockIndex].tell() == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+                    if (m_blockIndex < m_fileBlocks.size() - 1) {
                         ++m_blockIndex;
                         return;
                     }
@@ -284,7 +284,7 @@ namespace bfs
     FileEntry::read(char* s, std::streamsize n)
     {
 
-        if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
+        if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
             throw FileEntryException(FileEntryError::NotReadable);
         }
 
@@ -319,7 +319,7 @@ namespace bfs
     FileEntry::write(const char* s, std::streamsize n)
     {
 
-        if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::ReadOnly) {
+        if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::ReadOnly) {
             throw FileEntryException(FileEntryError::NotWritable);
         }
 
@@ -349,7 +349,7 @@ namespace bfs
         uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
 
         // edge case
-        if(newSize < blockSize) {
+        if (newSize < blockSize) {
             m_fileBlocks[0].setSize(newSize);
             m_fileBlocks[0].setNextIndex(m_fileBlocks[0].getIndex());
             return;
@@ -362,7 +362,7 @@ namespace bfs
         uint64_t blocksRequired = roundedDown / blockSize;
 
         // edge case
-        if(leftOver == 0) {
+        if (leftOver == 0) {
             --blocksRequired;
             m_fileBlocks[blocksRequired].setSize(blockSize);
         } else {
@@ -422,7 +422,7 @@ namespace bfs
         int64_t block = endBlockIndex - treatLikeBegin.first;
         boost::iostreams::stream_offset blockPosition = bytesWrittenToEnd - treatLikeBegin.second;
 
-        if(blockPosition < 0) {
+        if (blockPosition < 0) {
             uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
             blockPosition = blockSize + blockPosition;
             --block;
@@ -445,7 +445,7 @@ namespace bfs
 
         boost::iostreams::stream_offset addition = casted + indexedBlockPosition;
 
-        if(addition >= 0 && addition <= blockSize) {
+        if (addition >= 0 && addition <= blockSize) {
             return std::make_pair(blockIndex, addition);
         } else {
 
@@ -455,21 +455,21 @@ namespace bfs
 
             boost::iostreams::stream_offset roundedDown = addition - leftOver;
 
-            if(abs(roundedDown) > (blockSize)) {
+            if (abs(roundedDown) > (blockSize)) {
                 sumValue = abs(roundedDown) / blockSize;
 
                 // hacky bit to get working
-                if((addition < 0) && ((blockSize - leftOver) > indexedBlockPosition)){
-                   sumValue++;
+                if ((addition < 0) && ((blockSize - leftOver) > indexedBlockPosition)) {
+                    sumValue++;
                 }
             } else {
                 sumValue = 1;
             }
 
             uint16_t const theBlock = (addition < 0) ? (blockIndex - sumValue) :
-                                      (blockIndex + sumValue);
+                (blockIndex + sumValue);
             boost::iostreams::stream_offset offset = (addition < 0) ? (blockSize - leftOver) :
-                                                     leftOver;
+                leftOver;
 
             return std::make_pair(theBlock, offset);
         }
@@ -481,7 +481,7 @@ namespace bfs
         // reset any offset values to zero but only if not seeking from the current
         // position. When seeking from the current position, we need to keep
         // track of the original block offset
-        if(way != std::ios_base::cur) {
+        if (way != std::ios_base::cur) {
             std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
             for (; it != m_fileBlocks.end(); ++it) {
                 it->seek(0);
@@ -494,7 +494,7 @@ namespace bfs
 
             size_t endBlock = m_fileBlocks.size() - 1;
             seekPair = getPositionFromEnd(off, endBlock,
-                                           m_fileBlocks[endBlock].getDataBytesWritten());
+                                          m_fileBlocks[endBlock].getDataBytesWritten());
 
         }
 
@@ -502,11 +502,11 @@ namespace bfs
         // block position. Note both of these latter two params will be 0
         // if seeking from the beginning
 
-        if(way == std::ios_base::beg) {
+        if (way == std::ios_base::beg) {
             seekPair = getPositionFromBegin(off);
         }
         // seek relative to the current position
-        if(way == std::ios_base::cur) {
+        if (way == std::ios_base::cur) {
             seekPair = getPositionFromCurrent(off, m_blockIndex,
                                               m_fileBlocks[m_blockIndex].tell());
         }
@@ -523,18 +523,17 @@ namespace bfs
             // this will be the point from which we read or write
             m_fileBlocks[m_blockIndex].seek(seekPair.second);
 
-            switch(way)
-            {
-            case std::ios_base::cur:
+            switch (way) {
+              case std::ios_base::cur:
                 m_pos = m_pos + off;
                 break;
-            case std::ios_base::end:
+              case std::ios_base::end:
                 m_pos = m_fileSize + off;
                 break;
-            case std::ios_base::beg:
+              case std::ios_base::beg:
                 m_pos = off;
                 break;
-            default:
+              default:
                 break;
             }
 

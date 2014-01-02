@@ -1,24 +1,24 @@
 /*
-The MIT License (MIT)
+  The MIT License (MIT)
 
-Copyright (c) 2013 Ben H.D. Jones
+  Copyright (c) 2013 Ben H.D. Jones
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "bfs/BFSImageStream.hpp"
@@ -201,12 +201,12 @@ namespace bfs
 
     void
     FolderEntry::doWriteNewMetaDataForEntry(std::string const &name,
-                                          EntryType const &entryType,
-                                          uint64_t startBlock)
+                                            EntryType const &entryType,
+                                            uint64_t startBlock)
     {
         OptionalOffset overWroteOld = findOffsetWhereMetaDataShouldBeWritten();
 
-        if(overWroteOld) {
+        if (overWroteOld) {
             m_folderData = FileEntry(m_io, m_name, m_startVolumeBlock,
                                      OpenDisposition::buildOverwriteDisposition());
             m_folderData.seek(*overWroteOld);
@@ -227,7 +227,7 @@ namespace bfs
         m_folderData.flush();
 
         // increment entry count, but only if brand new
-        if(!overWroteOld) {
+        if (!overWroteOld) {
             detail::incrementFolderEntryCount(m_io, m_folderData.getStartVolumeBlockIndex());
         }
     }
@@ -389,8 +389,8 @@ namespace bfs
         // and deleting their entries
         std::vector<EntryInfo> infos = entry.listAllEntries();
         std::vector<EntryInfo>::iterator it = infos.begin();
-        for(; it != infos.end(); ++it) {
-            if(it->type() == EntryType::FileType) {
+        for (; it != infos.end(); ++it) {
+            if (it->type() == EntryType::FileType) {
                 entry.removeFileEntry(it->filename());
             } else {
                 entry.removeFolderEntry(it->filename());
@@ -426,7 +426,7 @@ namespace bfs
         std::vector<EntryInfo> infos(listAllEntries());
         EntryFinder entryFinder(name);
         std::vector<EntryInfo>::iterator it = std::find_if(infos.begin(), infos.end(), entryFinder);
-        if(it != infos.end()) {
+        if (it != infos.end()) {
             return OptionalEntryInfo(*it);
         }
         return OptionalEntryInfo();

@@ -1,24 +1,24 @@
 /*
-The MIT License (MIT)
+  The MIT License (MIT)
 
-Copyright (c) 2013 Ben H.D. Jones
+  Copyright (c) 2013 Ben H.D. Jones
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 
@@ -38,6 +38,7 @@ namespace bfs
         , m_next(next)
         , m_offset(0)
         , m_seekPos(0)
+        , m_positionBeforeWrite(0)
         , m_initialBytesWritten(0)
         , m_openDisposition(openDisposition)
     {
@@ -109,7 +110,7 @@ namespace bfs
     FileBlock::read(char * const buf, std::streamsize const n) const
     {
 
-        if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
+        if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
             throw FileBlockException(FileBlockError::NotReadable);
         }
 
@@ -129,7 +130,7 @@ namespace bfs
     FileBlock::write(char const * const buf, std::streamsize const n) const
     {
 
-        if(m_openDisposition.readWrite() == ReadOrWriteOrBoth::ReadOnly) {
+        if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::ReadOnly) {
             throw FileBlockException(FileBlockError::NotWritable);
         }
 
@@ -141,6 +142,8 @@ namespace bfs
         // do updates to file block metadata only if in append mode
         if (m_openDisposition.append() == AppendOrOverwrite::Append) {
 
+            m_positionBeforeWrite = m_seekPos;
+
             // check if we need to update m_bytesWritten and m_next. This will be different
             // probably if the number of bytes read is not consistent with the
             // reported size stored in m_bytesWritten or if the stream has been moved
@@ -150,7 +153,7 @@ namespace bfs
             // update m_bytesWritten
             doSetSize(stream, m_bytesWritten);
 
-            if (n < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META || m_seekPos > 0) {
+            if (m_bytesWritten < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META || m_seekPos > 0) {
 
                 m_next = m_index;
                 // update m_next

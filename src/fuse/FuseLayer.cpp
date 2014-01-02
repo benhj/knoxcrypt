@@ -1,24 +1,24 @@
 /*
-The MIT License (MIT)
+  The MIT License (MIT)
 
-Copyright (c) 2013 Ben H.D. Jones
+  Copyright (c) 2013 Ben H.D. Jones
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 
@@ -40,10 +40,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 int exceptionDispatch(bfs::BFSException const &ex)
 {
-    if(ex == bfs::BFSException(bfs::BFSError::NotFound)) {
+    if (ex == bfs::BFSException(bfs::BFSError::NotFound)) {
         return -ENOENT;
     }
-    if(ex == bfs::BFSException(bfs::BFSError::AlreadyExists)) {
+    if (ex == bfs::BFSException(bfs::BFSError::AlreadyExists)) {
         return -EEXIST;
     }
 
@@ -62,17 +62,17 @@ bfs_getattr(const char *path, struct stat *stbuf)
     } else {
         try {
             bfs::EntryInfo info = BFS_DATA->getInfo(path);
-            if(info.type() == bfs::EntryType::FolderType){
+            if (info.type() == bfs::EntryType::FolderType) {
                 stbuf->st_mode = S_IFDIR | 0777;
                 stbuf->st_nlink = 3;
                 return 0;
-            } else if(info.type() == bfs::EntryType::FileType){
+            } else if (info.type() == bfs::EntryType::FileType) {
                 stbuf->st_mode = S_IFREG | 0777;
                 stbuf->st_nlink = 1;
                 stbuf->st_size = info.size();
                 return 0;
             } else {
-               return -ENOENT;
+                return -ENOENT;
             }
         } catch (bfs::BFSException const &e) {
             return exceptionDispatch(e);
@@ -143,7 +143,7 @@ static int bfs_truncate(const char *path, off_t newsize)
 // is deferred to the respective functions
 static int bfs_open(const char *path, struct fuse_file_info *fi)
 {
-    if(!BFS_DATA->fileExists(path)) {
+    if (!BFS_DATA->fileExists(path)) {
         try {
             BFS_DATA->addFile(path);
         } catch (bfs::BFSException const &e) {
@@ -174,19 +174,19 @@ static int bfs_write(const char *path, const char *buf, size_t size, off_t offse
     bfs::ReadOrWriteOrBoth openMode = bfs::ReadOrWriteOrBoth::ReadWrite;
 
     /*
-    if((fi->flags & O_RDWR) == O_RDWR) {
-        openMode = bfs::ReadOrWriteOrBoth::ReadWrite;
-    }*/
+      if((fi->flags & O_RDWR) == O_RDWR) {
+      openMode = bfs::ReadOrWriteOrBoth::ReadWrite;
+      }*/
 
     bfs::AppendOrOverwrite appendType = bfs::AppendOrOverwrite::Append;
 
-    if((fi->flags & O_APPEND) == O_APPEND) {
+    if ((fi->flags & O_APPEND) == O_APPEND) {
         appendType = bfs::AppendOrOverwrite::Append;
     }
 
     bfs::TruncateOrKeep truncateType = bfs::TruncateOrKeep::Keep;
 
-    if((fi->flags & O_TRUNC) == O_TRUNC) {
+    if ((fi->flags & O_TRUNC) == O_TRUNC) {
         truncateType = bfs::TruncateOrKeep::Truncate;
     }
 
@@ -233,7 +233,7 @@ static int bfs_opendir(const char *path, struct fuse_file_info *fi)
 
 // list the directory contents
 static int bfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-                         off_t offset, struct fuse_file_info *fi)
+                       off_t offset, struct fuse_file_info *fi)
 {
     try {
         bfs::FolderEntry folder = BFS_DATA->getCurrent(path);
@@ -244,9 +244,9 @@ static int bfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
         filler(buf, ".", NULL, 0);           /* Current directory (.)  */
         filler(buf, "..", NULL, 0);
 
-        for(; it != infos.end(); ++it) {
+        for (; it != infos.end(); ++it) {
             struct stat stbuf;
-            if(it->type() == bfs::EntryType::FileType) {
+            if (it->type() == bfs::EntryType::FileType) {
                 stbuf.st_mode = S_IFREG | 0755;
                 stbuf.st_nlink = 1;
                 stbuf.st_size = it->size();
@@ -265,21 +265,22 @@ static int bfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     return 0;
 }
 
-static struct fuse_operations bfs_oper = {
-  .mkdir = bfs_mkdir,
-  .unlink = bfs_unlink,
-  .rmdir = bfs_rmdir,
-  .truncate = bfs_truncate,
-  .open = bfs_open,
-  .read = bfs_read,
-  .write = bfs_write,
-  .create = bfs_create,
-  .ftruncate = bfs_ftruncate,
-  .opendir = bfs_opendir,
-  .init = bfs_init,
-  .readdir = bfs_readdir,
-  .getattr = bfs_getattr,
-  .rename = bfs_rename
+static struct fuse_operations bfs_oper =
+{
+    .mkdir = bfs_mkdir,
+    .unlink = bfs_unlink,
+    .rmdir = bfs_rmdir,
+    .truncate = bfs_truncate,
+    .open = bfs_open,
+    .read = bfs_read,
+    .write = bfs_write,
+    .create = bfs_create,
+    .ftruncate = bfs_ftruncate,
+    .opendir = bfs_opendir,
+    .init = bfs_init,
+    .readdir = bfs_readdir,
+    .getattr = bfs_getattr,
+    .rename = bfs_rename
 };
 
 
@@ -305,8 +306,8 @@ int main(int argc, char *argv[])
     nflags.c_lflag |= ECHONL;
 
     if (tcsetattr(fileno(stdin), TCSANOW, &nflags) != 0) {
-      perror("tcsetattr");
-      return EXIT_FAILURE;
+        perror("tcsetattr");
+        return EXIT_FAILURE;
     }
 
     printf("password: ");
@@ -315,8 +316,8 @@ int main(int argc, char *argv[])
 
     // restore terminal
     if (tcsetattr(fileno(stdin), TCSANOW, &oflags) != 0) {
-      perror("tcsetattr");
-      return EXIT_FAILURE;
+        perror("tcsetattr");
+        return EXIT_FAILURE;
     }
 
     io.password.append(password);
@@ -324,7 +325,7 @@ int main(int argc, char *argv[])
     bfs::BFS *bfsPtr = new bfs::BFS(io);
 
     argc -= 2;
-    for(int i = 0; i<argc;++i) {
+    for (int i = 0; i<argc; ++i) {
         argv[i+1] = argv[i+3];
     }
 
@@ -335,5 +336,3 @@ int main(int argc, char *argv[])
 
     return fuse_stat;
 }
-
-
