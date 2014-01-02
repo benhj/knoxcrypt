@@ -72,6 +72,15 @@ std::string createAString()
     return theString;
 }
 
+bfs::CoreBFSIO createTestIO(boost::filesystem::path const &testPath)
+{
+    bfs::CoreBFSIO io;
+    io.path = testPath.string();
+    io.blocks = 2048;
+    io.password = "abcd1234";
+    return io;
+}
+
 #define ASSERT_EQUAL(A, B, C)                                          \
     if(A == B) {                                                       \
         std::cout<<boost::format("%1% %|100t|%2%\n") % C % "passed";   \

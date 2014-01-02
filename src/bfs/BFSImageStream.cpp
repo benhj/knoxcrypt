@@ -27,7 +27,7 @@ namespace bfs
 {
 
     BFSImageStream::BFSImageStream(CoreBFSIO const &io, std::ios::openmode mode)
-        : m_stream(io.path, mode)
+        : m_stream(io.path.c_str(), mode)
         , m_cipher(io.password)
     {
     }
