@@ -35,7 +35,7 @@ namespace bfs
         : m_io(io)
         , m_index(index)
         , m_bytesWritten(0)
-        , m_next(next)
+        , m_next(index)
         , m_offset(0)
         , m_seekPos(0)
         , m_positionBeforeWrite(0)
@@ -43,23 +43,7 @@ namespace bfs
         , m_openDisposition(openDisposition)
     {
         // set m_offset
-        BFSImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
         m_offset = detail::getOffsetOfFileBlock(m_index, io.blocks);
-        (void)stream.seekp(m_offset);
-
-        // write m_bytesWritten
-        uint8_t sizeDat[4];
-        uint32_t size = 0;
-        detail::convertInt32ToInt4Array(size, sizeDat);
-        (void)stream.write((char*)sizeDat, 4);
-
-        // write m_next
-        uint8_t nextDat[8];
-        detail::convertUInt64ToInt8Array(m_next, nextDat);
-        assert(m_next == detail::convertInt8ArrayToInt64(nextDat));
-        (void)stream.write((char*)nextDat, 8);
-        stream.flush();
-        stream.close();
     }
 
     FileBlock::FileBlock(CoreBFSIO const &io,
@@ -140,6 +124,7 @@ namespace bfs
         (void)stream.write((char*)buf, n);
 
         // do updates to file block metadata only if in append mode
+        // note update to next index taken care of in FileEntry
         if (m_openDisposition.append() == AppendOrOverwrite::Append) {
 
             m_positionBeforeWrite = m_seekPos;
@@ -152,13 +137,6 @@ namespace bfs
 
             // update m_bytesWritten
             doSetSize(stream, m_bytesWritten);
-
-            if (m_bytesWritten < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META || m_seekPos > 0) {
-
-                m_next = m_index;
-                // update m_next
-                doSetNextIndex(stream, m_next);
-            }
         }
 
         stream.flush();

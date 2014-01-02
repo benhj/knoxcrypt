@@ -61,12 +61,27 @@ namespace bfs
             detail::convertUInt64ToInt8Array(fileCount, sizeBytes);
         }
 
-        void writeOutFileSpaceBytes(uint64_t const fileBlockCount, BFSImageStream &out)
+        void writeOutFileSpaceBytes(CoreBFSIO const &io, BFSImageStream &out)
         {
-            for (uint64_t i(0); i < fileBlockCount ; ++i) {
+            for (uint64_t i(0); i < io.blocks ; ++i) {
                 std::vector<uint8_t> ints;
-                ints.assign(detail::FILE_BLOCK_SIZE, 0);
-                (void)out.write((char*)&ints.front(), detail::FILE_BLOCK_SIZE);
+                ints.assign(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META, 0);
+
+                // write out block metadata
+                uint64_t offset = detail::getOffsetOfFileBlock(i, io.blocks);
+                (void)out.seekp(offset);
+
+                // write m_bytesWritten
+                uint8_t sizeDat[4];
+                uint32_t size = 0;
+                detail::convertInt32ToInt4Array(size, sizeDat);
+                (void)out.write((char*)sizeDat, 4);
+
+                // write m_next
+                uint8_t nextDat[8];
+                detail::convertUInt64ToInt8Array(i, nextDat);
+                (void)out.write((char*)nextDat, 8);
+                (void)out.write((char*)&ints.front(), detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
             }
         }
 
@@ -138,7 +153,7 @@ namespace bfs
             out.write((char*)countBytes, 8);
 
             // write out the file space bytes
-            writeOutFileSpaceBytes(io.blocks, out);
+            writeOutFileSpaceBytes(io, out);
 
             out.flush();
             out.close();

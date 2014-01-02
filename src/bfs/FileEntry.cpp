@@ -146,14 +146,13 @@ namespace bfs
     void FileEntry::newWritableFileBlock() const
     {
         bfs::BFSImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        std::vector<uint64_t> firstAndNext = detail::getNAvailableBlocks(stream, 2, m_io.blocks);
+        uint64_t volumeBlockIndex = *detail::getNextAvailableBlock(stream, m_io.blocks);
         stream.close();
         // note building a new block to write to should always be in append mode
-        FileBlock block(m_io, firstAndNext[0], firstAndNext[0],
-                        bfs::OpenDisposition::buildAppendDisposition());
+        FileBlock block(m_io, volumeBlockIndex, volumeBlockIndex, bfs::OpenDisposition::buildAppendDisposition());
         m_fileBlocks.push_back(block);
         m_blockIndex = m_fileBlocks.size() - 1;
-        m_currentVolumeBlock = firstAndNext[0];
+        m_currentVolumeBlock = volumeBlockIndex;
         m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     }
 
