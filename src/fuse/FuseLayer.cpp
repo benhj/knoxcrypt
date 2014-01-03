@@ -65,13 +65,13 @@ bfs_getattr(const char *path, struct stat *stbuf)
             if (info.type() == bfs::EntryType::FolderType) {
                 stbuf->st_mode = S_IFDIR | 0777;
                 stbuf->st_nlink = 3;
-                stbuf->st_blksize = 500;
+                stbuf->st_blksize = bfs::detail::FILE_BLOCK_SIZE - bfs::detail::FILE_BLOCK_META;
                 return 0;
             } else if (info.type() == bfs::EntryType::FileType) {
                 stbuf->st_mode = S_IFREG | 0777;
                 stbuf->st_nlink = 1;
                 stbuf->st_size = info.size();
-                stbuf->st_blksize = 500;
+                stbuf->st_blksize = bfs::detail::FILE_BLOCK_SIZE - bfs::detail::FILE_BLOCK_META;
                 return 0;
             } else {
                 return -ENOENT;
