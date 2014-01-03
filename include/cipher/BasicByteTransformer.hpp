@@ -23,17 +23,14 @@
 
 // will implement some variant of ARCFOUR
 
-#ifndef BFS_CIPHER_STREAM_CIPHER_HPP__
-#define BFS_CIPHER_STREAM_CIPHER_HPP__
+#ifndef BFS_CIPHER_BASIC_TRANSFORMER_CIPHER_HPP__
+#define BFS_CIPHER_BASIC_TRANSFORMER_CIPHER_HPP__
 
-
-#include <string>
-#include <vector>
-#include <cassert>
-#include <iostream>
+#include "cipher/IByteTransformer.hpp"
 
 namespace bfs { namespace cipher
 {
+
     static long g_sbox[256];
     static std::string g_password;
 
@@ -61,12 +58,13 @@ namespace bfs { namespace cipher
         }
     }
 
-    class StreamCipher
+    class BasicByteTransformer : public IByteTransformer
     {
       public:
-        StreamCipher(std::string const &password)
-            : m_password(password)
+        explicit BasicByteTransformer(std::string const &password)
+            : IByteTransformer(password)
         {
+            // we statically initialize as an optimization
             static bool init = false;
             if (!init) {
                 g_password = password;
@@ -76,9 +74,16 @@ namespace bfs { namespace cipher
             }
         }
 
-        void transform(char *in, char *out,
-                       std::ios_base::streamoff startPosition,
-                       long length)
+        ~BasicByteTransformer()
+        {
+
+        }
+
+      private:
+
+        BasicByteTransformer(); // not required
+
+        void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
         {
             long j = 0;
             for (long a=0; a < length; a++) {
@@ -90,7 +95,6 @@ namespace bfs { namespace cipher
         }
 
       private:
-        std::string m_password;
         long m_key[256];
     };
 
@@ -98,4 +102,4 @@ namespace bfs { namespace cipher
 }
 
 
-#endif // BFS_CIPHER_STREAM_CIPHER_HPP__
+#endif // BFS_CIPHER_BASIC_TRANSFORMER_CIPHER_HPP__

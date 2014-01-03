@@ -21,49 +21,27 @@
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef BFS_BFS_IMAGE_STREAM_HPP__
-#define BFS_BFS_IMAGE_STREAM_HPP__
 
-#include "bfs/CoreBFSIO.hpp"
-#include "cipher/IByteTransformer.hpp"
+#ifndef BFS_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#define BFS_CIPHER_I_BYTE_TRANSFORMER_HPP__
 
-#include <boost/shared_ptr.hpp>
-
-#include <fstream>
+#include <iostream>
 #include <string>
 
-namespace bfs
+namespace bfs { namespace cipher
 {
-
-    typedef boost::shared_ptr<cipher::IByteTransformer> ByteTransformerPtr;
-
-    class BFSImageStream
+    class IByteTransformer
     {
-      public:
-        explicit BFSImageStream(CoreBFSIO const &io,
-                                std::ios::openmode mode = std::ios::out | std::ios::binary);
-
-        BFSImageStream& read(char * const buf, std::streamsize const n);
-
-        BFSImageStream& write(char const * buf, std::streamsize const n);
-
-        BFSImageStream& seekg(std::streampos pos);
-        BFSImageStream& seekg(std::streamoff off, std::ios_base::seekdir way);
-        BFSImageStream& seekp(std::streampos pos);
-        BFSImageStream& seekp(std::streamoff off, std::ios_base::seekdir way);
-        std::streampos tellg();
-        std::streampos tellp();
-
-        void flush();
-
-        void close();
-
+    public:
+        explicit IByteTransformer(std::string const &password);
+        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length);
+        virtual ~IByteTransformer();
       private:
-        BFSImageStream();
-        std::fstream m_stream;
-        ByteTransformerPtr m_cipher;
+        std::string const m_password;
+        IByteTransformer(); // no impl required
+        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
     };
-
+}
 }
 
-#endif // BFS_BFS_IMAGE_STREAM_HPP__
+#endif // BFS_CIPHER_I_TRANSFORMER_HPP__
