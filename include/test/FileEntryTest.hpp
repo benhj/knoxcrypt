@@ -417,6 +417,7 @@ class FileEntryTest
             entry.flush();
         }
 
+
         // secondary overwrite
         std::string testData("goodbye...!");
         std::string testDataB("final bit!");
@@ -424,7 +425,7 @@ class FileEntryTest
             bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildOverwriteDisposition());
-            entry.seek(BIG_SIZE - testData.length());
+            assert(entry.seek(BIG_SIZE - testData.length()) != -1);
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             std::vector<uint8_t> vecb(testDataB.begin(), testDataB.end());
@@ -432,13 +433,14 @@ class FileEntryTest
             entry.flush();
         }
 
+
         {
             bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", 1,
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length() + testDataB.length());
-            entry.seek(BIG_SIZE - testData.length());
+            assert(entry.seek(BIG_SIZE - testData.length()) != -1);
             entry.read((char*)&readBackIn.front(), testData.length() + testDataB.length());
             std::string result(readBackIn.begin(), readBackIn.end());
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE + testDataB.length(), "testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength correct file size");

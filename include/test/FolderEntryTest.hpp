@@ -165,6 +165,8 @@ class FolderEntryTest
         uint64_t b3 = folder.getEntryInfo(2).firstFileBlock();
         uint64_t b4 = folder.getEntryInfo(3).firstFileBlock();
 
+        // !!!NOTE: These tests are contingent on the file block size
+        // being 512 bytes and will not work on other (e.g. 4096) byte block sizes
         ASSERT_EQUAL(b1, 1, "testAddEntryBlockIndexRetrieval A");
         ASSERT_EQUAL(b2, 2, "testAddEntryBlockIndexRetrieval B");
         ASSERT_EQUAL(b3, 4, "testAddEntryBlockIndexRetrieval C");
@@ -247,6 +249,7 @@ class FolderEntryTest
             bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
+            entry.flush();
         }
         {
             bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());

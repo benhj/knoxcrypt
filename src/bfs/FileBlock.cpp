@@ -137,6 +137,14 @@ namespace bfs
 
             // update m_bytesWritten
             doSetSize(stream, m_bytesWritten);
+
+        }
+        // if in overwrite mode, we still need to check if writing goes above
+        // the initial bytes written and update the size accordingly
+        else if (m_seekPos + n > m_initialBytesWritten) {
+            m_bytesWritten += uint32_t(n);
+            // update m_bytesWritten
+            doSetSize(stream, m_seekPos + n);
         }
 
         stream.flush();

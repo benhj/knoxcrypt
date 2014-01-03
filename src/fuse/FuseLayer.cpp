@@ -292,11 +292,18 @@ static struct fuse_operations bfs_oper =
 int main(int argc, char *argv[])
 {
 
-    int fuse_stat;
+    if(argc < 4) {
+        std::cout<<"\nUnsufficient arguments supplied\n\n";
+        std::cout<<"Format is \n\n";
+        std::cout<<"    ./bfs <image.bfs> <blocks> <mountPoint> <optionalFuseArgs>\n\n";
+        return 1;
+    }
 
+    int fuse_stat;
     bfs::CoreBFSIO io;
     io.path = argv[1];
     io.blocks = atoi(argv[2]);
+    io.rootBlock = 0;
 
     // reading echoless password, based on solution here:
     // http://stackoverflow.com/questions/1196418/getting-a-password-in-c-without-using-getpass-3

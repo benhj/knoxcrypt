@@ -147,18 +147,20 @@ namespace bfs
     {
         bfs::BFSImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
 
+        // not sure about this..
+        // the idea is to maitain a 'pool' of available file blocks. This way,
+        // the fs doesn't have to contantly seek to the beginning of the fs for each
+        // new block required. It only has to do it every N blocks
         if(m_blockIndexPool.empty()) {
-
-            std::vector<uint64_t> indices = detail::getNAvailableBlocks(stream, 500, m_io.blocks);
+            std::vector<uint64_t> indices = detail::getNAvailableBlocks(stream, 10, m_io.blocks);
             m_blockIndexPool.assign(indices.begin(), indices.end());
-
         }
-
-        stream.close();
 
         // note building a new block to write to should always be in append mode
         uint64_t id = m_blockIndexPool[0];
         m_blockIndexPool.pop_front();
+        //uint64_t id = *detail::getNextAvailableBlock(stream, m_io.blocks);
+        stream.close();
         FileBlock block(m_io, id, id, bfs::OpenDisposition::buildAppendDisposition());
 
 
@@ -337,9 +339,16 @@ namespace bfs
             // if in overwrite mode, filesize won't be updated
             // since we're simply overwriting bytes that already exist
             // NOTE: need to fix for when we start increasing size of file at end
+
+            // this is the fix!
+            if(this->tell() == m_fileSize) {
+                m_openDisposition = OpenDisposition::buildAppendDisposition();
+            }
+
             if (m_openDisposition.append() == AppendOrOverwrite::Append) {
                 ++m_fileSize;
             }
+
             bufferByteForWriting(s[i]);
         }
 

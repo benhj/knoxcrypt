@@ -52,9 +52,8 @@ namespace bfs
         explicit BFS(CoreBFSIO const &io)
             : m_io(io)
             , m_accessMutex()
-            , m_rootFolder(m_io, 0, "root")
+            , m_rootFolder(io, io.rootBlock, "root")
         {
-
         }
 
         FolderEntry getCurrent(std::string const &path)
