@@ -33,7 +33,7 @@ namespace bfs
 
     BFSImageStream::BFSImageStream(CoreBFSIO const &io, std::ios::openmode mode)
         : m_stream(io.path.c_str(), mode)
-        , m_cipher(boost::make_shared<cipher::BasicByteTransformer>(io.password))
+        , m_byteTransformer(boost::make_shared<cipher::BasicByteTransformer>(io.password))
     {
     }
 
@@ -44,7 +44,7 @@ namespace bfs
         std::vector<char> in;
         in.resize(n);
         (void)m_stream.read(&in.front(), n);
-        m_cipher->transform(&in.front(), buf, start, n);
+        m_byteTransformer->transform(&in.front(), buf, start, n);
         return *this;
     }
 
@@ -54,7 +54,7 @@ namespace bfs
         std::vector<char> out;
         out.resize(n);
         std::ios_base::streamoff start = m_stream.tellp();
-        m_cipher->transform((char*)buf, &out.front(), start, n);
+        m_byteTransformer->transform((char*)buf, &out.front(), start, n);
         (void)m_stream.write(&out.front(), n);
         return *this;
     }

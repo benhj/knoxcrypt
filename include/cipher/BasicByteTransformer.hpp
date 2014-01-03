@@ -21,10 +21,10 @@
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// will implement some variant of ARCFOUR
+// a basic stream transformation algorithm *very loosely* based on ARCFOUR
 
-#ifndef BFS_CIPHER_BASIC_TRANSFORMER_CIPHER_HPP__
-#define BFS_CIPHER_BASIC_TRANSFORMER_CIPHER_HPP__
+#ifndef BFS_CIPHER_BASIC_BYTE_TRANSFORMER_HPP__
+#define BFS_CIPHER_BASIC_BYTE_TRANSFORMER_HPP__
 
 #include "cipher/IByteTransformer.hpp"
 

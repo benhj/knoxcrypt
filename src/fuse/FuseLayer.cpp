@@ -28,7 +28,6 @@
 
 #include "bfs/BFS.hpp"
 #include "bfs/CoreBFSIO.hpp"
-#include "cipher/StreamCipher.hpp"
 
 #include <fuse.h>
 

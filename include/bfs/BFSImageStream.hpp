@@ -61,7 +61,7 @@ namespace bfs
       private:
         BFSImageStream();
         std::fstream m_stream;
-        ByteTransformerPtr m_cipher;
+        ByteTransformerPtr m_byteTransformer;
     };
 
 }
