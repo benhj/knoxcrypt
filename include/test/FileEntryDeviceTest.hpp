@@ -60,20 +60,14 @@ class FileEntryDeviceTest
 
         // test write get file size from same entry
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             bfs::FileStreamPtr stream(new bfs::FileStream(bfs::FileEntryDevice(entry)));
             std::string testData(createLargeStringToWrite());
             (*stream) << testData.c_str();
         }
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "FileStreamTest::testWriteReportsCorrectFileSize()");
@@ -88,20 +82,14 @@ class FileEntryDeviceTest
         // test write get file size from same entry
         std::string testData(createLargeStringToWrite());
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             bfs::FileEntryDevice device(entry);
             std::streampos bytesWrote = device.write(testData.c_str(), testData.length());
             ASSERT_EQUAL(BIG_SIZE, bytesWrote, "FileStreamTest::testWriteFollowedByRead() bytes wrote");
         }
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> buffer;

@@ -42,14 +42,21 @@ int testFailures = 0;
 int passedPoints = 0;
 std::vector<std::string> failingTestPoints;
 
+bfs::CoreBFSIO createTestIO(boost::filesystem::path const &testPath)
+{
+    bfs::CoreBFSIO io;
+    io.path = testPath.string();
+    io.blocks = 2048;
+    io.password = "abcd1234";
+    io.rootBlock = 0;
+    return io;
+}
+
 inline boost::filesystem::path buildImage(boost::filesystem::path const &path, long const blockCount)
 {
     std::string testImage(boost::filesystem::unique_path().string());
     boost::filesystem::path testPath = path / testImage;
-    bfs::CoreBFSIO io;
-    io.path = testPath.string();
-    io.blocks = blockCount;
-    io.password = "abcd1234";
+    bfs::CoreBFSIO io = createTestIO(testPath);
     bfs::MakeBFS bfs(io);
     return testPath;
 }
@@ -70,15 +77,6 @@ std::string createAString()
         theString.append("a");
     }
     return theString;
-}
-
-bfs::CoreBFSIO createTestIO(boost::filesystem::path const &testPath)
-{
-    bfs::CoreBFSIO io;
-    io.path = testPath.string();
-    io.blocks = 2048;
-    io.password = "abcd1234";
-    return io;
 }
 
 #define ASSERT_EQUAL(A, B, C)                                          \

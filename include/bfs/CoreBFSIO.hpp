@@ -34,6 +34,7 @@ namespace bfs
         std::string path;
         uint64_t blocks;
         std::string password;
+        uint64_t rootBlock;
     };
 
 }

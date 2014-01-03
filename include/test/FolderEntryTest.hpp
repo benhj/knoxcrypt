@@ -75,10 +75,7 @@ class FolderEntryTest
 
     bfs::FolderEntry createTestFolder(boost::filesystem::path const &p, long const blocks)
     {
-        bfs::CoreBFSIO io;
-        io.path = p.string();
-        io.blocks = blocks;
-        io.password = "abcd1234";
+        bfs::CoreBFSIO io = createTestIO(p);
         bfs::FolderEntry folder(io, 0, "root");
         folder.addFileEntry("test.txt");
         folder.addFileEntry("some.log");
@@ -125,10 +122,7 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::CoreBFSIO io;
-        io.path = testPath.string();
-        io.blocks = blocks;
-        io.password = "abcd1234";
+        bfs::CoreBFSIO io = createTestIO(testPath);
         bfs::FolderEntry folder(io, 0, "root");
         std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 0, "testListAllEntriesEmpty: number of entries");
@@ -218,10 +212,7 @@ class FolderEntryTest
         bfs::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testData("some test data!");
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FolderEntry folder(io, 0, "root");
             bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -251,10 +242,7 @@ class FolderEntryTest
         std::string testData("some test data!");
         std::string testString(createLargeStringToWrite());
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FolderEntry folder(io, 0, "root");
             bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());

@@ -57,10 +57,7 @@ class MakeBFSTest
         int blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
-        bfs::CoreBFSIO io;
-        io.path = testPath.string();
-        io.blocks = blocks;
-        io.password = "abcd1234";
+        bfs::CoreBFSIO io = createTestIO(testPath);
 
         // test that enough bytes are written
         bfs::BFSImageStream is(io, std::ios::in | std::ios::binary);
@@ -76,10 +73,7 @@ class MakeBFSTest
         uint64_t fileCount(0);
         uint8_t fileCountBytes[8];
 
-        bfs::CoreBFSIO io;
-        io.path = testPath.string();
-        io.blocks = blocks;
-        io.password = "abcd1234";
+        bfs::CoreBFSIO io = createTestIO(testPath);
 
         bfs::BFSImageStream is(io, std::ios::in | std::ios::binary);
 
@@ -94,10 +88,7 @@ class MakeBFSTest
         int blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
-        bfs::CoreBFSIO io;
-        io.path = testPath.string();
-        io.blocks = blocks;
-        io.password = "abcd1234";
+        bfs::CoreBFSIO io = createTestIO(testPath);
 
         bfs::BFSImageStream is(io, std::ios::in | std::ios::binary);
         bfs::detail::OptionalBlock p = bfs::detail::getNextAvailableBlock(is);
@@ -111,10 +102,7 @@ class MakeBFSTest
         int blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
-        bfs::CoreBFSIO io;
-        io.path = testPath.string();
-        io.blocks = blocks;
-        io.password = "abcd1234";
+        bfs::CoreBFSIO io = createTestIO(testPath);
 
         bfs::BFSImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
         bfs::detail::setBlockToInUse(1, blocks, is);
@@ -158,10 +146,7 @@ class MakeBFSTest
 
         uint64_t offset = bfs::detail::getOffsetOfFileBlock(0, blocks);
         // open a stream and read the first byte which signifies number of entries
-        bfs::CoreBFSIO io;
-        io.path = testPath.string();
-        io.blocks = blocks;
-        io.password = "abcd1234";
+        bfs::CoreBFSIO io = createTestIO(testPath);
         bfs::BFSImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
         is.seekg(offset + bfs::detail::FILE_BLOCK_META);
         uint8_t bytes[8];

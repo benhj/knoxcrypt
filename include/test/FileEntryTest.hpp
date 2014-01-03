@@ -80,10 +80,7 @@ class FileEntryTest
 
         // test write get file size from same entry
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -94,10 +91,7 @@ class FileEntryTest
 
         // test get file size different entry but same data
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "testFileSizeReportedCorrectly B");
@@ -111,10 +105,7 @@ class FileEntryTest
 
         // test write get file size from same entry
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -147,10 +138,7 @@ class FileEntryTest
 
         // test write followed by unlink
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -181,10 +169,7 @@ class FileEntryTest
 
         // test that filesize is 0 when read back in
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             ASSERT_EQUAL(0, entry.fileSize(), "testFileUnlink B");
 
@@ -205,10 +190,7 @@ class FileEntryTest
 
         // test write get file size from same entry
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -217,10 +199,7 @@ class FileEntryTest
         }
 
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildWriteOnlyDisposition());
             std::vector<uint8_t> vec(entry.fileSize());
@@ -245,10 +224,7 @@ class FileEntryTest
 
         // test write get file size from same entry
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -258,10 +234,7 @@ class FileEntryTest
 
         // write some more
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::string testData(createLargeStringToWrite());
@@ -287,10 +260,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -300,10 +270,7 @@ class FileEntryTest
 
         // test read
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(createLargeStringToWrite());
@@ -322,10 +289,7 @@ class FileEntryTest
 
         // initial big write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -336,10 +300,7 @@ class FileEntryTest
         // small append
         std::string appendString("appended!");
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
@@ -348,10 +309,7 @@ class FileEntryTest
 
         // test read
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", 1,
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(createLargeStringToWrite());
@@ -371,10 +329,7 @@ class FileEntryTest
 
         // initial big write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -385,10 +340,7 @@ class FileEntryTest
         // secondary overwrite
         std::string testData("goodbye...!");
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildOverwriteDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -398,10 +350,7 @@ class FileEntryTest
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtStart correct file size");
         }
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", 1,
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
@@ -419,10 +368,7 @@ class FileEntryTest
 
         // initial big write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -433,10 +379,7 @@ class FileEntryTest
         // secondary overwrite
         std::string testData("goodbye...!");
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - testData.length());
@@ -447,10 +390,7 @@ class FileEntryTest
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtEnd correct file size");
         }
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", 1,
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
@@ -469,10 +409,7 @@ class FileEntryTest
 
         // initial big write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -484,10 +421,7 @@ class FileEntryTest
         std::string testData("goodbye...!");
         std::string testDataB("final bit!");
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - testData.length());
@@ -499,10 +433,7 @@ class FileEntryTest
         }
 
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", 1,
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
@@ -522,10 +453,7 @@ class FileEntryTest
 
         // initial big write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -535,10 +463,7 @@ class FileEntryTest
 
         // secondary overwrite
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - 50);
@@ -548,10 +473,7 @@ class FileEntryTest
         }
 
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", 1,
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
@@ -574,10 +496,7 @@ class FileEntryTest
         // initial small write
         std::string testData("small string");
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -587,10 +506,7 @@ class FileEntryTest
         // big append
         std::string appendString(createLargeStringToWrite());
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
@@ -599,10 +515,7 @@ class FileEntryTest
 
         // test read
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(testData.append(appendString));
@@ -621,10 +534,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string const testString("Hello and goodbye!");
             std::string testData(testString);
@@ -635,10 +545,7 @@ class FileEntryTest
 
         // test seek and read
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::string expected("goodbye!");
@@ -658,10 +565,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -672,10 +576,7 @@ class FileEntryTest
         // test seek of big file
         std::string appendString("appended!");
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
@@ -683,10 +584,7 @@ class FileEntryTest
         }
 
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildAppendDisposition());
             std::vector<char> vec;
@@ -706,10 +604,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -720,10 +615,7 @@ class FileEntryTest
         std::string testData("goodbye!");
         std::streamoff off = -548;
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(off, std::ios_base::end);
@@ -731,10 +623,7 @@ class FileEntryTest
             entry.flush();
         }
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
@@ -753,10 +642,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -769,10 +655,7 @@ class FileEntryTest
         std::streamoff initialSeek = 12880;
         std::streamoff finalPosition = initialSeek + off;
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(initialSeek);
@@ -782,10 +665,7 @@ class FileEntryTest
         }
 
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
@@ -804,10 +684,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -820,10 +697,7 @@ class FileEntryTest
         std::streamoff initialSeek = 3267;
         std::streamoff finalPosition = initialSeek + off;
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(initialSeek);
@@ -833,10 +707,7 @@ class FileEntryTest
         }
 
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
@@ -855,10 +726,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createAString());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -869,10 +737,7 @@ class FileEntryTest
         int seekPos = 499; // overwrite to begin at very end
         std::string testData("goodbye!");
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildOverwriteDisposition());
             entry.seek(seekPos);
@@ -881,10 +746,7 @@ class FileEntryTest
         }
 
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
@@ -903,10 +765,7 @@ class FileEntryTest
 
         // test write
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt");
             std::string testData(createAString());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -916,10 +775,7 @@ class FileEntryTest
 
         std::string testData("goodbye!");
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "test.txt", 1,
                                  bfs::OpenDisposition::buildAppendDisposition());
             entry.write(testData.c_str(), testData.length());
@@ -927,10 +783,7 @@ class FileEntryTest
         }
 
         {
-            bfs::CoreBFSIO io;
-            io.path = testPath.string();
-            io.blocks = blocks;
-            io.password = "abcd1234";
+            bfs::CoreBFSIO io = createTestIO(testPath);
             bfs::FileEntry entry(io, "entry", uint64_t(1),
                                  bfs::OpenDisposition::buildReadOnlyDisposition());
 
