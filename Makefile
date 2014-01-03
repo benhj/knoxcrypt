@@ -1,7 +1,7 @@
 CXX=clang++
-CXXFLAGS=-ggdb -std=c++11 -stdlib=libc++ -I/usr/local/include/boost -Iinclude -D_FILE_OFFSET_BITS=64
+CXXFLAGS=-ggdb -std=c++11 -I/usr/local/include/boost -Iinclude -D_FILE_OFFSET_BITS=64
 CXXFLAGS_FUSE=-I/usr/local/include/osxfuse  -DFUSE_USE_VERSION=26
-LDFLAGS=-L/usr/local/lib -stdlib=libc++ -lboost_filesystem -lboost_system -losxfuse
+LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -losxfuse
 SOURCES := $(wildcard src/bfs/*.cpp)
 MAKE_BFS_SRC := $(wildcard src/makebfs/*.cpp)
 TEST_SRC := $(wildcard src/test/*.cpp)
@@ -12,7 +12,7 @@ OBJECTS_TEST := $(addprefix obj-test/,$(notdir $(TEST_SRC:.cpp=.o)))
 OBJECTS_FUSE := $(addprefix obj-fuse/,$(notdir $(FUSE_SRC:.cpp=.o)))
 TEST_EXECUTABLE=test
 MAKEBFS_EXECUTABLE=makebfs
-FUSE_LAYER=bfs_
+FUSE_LAYER=bfs
 
 obj/%.o: src/bfs/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
@@ -26,22 +26,19 @@ obj-makebfs/%.o: src/makebfs/%.cpp
 obj-fuse/%.o: src/fuse/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_FUSE) -c -o $@ $<
 
-all: $(SOURCES) $(TEST_SRC) $(TEST_EXECUTABLE)
-
-makebfs: $(SOURCES) $(MAKE_BFS_SRC) $(MAKEBFS_EXECUTABLE)
-
-bfs: $(SOURCES) $(FUSE_SRC) $(FUSE_LAYER)
+all: $(SOURCES) $(TEST_SRC) $(TEST_EXECUTABLE) $(FUSE_LAYER) $(MAKEBFS_EXECUTABLE)
 
 $(TEST_EXECUTABLE): directoryObj directoryObjTest $(OBJECTS) $(OBJECTS_TEST)
-	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJECTS_TEST) -o $@
+	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJECTS_TEST) -o $@ 
 	
 $(MAKEBFS_EXECUTABLE): directoryObj directoryObjMakeBfs $(OBJECTS) $(OBJECTS_UTIL)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJECTS_UTIL) -o $@
 
 $(FUSE_LAYER): directoryObj directoryObjFuse $(OBJECTS) $(OBJECTS_FUSE)
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJECTS_FUSE) -o $@
+	
 clean:
-	/bin/rm -fr obj obj-makebfs obj-test obj-fuse test makebfs
+	/bin/rm -fr obj obj-makebfs obj-test obj-fuse test makebfs bfs
 	
 directoryObj: 
 	/bin/mkdir -p obj
@@ -54,6 +51,7 @@ directoryObjMakeBfs:
 	
 directoryObjFuse:
 	/bin/mkdir -p obj-fuse
+	
     
     
     

@@ -53,16 +53,17 @@ Compiling
 - Requires boost filesystem libraries and boost headers.
 - Makefile needs to be updated according to where boost is installed
 
-`make test` will compile the test binary used to unit test the functionality
+`make` or `make all` will compile everything and all binaries. To execute:
 
 `./test` will run the unit test suite
-
-`make makebfs` will compile the tool used to build a bfs image
-
 `./makebfs 204800 image.bfs` will create a 100MB bfs image
+`./bfs image.bfs 204800 testMount -d` will launch and mount image.bfs under 
+the directory test mount in fuse debug mode
 
+To compile separate
+components:-
+
+`make test` will compile the test binary only
+`make makebfs` will compile the tool used to build a bfs image
 `make bfs` will compile the fuse layer
 
-`./bfs_ image.bfs 204800 testMount -o debug` will launch and mount image.bfs under the directory test mount in single-threaded mode.
-
-More details to follow.
