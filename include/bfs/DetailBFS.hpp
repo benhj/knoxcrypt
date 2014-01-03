@@ -38,7 +38,7 @@ namespace bfs { namespace detail
     uint64_t const METABLOCKS_BEGIN = 24;
     uint64_t const METABLOCK_SIZE = 25;
     uint64_t const MAX_FILENAME_LENGTH = 255;
-    uint64_t const FILE_BLOCK_SIZE = 512;
+    uint64_t const FILE_BLOCK_SIZE = 4096;
     uint64_t const FILE_BLOCK_META = 12;
 
     inline void convertUInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
@@ -351,7 +351,8 @@ namespace bfs { namespace detail
      * @param in the bfs image stream
      * @param blocksRequired the number of file blocks required
      * @param totalBlocks the total number of blocks in the bfs
-     * @return a vector of available file block indices
+     * @return a vector of available file block indices. Note this might
+     * be less that blocksRequired if there are not enough blocks available
      */
     inline std::vector<uint64_t> getNAvailableBlocks(bfs::BFSImageStream &in,
                                                      uint64_t const blocksRequired,
@@ -383,7 +384,7 @@ namespace bfs { namespace detail
             }
             eightCounter += 8;
         }
-        return std::vector<uint64_t>(); // empty not enough free blocks found
+        return bitBuffer; // return all blocks that could be found
     }
 
     /**
