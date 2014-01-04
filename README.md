@@ -92,10 +92,11 @@ Compiling
 
 `./test` will run the test suite
 
-`./makebfs 204800 image.bfs` will create a 100MB bfs image. This will ask you for a password which is
+`./makebfs 128000 image.bfs` will create a 500MB BasicFS image when the block
+size is 4096. This will ask you for a password which is
 used to seed a 256 byte key used to encrypt / decrypt the file system.
 
-`./bfs image.bfs 204800 testMount -d` will launch and mount image.bfs under 
+`./bfs image.bfs 128000 testMount -d` will launch and mount image.bfs under 
 the directory testMount in fuse debug mode. You will be asked for the password used to initially
 encrypt the image.
 
