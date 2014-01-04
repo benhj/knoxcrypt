@@ -4,7 +4,7 @@ BasicFS: An experimental fuse-based filesystem
 ### Technical overview
 
 Files are stored as blocks; the block size is determined by the macro
-`uint64_t const FILE_BLOCK_SIZE = 4096;` in the file `DetailBFS.hpp`. 4096 represents 
+`uint64_t const FILE_BLOCK_SIZE = 4096;` as found in the file `DetailBFS.hpp`. 4096 represents 
 a trade-off between file space usage and file access time efficiency. The smaller
 the block size, the better the utilization of space but the poorer 
 the write-time efficiency. A value of 4096 was found to represent a good tradeoff. (An
