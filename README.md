@@ -91,8 +91,10 @@ Compiling
 `make` or `make all` will compile everything and all binaries. To execute:
 
 `./test` will run the test suite
+
 `./makebfs 204800 image.bfs` will create a 100MB bfs image. This will ask you for a password which is
 used to seed a 256 byte key used to encrypt / decrypt the file system.
+
 `./bfs image.bfs 204800 testMount -d` will launch and mount image.bfs under 
 the directory testMount in fuse debug mode. You will be asked for the password used to initially
 encrypt the image.
@@ -100,6 +102,8 @@ encrypt the image.
 To compile each component separately:-
 
 `make test` will compile the test binary
+
 `make makebfs` will compile the binary used to build a BasicFS image
+
 `make bfs` will compile the fuse layer
 
