@@ -1,6 +1,15 @@
 BasicFS: An experimental fuse-based filesystem
 ----------------------------------------------
 
+BasicFS is an experiment in understanding file systems in userspace. 
+It is an educational project primarily undertaken to improve by programming chops. 
+And it can be used as the basis of more sophisticated file systems, for example, 
+those with encryption and/or steganography. The name is inspired by the 
+programming language, BASIC, which by definition is a beginner's language. 
+I am a relative novice at this stuff, hence the name, however, BasicFS has 
+evolved into something of a beast and continues to strive towards sophistication. 
+The core of the thing is implemented in C++ but has a little C thrown in for the FUSE parts.
+
 ### Technical overview
 
 Files are stored as blocks; the block size is determined by the macro
