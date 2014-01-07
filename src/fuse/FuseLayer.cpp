@@ -35,6 +35,8 @@ either expressed or implied, of the FreeBSD Project.
 #include "bfs/BFS.hpp"
 #include "bfs/CoreBFSIO.hpp"
 
+#include <boost/program_options.hpp>
+
 #include <fuse.h>
 
 #include <stdio.h>
@@ -293,25 +295,15 @@ static struct fuse_operations bfs_oper =
     .rename = bfs_rename
 };
 
-
-int main(int argc, char *argv[])
+/**
+ * @brief retrieves an echoless password from the user
+ * @note based on solution found here:
+ * http://stackoverflow.com/questions/1196418/getting-a-password-in-c-without-using-getpass-3
+ * @todo handle error conditions
+ * @return the password
+ */
+std::string getPassword()
 {
-
-    if(argc < 4) {
-        std::cout<<"\nUnsufficient arguments supplied\n\n";
-        std::cout<<"Format is \n\n";
-        std::cout<<"    ./bfs <image.bfs> <blocks> <mountPoint> <optionalFuseArgs>\n\n";
-        return 1;
-    }
-
-    int fuse_stat;
-    bfs::CoreBFSIO io;
-    io.path = argv[1];
-    io.blocks = atoi(argv[2]);
-    io.rootBlock = 0;
-
-    // reading echoless password, based on solution here:
-    // http://stackoverflow.com/questions/1196418/getting-a-password-in-c-without-using-getpass-3
     // read password in
     struct termios oflags, nflags;
     char password[64];
@@ -324,7 +316,6 @@ int main(int argc, char *argv[])
 
     if (tcsetattr(fileno(stdin), TCSANOW, &nflags) != 0) {
         perror("tcsetattr");
-        return EXIT_FAILURE;
     }
 
     printf("password: ");
@@ -334,22 +325,89 @@ int main(int argc, char *argv[])
     // restore terminal
     if (tcsetattr(fileno(stdin), TCSANOW, &oflags) != 0) {
         perror("tcsetattr");
-        return EXIT_FAILURE;
+    }
+    return std::string(password);
+}
+
+int main(int argc, char *argv[])
+{
+
+    // parse the program options
+    uint64_t rootBlock;
+    bool debug = true;
+    namespace po = boost::program_options;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help", "produce help message")
+        ("imageName", po::value<std::string>(), "bfs image path")
+        ("mountPoint", po::value<std::string>(), "mountPoint path")
+        ("debug", po::value<bool>(&debug)->default_value(true), "fuse debug")
+        ("rootBlock", po::value<uint64_t>(&rootBlock)->default_value(0), "root block")
+    ;
+
+    po::positional_options_description positionalOptions;
+    (void)positionalOptions.add("imageName", 1);
+    (void)positionalOptions.add("mountPoint", 1);
+
+    po::variables_map vm;
+    try {
+        po::store(po::command_line_parser(argc, argv).
+                  options(desc).positional(positionalOptions).run(),
+                  vm);
+        po::notify(vm);
+        if (vm.count("help") ||
+            vm.count("mountPoint")==0 || vm.count("imageName") == 0) {
+            std::cout << desc << std::endl;
+            return 1;
+        }
+
+        if(vm.count("help")) {
+            std::cout<<desc<<"\n";
+        } else {
+
+            std::cout<<"image path: "<<vm["imageName"].as<std::string>()<<std::endl;
+            std::cout<<"mount point: "<<vm["mountPoint"].as<std::string>()<<std::endl;
+
+        }
+    } catch (...) {
+        std::cout<<"Problem parsing options"<<std::endl;
+        std::cout<<desc<<std::endl;
+        return 1;
     }
 
-    io.password.append(password);
+    // Setup a core bfs io object which stores highlevel info about accessing
+    // the BFS image
+    bfs::CoreBFSIO io;
+    io.path = vm["imageName"].as<std::string>().c_str();
+    io.rootBlock = rootBlock;
+    io.password = getPassword();
 
-    bfs::BFS *bfsPtr = new bfs::BFS(io);
+    // Obtain the number of blocks in the image by reading the image's block count
+    bfs::BFSImageStream stream(io, std::ios::in | std::ios::binary);
+    io.blocks = bfs::detail::getBlockCount(stream);
+    stream.close();
 
-    argc -= 2;
-    for (int i = 0; i<argc; ++i) {
-        argv[i+1] = argv[i+3];
+    // Create the basic file system
+    bfs::BFS theBfs(io);
+
+    // make arguments fuse-compatable
+    argc = 3;
+    argv[1] = const_cast<char*>(vm["mountPoint"].as<std::string>().c_str());
+
+    // always run in single-threaded mode; multi-threaded not yet supported
+    argv[2] = const_cast<char*>(std::string("-s").c_str());
+
+    // debug mode? (this is also single-threaded)
+    // debug mode prints out a load of debug info to console
+    if(debug) {
+        argv[2] = const_cast<char*>(std::string("-d").c_str());
     }
 
     // turn over control to fuse
     fprintf(stderr, "about to call fuse_main\n");
-    fuse_stat = fuse_main(argc, argv, &bfs_oper, bfsPtr);
+    int fuse_stat = fuse_main(argc, argv, &bfs_oper, &theBfs);
     fprintf(stderr, "fuse_main returned %d\n", fuse_stat);
 
     return fuse_stat;
+
 }
