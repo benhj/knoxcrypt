@@ -6,7 +6,7 @@ It is an educational project primarily undertaken to improve by programming chop
 And it can be used as the basis of more sophisticated file systems, for example, 
 those with encryption and/or steganography. The name is inspired by the 
 programming language, BASIC, which by definition is a beginner's language. 
-I am a relative novice at this stuff, hence the name, however, BasicFS has 
+The design of the filesystem iteself is rather basic yet has 
 evolved into something of a beast and continues to strive towards sophistication. 
 The core of the thing is implemented in C++ but has a little C thrown in for the FUSE parts.
 
@@ -67,8 +67,11 @@ Any sub folders are accordingly updated in a similar manner.
 
 The whole filesystem image is encrypted using a very basic stream cipher. Although this has 
 bits borrowed from the ARCFOUR algorithm, it should not be relied upon for strong encryption 
-and I give no guarantees as to its strength (of which there might be very little) and security.
+and I give no guarantees as to its strength (of which there might be very little) and security*.
 During development ARCFOUR proper was implemented but was found to be too slow to be of any practical value.
+
+*I have looked at my implementation closer and have discovered that its ARCFOUR but without
+the swap operation. ARCFOUR without the swap implementation is provably insecure.
 
 The keen developer is encouraged to implement their own transformational cipher. All she 
 needs to do is implement the function `doTransform` in `IByteTransformer` as defined in `IByteTransformer.hpp`.
