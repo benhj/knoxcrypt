@@ -106,7 +106,7 @@ Compiling
 
 `./makebfs 128000 image.bfs` will create a 500MB BasicFS image when the block
 size is 4096. This will ask you for a password which is
-used to seed a 256 byte key used to encrypt / decrypt the file system.
+used to seed a key used to encrypt / decrypt the file system.
 
 `./bfs image.bfs testMount` will launch and mount image.bfs under 
 the directory testMount in fuse debug mode; note to disable debug
