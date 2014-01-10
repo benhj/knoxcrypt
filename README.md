@@ -108,8 +108,10 @@ Compiling
 size is 4096. This will ask you for a password which is
 used to seed a 256 byte key used to encrypt / decrypt the file system.
 
-`./bfs image.bfs 128000 testMount -d` will launch and mount image.bfs under 
-the directory testMount in fuse debug mode. You will be asked for the password used to initially
+`./bfs image.bfs testMount` will launch and mount image.bfs under 
+the directory testMount in fuse debug mode; note to disable debug
+mode you need to specify `--debug 0' as an extra parameter. 
+You will be asked for the password used to initially
 encrypt the image.
 
 To compile each component separately:-
