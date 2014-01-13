@@ -32,9 +32,9 @@ either expressed or implied, of the FreeBSD Project.
 #include "bfs/FileEntry.hpp"
 #include "bfs/FileEntryDevice.hpp"
 #include "bfs/FileStreamPtr.hpp"
-#include "bfs/MakeBFS.hpp"
 #include "bfs/OpenDisposition.hpp"
 #include "test/TestHelpers.hpp"
+#include "utility/MakeBFS.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>

@@ -31,7 +31,7 @@ either expressed or implied, of the FreeBSD Project.
 #define BFS_TEST_HELPERS_HPP__
 
 #include "bfs/CoreBFSIO.hpp"
-#include "bfs/MakeBFS.hpp"
+#include "utility/MakeBFS.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>

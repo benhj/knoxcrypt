@@ -32,9 +32,9 @@ either expressed or implied, of the FreeBSD Project.
 #include "bfs/DetailFileBlock.hpp"
 #include "bfs/FileBlock.hpp"
 #include "bfs/FileBlockException.hpp"
-#include "bfs/MakeBFS.hpp"
 #include "bfs/OpenDisposition.hpp"
 #include "test/TestHelpers.hpp"
+#include "utility/MakeBFS.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>

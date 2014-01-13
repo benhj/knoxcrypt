@@ -28,8 +28,8 @@ either expressed or implied, of the FreeBSD Project.
 */
 
 #include "bfs/CoreBFSIO.hpp"
-#include "bfs/EcholessPasswordPrompt.hpp"
-#include "bfs/MakeBFS.hpp"
+#include "utility/EcholessPasswordPrompt.hpp"
+#include "utility/MakeBFS.hpp"
 
 #include <boost/program_options.hpp>
 

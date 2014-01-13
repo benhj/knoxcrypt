@@ -32,8 +32,8 @@ either expressed or implied, of the FreeBSD Project.
 #include "bfs/DetailFileBlock.hpp"
 #include "bfs/FileEntry.hpp"
 #include "bfs/FileEntryException.hpp"
-#include "bfs/MakeBFS.hpp"
 #include "test/TestHelpers.hpp"
+#include "utility/MakeBFS.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>

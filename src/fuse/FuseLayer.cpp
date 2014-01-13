@@ -34,7 +34,7 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "bfs/BFS.hpp"
 #include "bfs/CoreBFSIO.hpp"
-#include "bfs/EcholessPasswordPrompt.hpp"
+#include "utility/EcholessPasswordPrompt.hpp"
 
 #include <boost/program_options.hpp>
 
