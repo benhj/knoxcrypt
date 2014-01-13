@@ -185,7 +185,7 @@ namespace bfs
             if(m_omp) {
                 CoreBFSIO magicIo = io;
                 magicIo.rootBlock = *m_omp;
-                FolderEntry magicDir(magicIo, "magic");
+                FolderEntry magicDir(magicIo, "root");
             }
         }
     };

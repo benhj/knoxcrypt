@@ -41,10 +41,6 @@ either expressed or implied, of the FreeBSD Project.
 #include <boost/filesystem/path.hpp>
 #include <boost/optional.hpp>
 
-#include <boost/thread/mutex.hpp>
-#include <boost/thread.hpp>
-#include <boost/thread/lock_guard.hpp>
-
 #include <string>
 
 namespace bfs
@@ -57,8 +53,6 @@ namespace bfs
       public:
         explicit BFS(CoreBFSIO const &io)
             : m_io(io)
-            , m_accessMutex()
-            , m_rootFolder(io, io.rootBlock, "root")
         {
         }
 
@@ -334,11 +328,6 @@ namespace bfs
 
         // the core bfs io (path, blocks, password)
         CoreBFSIO m_io;
-
-        mutable boost::mutex m_accessMutex;
-        typedef boost::lock_guard<boost::mutex> LockType;
-
-        mutable FolderEntry m_rootFolder;
 
         BFS(); // not required
 
