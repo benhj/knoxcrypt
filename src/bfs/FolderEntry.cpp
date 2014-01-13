@@ -28,9 +28,10 @@ either expressed or implied, of the FreeBSD Project.
 */
 
 #include "bfs/BFSImageStream.hpp"
-#include "bfs/DetailBFS.hpp"
-#include "bfs/DetailFolder.hpp"
 #include "bfs/FolderEntry.hpp"
+#include "bfs/detail/DetailBFS.hpp"
+#include "bfs/detail/DetailFolder.hpp"
+
 #include <stdexcept>
 
 namespace bfs

@@ -32,9 +32,9 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "bfs/BFSImageStream.hpp"
 #include "bfs/CoreBFSIO.hpp"
-#include "bfs/DetailBFS.hpp"
-#include "bfs/DetailFileBlock.hpp"
 #include "bfs/OpenDisposition.hpp"
+#include "bfs/detail/DetailBFS.hpp"
+#include "bfs/detail/DetailFileBlock.hpp"
 
 #include <vector>
 

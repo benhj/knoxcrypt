@@ -31,7 +31,7 @@ either expressed or implied, of the FreeBSD Project.
 #define BFS_BFS_DETAIL_FILE_BLOCK_HPP__
 
 #include "bfs/BFSImageStream.hpp"
-#include "bfs/DetailBFS.hpp"
+#include "bfs/detail/DetailBFS.hpp"
 
 #include <iostream>
 #include <stdint.h>
