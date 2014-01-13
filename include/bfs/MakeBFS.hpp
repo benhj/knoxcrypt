@@ -37,24 +37,30 @@ either expressed or implied, of the FreeBSD Project.
 #include "bfs/FileBlock.hpp"
 #include "bfs/FolderEntry.hpp"
 
+#include <boost/optional.hpp>
+
 #include <string>
 #include <fstream>
 #include <vector>
 #include <iostream>
 
+
 namespace bfs
 {
+    typedef boost::optional<uint64_t> OptionalMagicPart;
 
     class MakeBFS
     {
       public:
 
-        explicit MakeBFS(CoreBFSIO const &io)
+        explicit MakeBFS(CoreBFSIO const &io, OptionalMagicPart const &omp = OptionalMagicPart())
         {
             buildImage(io);
         }
 
       private:
+        OptionalMagicPart m_omp; // for creating a magic partition
+
         MakeBFS(); // not required
 
         void buildBlockBytes(uint64_t const fsSize, uint8_t sizeBytes[8])
@@ -172,6 +178,14 @@ namespace bfs
             // number of entries to zero. Note, the initial root block will
             // always be block 0
             FolderEntry rootDir(io, "root");
+
+            // create an extra 'magic partition' which is another root folder
+            // offset to a differing file block
+            if(m_omp) {
+                CoreBFSIO magicIo = io;
+                magicIo.rootBlock = *m_omp;
+                FolderEntry magicDir(magicIo, "magic");
+            }
         }
     };
 }

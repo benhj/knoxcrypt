@@ -34,14 +34,12 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "bfs/BFS.hpp"
 #include "bfs/CoreBFSIO.hpp"
+#include "bfs/EcholessPasswordPrompt.hpp"
 
 #include <boost/program_options.hpp>
 
 #include <fuse.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <termios.h>
 
 #define BFS_DATA ((bfs::BFS*) fuse_get_context()->private_data)
 
@@ -295,40 +293,6 @@ static struct fuse_operations bfs_oper =
     .rename = bfs_rename
 };
 
-/**
- * @brief retrieves an echoless password from the user
- * @note based on solution found here:
- * http://stackoverflow.com/questions/1196418/getting-a-password-in-c-without-using-getpass-3
- * @todo handle error conditions
- * @return the password
- */
-std::string getPassword()
-{
-    // read password in
-    struct termios oflags, nflags;
-    char password[64];
-
-    // disabling echo
-    tcgetattr(fileno(stdin), &oflags);
-    nflags = oflags;
-    nflags.c_lflag &= ~ECHO;
-    nflags.c_lflag |= ECHONL;
-
-    if (tcsetattr(fileno(stdin), TCSANOW, &nflags) != 0) {
-        perror("tcsetattr");
-    }
-
-    printf("password: ");
-    fgets(password, sizeof(password), stdin);
-    password[strlen(password) - 1] = 0;
-
-    // restore terminal
-    if (tcsetattr(fileno(stdin), TCSANOW, &oflags) != 0) {
-        perror("tcsetattr");
-    }
-    return std::string(password);
-}
-
 int main(int argc, char *argv[])
 {
 
@@ -380,7 +344,7 @@ int main(int argc, char *argv[])
     bfs::CoreBFSIO io;
     io.path = vm["imageName"].as<std::string>().c_str();
     io.rootBlock = rootBlock;
-    io.password = getPassword();
+    io.password = bfs::utility::getPassword();
 
     // Obtain the number of blocks in the image by reading the image's block count
     bfs::BFSImageStream stream(io, std::ios::in | std::ios::binary);
