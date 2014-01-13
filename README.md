@@ -5,7 +5,9 @@ BasicFS is an experiment in understanding file systems in userspace.
 It is an educational project primarily undertaken to improve by programming chops. 
 And it can be used as the basis of more sophisticated file systems, for example, 
 those with encryption and/or steganography. The name is inspired by the 
-programming language, BASIC, which by definition is a beginner's language. 
+programming language, BASIC, which by definition is a beginner's language
+(note: this is actually bullsh*t. I couldn't think of a better name but Ben's FS sounded too
+damn egotistical, however, I was already set on the namesapcing conventions... blah blah blah).
 The design of the filesystem iteself is rather basic yet has 
 evolved into something of a beast and continues to strive towards sophistication. 
 The core of the thing is implemented in C++ but has a little C thrown in for the FUSE parts.
