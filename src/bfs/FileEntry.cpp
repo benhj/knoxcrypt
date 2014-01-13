@@ -38,9 +38,10 @@ either expressed or implied, of the FreeBSD Project.
 namespace bfs
 {
     // for writing a brand new entry where start block isn't known
-    FileEntry::FileEntry(CoreBFSIO const &io, std::string const &name)
+    FileEntry::FileEntry(CoreBFSIO const &io, std::string const &name, bool const enforceStartBlock)
         : m_io(io)
         , m_name(name)
+        , m_enforceStartBlock(enforceStartBlock)
         , m_fileSize(0)
         , m_fileBlocks()
         , m_buffer()
@@ -59,6 +60,7 @@ namespace bfs
                          OpenDisposition const &openDisposition)
         : m_io(io)
         , m_name(name)
+        , m_enforceStartBlock(false)
         , m_fileSize(0)
         , m_fileBlocks()
         , m_buffer()
@@ -163,8 +165,16 @@ namespace bfs
         }
 
         // note building a new block to write to should always be in append mode
-        uint64_t id = m_blockIndexPool[0];
-        m_blockIndexPool.pop_front();
+        uint64_t id;
+
+        // if the starting file block is enforced, set to root block specified in m_io
+        if(m_enforceStartBlock) {
+            m_enforceStartBlock = false;
+            id = m_io.rootBlock;
+        } else {
+            id = m_blockIndexPool[0];
+            m_blockIndexPool.pop_front();
+        }
         //uint64_t id = *detail::getNextAvailableBlock(stream, m_io.blocks);
         stream.close();
         FileBlock block(m_io, id, id, bfs::OpenDisposition::buildAppendDisposition());

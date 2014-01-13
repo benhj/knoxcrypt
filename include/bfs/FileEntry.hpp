@@ -52,8 +52,9 @@ namespace bfs
          * @brief when creating a new file this constructor should be used
          * @param io the core bfs io (path, blocks, password)
          * @param name the name of the file entry
+         * @param enforceStartBlock true if start block should be set
          */
-        FileEntry(CoreBFSIO const &io, std::string const &name);
+        FileEntry(CoreBFSIO const &io, std::string const &name, bool const enforceStartBlock = false);
 
         /**
          * @brief when reading or appending or overwriting to the end of a file
@@ -134,6 +135,9 @@ namespace bfs
 
         // the name of the file entry
         std::string m_name;
+
+        // whether to enforce the starting file block (potentially dangerous!)
+        mutable bool m_enforceStartBlock;
 
         // the size of the file
         uint64_t m_fileSize;
