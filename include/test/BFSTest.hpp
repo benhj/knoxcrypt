@@ -75,7 +75,7 @@ class BFSTest
     bfs::FolderEntry createTestFolder(boost::filesystem::path const &p, long const blocks)
     {
         bfs::CoreBFSIO io = createTestIO(p);
-        bfs::FolderEntry folder(io, 0, "root");
+        bfs::FolderEntry folder(io, 0, std::string("root"));
         folder.addFileEntry("test.txt");
         folder.addFileEntry("some.log");
         folder.addFolderEntry("folderA");

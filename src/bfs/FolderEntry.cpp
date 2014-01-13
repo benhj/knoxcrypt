@@ -117,9 +117,10 @@ namespace bfs
     }
 
     FolderEntry::FolderEntry(CoreBFSIO const &io,
-                             std::string const &name)
+                             std::string const &name,
+                             bool const enforceRootBlock)
         : m_io(io)
-        , m_folderData(m_io, name)
+        , m_folderData(m_io, name, enforceRootBlock)
         , m_startVolumeBlock(m_folderData.getStartVolumeBlockIndex())
         , m_name(name)
         , m_entryCount(0)

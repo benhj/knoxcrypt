@@ -82,7 +82,7 @@ class FolderEntryTest
     bfs::FolderEntry createTestFolder(boost::filesystem::path const &p, long const blocks)
     {
         bfs::CoreBFSIO io = createTestIO(p);
-        bfs::FolderEntry folder(io, 0, "root");
+        bfs::FolderEntry folder(io, 0, std::string("root"));
         folder.addFileEntry("test.txt");
         folder.addFileEntry("some.log");
         folder.addFolderEntry("folderA");
@@ -129,7 +129,7 @@ class FolderEntryTest
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
         bfs::CoreBFSIO io = createTestIO(testPath);
-        bfs::FolderEntry folder(io, 0, "root");
+        bfs::FolderEntry folder(io, 0, std::string("root"));
         std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 0, "testListAllEntriesEmpty: number of entries");
     }
@@ -221,7 +221,7 @@ class FolderEntryTest
         std::string testData("some test data!");
         {
             bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FolderEntry folder(io, 0, "root");
+            bfs::FolderEntry folder(io, 0, std::string("root"));
             bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -251,7 +251,7 @@ class FolderEntryTest
         std::string testString(createLargeStringToWrite());
         {
             bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FolderEntry folder(io, 0, "root");
+            bfs::FolderEntry folder(io, 0, std::string("root"));
             bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());

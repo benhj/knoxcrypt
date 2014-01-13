@@ -52,9 +52,11 @@ namespace bfs
          * @param startBlock the index of the starting file block making up entry data
          * @param writable if data entries can be added to folder
          * @param name the name of the entry
+         * @param enforceRootBlock true if we want to enforce the starting root block
          */
         FolderEntry(CoreBFSIO const &io,
-                    std::string const &name = "root");
+                    std::string const &name = "root",
+                    bool const enforceRootBlock = false);
 
         /**
          * @brief constructs a FolderEntry to read from
