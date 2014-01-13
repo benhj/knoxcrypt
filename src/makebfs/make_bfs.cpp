@@ -30,6 +30,8 @@ either expressed or implied, of the FreeBSD Project.
 #include "bfs/CoreBFSIO.hpp"
 #include "bfs/MakeBFS.hpp"
 
+#include <boost/program_options.hpp>
+
 #include <iostream>
 #include <string>
 
@@ -39,15 +41,50 @@ either expressed or implied, of the FreeBSD Project.
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        std::cout<<"Insufficient number of arguments\n\nUsage:\n\nmake_bfs <blocks> <path>\n\n"<<std::endl;
+
+    namespace po = boost::program_options;
+    bool magicPartition;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help", "produce help message")
+        ("imageName", po::value<std::string>(), "bfs image path")
+        ("blockCount", po::value<uint64_t>(), "size of filesystem in blocks")
+        ("magicPartition", po::value<bool>(&magicPartition)->default_value(false), "create a magic partition");
+
+    po::positional_options_description positionalOptions;
+    (void)positionalOptions.add("imageName", 1);
+    (void)positionalOptions.add("blockCount", 1);
+
+    po::variables_map vm;
+    try {
+        po::store(po::command_line_parser(argc, argv).
+                  options(desc).positional(positionalOptions).run(),
+                  vm);
+        po::notify(vm);
+        if (vm.count("help") ||
+            vm.count("imageName")==0 || vm.count("blockCount") == 0) {
+            std::cout << desc << std::endl;
+            return 1;
+        }
+
+        if(vm.count("help")) {
+            std::cout<<desc<<"\n";
+        } else {
+
+            std::cout<<"image path: "<<vm["imageName"].as<std::string>()<<std::endl;
+            std::cout<<"file system size in blocks: "<<vm["blockCount"].as<uint64_t>()<<std::endl;
+
+        }
+    } catch (...) {
+        std::cout<<"Problem parsing options"<<std::endl;
+        std::cout<<desc<<std::endl;
         return 1;
     }
 
-    int blocks = atoi(argv[1]);
+    uint64_t blocks = vm["blockCount"].as<uint64_t>();
 
     bfs::CoreBFSIO io;
-    io.path = argv[2];
+    io.path = vm["imageName"].as<std::string>().c_str();
     io.blocks = blocks;
 
     // reading echoless password, based on solution here:
