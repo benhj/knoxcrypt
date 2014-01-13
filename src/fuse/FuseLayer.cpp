@@ -331,6 +331,7 @@ int main(int argc, char *argv[])
 
             std::cout<<"image path: "<<vm["imageName"].as<std::string>()<<std::endl;
             std::cout<<"mount point: "<<vm["mountPoint"].as<std::string>()<<std::endl;
+            std::cout<<"root block: "<<rootBlock<<std::endl;
 
         }
     } catch (...) {

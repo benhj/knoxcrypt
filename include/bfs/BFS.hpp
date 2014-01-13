@@ -64,7 +64,7 @@ namespace bfs
 
         FolderEntry getCurrent(std::string const &path)
         {
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // ignore trailing slash, but only if folder type
@@ -93,7 +93,7 @@ namespace bfs
 
         EntryInfo getInfo(std::string const &path)
         {
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // ignore trailing slash, but only if folder type
@@ -120,19 +120,19 @@ namespace bfs
 
         bool fileExists(std::string const &path) const
         {
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
             return doFileExists(path, rootFolder);
         }
 
         bool folderExists(std::string const &path)
         {
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
             return doFolderExists(path, rootFolder);
         }
 
         void addFile(std::string const &path)
         {
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // file entries with trailing slash should throw
@@ -166,7 +166,7 @@ namespace bfs
             if (chDst == '/') {
                 std::string(dst.begin(), dst.end() - 1).swap(dstPath);
             }
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
 
             // throw if source parent doesn't exist
             OptionalFolderEntry parentSrc = doGetParentFolderEntry(srcPath, rootFolder);
@@ -201,7 +201,7 @@ namespace bfs
 
         void addFolder(std::string const &path) const
         {
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // ignore trailing slash
@@ -222,7 +222,7 @@ namespace bfs
 
         void removeFile(std::string const &path)
         {
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // ignore trailing slash, but only if folder type
@@ -250,7 +250,7 @@ namespace bfs
 
         void removeFolder(std::string const &path, FolderRemovalType const &removalType)
         {
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // ignore trailing slash, but only if folder type
@@ -286,7 +286,7 @@ namespace bfs
 
         FileEntryDevice openFile(std::string const &path, OpenDisposition const &openMode)
         {
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
             char ch = *path.rbegin();
             if (ch == '/') {
                 throw BFSException(BFSError::NotFound);
@@ -312,7 +312,7 @@ namespace bfs
 
         void truncateFile(std::string const &path, std::ios_base::streamoff offset)
         {
-            FolderEntry rootFolder(m_io, 0, "root");
+            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
             OptionalFolderEntry parentEntry = doGetParentFolderEntry(path, rootFolder);
             if (!parentEntry) {
                 throw BFSException(BFSError::NotFound);

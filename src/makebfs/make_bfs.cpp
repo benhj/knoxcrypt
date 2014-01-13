@@ -87,7 +87,13 @@ int main(int argc, char *argv[])
 
     io.password.append(bfs::utility::getPassword());
 
-    bfs::MakeBFS bfs(io);
+    // magic partition?
+    bfs::OptionalMagicPart omp;
+    if(magicPartition) {
+        omp = bfs::OptionalMagicPart(atoi(bfs::utility::getPassword("Magic partition number: ").c_str()));
+    }
+
+    bfs::MakeBFS bfs(io, omp);
 
     return 0;
 }

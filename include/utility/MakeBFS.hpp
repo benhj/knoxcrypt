@@ -53,7 +53,8 @@ namespace bfs
     {
       public:
 
-        explicit MakeBFS(CoreBFSIO const &io, OptionalMagicPart const &omp = OptionalMagicPart())
+        MakeBFS(CoreBFSIO const &io, OptionalMagicPart const &omp = OptionalMagicPart())
+        : m_omp(omp)
         {
             buildImage(io);
         }

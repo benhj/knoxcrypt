@@ -1,6 +1,7 @@
 #ifndef BFS_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__
 #define BFS_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__
 
+#include <iostream>
 #include <string>
 
 #include <stdio.h>
@@ -19,7 +20,7 @@ namespace bfs
          * @todo handle error conditions
          * @return the password
          */
-        inline std::string getPassword()
+        inline std::string getPassword(std::string const &prompt = "password: ")
         {
             // read password in
             struct termios oflags, nflags;
@@ -35,7 +36,7 @@ namespace bfs
                 perror("tcsetattr");
             }
 
-            printf("password: ");
+            std::cout<<prompt;
             fgets(password, sizeof(password), stdin);
             password[strlen(password) - 1] = 0;
 
