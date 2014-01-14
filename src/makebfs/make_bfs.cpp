@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
         ("help", "produce help message")
         ("imageName", po::value<std::string>(), "bfs image path")
         ("blockCount", po::value<uint64_t>(), "size of filesystem in blocks")
-        ("magicPartition", po::value<bool>(&magicPartition)->default_value(false), "create a magic partition");
+        ("magic", po::value<bool>(&magicPartition)->default_value(false), "create a magic partition");
 
     po::positional_options_description positionalOptions;
     (void)positionalOptions.add("imageName", 1);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     // magic partition?
     bfs::OptionalMagicPart omp;
     if(magicPartition) {
-        omp = bfs::OptionalMagicPart(atoi(bfs::utility::getPassword("Magic partition number: ").c_str()));
+        omp = bfs::OptionalMagicPart(atoi(bfs::utility::getPassword("magic number: ").c_str()));
     }
 
     bfs::MakeBFS bfs(io, omp);

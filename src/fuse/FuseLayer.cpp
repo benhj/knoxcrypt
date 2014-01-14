@@ -299,6 +299,7 @@ int main(int argc, char *argv[])
     // parse the program options
     uint64_t rootBlock;
     bool debug = true;
+    bool magic = false;
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");
     desc.add_options()
@@ -306,7 +307,7 @@ int main(int argc, char *argv[])
         ("imageName", po::value<std::string>(), "bfs image path")
         ("mountPoint", po::value<std::string>(), "mountPoint path")
         ("debug", po::value<bool>(&debug)->default_value(true), "fuse debug")
-        ("rootBlock", po::value<uint64_t>(&rootBlock)->default_value(0), "root block")
+        ("magic", po::value<bool>(&magic)->default_value(false), "magic partition")
     ;
 
     po::positional_options_description positionalOptions;
@@ -329,9 +330,10 @@ int main(int argc, char *argv[])
             std::cout<<desc<<"\n";
         } else {
 
+            std::cout<<"\nMounting as follows: \n\n";
             std::cout<<"image path: "<<vm["imageName"].as<std::string>()<<std::endl;
             std::cout<<"mount point: "<<vm["mountPoint"].as<std::string>()<<std::endl;
-            std::cout<<"root block: "<<rootBlock<<std::endl;
+            std::cout<<"\n";
 
         }
     } catch (...) {
@@ -344,8 +346,8 @@ int main(int argc, char *argv[])
     // the BFS image
     bfs::CoreBFSIO io;
     io.path = vm["imageName"].as<std::string>().c_str();
-    io.rootBlock = rootBlock;
     io.password = bfs::utility::getPassword();
+    io.rootBlock = magic ? atoi(bfs::utility::getPassword("magic number: ").c_str()) : 0;
 
     // Obtain the number of blocks in the image by reading the image's block count
     bfs::BFSImageStream stream(io, std::ios::in | std::ios::binary);
