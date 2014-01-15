@@ -89,7 +89,8 @@ namespace bfs { namespace cipher
 
         BasicByteTransformer(); // not required
 
-        void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+        void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
+                         bool /* not used */) const
         {
             long j = 0;
             for (long a=0; a < length; a++) {

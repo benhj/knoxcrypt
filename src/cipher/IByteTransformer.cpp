@@ -42,9 +42,10 @@ namespace bfs { namespace cipher
     }
 
     void
-    IByteTransformer::transform(char *in, char *out, std::ios_base::streamoff startPosition, long length)
+    IByteTransformer::transform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
+                                bool encrypt)
     {
-        this->doTransform(in, out, startPosition, length);
+        this->doTransform(in, out, startPosition, length, encrypt);
     }
 }
 }

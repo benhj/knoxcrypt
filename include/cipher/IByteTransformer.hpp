@@ -39,12 +39,13 @@ namespace bfs { namespace cipher
     {
     public:
         explicit IByteTransformer(std::string const &password);
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length);
+        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length, bool encrypt);
         virtual ~IByteTransformer();
       private:
         std::string const m_password;
         IByteTransformer(); // no impl required
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
+        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
+                                 bool encrypt) const = 0;
     };
 }
 }

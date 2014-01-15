@@ -51,7 +51,8 @@ namespace bfs
         std::vector<char> in;
         in.resize(n);
         (void)m_stream.read(&in.front(), n);
-        m_byteTransformer->transform(&in.front(), buf, start, n);
+        bool const encrypt = false;
+        m_byteTransformer->transform(&in.front(), buf, start, n, encrypt);
         return *this;
     }
 
@@ -61,7 +62,8 @@ namespace bfs
         std::vector<char> out;
         out.resize(n);
         std::ios_base::streamoff start = m_stream.tellp();
-        m_byteTransformer->transform((char*)buf, &out.front(), start, n);
+        bool const encrypt = true;
+        m_byteTransformer->transform((char*)buf, &out.front(), start, n, encrypt);
         (void)m_stream.write(&out.front(), n);
         return *this;
     }
