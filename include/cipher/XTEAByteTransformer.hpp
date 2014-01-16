@@ -39,7 +39,9 @@ namespace bfs { namespace cipher
 
     namespace detail
     {
-        // the xtea encipher algorithm as found on wikipedia
+        // the xtea encipher algorithm as found on wikipedia. Use this to encrypt
+        // a sequence of numbers. The original plain-text is then xor-ed with this
+        // sequence
         void encipher(unsigned int num_rounds, uint32_t v[2], uint32_t const key[4])
         {
             unsigned int i;
