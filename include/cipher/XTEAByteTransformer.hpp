@@ -1,30 +1,30 @@
 /*
-Copyright (c) <2014>, <BenHJ>
-All rights reserved.
+  Copyright (c) <2014>, <BenHJ>
+  All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+  1. Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies,
-either expressed or implied, of the FreeBSD Project.
+  The views and conclusions contained in the software and documentation are those
+  of the authors and should not be interpreted as representing official policies,
+  either expressed or implied, of the FreeBSD Project.
 */
 
 // an implementation of XTEA
@@ -49,9 +49,9 @@ namespace bfs { namespace cipher
             unsigned int i;
             uint32_t v0=v[0], v1=v[1], sum=0, delta=0x9E3779B9;
             for (i=0; i < num_rounds; i++) {
-                v0 += ((v1 << 4 ^ v1 >> 5) + v1) ^ (sum + key[sum & 3]);
+                v0 += ((v1 << 4 ^ v1 >> 5) + v1) ^(sum + key[sum & 3]);
                 sum += delta;
-                v1 += ((v0 << 4 ^ v0 >> 5) + v0) ^ (sum + key[(sum>>11) & 3]);
+                v1 += ((v0 << 4 ^ v0 >> 5) + v0) ^(sum + key[(sum>>11) & 3]);
             }
             v[0]=v0; v[1]=v1;
         }
@@ -95,7 +95,7 @@ namespace bfs { namespace cipher
                 unsigned char temp[20];
                 SHA1((unsigned char*)password.c_str(), password.size(), temp);
                 int c = 0;
-                for(int i = 0; i < 16; i += 4) {
+                for (int i = 0; i < 16; i += 4) {
                     unsigned char buf[4];
                     buf[0] = temp[i];
                     buf[1] = temp[i + 1];
@@ -128,7 +128,7 @@ namespace bfs { namespace cipher
 
             std::ios_base::streamoff const startPositionOffset = startPosition % 8;
 
-            if(length > 8) {
+            if (length > 8) {
                 long remainder = length % 8;
                 long roundedDown = length - remainder;
                 blocksRequired += (roundedDown / 8);
@@ -142,7 +142,7 @@ namespace bfs { namespace cipher
                                      c,                          // stream position
                                      8 + startPositionOffset);   // upper bound of xor loop
 
-                if(remainder > 0) {
+                if (remainder > 0) {
                     doSubTransformations(in,
                                          out,
                                          startPosition,
@@ -176,33 +176,33 @@ namespace bfs { namespace cipher
             int rounds = 16;
             uint8_t a[8];
             uint8_t b[8];
-            for(long i = 0;i < iterations; ++i) {
+            for (long i = 0; i < iterations; ++i) {
                 uint8_t cipherStream[16];
-                for(int j = 0; j < 16; ++j) {
+                for (int j = 0; j < 16; ++j) {
                     cipherStream[j] = startPosition + c - startPositionOffset;
                     ++c;
                 }
                 c -= 16;
 
                 // optimization
-                if(i == 0) {
-                    memcpy(&a, cipherStream, 8 * sizeof(uint8_t) );
+                if (i == 0) {
+                    memcpy(&a, cipherStream, 8 * sizeof(uint8_t));
                 } else {
-                    memcpy(&a, b, 8 * sizeof(uint8_t) );
+                    memcpy(&a, b, 8 * sizeof(uint8_t));
                 }
-                memcpy(&b, cipherStream + 8, 8 * sizeof(uint8_t) );
+                memcpy(&b, cipherStream + 8, 8 * sizeof(uint8_t));
 
                 // todo: encipher here!
                 // part of above optimization
-                if(i == 0) {
+                if (i == 0) {
                     detail::convertBytesAndEncipher(rounds, a, g_key);
                 }
                 detail::convertBytesAndEncipher(rounds, b, g_key);
 
                 // now xor plain with key stream
                 int k = 0;
-                for(int j = startPositionOffset; j < uptoBit; ++j) {
-                    if(j >= 8) {
+                for (int j = startPositionOffset; j < uptoBit; ++j) {
+                    if (j >= 8) {
                         out[c] = in[c] ^ b[k];
                         ++k;
                     } else {
