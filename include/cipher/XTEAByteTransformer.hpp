@@ -92,8 +92,8 @@ namespace bfs { namespace cipher
             // a uint32_t array out of it
             static bool init = false;
             if (!init) {
-                unsigned char temp[20];
-                SHA1((unsigned char*)password.c_str(), password.size(), temp);
+                unsigned char temp[32];
+                SHA256((unsigned char*)password.c_str(), password.size(), temp);
                 int c = 0;
                 for (int i = 0; i < 16; i += 4) {
                     unsigned char buf[4];
@@ -173,7 +173,7 @@ namespace bfs { namespace cipher
                                   long &c,
                                   int const uptoBit) const
         {
-            int rounds = 16;
+            int rounds = 128;
             uint8_t a[8];
             uint8_t b[8];
             for (long i = 0; i < iterations; ++i) {
