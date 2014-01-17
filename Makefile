@@ -1,7 +1,7 @@
 CXX=clang++
 CXXFLAGS=-ggdb -std=c++11 -Os -I/usr/local/include/boost -Iinclude -D_FILE_OFFSET_BITS=64
 CXXFLAGS_FUSE=-I/usr/local/include/osxfuse  -DFUSE_USE_VERSION=26
-LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -losxfuse
+LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -losxfuse -lcrypto
 SOURCES := $(wildcard src/bfs/*.cpp)
 MAKE_BFS_SRC := $(wildcard src/makebfs/*.cpp)
 TEST_SRC := $(wildcard src/test/*.cpp)

@@ -30,6 +30,7 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "bfs/BFSImageStream.hpp"
 #include "cipher/BasicByteTransformer.hpp"
+#include "cipher/XTEAByteTransformer.hpp"
 
 #include <boost/make_shared.hpp>
 
@@ -40,7 +41,7 @@ namespace bfs
 
     BFSImageStream::BFSImageStream(CoreBFSIO const &io, std::ios::openmode mode)
         : m_stream(io.path.c_str(), mode)
-        , m_byteTransformer(boost::make_shared<cipher::BasicByteTransformer>(io.password))
+        , m_byteTransformer(boost::make_shared<cipher::XTEAByteTransformer>(io.password))
     {
     }
 
