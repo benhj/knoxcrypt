@@ -34,6 +34,8 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "cipher/IByteTransformer.hpp"
 
+#include <openssl/sha.h>
+
 namespace bfs { namespace cipher
 {
 
@@ -76,6 +78,8 @@ namespace bfs { namespace cipher
         }
     }
 
+    // used for holding the hash-generated key
+    static uint32_t g_key[4];
 
     class XTEAByteTransformer : public IByteTransformer
     {
@@ -83,6 +87,24 @@ namespace bfs { namespace cipher
         explicit XTEAByteTransformer(std::string const &password)
             : IByteTransformer(password)
         {
+            // initialize the key by taking a hash of the password and then creating
+            // a uint32_t array
+            static bool init = false;
+            if (!init) {
+                unsigned char temp[20];
+                SHA1((unsigned char*)password.c_str(), password.size(), temp);
+                int c = 0;
+                for(int i = 0; i < 16; i += 4) {
+                    unsigned char buf[4];
+                    buf[0] = temp[i];
+                    buf[1] = temp[i + 1];
+                    buf[2] = temp[i + 2];
+                    buf[3] = temp[i + 3];
+                    g_key[c] = (buf[0] << 24) | (buf[1] << 16)  | (buf[2] << 8) | (buf[3]);
+                    ++c;
+                }
+                init = true;
+            }
 
         }
 
@@ -102,63 +124,120 @@ namespace bfs { namespace cipher
             // how many blocks required? defaults to 1, if length greater
             // than 8 bytes then more blocks are needed
             long blocksRequired = 0;
+            int rounds = 32;
+
+            std::ios_base::streamoff const startPositionOffset = startPosition % 8;
+
             if(length > 8) {
                 long remainder = length % 8;
                 long roundedDown = length - remainder;
                 blocksRequired += (roundedDown / 8);
-
                 long c = 0;
+                uint8_t a[8];
+                uint8_t b[8];
                 for(long i = 0;i < blocksRequired; ++i) {
-                    uint8_t cipherStream[8];
-                    for(int j = 0; j < 8; ++j) {
-                        cipherStream[j] = startPosition + c;
+                    uint8_t cipherStream[16];
+                    for(int j = 0; j < 16; ++j) {
+                        cipherStream[j] = startPosition + c - startPositionOffset;
                         ++c;
                     }
-                    c -= 8;
+                    c -= 16;
+
+                    // optimization
+                    if(i == 0) {
+                        memcpy(&a, cipherStream, 8 * sizeof(uint8_t) );
+                    } else {
+                        memcpy(&a, b, 8 * sizeof(uint8_t) );
+                    }
+                    memcpy(&b, cipherStream + 8, 8 * sizeof(uint8_t) );
+
                     // todo: encipher here!
+                    // part of above optimization
+                    if(i == 0) {
+                        detail::convertBytesAndEncipher(rounds, a, g_key);
+                    }
+                    detail::convertBytesAndEncipher(rounds, b, g_key);
+
                     // now xor plain with key stream
-                    for(int j = 0; j < 8; ++j) {
-                        out[c] = in[c] ^ cipherStream[j];
+                    int k = 0;
+                    for(int j = startPositionOffset; j < 8 + startPositionOffset; ++j) {
+                        if(j >= 8) {
+                            out[c] = in[c] ^ b[k];
+                            ++k;
+                        } else {
+                            out[c] = in[c] ^ a[j];
+                        }
                         ++c;
                     }
                 }
 
                 if(remainder > 0) {
 
-                    uint8_t cipherStream[8];
-                    for(int j = 0; j < 8; ++j) {
-                        cipherStream[j] = startPosition + c;
+                    uint8_t cipherStream[16];
+                    for(int j = 0; j < 16; ++j) {
+                        cipherStream[j] = startPosition + c - startPositionOffset;
                         ++c;
                     }
+                    c -= 16;
 
-                    c -= 8;
+                    // optimization
+                    if(blocksRequired == 0) {
+                        memcpy(&a, cipherStream, 8 * sizeof(uint8_t) );
+                    } else {
+                        memcpy(&a, b, 8 * sizeof(uint8_t) );
+                    }
+                    memcpy(&b, cipherStream + 8, 8 * sizeof(uint8_t) );
 
                     // todo: encipher here!
+                    // part of above optimization
+                    if(blocksRequired == 0) {
+                        detail::convertBytesAndEncipher(rounds, a, g_key);
+                    }
+                    detail::convertBytesAndEncipher(rounds, b, g_key);
 
                     // xor rest of stream
-                    for(int j = 0; j < remainder; ++j) {
-                        out[c] = in[c] ^ cipherStream[j];
+                    // now xor plain with key stream
+                    int k = 0;
+                    for(int j = startPositionOffset; j < 8 + remainder; ++j) {
+                        if(j >= 8) {
+                            out[c] = in[c] ^ b[k];
+                            ++k;
+                        } else {
+                            out[c] = in[c] ^ a[j];
+                        }
                         ++c;
                     }
-
                 }
             } else {
-                uint8_t cipherStream[8];
-                for(int j = 0; j < 8; ++j) {
-                    cipherStream[j] = startPosition + j;
+
+                uint8_t cipherStream[16];
+                for(int j = 0; j < 16; ++j) {
+                    cipherStream[j] = startPosition + j - startPositionOffset;
                 }
 
+                uint8_t a[8];
+                uint8_t b[8];
+                memcpy(&a, cipherStream, 8 * sizeof(uint8_t) );
+                memcpy(&b, cipherStream + 8, 8 * sizeof(uint8_t) );
+
                 // todo: encipher here!
+                detail::convertBytesAndEncipher(rounds, a, g_key);
+                detail::convertBytesAndEncipher(rounds, b, g_key);
 
                 // xor rest of stream
-                for(int j = 0; j < length; ++j) {
-                    out[j] = in[j] ^ cipherStream[j];
+                int k = 0;
+                int c = 0;
+                for(int j = startPositionOffset; j < length + startPositionOffset; ++j) {
+                    if(j >= 8) {
+                        out[c] = in[c] ^ b[k];
+                        ++k;
+                    } else {
+                        out[c] = in[c] ^ a[j];
+                    }
+                    ++c;
                 }
             }
         }
-
-      private:
-        long m_key[256];
     };
 
 }
