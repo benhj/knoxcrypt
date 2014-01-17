@@ -27,14 +27,14 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#include "bfs/BFSImageStream.hpp"
-#include "bfs/FileEntry.hpp"
-#include "bfs/FileEntryDevice.hpp"
-#include "bfs/FileStreamPtr.hpp"
-#include "bfs/OpenDisposition.hpp"
-#include "bfs/detail/DetailBFS.hpp"
+#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/FileEntry.hpp"
+#include "teasafe/FileEntryDevice.hpp"
+#include "teasafe/FileStreamPtr.hpp"
+#include "teasafe/OpenDisposition.hpp"
+#include "teasafe/detail/DetailTeaSafe.hpp"
 #include "test/TestHelpers.hpp"
-#include "utility/MakeBFS.hpp"
+#include "utility/MakeTeaSafe.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -66,16 +66,16 @@ class FileEntryDeviceTest
 
         // test write get file size from same entry
         {
-            bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FileEntry entry(io, "test.txt");
-            bfs::FileStreamPtr stream(new bfs::FileStream(bfs::FileEntryDevice(entry)));
+            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::FileEntry entry(io, "test.txt");
+            teasafe::FileStreamPtr stream(new teasafe::FileStream(teasafe::FileEntryDevice(entry)));
             std::string testData(createLargeStringToWrite());
             (*stream) << testData.c_str();
         }
         {
-            bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FileEntry entry(io, "entry", uint64_t(1),
-                                 bfs::OpenDisposition::buildReadOnlyDisposition());
+            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::FileEntry entry(io, "entry", uint64_t(1),
+                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "FileStreamTest::testWriteReportsCorrectFileSize()");
         }
     }
@@ -88,19 +88,19 @@ class FileEntryDeviceTest
         // test write get file size from same entry
         std::string testData(createLargeStringToWrite());
         {
-            bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FileEntry entry(io, "test.txt");
-            bfs::FileEntryDevice device(entry);
+            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::FileEntry entry(io, "test.txt");
+            teasafe::FileEntryDevice device(entry);
             std::streampos bytesWrote = device.write(testData.c_str(), testData.length());
             ASSERT_EQUAL(BIG_SIZE, bytesWrote, "FileStreamTest::testWriteFollowedByRead() bytes wrote");
         }
         {
-            bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FileEntry entry(io, "entry", uint64_t(1),
-                                 bfs::OpenDisposition::buildReadOnlyDisposition());
+            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::FileEntry entry(io, "entry", uint64_t(1),
+                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> buffer;
             buffer.resize(entry.fileSize());
-            bfs::FileEntryDevice device(entry);
+            teasafe::FileEntryDevice device(entry);
             std::streamsize readBytes = device.read((char*)&buffer.front(), entry.fileSize());
             ASSERT_EQUAL(BIG_SIZE, readBytes, "FileStreamTest::testWriteFollowedByRead() bytes read");
             std::string recovered(buffer.begin(), buffer.end());

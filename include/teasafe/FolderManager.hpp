@@ -27,27 +27,37 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#ifndef TeaSafe_FOLDER_MANAGER_HPP__
+#define TeaSafe_FOLDER_MANAGER_HPP__
 
-#include <iostream>
-#include <string>
+#include "teasafe/FileEntry.hpp"
+#include "teasafe/FolderEntry.hpp"
 
-namespace teasafe { namespace cipher
+namespace teasafe
 {
-    class IByteTransformer
+    class FolderManager
     {
-    public:
-        explicit IByteTransformer(std::string const &password);
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length, bool encrypt);
-        virtual ~IByteTransformer();
+      public:
+        FolderManager(std::string const &name);
+
+        void addFile(std::string const& name, std::iostream &fileData)
+        {
+            m_thisFolderEntry.addFileEntry(name);
+        }
+        void addFolder(std::string const& name);
+
+        void getFile(std::string &name, std::ostream &output);
+        void getFile(uint64_t const fileId, std::ostream &output);
+
+        void removeFile(std::string const &name);
+        void removeFolder(std::string const &name);
+
+        std::vector<std::string> listContents();
+
       private:
-        std::string const m_password;
-        IByteTransformer(); // no impl required
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                                 bool encrypt) const = 0;
+        FolderEntry m_thisFolderEntry;
+
     };
 }
-}
 
-#endif // TeaSafe_CIPHER_I_TRANSFORMER_HPP__
+#endif // TeaSafe_FOLDER_MANAGER_HPP__

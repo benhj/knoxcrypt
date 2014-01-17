@@ -27,27 +27,13 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#ifndef TeaSafe_CREATE_OR_DONTCREATE_HPP__
+#define TeaSafe_CREATE_OR_DONTCREATE_HPP__
 
-#include <iostream>
-#include <string>
-
-namespace teasafe { namespace cipher
+namespace teasafe
 {
-    class IByteTransformer
-    {
-    public:
-        explicit IByteTransformer(std::string const &password);
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length, bool encrypt);
-        virtual ~IByteTransformer();
-      private:
-        std::string const m_password;
-        IByteTransformer(); // no impl required
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                                 bool encrypt) const = 0;
-    };
-}
+    enum class CreateOrDontCreate { Create, DontCreate };
 }
 
-#endif // TeaSafe_CIPHER_I_TRANSFORMER_HPP__
+
+#endif // TeaSafe_CREATE_OR_DONTCREATE_HPP__

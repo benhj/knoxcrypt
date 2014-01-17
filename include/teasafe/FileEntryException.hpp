@@ -27,27 +27,47 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#ifndef TeaSafe_FILE_ENTRY_EXCEPTION_HPP__
+#define TeaSafe_FILE_ENTRY_EXCEPTION_HPP__
 
-#include <iostream>
-#include <string>
+#include <exception>
 
-namespace teasafe { namespace cipher
+namespace teasafe
 {
-    class IByteTransformer
+
+    enum class FileEntryError { NotReadable, NotWritable };
+
+    class FileEntryException : public std::exception
     {
-    public:
-        explicit IByteTransformer(std::string const &password);
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length, bool encrypt);
-        virtual ~IByteTransformer();
+      public:
+        FileEntryException(FileEntryError const &error)
+            : m_error(error)
+        {
+
+        }
+
+        virtual const char* what() const throw()
+        {
+            if (m_error == FileEntryError::NotReadable) {
+                return "File entry not readable";
+            }
+
+            if (m_error == FileEntryError::NotWritable) {
+                return "File entry not writable";
+            }
+
+            return "File entry unknown error";
+        }
+
+        bool operator==(FileEntryException const &other) const
+        {
+            return m_error == other.m_error;
+        }
+
       private:
-        std::string const m_password;
-        IByteTransformer(); // no impl required
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                                 bool encrypt) const = 0;
+        FileEntryError m_error;
     };
 }
-}
 
-#endif // TeaSafe_CIPHER_I_TRANSFORMER_HPP__
+
+#endif // TeaSafe_FILE_ENTRY_EXCEPTION_HPP__

@@ -27,14 +27,14 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#include "bfs/BFSImageStream.hpp"
-#include "bfs/CoreBFSIO.hpp"
-#include "bfs/FileEntry.hpp"
-#include "bfs/FolderEntry.hpp"
-#include "bfs/detail/DetailBFS.hpp"
-#include "bfs/detail/DetailFileBlock.hpp"
+#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/CoreTeaSafeIO.hpp"
+#include "teasafe/FileEntry.hpp"
+#include "teasafe/FolderEntry.hpp"
+#include "teasafe/detail/DetailTeaSafe.hpp"
+#include "teasafe/detail/DetailFileBlock.hpp"
 #include "test/TestHelpers.hpp"
-#include "utility/MakeBFS.hpp"
+#include "utility/MakeTeaSafe.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -79,10 +79,10 @@ class FolderEntryTest
 
     boost::filesystem::path m_uniquePath;
 
-    bfs::FolderEntry createTestFolder(boost::filesystem::path const &p, long const blocks)
+    teasafe::FolderEntry createTestFolder(boost::filesystem::path const &p, long const blocks)
     {
-        bfs::CoreBFSIO io = createTestIO(p);
-        bfs::FolderEntry folder(io, 0, std::string("root"));
+        teasafe::CoreTeaSafeIO io = createTestIO(p);
+        teasafe::FolderEntry folder(io, 0, std::string("root"));
         folder.addFileEntry("test.txt");
         folder.addFileEntry("some.log");
         folder.addFolderEntry("folderA");
@@ -98,7 +98,7 @@ class FolderEntryTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
         {
-            bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+            teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
             ASSERT_EQUAL(folder.getEntryInfo(0).filename(), "test.txt", "testAddEntryNameRetrieval A");
             ASSERT_EQUAL(folder.getEntryInfo(1).filename(), "some.log", "testAddEntryNameRetrieval B");
             ASSERT_EQUAL(folder.getEntryInfo(2).filename(), "folderA", "testAddEntryNameRetrieval B");
@@ -112,10 +112,10 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
-        std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
+        std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 6, "testListAllEntries: number of entries");
-        std::vector<bfs::EntryInfo>::iterator it = entries.begin();
+        std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
         ASSERT_EQUAL(entries[0].filename(), "test.txt", "testListAllEntries: filename A");
         ASSERT_EQUAL(entries[1].filename(), "some.log", "testListAllEntries: filename B");
         ASSERT_EQUAL(entries[2].filename(), "folderA", "testListAllEntries: filename C");
@@ -128,9 +128,9 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::CoreBFSIO io = createTestIO(testPath);
-        bfs::FolderEntry folder(io, 0, std::string("root"));
-        std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+        teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+        teasafe::FolderEntry folder(io, 0, std::string("root"));
+        std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 0, "testListAllEntriesEmpty: number of entries");
     }
 
@@ -138,10 +138,10 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
-        std::vector<bfs::EntryInfo> entries = folder.listFileEntries();
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
+        std::vector<teasafe::EntryInfo> entries = folder.listFileEntries();
         ASSERT_EQUAL(entries.size(), 4, "testListFileEntries: number of entries");
-        std::vector<bfs::EntryInfo>::iterator it = entries.begin();
+        std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
         ASSERT_EQUAL(entries[0].filename(), "test.txt", "testListFileEntries: filename A");
         ASSERT_EQUAL(entries[1].filename(), "some.log", "testListFileEntries: filename B");
         ASSERT_EQUAL(entries[2].filename(), "picture.jpg", "testListFileEntries: filename D");
@@ -152,10 +152,10 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
-        std::vector<bfs::EntryInfo> entries = folder.listFolderEntries();
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
+        std::vector<teasafe::EntryInfo> entries = folder.listFolderEntries();
         ASSERT_EQUAL(entries.size(), 2, "testListFolderEntries: number of entries");
-        std::vector<bfs::EntryInfo>::iterator it = entries.begin();
+        std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
         ASSERT_EQUAL(entries[0].filename(), "folderA", "testListFolderEntries: filename C");
         ASSERT_EQUAL(entries[1].filename(), "folderB", "testListFolderEntries: filename F");
     }
@@ -164,7 +164,7 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
 
         uint64_t b1 = folder.getEntryInfo(0).firstFileBlock();
         uint64_t b2 = folder.getEntryInfo(1).firstFileBlock();
@@ -183,9 +183,9 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testData("some test data!");
-        bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
+        teasafe::FileEntry entry = folder.getFileEntry("some.log", teasafe::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), testData.length());
         entry.flush();
@@ -200,9 +200,9 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testString(createLargeStringToWrite());
-        bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
+        teasafe::FileEntry entry = folder.getFileEntry("some.log", teasafe::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testString.begin(), testString.end());
         entry.write((char*)&vec.front(), testString.length());
         entry.flush();
@@ -217,19 +217,19 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testData("some test data!");
         {
-            bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FolderEntry folder(io, 0, std::string("root"));
-            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
+            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::FolderEntry folder(io, 0, std::string("root"));
+            teasafe::FileEntry entry = folder.getFileEntry("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
         }
         {
             std::string testString(createLargeStringToWrite());
-            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
+            teasafe::FileEntry entry = folder.getFileEntry("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -246,19 +246,19 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
         std::string testData("some test data!");
         std::string testString(createLargeStringToWrite());
         {
-            bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FolderEntry folder(io, 0, std::string("root"));
-            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
+            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::FolderEntry folder(io, 0, std::string("root"));
+            teasafe::FileEntry entry = folder.getFileEntry("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
         }
         {
-            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
+            teasafe::FileEntry entry = folder.getFileEntry("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -275,10 +275,10 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
         {
             std::string testData("some test data!");
-            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
+            teasafe::FileEntry entry = folder.getFileEntry("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -290,7 +290,7 @@ class FolderEntryTest
 
         {
             std::string testString(createLargeStringToWrite());
-            bfs::FileEntry entry = folder.getFileEntry("picture.jpg", bfs::OpenDisposition::buildAppendDisposition());
+            teasafe::FileEntry entry = folder.getFileEntry("picture.jpg", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -306,11 +306,11 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
 
         {
             std::string testString(createLargeStringToWrite());
-            bfs::FileEntry entry = folder.getFileEntry("picture.jpg", bfs::OpenDisposition::buildAppendDisposition());
+            teasafe::FileEntry entry = folder.getFileEntry("picture.jpg", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -321,7 +321,7 @@ class FolderEntryTest
         }
         {
             std::string testData("some test data!");
-            bfs::FileEntry entry = folder.getFileEntry("some.log", bfs::OpenDisposition::buildAppendDisposition());
+            teasafe::FileEntry entry = folder.getFileEntry("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -337,8 +337,8 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
-        bfs::FolderEntry subFolder = folder.getFolderEntry("folderA");
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry subFolder = folder.getFolderEntry("folderA");
         subFolder.addFileEntry("subFileA");
         subFolder.addFileEntry("subFileB");
         subFolder.addFileEntry("subFileC");
@@ -346,9 +346,9 @@ class FolderEntryTest
 
         // test root entries still intact
         {
-            std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+            std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
             ASSERT_EQUAL(entries.size(), 6, "testFolderEntryRetrievalAddEntries: root number of entries");
-            std::vector<bfs::EntryInfo>::iterator it = entries.begin();
+            std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
             ASSERT_EQUAL(entries[0].filename(), "test.txt", "testFolderEntryRetrievalAddEntries: root filename A");
             ASSERT_EQUAL(entries[1].filename(), "some.log", "testFolderEntryRetrievalAddEntries: root filename B");
             ASSERT_EQUAL(entries[2].filename(), "folderA", "testFolderEntryRetrievalAddEntries: root filename C");
@@ -358,9 +358,9 @@ class FolderEntryTest
         }
         // test sub folder entries exist
         {
-            std::vector<bfs::EntryInfo> entries = subFolder.listAllEntries();
+            std::vector<teasafe::EntryInfo> entries = subFolder.listAllEntries();
             ASSERT_EQUAL(entries.size(), 4, "testFolderEntryRetrievalAddEntries: subfolder number of entries");
-            std::vector<bfs::EntryInfo>::iterator it = entries.begin();
+            std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
             ASSERT_EQUAL(entries[0].filename(), "subFileA", "testFolderEntryRetrievalAddEntries: subFolder filename A");
             ASSERT_EQUAL(entries[1].filename(), "subFileB", "testFolderEntryRetrievalAddEntries: subFolder filename B");
             ASSERT_EQUAL(entries[2].filename(), "subFileC", "testFolderEntryRetrievalAddEntries: subFolder filename C");
@@ -372,15 +372,15 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
-        bfs::FolderEntry subFolder = folder.getFolderEntry("folderA");
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry subFolder = folder.getFolderEntry("folderA");
         subFolder.addFileEntry("subFileA");
         subFolder.addFileEntry("subFileB");
         subFolder.addFileEntry("subFileC");
         subFolder.addFileEntry("subFileD");
 
         std::string testData("some test data!");
-        bfs::FileEntry entry = subFolder.getFileEntry("subFileB", bfs::OpenDisposition::buildAppendDisposition());
+        teasafe::FileEntry entry = subFolder.getFileEntry("subFileB", teasafe::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), testData.length());
         entry.flush();
@@ -395,9 +395,9 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
         folder.removeFileEntry("test.txt");
-        std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+        std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 5, "testRemoveFileEntry: number of entries after removal");
     }
 
@@ -405,9 +405,9 @@ class FolderEntryTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+        teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
         folder.removeFolderEntry("folderA");
-        std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+        std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 5, "testRemoveEmptySubFolder: number of entries after removal");
     }
 
@@ -416,15 +416,15 @@ class FolderEntryTest
         {
             long const blocks = 2048;
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-            bfs::FolderEntry folder = createTestFolder(testPath, blocks);
-            bfs::FolderEntry subFolder = folder.getFolderEntry("folderA");
+            teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
+            teasafe::FolderEntry subFolder = folder.getFolderEntry("folderA");
             subFolder.addFileEntry("subFileA");
             subFolder.addFileEntry("subFileB");
             subFolder.addFileEntry("subFileC");
             subFolder.addFileEntry("subFileD");
 
             std::string testData("some test data!");
-            bfs::FileEntry entry = subFolder.getFileEntry("subFileB", bfs::OpenDisposition::buildAppendDisposition());
+            teasafe::FileEntry entry = subFolder.getFileEntry("subFileB", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -432,9 +432,9 @@ class FolderEntryTest
         {
             long const blocks = 2048;
             boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-            bfs::FolderEntry folder = createTestFolder(testPath, blocks);
+            teasafe::FolderEntry folder = createTestFolder(testPath, blocks);
             folder.removeFolderEntry("folderA");
-            std::vector<bfs::EntryInfo> entries = folder.listAllEntries();
+            std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
             ASSERT_EQUAL(entries.size(), 5, "testRemoveNonEmptySubFolder: number of entries after removal");
         }
     }

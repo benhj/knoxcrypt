@@ -27,14 +27,14 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#include "bfs/BFSImageStream.hpp"
-#include "bfs/FileBlock.hpp"
-#include "bfs/FileBlockException.hpp"
-#include "bfs/OpenDisposition.hpp"
-#include "bfs/detail/DetailBFS.hpp"
-#include "bfs/detail/DetailFileBlock.hpp"
+#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/FileBlock.hpp"
+#include "teasafe/FileBlockException.hpp"
+#include "teasafe/OpenDisposition.hpp"
+#include "teasafe/detail/DetailTeaSafe.hpp"
+#include "teasafe/detail/DetailFileBlock.hpp"
 #include "test/TestHelpers.hpp"
-#include "utility/MakeBFS.hpp"
+#include "utility/MakeTeaSafe.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -71,23 +71,23 @@ class FileBlockTest
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
-        bfs::CoreBFSIO io = createTestIO(testPath);
+        teasafe::CoreTeaSafeIO io = createTestIO(testPath);
 
-        bfs::FileBlock block(io, uint64_t(0), uint64_t(0),
-                             bfs::OpenDisposition::buildAppendDisposition());
+        teasafe::FileBlock block(io, uint64_t(0), uint64_t(0),
+                             teasafe::OpenDisposition::buildAppendDisposition());
         std::string testData("Hello, world!Hello, world!");
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         block.write((char*)&vec.front(), testData.length());
 
         // test that actual written correct
         assert(block.getDataBytesWritten() == 26);
-        bfs::BFSImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t size = bfs::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
+        teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
+        uint64_t size = teasafe::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
         ASSERT_EQUAL(size, 26, "FileBlockTest::blockWriteAndReadTest(): correctly returned block size");
 
         // test that reported next index correct
         assert(block.getNextIndex() == 0);
-        uint64_t next = bfs::detail::getIndexOfNextFileBlockFromFileBlockN(stream, 0, blocks);
+        uint64_t next = teasafe::detail::getIndexOfNextFileBlockFromFileBlockN(stream, 0, blocks);
         stream.close();
         ASSERT_EQUAL(next, 0, "FileBlockTest::blockWriteAndReadTest(): correct block index");
 
@@ -107,17 +107,17 @@ class FileBlockTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
         {
-            bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FileBlock block(io, uint64_t(0), uint64_t(0),
-                                 bfs::OpenDisposition::buildReadOnlyDisposition());
+            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::FileBlock block(io, uint64_t(0), uint64_t(0),
+                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string testData("Hello, world!Hello, world!");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             bool pass = false;
             // assert correct exception was thrown
             try {
                 block.write((char*)&vec.front(), testData.length());
-            } catch (bfs::FileBlockException const &e) {
-                ASSERT_EQUAL(e, bfs::FileBlockException(bfs::FileBlockError::NotWritable), "FileBlockTest::testWritingToNonWritableThrows() A");
+            } catch (teasafe::FileBlockException const &e) {
+                ASSERT_EQUAL(e, teasafe::FileBlockException(teasafe::FileBlockError::NotWritable), "FileBlockTest::testWritingToNonWritableThrows() A");
                 pass = true;
             }
             // assert that any exception was thrown
@@ -131,25 +131,25 @@ class FileBlockTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
         {
-            bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FileBlock block(io, uint64_t(0), uint64_t(0),
-                                 bfs::OpenDisposition::buildWriteOnlyDisposition());
+            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::FileBlock block(io, uint64_t(0), uint64_t(0),
+                                 teasafe::OpenDisposition::buildWriteOnlyDisposition());
             std::string testData("Hello, world!Hello, world!");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             block.write((char*)&vec.front(), testData.length());
         }
 
         {
-            bfs::CoreBFSIO io = createTestIO(testPath);
-            bfs::FileBlock block(io, uint64_t(0),
-                                 bfs::OpenDisposition::buildWriteOnlyDisposition());
+            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::FileBlock block(io, uint64_t(0),
+                                 teasafe::OpenDisposition::buildWriteOnlyDisposition());
             std::vector<uint8_t> vec(block.getInitialDataBytesWritten());
             // assert correct exception was thrown
             bool pass = false;
             try {
                 block.read((char*)&vec.front(), block.getInitialDataBytesWritten());
-            } catch (bfs::FileBlockException const &e) {
-                ASSERT_EQUAL(e, bfs::FileBlockException(bfs::FileBlockError::NotReadable), "FileBlockTest::testReadingFromNonReadableThrows() A");
+            } catch (teasafe::FileBlockException const &e) {
+                ASSERT_EQUAL(e, teasafe::FileBlockException(teasafe::FileBlockError::NotReadable), "FileBlockTest::testReadingFromNonReadableThrows() A");
                 pass = true;
             }
             // assert that any exception was thrown

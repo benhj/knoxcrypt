@@ -27,27 +27,55 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#ifndef TeaSafe_TeaSafe_EXCEPTION_HPP__
+#define TeaSafe_TeaSafe_EXCEPTION_HPP__
 
-#include <iostream>
-#include <string>
+#include <exception>
 
-namespace teasafe { namespace cipher
+namespace teasafe
 {
-    class IByteTransformer
+
+    enum class TeaSafeError { NotFound, AlreadyExists, IllegalFilename, FolderNotEmpty };
+
+    class TeaSafeException : public std::exception
     {
-    public:
-        explicit IByteTransformer(std::string const &password);
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length, bool encrypt);
-        virtual ~IByteTransformer();
+      public:
+        TeaSafeException(TeaSafeError const &error)
+            : m_error(error)
+        {
+
+        }
+
+        virtual const char* what() const throw()
+        {
+            if (m_error == TeaSafeError::NotFound) {
+                return "TeaSafe: Entry not found";
+            }
+
+            if (m_error == TeaSafeError::AlreadyExists) {
+                return "TeaSafe: Entry already exists";
+            }
+
+            if (m_error == TeaSafeError::IllegalFilename) {
+                return "TeaSafe: illegal filename";
+            }
+
+            if (m_error == TeaSafeError::FolderNotEmpty) {
+                return "TeaSafe: Folder not empty";
+            }
+
+            return "TeaSafe: Unknown error";
+        }
+
+        bool operator==(TeaSafeException const &other) const
+        {
+            return m_error == other.m_error;
+        }
+
       private:
-        std::string const m_password;
-        IByteTransformer(); // no impl required
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                                 bool encrypt) const = 0;
+        TeaSafeError m_error;
     };
 }
-}
 
-#endif // TeaSafe_CIPHER_I_TRANSFORMER_HPP__
+
+#endif // TeaSafe_TeaSafe_EXCEPTION_HPP__

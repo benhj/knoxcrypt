@@ -1,5 +1,5 @@
-#ifndef BFS_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__
-#define BFS_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__
+#ifndef TeaSafe_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__
+#define TeaSafe_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__
 
 #include <iostream>
 #include <string>
@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <termios.h>
 
-namespace bfs
+namespace teasafe
 {
 
     namespace utility {
@@ -50,4 +50,4 @@ namespace bfs
     }
 }
 
-#endif // BFS_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__
+#endif // TeaSafe_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__

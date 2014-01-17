@@ -27,11 +27,11 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef BFS_TEST_HELPERS_HPP__
-#define BFS_TEST_HELPERS_HPP__
+#ifndef TeaSafe_TEST_HELPERS_HPP__
+#define TeaSafe_TEST_HELPERS_HPP__
 
-#include "bfs/CoreBFSIO.hpp"
-#include "utility/MakeBFS.hpp"
+#include "teasafe/CoreTeaSafeIO.hpp"
+#include "utility/MakeTeaSafe.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -48,9 +48,9 @@ int testFailures = 0;
 int passedPoints = 0;
 std::vector<std::string> failingTestPoints;
 
-bfs::CoreBFSIO createTestIO(boost::filesystem::path const &testPath)
+teasafe::CoreTeaSafeIO createTestIO(boost::filesystem::path const &testPath)
 {
-    bfs::CoreBFSIO io;
+    teasafe::CoreTeaSafeIO io;
     io.path = testPath.string();
     io.blocks = 2048;
     io.password = "abcd1234";
@@ -62,8 +62,8 @@ inline boost::filesystem::path buildImage(boost::filesystem::path const &path, l
 {
     std::string testImage(boost::filesystem::unique_path().string());
     boost::filesystem::path testPath = path / testImage;
-    bfs::CoreBFSIO io = createTestIO(testPath);
-    bfs::MakeBFS bfs(io);
+    teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+    teasafe::MakeTeaSafe teasafe(io);
     return testPath;
 }
 

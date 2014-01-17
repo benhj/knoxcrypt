@@ -29,14 +29,14 @@
 
 // an implementation of XTEA
 
-#ifndef BFS_CIPHER_XTEA_BYTE_TRANSFORMER_HPP__
-#define BFS_CIPHER_XTEA_BYTE_TRANSFORMER_HPP__
+#ifndef TeaSafe_CIPHER_XTEA_BYTE_TRANSFORMER_HPP__
+#define TeaSafe_CIPHER_XTEA_BYTE_TRANSFORMER_HPP__
 
 #include "cipher/IByteTransformer.hpp"
 
 #include <openssl/sha.h>
 
-namespace bfs { namespace cipher
+namespace teasafe { namespace cipher
 {
 
     namespace detail
@@ -219,4 +219,4 @@ namespace bfs { namespace cipher
 }
 
 
-#endif // BFS_CIPHER_BASIC_TRANSFORMER_CIPHER_HPP__
+#endif // TeaSafe_CIPHER_BASIC_TRANSFORMER_CIPHER_HPP__

@@ -30,8 +30,8 @@ either expressed or implied, of the FreeBSD Project.
 
 // will implement some variant of ARCFOUR
 
-#ifndef BFS_CIPHER_STREAM_CIPHER_HPP__
-#define BFS_CIPHER_STREAM_CIPHER_HPP__
+#ifndef TeaSafe_CIPHER_STREAM_CIPHER_HPP__
+#define TeaSafe_CIPHER_STREAM_CIPHER_HPP__
 
 
 #include <string>
@@ -39,7 +39,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <cassert>
 #include <iostream>
 
-namespace bfs { namespace cipher
+namespace teasafe { namespace cipher
 {
 
     inline void swapints(long *array, long ndx1, long ndx2)
@@ -167,4 +167,4 @@ namespace bfs { namespace cipher
 }
 
 
-#endif // BFS_CIPHER_STREAM_CIPHER_HPP__
+#endif // TeaSafe_CIPHER_STREAM_CIPHER_HPP__

@@ -1,17 +1,15 @@
-BasicFS: An experimental fuse-based filesystem
+TeaSafe: An experimental fuse-based filesystem
 ----------------------------------------------
 
-BFS, or BasicFS, is an experiment in understanding file 
-systems in userspace. It is an educational project primarily undertaken 
-to improve by programming chops but can be used as the basis of more 
-sophisticated file systems, for example, those with encryption. 
-The core implementation language is C++ but has a little C for the FUSE parts.
-Following is a technical overview.
+TeaSafe is an experimental filesystem designed with encryption in mind. 
+Unlike its main contemporary (EncFS), the whole filesystem is block-based
+meaning that the whole image is encrypted rather than each file element
+of the filesystem.
 
 ### Technical overview
 
 Files are stored as blocks; the block size is determined by the macro
-`uint64_t const FILE_BLOCK_SIZE = 4096;` as found in the file `DetailBFS.hpp`. 4096 represents 
+`uint64_t const FILE_BLOCK_SIZE = 4096;` as found in the file `DetailTeaSafe.hpp`. 4096 represents 
 a trade-off between file space usage and file access time efficiency. The smaller
 the block size, the better the utilization of space but the poorer 
 the write-time efficiency. A value of 4096 was found to represent a good tradeoff. (An
@@ -47,7 +45,7 @@ when the entry is deleted and can then be overwritten with the addition of new m
 - the next 255 bytes describe the entry's filename. 
 - the final 8 bytes represents a 64 bit pointer to the file entry's first file block.
 
-### The BasicFS image
+### The TeaSafe image
 
 - The whole filesystem is represented as a file image
 - The first 8 bytes represent a 64 bit counter describing FS size (basically the number of file blocks).
@@ -63,18 +61,11 @@ Any sub folders are accordingly updated in a similar manner.
 
 ### Encryption
 
-The whole filesystem image is encrypted using a very basic stream cipher. Although this has 
-bits borrowed from the ARCFOUR algorithm, it should not be relied upon for strong encryption 
-and I give no guarantees as to its strength (of which there might be very little) and security*.
-During development ARCFOUR proper was implemented but was found to be too slow to be of any practical value.
-
-*I have looked at my implementation closer and have discovered that its ARCFOUR but without
-the swap operation. ARCFOUR without the swap implementation is provably insecure.
-
-The keen developer is encouraged to implement their own transformational cipher. All she 
+The filesystem is encrypted using a varient of the XTEA algorithm. Having said
+that, the keen developer is encouraged to implement their own transformational cipher. All she 
 needs to do is implement the function `doTransform` in `IByteTransformer` as defined in `IByteTransformer.hpp`.
 See file `BasicByteTransformer.hpp` as an example of how this is done. The pointer type of `m_byteTransformer`
-as initialized in the constructor argument list of `BFSImageStream.cpp` then needs to be updated to
+as initialized in the constructor argument list of `TeaSafeImageStream.cpp` then needs to be updated to
 the developer's new implementation e.g.:
 
 `m_byteTransformer(boost::make_shared<cipher::BasicByteTransformer>(io.password))` --->
@@ -102,11 +93,11 @@ Compiling
 
 `./test` will run the test suite
 
-`./makebfs 128000 image.bfs` will create a 500MB BasicFS image when the block
+`./maketeasafe 128000 image.teasafe` will create a 500MB TeaSafe image when the block
 size is 4096. This will ask you for a password which is
 used to seed a key used to encrypt / decrypt the file system.
 
-`./bfs image.bfs testMount` will launch and mount image.bfs under 
+`./teasafe image.teasafe testMount` will launch and mount image.teasafe under 
 the directory testMount in fuse debug mode; note to disable debug
 mode you need to specify `--debug 0' as an extra parameter. 
 You will be asked for the password used to initially
@@ -116,7 +107,7 @@ To compile each component separately:-
 
 `make test` will compile the test binary
 
-`make makebfs` will compile the binary used to build a BasicFS image
+`make maketeasafe` will compile the binary used to build a TeaSafe image
 
-`make bfs` will compile the fuse layer
+`make teasafe` will compile the fuse layer
 

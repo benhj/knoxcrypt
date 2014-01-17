@@ -27,27 +27,47 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#ifndef TeaSafe_ENTRY_INFO_HPP__
+#define TeaSafe_ENTRY_INFO_HPP__
 
-#include <iostream>
+#include "teasafe/EntryType.hpp"
+
 #include <string>
 
-namespace teasafe { namespace cipher
+namespace teasafe
 {
-    class IByteTransformer
+
+    class EntryInfo
     {
-    public:
-        explicit IByteTransformer(std::string const &password);
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length, bool encrypt);
-        virtual ~IByteTransformer();
+      public:
+        EntryInfo(std::string const &fileName,
+                  uint64_t const &fileSize,
+                  EntryType const &entryType,
+                  bool const writable,
+                  uint64_t const firstFileBlock,
+                  uint64_t const folderIndex);
+
+        std::string filename() const;
+
+        uint64_t size() const;
+
+        EntryType type() const;
+
+        bool writable() const;
+
+        uint64_t firstFileBlock() const;
+
+        uint64_t folderIndex() const;
+
       private:
-        std::string const m_password;
-        IByteTransformer(); // no impl required
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                                 bool encrypt) const = 0;
+        std::string m_fileName;
+        uint64_t m_fileSize;
+        EntryType m_entryType;
+        bool m_writable;
+        uint64_t m_firstFileBlock;
+        uint64_t m_folderIndex;
     };
-}
+
 }
 
-#endif // TeaSafe_CIPHER_I_TRANSFORMER_HPP__
+#endif // TeaSafe_ENTRY_INFO_HPP__

@@ -27,27 +27,36 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#ifndef TeaSafe_FILE_ENTRY_DEVICE_HPP__
+#define TeaSafe_FILE_ENTRY_DEVICE_HPP__
 
-#include <iostream>
-#include <string>
+#include <teasafe/FileEntry.hpp>
 
-namespace teasafe { namespace cipher
+#include <iosfwd>                           // streamsize, seekdir
+#include <boost/iostreams/categories.hpp>   // seekable_device_tag
+#include <boost/iostreams/positioning.hpp>  // stream_offset
+
+namespace teasafe
 {
-    class IByteTransformer
+    class FileEntryDevice
     {
-    public:
-        explicit IByteTransformer(std::string const &password);
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length, bool encrypt);
-        virtual ~IByteTransformer();
+
+      public:
+
+        typedef char                                   char_type;
+        typedef boost::iostreams::seekable_device_tag  category;
+
+        explicit FileEntryDevice(FileEntry const &entry);
+
+        std::streamsize read(char* s, std::streamsize n);
+        std::streamsize write(const char* s, std::streamsize n);
+        std::streampos seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
+
       private:
-        std::string const m_password;
-        IByteTransformer(); // no impl required
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                                 bool encrypt) const = 0;
+        FileEntryDevice();
+        FileEntry m_entry;
     };
-}
+
 }
 
-#endif // TeaSafe_CIPHER_I_TRANSFORMER_HPP__
+#endif // TeaSafe_FILE_ENTRY_DEVICE_HPP__

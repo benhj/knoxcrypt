@@ -27,27 +27,33 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#include "teasafe/FileEntryDevice.hpp"
 
-#include <iostream>
-#include <string>
-
-namespace teasafe { namespace cipher
+namespace teasafe
 {
-    class IByteTransformer
-    {
-    public:
-        explicit IByteTransformer(std::string const &password);
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length, bool encrypt);
-        virtual ~IByteTransformer();
-      private:
-        std::string const m_password;
-        IByteTransformer(); // no impl required
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                                 bool encrypt) const = 0;
-    };
-}
-}
 
-#endif // TeaSafe_CIPHER_I_TRANSFORMER_HPP__
+    FileEntryDevice::FileEntryDevice(FileEntry const &entry)
+        : m_entry(entry)
+    {
+    }
+
+    std::streamsize
+    FileEntryDevice::read(char* s, std::streamsize n)
+    {
+        return m_entry.read(s, n);
+    }
+
+    std::streamsize
+    FileEntryDevice::write(const char* s, std::streamsize n)
+    {
+        std::streamsize wrote = m_entry.write(s, n);
+        m_entry.flush();
+        return wrote;
+    }
+
+    std::streampos
+    FileEntryDevice::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
+    {
+        return m_entry.seek(off, way);
+    }
+}

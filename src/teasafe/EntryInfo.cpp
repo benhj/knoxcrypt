@@ -27,27 +27,60 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#include "teasafe/EntryInfo.hpp"
 
-#include <iostream>
-#include <string>
-
-namespace teasafe { namespace cipher
+namespace teasafe
 {
-    class IByteTransformer
+    EntryInfo::EntryInfo(std::string const &fileName,
+                         uint64_t const &fileSize,
+                         EntryType const &entryType,
+                         bool const writable,
+                         uint64_t const firstFileBlock,
+                         uint64_t const folderIndex)
+        : m_fileName(fileName)
+        , m_fileSize(fileSize)
+        , m_entryType(entryType)
+        , m_writable(writable)
+        , m_firstFileBlock(firstFileBlock)
+        , m_folderIndex(folderIndex)
     {
-    public:
-        explicit IByteTransformer(std::string const &password);
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length, bool encrypt);
-        virtual ~IByteTransformer();
-      private:
-        std::string const m_password;
-        IByteTransformer(); // no impl required
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                                 bool encrypt) const = 0;
-    };
-}
-}
 
-#endif // TeaSafe_CIPHER_I_TRANSFORMER_HPP__
+    }
+
+    std::string
+    EntryInfo::filename() const
+    {
+        return m_fileName;
+    }
+
+    uint64_t
+    EntryInfo::size() const
+    {
+        return m_fileSize;
+    }
+
+    EntryType
+    EntryInfo::type() const
+    {
+        return m_entryType;
+    }
+
+    bool
+    EntryInfo::writable() const
+    {
+        return m_writable;
+    }
+
+    uint64_t
+    EntryInfo::firstFileBlock() const
+    {
+        return m_firstFileBlock;
+    }
+
+    uint64_t
+    EntryInfo::folderIndex() const
+    {
+        return m_folderIndex;
+    }
+
+}

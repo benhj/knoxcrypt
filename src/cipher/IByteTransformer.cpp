@@ -29,7 +29,7 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "cipher/IByteTransformer.hpp"
 
-namespace bfs { namespace cipher
+namespace teasafe { namespace cipher
 {
     IByteTransformer::IByteTransformer(std::string const &password)
         : m_password(password)

@@ -27,19 +27,19 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#include "test/BFSTest.hpp"
+#include "test/TeaSafeTest.hpp"
 #include "test/FileBlockTest.hpp"
 #include "test/FileEntryTest.hpp"
 #include "test/FileEntryDeviceTest.hpp"
-#include "test/MakeBFSTest.hpp"
+#include "test/MakeTeaSafeTest.hpp"
 #include "test/FolderEntryTest.hpp"
 #include "test/TestHelpers.hpp"
 
 
 int main()
 {
-    BFSTest();
-    MakeBFSTest();
+    TeaSafeTest();
+    MakeTeaSafeTest();
     FileEntryDeviceTest();
     FileBlockTest();
     FileEntryTest();

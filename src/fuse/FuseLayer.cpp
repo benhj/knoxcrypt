@@ -29,11 +29,11 @@ either expressed or implied, of the FreeBSD Project.
 
 
 /**
- * @brief an experimental fuse wrapper around the bfs container
+ * @brief an experimental fuse wrapper around the teasafe container
  */
 
-#include "bfs/BFS.hpp"
-#include "bfs/CoreBFSIO.hpp"
+#include "teasafe/TeaSafe.hpp"
+#include "teasafe/CoreTeaSafeIO.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
 
 #include <boost/program_options.hpp>
@@ -41,14 +41,14 @@ either expressed or implied, of the FreeBSD Project.
 #include <fuse.h>
 
 
-#define BFS_DATA ((bfs::BFS*) fuse_get_context()->private_data)
+#define TeaSafe_DATA ((teasafe::TeaSafe*) fuse_get_context()->private_data)
 
-int exceptionDispatch(bfs::BFSException const &ex)
+int exceptionDispatch(teasafe::TeaSafeException const &ex)
 {
-    if (ex == bfs::BFSException(bfs::BFSError::NotFound)) {
+    if (ex == teasafe::TeaSafeException(teasafe::TeaSafeError::NotFound)) {
         return -ENOENT;
     }
-    if (ex == bfs::BFSException(bfs::BFSError::AlreadyExists)) {
+    if (ex == teasafe::TeaSafeException(teasafe::TeaSafeError::AlreadyExists)) {
         return -EEXIST;
     }
 
@@ -56,7 +56,7 @@ int exceptionDispatch(bfs::BFSException const &ex)
 }
 
 static int
-bfs_getattr(const char *path, struct stat *stbuf)
+teasafe_getattr(const char *path, struct stat *stbuf)
 {
     memset(stbuf, 0, sizeof(struct stat));
 
@@ -67,22 +67,22 @@ bfs_getattr(const char *path, struct stat *stbuf)
         return 0;
     } else {
         try {
-            bfs::EntryInfo info = BFS_DATA->getInfo(path);
-            if (info.type() == bfs::EntryType::FolderType) {
+            teasafe::EntryInfo info = TeaSafe_DATA->getInfo(path);
+            if (info.type() == teasafe::EntryType::FolderType) {
                 stbuf->st_mode = S_IFDIR | 0777;
                 stbuf->st_nlink = 3;
-                stbuf->st_blksize = bfs::detail::FILE_BLOCK_SIZE - bfs::detail::FILE_BLOCK_META;
+                stbuf->st_blksize = teasafe::detail::FILE_BLOCK_SIZE - teasafe::detail::FILE_BLOCK_META;
                 return 0;
-            } else if (info.type() == bfs::EntryType::FileType) {
+            } else if (info.type() == teasafe::EntryType::FileType) {
                 stbuf->st_mode = S_IFREG | 0777;
                 stbuf->st_nlink = 1;
                 stbuf->st_size = info.size();
-                stbuf->st_blksize = bfs::detail::FILE_BLOCK_SIZE - bfs::detail::FILE_BLOCK_META;
+                stbuf->st_blksize = teasafe::detail::FILE_BLOCK_SIZE - teasafe::detail::FILE_BLOCK_META;
                 return 0;
             } else {
                 return -ENOENT;
             }
-        } catch (bfs::BFSException const &e) {
+        } catch (teasafe::TeaSafeException const &e) {
             return exceptionDispatch(e);
         }
     }
@@ -90,33 +90,33 @@ bfs_getattr(const char *path, struct stat *stbuf)
     return 0;
 }
 
-int bfs_rename(const char *path, const char *newpath)
+int teasafe_rename(const char *path, const char *newpath)
 {
     try {
-        BFS_DATA->renameEntry(path, newpath);
-    } catch (bfs::BFSException const &e) {
+        TeaSafe_DATA->renameEntry(path, newpath);
+    } catch (teasafe::TeaSafeException const &e) {
         return exceptionDispatch(e);
     }
     return 0;
 }
 
 // Create a directory
-static int bfs_mkdir(const char *path, mode_t mode)
+static int teasafe_mkdir(const char *path, mode_t mode)
 {
     try {
-        BFS_DATA->addFolder(path);
-    } catch (bfs::BFSException const &e) {
+        TeaSafe_DATA->addFolder(path);
+    } catch (teasafe::TeaSafeException const &e) {
         return exceptionDispatch(e);
     }
     return 0;
 }
 
 // Remove a file
-static int bfs_unlink(const char *path)
+static int teasafe_unlink(const char *path)
 {
     try {
-        BFS_DATA->removeFile(path);
-    } catch (bfs::BFSException const &e) {
+        TeaSafe_DATA->removeFile(path);
+    } catch (teasafe::TeaSafeException const &e) {
         return exceptionDispatch(e);
     }
 
@@ -124,11 +124,11 @@ static int bfs_unlink(const char *path)
 }
 
 // Remove a folder
-static int bfs_rmdir(const char *path)
+static int teasafe_rmdir(const char *path)
 {
     try {
-        BFS_DATA->removeFolder(path, bfs::FolderRemovalType::Recursive);
-    } catch (bfs::BFSException const &e) {
+        TeaSafe_DATA->removeFolder(path, teasafe::FolderRemovalType::Recursive);
+    } catch (teasafe::TeaSafeException const &e) {
         return exceptionDispatch(e);
     }
 
@@ -136,11 +136,11 @@ static int bfs_rmdir(const char *path)
 }
 
 // truncate a file
-static int bfs_truncate(const char *path, off_t newsize)
+static int teasafe_truncate(const char *path, off_t newsize)
 {
     try {
-        BFS_DATA->truncateFile(path, newsize);
-    } catch (bfs::BFSException const &e) {
+        TeaSafe_DATA->truncateFile(path, newsize);
+    } catch (teasafe::TeaSafeException const &e) {
         return exceptionDispatch(e);
     }
 
@@ -149,85 +149,85 @@ static int bfs_truncate(const char *path, off_t newsize)
 
 // open a file.. note most reading and writing functionality
 // is deferred to the respective functions
-static int bfs_open(const char *path, struct fuse_file_info *fi)
+static int teasafe_open(const char *path, struct fuse_file_info *fi)
 {
-    if (!BFS_DATA->fileExists(path)) {
+    if (!TeaSafe_DATA->fileExists(path)) {
         try {
-            BFS_DATA->addFile(path);
-        } catch (bfs::BFSException const &e) {
+            TeaSafe_DATA->addFile(path);
+        } catch (teasafe::TeaSafeException const &e) {
             return exceptionDispatch(e);
         }
     }
 
     try {
-        bfs::EntryInfo info = BFS_DATA->getInfo(path);
-    } catch (bfs::BFSException const &e) {
+        teasafe::EntryInfo info = TeaSafe_DATA->getInfo(path);
+    } catch (teasafe::TeaSafeException const &e) {
         return exceptionDispatch(e);
     }
 
     return 0;
 }
 
-static int bfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
+static int teasafe_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-    bfs::FileEntryDevice device = BFS_DATA->openFile(path, bfs::OpenDisposition::buildReadOnlyDisposition());
+    teasafe::FileEntryDevice device = TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
     device.seek(offset, std::ios_base::beg);
     return device.read(buf, size);
 }
 
-static int bfs_write(const char *path, const char *buf, size_t size, off_t offset,
+static int teasafe_write(const char *path, const char *buf, size_t size, off_t offset,
                      struct fuse_file_info *fi)
 {
 
     std::cout<<"size: "<<size<<std::endl;
 
-    bfs::ReadOrWriteOrBoth openMode = bfs::ReadOrWriteOrBoth::ReadWrite;
+    teasafe::ReadOrWriteOrBoth openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
 
     /*
       if((fi->flags & O_RDWR) == O_RDWR) {
-      openMode = bfs::ReadOrWriteOrBoth::ReadWrite;
+      openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
       }*/
 
-    bfs::AppendOrOverwrite appendType = bfs::AppendOrOverwrite::Append;
+    teasafe::AppendOrOverwrite appendType = teasafe::AppendOrOverwrite::Append;
 
     if ((fi->flags & O_APPEND) == O_APPEND) {
-        appendType = bfs::AppendOrOverwrite::Append;
+        appendType = teasafe::AppendOrOverwrite::Append;
     }
 
-    bfs::TruncateOrKeep truncateType = bfs::TruncateOrKeep::Keep;
+    teasafe::TruncateOrKeep truncateType = teasafe::TruncateOrKeep::Keep;
 
     if ((fi->flags & O_TRUNC) == O_TRUNC) {
-        truncateType = bfs::TruncateOrKeep::Truncate;
+        truncateType = teasafe::TruncateOrKeep::Truncate;
     }
 
-    bfs::OpenDisposition od(openMode, appendType, bfs::CreateOrDontCreate::Create, truncateType);
+    teasafe::OpenDisposition od(openMode, appendType, teasafe::CreateOrDontCreate::Create, truncateType);
 
-    bfs::FileEntryDevice device = BFS_DATA->openFile(path, od);
+    teasafe::FileEntryDevice device = TeaSafe_DATA->openFile(path, od);
     device.seek(offset, std::ios_base::beg);
     return device.write(buf, size);
 }
 
-static void *bfs_init(struct fuse_conn_info *conn)
+static void *teasafe_init(struct fuse_conn_info *conn)
 {
-    return BFS_DATA;
+    return TeaSafe_DATA;
 }
 
 // create file; comment for git test
-static int bfs_create(const char *path, mode_t mode, struct fuse_file_info *fi)
+static int teasafe_create(const char *path, mode_t mode, struct fuse_file_info *fi)
 {
     try {
-        BFS_DATA->addFile(path);
-    } catch (bfs::BFSException const &e) {
+        TeaSafe_DATA->addFile(path);
+    } catch (teasafe::TeaSafeException const &e) {
         return exceptionDispatch(e);
     }
     return 0;
 }
 
-static int bfs_ftruncate(const char *path, off_t offset, struct fuse_file_info *fi)
+static int teasafe_ftruncate(const char *path, off_t offset, struct fuse_file_info *fi)
 {
     try {
-        BFS_DATA->truncateFile(path, offset);
-    } catch (bfs::BFSException const &e) {
+        TeaSafe_DATA->truncateFile(path, offset);
+    } catch (teasafe::TeaSafeException const &e) {
         return exceptionDispatch(e);
     }
     return 0;
@@ -235,28 +235,28 @@ static int bfs_ftruncate(const char *path, off_t offset, struct fuse_file_info *
 
 // not sure what this does. Not figured out if we need it yet
 // but I think its called a bunch of times
-static int bfs_opendir(const char *path, struct fuse_file_info *fi)
+static int teasafe_opendir(const char *path, struct fuse_file_info *fi)
 {
     return 0;
 }
 
 
 // list the directory contents
-static int bfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+static int teasafe_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
                        off_t offset, struct fuse_file_info *fi)
 {
     try {
-        bfs::FolderEntry folder = BFS_DATA->getCurrent(path);
+        teasafe::FolderEntry folder = TeaSafe_DATA->getCurrent(path);
 
-        std::vector<bfs::EntryInfo> infos = folder.listAllEntries();
-        std::vector<bfs::EntryInfo>::iterator it = infos.begin();
+        std::vector<teasafe::EntryInfo> infos = folder.listAllEntries();
+        std::vector<teasafe::EntryInfo>::iterator it = infos.begin();
 
         filler(buf, ".", NULL, 0);           /* Current directory (.)  */
         filler(buf, "..", NULL, 0);
 
         for (; it != infos.end(); ++it) {
             struct stat stbuf;
-            if (it->type() == bfs::EntryType::FileType) {
+            if (it->type() == teasafe::EntryType::FileType) {
                 stbuf.st_mode = S_IFREG | 0755;
                 stbuf.st_nlink = 1;
                 stbuf.st_size = it->size();
@@ -268,29 +268,29 @@ static int bfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
             filler(buf, it->filename().c_str(), &stbuf, 0);
 
         }
-    } catch (bfs::BFSException const &e) {
+    } catch (teasafe::TeaSafeException const &e) {
         return exceptionDispatch(e);
     }
 
     return 0;
 }
 
-static struct fuse_operations bfs_oper =
+static struct fuse_operations teasafe_oper =
 {
-    .mkdir = bfs_mkdir,
-    .unlink = bfs_unlink,
-    .rmdir = bfs_rmdir,
-    .truncate = bfs_truncate,
-    .open = bfs_open,
-    .read = bfs_read,
-    .write = bfs_write,
-    .create = bfs_create,
-    .ftruncate = bfs_ftruncate,
-    .opendir = bfs_opendir,
-    .init = bfs_init,
-    .readdir = bfs_readdir,
-    .getattr = bfs_getattr,
-    .rename = bfs_rename
+    .mkdir = teasafe_mkdir,
+    .unlink = teasafe_unlink,
+    .rmdir = teasafe_rmdir,
+    .truncate = teasafe_truncate,
+    .open = teasafe_open,
+    .read = teasafe_read,
+    .write = teasafe_write,
+    .create = teasafe_create,
+    .ftruncate = teasafe_ftruncate,
+    .opendir = teasafe_opendir,
+    .init = teasafe_init,
+    .readdir = teasafe_readdir,
+    .getattr = teasafe_getattr,
+    .rename = teasafe_rename
 };
 
 int main(int argc, char *argv[])
@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
-        ("imageName", po::value<std::string>(), "bfs image path")
+        ("imageName", po::value<std::string>(), "teasafe image path")
         ("mountPoint", po::value<std::string>(), "mountPoint path")
         ("debug", po::value<bool>(&debug)->default_value(true), "fuse debug")
         ("magic", po::value<bool>(&magic)->default_value(false), "magic partition")
@@ -342,20 +342,20 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Setup a core bfs io object which stores highlevel info about accessing
-    // the BFS image
-    bfs::CoreBFSIO io;
+    // Setup a core teasafe io object which stores highlevel info about accessing
+    // the TeaSafe image
+    teasafe::CoreTeaSafeIO io;
     io.path = vm["imageName"].as<std::string>().c_str();
-    io.password = bfs::utility::getPassword();
-    io.rootBlock = magic ? atoi(bfs::utility::getPassword("magic number: ").c_str()) : 0;
+    io.password = teasafe::utility::getPassword();
+    io.rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;
 
     // Obtain the number of blocks in the image by reading the image's block count
-    bfs::BFSImageStream stream(io, std::ios::in | std::ios::binary);
-    io.blocks = bfs::detail::getBlockCount(stream);
+    teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
+    io.blocks = teasafe::detail::getBlockCount(stream);
     stream.close();
 
     // Create the basic file system
-    bfs::BFS theBfs(io);
+    teasafe::TeaSafe theBfs(io);
 
     // make arguments fuse-compatable
     argc = 3;
@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
 
     // turn over control to fuse
     fprintf(stderr, "about to call fuse_main\n");
-    int fuse_stat = fuse_main(argc, argv, &bfs_oper, &theBfs);
+    int fuse_stat = fuse_main(argc, argv, &teasafe_oper, &theBfs);
     fprintf(stderr, "fuse_main returned %d\n", fuse_stat);
 
     return fuse_stat;

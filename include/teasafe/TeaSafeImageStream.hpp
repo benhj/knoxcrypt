@@ -27,27 +27,49 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#ifndef TeaSafe_TeaSafe_IMAGE_STREAM_HPP__
+#define TeaSafe_TeaSafe_IMAGE_STREAM_HPP__
 
-#include <iostream>
+#include "teasafe/CoreTeaSafeIO.hpp"
+#include "cipher/IByteTransformer.hpp"
+
+#include <boost/shared_ptr.hpp>
+
+#include <fstream>
 #include <string>
 
-namespace teasafe { namespace cipher
+namespace teasafe
 {
-    class IByteTransformer
+
+    typedef boost::shared_ptr<cipher::IByteTransformer> ByteTransformerPtr;
+
+    class TeaSafeImageStream
     {
-    public:
-        explicit IByteTransformer(std::string const &password);
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length, bool encrypt);
-        virtual ~IByteTransformer();
+      public:
+        explicit TeaSafeImageStream(CoreTeaSafeIO const &io,
+                                std::ios::openmode mode = std::ios::out | std::ios::binary);
+
+        TeaSafeImageStream& read(char * const buf, std::streamsize const n);
+
+        TeaSafeImageStream& write(char const * buf, std::streamsize const n);
+
+        TeaSafeImageStream& seekg(std::streampos pos);
+        TeaSafeImageStream& seekg(std::streamoff off, std::ios_base::seekdir way);
+        TeaSafeImageStream& seekp(std::streampos pos);
+        TeaSafeImageStream& seekp(std::streamoff off, std::ios_base::seekdir way);
+        std::streampos tellg();
+        std::streampos tellp();
+
+        void flush();
+
+        void close();
+
       private:
-        std::string const m_password;
-        IByteTransformer(); // no impl required
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                                 bool encrypt) const = 0;
+        TeaSafeImageStream();
+        std::fstream m_stream;
+        ByteTransformerPtr m_byteTransformer;
     };
-}
+
 }
 
-#endif // TeaSafe_CIPHER_I_TRANSFORMER_HPP__
+#endif // TeaSafe_TeaSafe_IMAGE_STREAM_HPP__
