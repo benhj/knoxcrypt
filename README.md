@@ -61,8 +61,10 @@ Any sub folders are accordingly updated in a similar manner.
 
 ### Encryption
 
-The filesystem is encrypted using a varient of the XTEA algorithm. Having said
-that, the keen developer is encouraged to implement their own transformational cipher. All she 
+The filesystem is encrypted using a varient of the XTEA algorithm. 
+I don't consider myself an expert in encryption so I would suggest you
+review my code before you consider it secure or not.
+The more keen developer is encouraged to implement their own transformational cipher. All she 
 needs to do is implement the function `doTransform` in `IByteTransformer` as defined in `IByteTransformer.hpp`.
 See file `BasicByteTransformer.hpp` as an example of how this is done. The pointer type of `m_byteTransformer`
 as initialized in the constructor argument list of `TeaSafeImageStream.cpp` then needs to be updated to
