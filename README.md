@@ -2,13 +2,13 @@ TeaSafe: An experimental fuse-based filesystem
 ----------------------------------------------
 
 TeaSafe is an experimental filesystem designed with encryption in mind. 
-The whole filesystem is block-based in which the whole file system exists as an 'image'
-mounted to a user-specified mount-point. Rather than encrypting each file entry
+The whole filesystem is block-based, exising as a single 'image'
+that can be mounted to a user-specified mount-point. Rather than encrypting each file entry
 individually, the whole image is transformed using a variant of the XTEA algorithm.
 TeaSafe also incorporates an experimental
 'coffee mode' in which a 'hidden partition' can be specified at the time
-of image creation, and then subsequently mounted rather than the default directory.
-
+of image creation. At the time of mounting, the user can choose to mount this
+rather than the default root folder.
 
 ### The TeaSafe image
 
