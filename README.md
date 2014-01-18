@@ -56,8 +56,8 @@ on modifying the Makefile to point to correct library and header paths.
 
 ### Running
 
-`./test` will run the test suite. This unit tests various parts of TeaSafe. As I uncover
-new bugs and attemp to fix them, I will add new units to verify these fixes.
+`./test` will run the test suite. This unit tests test various parts of TeaSafe. As I uncover
+new bugs and attemp to fix them, I will add new units to verify the fixes.
 
 `./maketeasafe 128000 image.teasf` will create a 500MB TeaSafe image when the block
 size is 4096 (note the block size is hardcoded into DetailTeaSafe.hpp and represents
@@ -66,5 +66,5 @@ a good compromise between file speed and space efficiency).
 `./teasafe image.teasf testMount` will launch and mount image.teasf under 
 the directory testMount in fuse debug mode; note to disable debug
 mode you need to specify `--debug 0' as an extra parameter. Disabling
-sebug mode will mount in single-threaded mode. Multi-threaded mode
-is not supported.
+debug mode will mount the image in single-threaded mode. Multi-threaded mode
+is not currently supported.
