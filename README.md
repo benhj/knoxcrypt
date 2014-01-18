@@ -34,8 +34,7 @@ the developer's new implementation e.g.:
 `m_byteTransformer(boost::make_shared<cipher::BasicByteTransformer>(io.password))` --->
 `m_byteTransformer(boost::make_shared<cipher::SomeOtherImplementation>(io.password))`
 
-Development requirements
-------------------------
+### Development requirements
 
 All development was undertaken on a machine running osx10.9.
 The actual development requirements are thus:
@@ -50,14 +49,12 @@ updating according to where boost is installed
 I envisage no problems running and compiling on linux. Windows unfortunately is a completely different beast
 not least of which is due to a lack of a FUSE implementation.
 
-Compiling
----------
+### Compiling
 
 `make` or `make all` will compile everything and all binaries. Please see above notes
 on modifying the Makefile to point to correct library and header paths.
 
-Running
--------
+### Running
 
 `./test` will run the test suite. This unit tests various parts of TeaSafe. As I uncover
 new bugs and attemp to fix them, I will add new units to verify these fixes.
@@ -71,5 +68,3 @@ the directory testMount in fuse debug mode; note to disable debug
 mode you need to specify `--debug 0' as an extra parameter. Disabling
 sebug mode will mount in single-threaded mode. Multi-threaded mode
 is not supported.
-
-
