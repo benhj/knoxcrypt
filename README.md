@@ -10,17 +10,7 @@ TeaSafe also incorporates an experimental
 of image creation. At the time of mounting, the user can choose to mount this
 rather than the default root folder.
 
-### The TeaSafe image
-
-- The whole filesystem is represented as a file image
-- The first 8 bytes represent a 64 bit counter describing FS size (basically the number of file blocks).
-- The next N bits constitute the volume bit map
-- The next 8 bytes represent how many 'root' entries there are. The root constitutes
-the root folder of the FS, so there is normally only one root entry. This indicator
-is obsolete and is always set to '1' even if 'coffee mode' is used.
-- The next M x N bytes represent the file block data
-
-### Encryption
+### Security
 
 The filesystem is encrypted using a varient of the XTEA algorithm. 
 I don't consider myself an expert in encryption so I would suggest you
@@ -33,6 +23,8 @@ the developer's new implementation e.g.:
 
 `m_byteTransformer(boost::make_shared<cipher::BasicByteTransformer>(io.password))` --->
 `m_byteTransformer(boost::make_shared<cipher::SomeOtherImplementation>(io.password))`
+
+A hidden partition scheme is also supported in a similar vein to truecrypt. More details soon.
 
 ### Development requirements
 
@@ -68,3 +60,8 @@ the directory testMount in fuse debug mode; note to disable debug
 mode you need to specify `--debug 0' as an extra parameter. Disabling
 debug mode will mount the image in single-threaded mode. Multi-threaded mode
 is not currently supported.
+
+Licensing
+---------
+
+TeaSafe follows the BSD 2-Clause licence. 
