@@ -65,6 +65,7 @@ class TeaSafeTest
         testMoveFileSameFolder();
         testMoveFileToSubFolder();
         testMoveFileFromSubFolderToParentFolder();
+        testThatDeletingEverythingDeallocatesEverything();
     }
 
     ~TeaSafeTest()
@@ -337,7 +338,7 @@ class TeaSafeTest
         teasafe::CoreTeaSafeIO io = createTestIO(testPath);
         teasafe::TeaSafe theTeaSafe(io);
         theTeaSafe.removeFolder("/folderA/subFolderA/subFolderC/finalFolder",
-                            teasafe::FolderRemovalType::MustBeEmpty);
+                                teasafe::FolderRemovalType::MustBeEmpty);
 
 
         teasafe::OptionalEntryInfo info = root.getFolderEntry("folderA")
@@ -473,5 +474,99 @@ class TeaSafeTest
         theTeaSafe.renameEntry("/folderA/subFolderA/fileX", "/folderA/renamed.txt");
         ASSERT_EQUAL(false, theTeaSafe.fileExists("/folderA/subFolderA/fileX"), "TeaSafeTest::testMoveFileToSubFolderFolder() original removed");
         ASSERT_EQUAL(true, theTeaSafe.fileExists("/folderA/renamed.txt"), "TeaSafeTest::testMoveFileToSubFolderFolder() new version");
+    }
+
+    // checks that exactly the same blocks are allocated for content that is removed
+    // and then re-added
+    void testThatDeletingEverythingDeallocatesEverything()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        {
+            (void)createTestFolder(testPath, blocks);
+        }
+        teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+        teasafe::TeaSafe theTeaSafe(io);
+
+        // open file and append to end of it
+        std::string const &testString(createLargeStringToWrite());
+        {
+            teasafe::FileEntryDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
+                                                                  teasafe::OpenDisposition::buildAppendDisposition());
+            (void)device.write(testString.c_str(), testString.length());
+        }
+
+        // see what blocks are in use
+        std::vector<long> blocksInUse;
+        {
+            teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            for(long i = 0; i < blocks; ++i) {
+
+                if(teasafe::detail::isBlockInUse(i, blocks, in)) {
+                    blocksInUse.push_back(i);
+                }
+            }
+        }
+
+        // now remove all content
+        theTeaSafe.removeFile("/test.txt");
+        theTeaSafe.removeFile("/some.log");
+        theTeaSafe.removeFolder("/folderA", teasafe::FolderRemovalType::Recursive);
+        theTeaSafe.removeFile("/picture.jpg");
+        theTeaSafe.removeFile("/vai.mp3");
+        theTeaSafe.removeFolder("/folderB", teasafe::FolderRemovalType::Recursive);
+
+        // check that all blocks except 0 which is the root folder entry point
+        // have been deallocated
+        {
+            bool blockCheckPassed = true;
+            teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            for(int i = 1; i<blocks; ++i) {
+
+                if(teasafe::detail::isBlockInUse(i, blocks, in)) {
+                    blockCheckPassed = false;
+                    break;
+                }
+            }
+            ASSERT_EQUAL(true, blockCheckPassed,
+                    "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() blocks dealloc'd");
+        }
+
+        // now re-add content and check that allocated blocks are same as previous allocation
+        {
+            (void)createTestFolder(testPath, blocks);
+        }
+        {
+            teasafe::FileEntryDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
+                                                                  teasafe::OpenDisposition::buildAppendDisposition());
+            (void)device.write(testString.c_str(), testString.length());
+        }
+
+        // see what blocks are in use this time around; should be same as first time around
+        std::vector<long> blocksInUseB;
+        {
+            teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            for(long i = 0; i < blocks; ++i) {
+
+                if(teasafe::detail::isBlockInUse(i, blocks, in)) {
+                    blocksInUseB.push_back(i);
+                }
+            }
+        }
+
+        ASSERT_EQUAL(blocksInUse.size(), blocksInUseB.size(),
+                "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() blocks in use sizes");
+
+        bool sameBlocks = true;
+        for(int i = 0;i < blocksInUse.size(); ++i) {
+            if(blocksInUse[i] != blocksInUseB[i]) {
+                sameBlocks = false;
+                break;
+            }
+        }
+
+        ASSERT_EQUAL(true, sameBlocks,
+                        "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() same blocks");
+
     }
 };

@@ -169,7 +169,7 @@ namespace teasafe { namespace cipher
                                   long &c,
                                   int const uptoBit) const
         {
-            int rounds = 128;
+            int rounds = 32;
             uint8_t a[8];
             uint8_t b[8];
             for (long i = 0; i < iterations; ++i) {
