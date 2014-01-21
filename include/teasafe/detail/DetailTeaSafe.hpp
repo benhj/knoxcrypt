@@ -103,51 +103,6 @@ namespace teasafe { namespace detail
     }
 
     /**
-     * @brief gets the number of files stored in the TeaSafe
-     * @param in the TeaSafe image stream
-     * @param totalFileBlocks total blocks in file space
-     * @return the number of files
-     */
-    inline uint64_t getFileCount(teasafe::TeaSafeImageStream &in, uint64_t const totalFileBlocks = 0)
-    {
-        uint64_t blockCount = totalFileBlocks;
-        if (blockCount == 0) { // read in, in this case as should never be 0
-            uint8_t blockCountBytes[8];
-            in.seekg(0);
-            (void)in.read((char*)blockCountBytes, 8);
-            blockCount = convertInt8ArrayToInt64(blockCountBytes);
-        }
-        uint64_t const volumeBitMapBytes = blockCount / 8;
-        in.seekg(volumeBitMapBytes + 8);
-        uint8_t dat[8];
-        (void)in.read((char*)dat, 8);
-        return convertInt8ArrayToInt64(dat);
-    }
-
-    /**
-     * @brief increments the file count
-     * @param in the path of the container
-     * @param totalFileBlocks total fs blocks
-     * @param increment whether to increment (true) or decrement (false) the file count
-     */
-    inline void incrementFileCount(teasafe::TeaSafeImageStream &in, uint64_t const totalFileBlocks, bool const increment = true)
-    {
-        uint64_t numberOfFiles = getFileCount(in, totalFileBlocks);
-        if (increment) {
-            ++numberOfFiles;
-        } else {
-            --numberOfFiles;
-        }
-        uint64_t const volumeBitMapBytes = totalFileBlocks / 8;
-        (void)in.seekg(8 + volumeBitMapBytes);
-        uint8_t dat[8];
-        convertUInt64ToInt8Array(numberOfFiles, dat);
-        (void)in.write((char*)dat, 8);
-    }
-
-
-
-    /**
      * @brief gets the number of blocks in this teasafe
      * @param in the teasafe image stream
      * @return the number of blocks

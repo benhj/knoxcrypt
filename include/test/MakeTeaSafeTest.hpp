@@ -46,7 +46,6 @@ class MakeTeaSafeTest
     {
         boost::filesystem::create_directories(m_uniquePath);
         correctBlockCountIsReported();
-        correctNumberOfFilesIsReported();
         firstBlockIsReportedAsBeingFree();
         blocksCanBeSetAndCleared();
         testThatRootFolderContainsZeroEntries();
@@ -69,24 +68,6 @@ class MakeTeaSafeTest
         teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::binary);
         ASSERT_EQUAL(blocks, teasafe::detail::getBlockCount(is), "correctBlockCountIsReported");
         is.close();
-    }
-
-    void correctNumberOfFilesIsReported()
-    {
-        int blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-
-        uint64_t fileCount(0);
-        uint8_t fileCountBytes[8];
-
-        teasafe::SharedCoreIO io(createTestIO(testPath));
-
-        teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::binary);
-
-        // convert the byte array back to uint64 representation
-        uint64_t reported = teasafe::detail::getFileCount(is);
-        is.close();
-        ASSERT_EQUAL(reported, fileCount, "correctNumberOfFilesIsReported");
     }
 
     void firstBlockIsReportedAsBeingFree()

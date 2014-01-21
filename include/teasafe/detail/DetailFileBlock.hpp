@@ -86,31 +86,6 @@ namespace teasafe { namespace detail
         (void)in.read((char*)dat, 4);
         return convertInt4ArrayToInt32(dat);
     }
-
-    inline void writeNumberOfDataBytesWrittenToFileBlockN(teasafe::TeaSafeImageStream &in,
-                                                          uint64_t const n,
-                                                          uint64_t const totalBlocks,
-                                                          uint32_t const bytesWritten)
-    {
-        uint64_t offset = getOffsetOfFileBlock(n, totalBlocks);
-        (void)in.seekg(offset);
-        uint8_t dat[4];
-        convertInt32ToInt4Array(bytesWritten, dat);
-        (void)in.write((char*)dat, 4);
-    }
-
-    inline void writeIndexOfNextFileBlockFromFileBlockN(teasafe::TeaSafeImageStream &in,
-                                                        uint64_t const n,
-                                                        uint64_t const totalBlocks,
-                                                        uint32_t const nextIndex)
-    {
-        uint64_t offset = getOffsetOfFileBlock(n, totalBlocks) + 4;
-        (void)in.seekg(offset);
-        uint8_t dat[8];
-        convertInt32ToInt4Array(nextIndex, dat);
-        (void)in.write((char*)dat, 8);
-    }
-
 }
 }
 
