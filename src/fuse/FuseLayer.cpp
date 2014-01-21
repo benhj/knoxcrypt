@@ -353,7 +353,13 @@ int main(int argc, char *argv[])
     // Obtain the number of blocks in the image by reading the image's block count
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
     io->blocks = teasafe::detail::getBlockCount(stream);
-    io->freeBlocks = io->blocks;
+
+    printf("Counting allocated blocks. Please wait...\n");
+
+    io->freeBlocks = teasafe::detail::getNumberOfAllocatedBlocks(stream);
+
+    printf("Finished counting allocated blocks.\n");
+
     stream.close();
 
     // Create the basic file system

@@ -161,28 +161,6 @@ namespace teasafe { namespace detail
     }
 
     /**
-     * @brief updates the number of file blocks used
-     * @param in the teasafe image stream
-     * @param blocksUsed the number of blocks to increment block usage by
-     */
-    inline void setBlocksUsed(teasafe::TeaSafeImageStream &in, uint64_t const blocksUsed, bool increment = true)
-    {
-        (void)in.seekg(0);
-        uint8_t dat[8];
-        (void)in.read((char*)dat, 8);
-        uint64_t blockCountStore = convertInt8ArrayToInt64(dat);
-        if (increment) {
-            blockCountStore += blocksUsed;
-        } else {
-            blockCountStore -= blocksUsed;
-        }
-        convertUInt64ToInt8Array(blockCountStore, dat);
-        (void)in.seekp(0);
-        (void)in.write((char*)dat, 8);
-
-    }
-
-    /**
      * @brief determines whether a bit is set in a byte
      * @param byte the byte to test
      * @param bit the bit index to check
@@ -293,6 +271,46 @@ namespace teasafe { namespace detail
             uint8_t &dat = buf[byteThatStoresBit];
             return isBitSetInByte(dat, leftOver);
         }
+    }
+
+    /**
+     * @brief gets the number of blocks currently allocated
+     * @param in the teasafe image stream
+     * @return the number of allocated blocks
+     */
+    inline uint64_t getNumberOfAllocatedBlocks(teasafe::TeaSafeImageStream &in)
+    {
+        (void)in.seekg(0);
+        uint8_t dat[8];
+        (void)in.read((char*)dat, 8);
+        uint64_t blocks = convertInt8ArrayToInt64(dat);
+        uint64_t bytes = blocks / uint64_t(8);
+        // read the bytes in to a buffer
+        std::vector<uint8_t> buf;
+        buf.assign(bytes, 0);
+        (void)in.read((char*)&buf.front(), bytes);
+        uint64_t used(0);
+        // note this is quicker than calling isBlockInUse repeatedly
+        for(uint64_t block = 0; block < blocks; ++block) {
+            uint64_t byteThatStoresBit(0);
+            if (block < 8) {
+                uint8_t dat = buf[byteThatStoresBit];
+                if(isBitSetInByte(dat, block)) {
+                    ++used;
+                }
+            } else {
+                uint64_t const leftOver = block % 8;
+                uint64_t withoutLeftOver = block - leftOver;
+                byteThatStoresBit = (withoutLeftOver / 8) - 1;
+                ++byteThatStoresBit;
+                uint8_t &dat = buf[byteThatStoresBit];
+                if(isBitSetInByte(dat, leftOver)) {
+                    ++used;
+                }
+            }
+        }
+
+        return used;
     }
 
     /**
