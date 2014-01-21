@@ -43,6 +43,8 @@ either expressed or implied, of the FreeBSD Project.
 
 #include <string>
 
+#include <sys/statvfs.h>
+
 namespace teasafe
 {
     class TeaSafe
@@ -51,14 +53,14 @@ namespace teasafe
         typedef boost::optional<FolderEntry> OptionalFolderEntry;
 
       public:
-        explicit TeaSafe(CoreTeaSafeIO const &io)
+        explicit TeaSafe(SharedCoreIO const &io)
             : m_io(io)
         {
         }
 
         FolderEntry getCurrent(std::string const &path)
         {
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // ignore trailing slash, but only if folder type
@@ -87,7 +89,7 @@ namespace teasafe
 
         EntryInfo getInfo(std::string const &path)
         {
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // ignore trailing slash, but only if folder type
@@ -114,19 +116,19 @@ namespace teasafe
 
         bool fileExists(std::string const &path) const
         {
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
             return doFileExists(path, rootFolder);
         }
 
         bool folderExists(std::string const &path)
         {
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
             return doFolderExists(path, rootFolder);
         }
 
         void addFile(std::string const &path)
         {
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // file entries with trailing slash should throw
@@ -160,7 +162,7 @@ namespace teasafe
             if (chDst == '/') {
                 std::string(dst.begin(), dst.end() - 1).swap(dstPath);
             }
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
 
             // throw if source parent doesn't exist
             OptionalFolderEntry parentSrc = doGetParentFolderEntry(srcPath, rootFolder);
@@ -195,7 +197,7 @@ namespace teasafe
 
         void addFolder(std::string const &path) const
         {
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // ignore trailing slash
@@ -216,7 +218,7 @@ namespace teasafe
 
         void removeFile(std::string const &path)
         {
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // ignore trailing slash, but only if folder type
@@ -244,7 +246,7 @@ namespace teasafe
 
         void removeFolder(std::string const &path, FolderRemovalType const &removalType)
         {
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
             std::string thePath(path);
             char ch = *path.rbegin();
             // ignore trailing slash, but only if folder type
@@ -280,7 +282,7 @@ namespace teasafe
 
         FileEntryDevice openFile(std::string const &path, OpenDisposition const &openMode)
         {
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
             char ch = *path.rbegin();
             if (ch == '/') {
                 throw TeaSafeException(TeaSafeError::NotFound);
@@ -306,7 +308,7 @@ namespace teasafe
 
         void truncateFile(std::string const &path, std::ios_base::streamoff offset)
         {
-            FolderEntry rootFolder(m_io, m_io.rootBlock, "root");
+            FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
             OptionalFolderEntry parentEntry = doGetParentFolderEntry(path, rootFolder);
             if (!parentEntry) {
                 throw TeaSafeException(TeaSafeError::NotFound);
@@ -324,10 +326,20 @@ namespace teasafe
             fe.truncate(offset);
         }
 
+        /**
+         * @brief gets file system info; used when a 'df' command is issued
+         * @param buf stores the filesystem stats data
+         */
+        void statvfs(struct statvfs *buf)
+        {
+            buf->f_bsize = detail::FILE_BLOCK_SIZE;
+            buf->f_blocks = m_io->blocks;
+        }
+
       private:
 
         // the core teasafe io (path, blocks, password)
-        CoreTeaSafeIO m_io;
+        SharedCoreIO m_io;
 
         TeaSafe(); // not required
 

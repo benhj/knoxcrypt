@@ -63,7 +63,7 @@ class MakeTeaSafeTest
         int blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
-        teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+        teasafe::SharedCoreIO io(createTestIO(testPath));
 
         // test that enough bytes are written
         teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::binary);
@@ -79,7 +79,7 @@ class MakeTeaSafeTest
         uint64_t fileCount(0);
         uint8_t fileCountBytes[8];
 
-        teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+        teasafe::SharedCoreIO io(createTestIO(testPath));
 
         teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::binary);
 
@@ -94,7 +94,7 @@ class MakeTeaSafeTest
         int blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
-        teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+        teasafe::SharedCoreIO io(createTestIO(testPath));
 
         teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::binary);
         teasafe::detail::OptionalBlock p = teasafe::detail::getNextAvailableBlock(is);
@@ -108,7 +108,7 @@ class MakeTeaSafeTest
         int blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
 
-        teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+        teasafe::SharedCoreIO io(createTestIO(testPath));
 
         teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
         teasafe::detail::setBlockToInUse(1, blocks, is);
@@ -152,7 +152,7 @@ class MakeTeaSafeTest
 
         uint64_t offset = teasafe::detail::getOffsetOfFileBlock(0, blocks);
         // open a stream and read the first byte which signifies number of entries
-        teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+        teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
         is.seekg(offset + teasafe::detail::FILE_BLOCK_META);
         uint8_t bytes[8];

@@ -46,8 +46,8 @@ namespace teasafe
     class TeaSafeImageStream
     {
       public:
-        explicit TeaSafeImageStream(CoreTeaSafeIO const &io,
-                                std::ios::openmode mode = std::ios::out | std::ios::binary);
+        explicit TeaSafeImageStream(SharedCoreIO const &io,
+                                    std::ios::openmode mode = std::ios::out | std::ios::binary);
 
         TeaSafeImageStream& read(char * const buf, std::streamsize const n);
 

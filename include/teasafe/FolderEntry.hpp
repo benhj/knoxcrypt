@@ -54,7 +54,7 @@ namespace teasafe
          * @param name the name of the entry
          * @param enforceRootBlock true if we want to enforce the starting root block
          */
-        FolderEntry(CoreTeaSafeIO const &io,
+        FolderEntry(SharedCoreIO const &io,
                     std::string const &name = "root",
                     bool const enforceRootBlock = false);
 
@@ -65,7 +65,7 @@ namespace teasafe
          * @param writable if data entries can be added to folder
          * @param name the name of the entry
          */
-        FolderEntry(CoreTeaSafeIO const &io,
+        FolderEntry(SharedCoreIO const &io,
                     uint64_t const startBlock,
                     std::string const &name = "root");
 
@@ -301,7 +301,7 @@ namespace teasafe
         std::vector<EntryInfo> doListEntriesBasedOnType(EntryType entryType) const;
 
         // the core teasafe io (path, blocks, password)
-        CoreTeaSafeIO m_io;
+        SharedCoreIO m_io;
 
         // the underlying file blocks storing the folder entry data
         mutable FileEntry m_folderData;

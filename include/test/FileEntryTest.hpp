@@ -86,7 +86,7 @@ class FileEntryTest
 
         // test write get file size from same entry
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -97,7 +97,7 @@ class FileEntryTest
 
         // test get file size different entry but same data
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "testFileSizeReportedCorrectly B");
@@ -111,7 +111,7 @@ class FileEntryTest
 
         // test write get file size from same entry
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -144,7 +144,7 @@ class FileEntryTest
 
         // test write followed by unlink
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -175,7 +175,7 @@ class FileEntryTest
 
         // test that filesize is 0 when read back in
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             ASSERT_EQUAL(0, entry.fileSize(), "testFileUnlink B");
 
@@ -196,7 +196,7 @@ class FileEntryTest
 
         // test write get file size from same entry
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -205,7 +205,7 @@ class FileEntryTest
         }
 
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildWriteOnlyDisposition());
             std::vector<uint8_t> vec(entry.fileSize());
@@ -230,7 +230,7 @@ class FileEntryTest
 
         // test write get file size from same entry
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -240,7 +240,7 @@ class FileEntryTest
 
         // write some more
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string testData(createLargeStringToWrite());
@@ -266,7 +266,7 @@ class FileEntryTest
 
         // test write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -276,7 +276,7 @@ class FileEntryTest
 
         // test read
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(createLargeStringToWrite());
@@ -295,7 +295,7 @@ class FileEntryTest
 
         // initial big write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -306,7 +306,7 @@ class FileEntryTest
         // small append
         std::string appendString("appended!");
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
@@ -315,7 +315,7 @@ class FileEntryTest
 
         // test read
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", 1,
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(createLargeStringToWrite());
@@ -335,7 +335,7 @@ class FileEntryTest
 
         // initial big write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -346,7 +346,7 @@ class FileEntryTest
         // secondary overwrite
         std::string testData("goodbye...!");
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildOverwriteDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -356,7 +356,7 @@ class FileEntryTest
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtStart correct file size");
         }
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", 1,
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
@@ -374,7 +374,7 @@ class FileEntryTest
 
         // initial big write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -385,7 +385,7 @@ class FileEntryTest
         // secondary overwrite
         std::string testData("goodbye...!");
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - testData.length());
@@ -396,7 +396,7 @@ class FileEntryTest
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtEnd correct file size");
         }
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", 1,
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
@@ -415,7 +415,7 @@ class FileEntryTest
 
         // initial big write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -428,7 +428,7 @@ class FileEntryTest
         std::string testData("goodbye...!");
         std::string testDataB("final bit!");
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildOverwriteDisposition());
             assert(entry.seek(BIG_SIZE - testData.length()) != -1);
@@ -441,7 +441,7 @@ class FileEntryTest
 
 
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", 1,
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
@@ -461,7 +461,7 @@ class FileEntryTest
 
         // initial big write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -471,7 +471,7 @@ class FileEntryTest
 
         // secondary overwrite
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - 50);
@@ -481,7 +481,7 @@ class FileEntryTest
         }
 
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", 1,
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
@@ -504,7 +504,7 @@ class FileEntryTest
         // initial small write
         std::string testData("small string");
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -514,7 +514,7 @@ class FileEntryTest
         // big append
         std::string appendString(createLargeStringToWrite());
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
@@ -523,7 +523,7 @@ class FileEntryTest
 
         // test read
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(testData.append(appendString));
@@ -542,7 +542,7 @@ class FileEntryTest
 
         // test write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string const testString("Hello and goodbye!");
             std::string testData(testString);
@@ -553,7 +553,7 @@ class FileEntryTest
 
         // test seek and read
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string expected("goodbye!");
@@ -573,7 +573,7 @@ class FileEntryTest
 
         // test write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -584,7 +584,7 @@ class FileEntryTest
         // test seek of big file
         std::string appendString("appended!");
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
@@ -592,7 +592,7 @@ class FileEntryTest
         }
 
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<char> vec;
@@ -612,7 +612,7 @@ class FileEntryTest
 
         // test write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -623,7 +623,7 @@ class FileEntryTest
         std::string testData("goodbye!");
         std::streamoff off = -548;
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(off, std::ios_base::end);
@@ -631,7 +631,7 @@ class FileEntryTest
             entry.flush();
         }
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
@@ -650,7 +650,7 @@ class FileEntryTest
 
         // test write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -663,7 +663,7 @@ class FileEntryTest
         std::streamoff initialSeek = 12880;
         std::streamoff finalPosition = initialSeek + off;
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(initialSeek);
@@ -673,7 +673,7 @@ class FileEntryTest
         }
 
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
@@ -692,7 +692,7 @@ class FileEntryTest
 
         // test write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -705,7 +705,7 @@ class FileEntryTest
         std::streamoff initialSeek = 3267;
         std::streamoff finalPosition = initialSeek + off;
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(initialSeek);
@@ -715,7 +715,7 @@ class FileEntryTest
         }
 
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
@@ -734,7 +734,7 @@ class FileEntryTest
 
         // test write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createAString());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -745,7 +745,7 @@ class FileEntryTest
         int seekPos = 499; // overwrite to begin at very end
         std::string testData("goodbye!");
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(seekPos);
@@ -754,7 +754,7 @@ class FileEntryTest
         }
 
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
@@ -773,7 +773,7 @@ class FileEntryTest
 
         // test write
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt");
             std::string testData(createAString());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -783,7 +783,7 @@ class FileEntryTest
 
         std::string testData("goodbye!");
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "test.txt", 1,
                                  teasafe::OpenDisposition::buildAppendDisposition());
             entry.write(testData.c_str(), testData.length());
@@ -791,7 +791,7 @@ class FileEntryTest
         }
 
         {
-            teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+            teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::FileEntry entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
 

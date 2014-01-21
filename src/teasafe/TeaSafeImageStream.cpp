@@ -39,9 +39,9 @@ either expressed or implied, of the FreeBSD Project.
 namespace teasafe
 {
 
-    TeaSafeImageStream::TeaSafeImageStream(CoreTeaSafeIO const &io, std::ios::openmode mode)
-        : m_stream(io.path.c_str(), mode)
-        , m_byteTransformer(boost::make_shared<cipher::XTEAByteTransformer>(io.password))
+    TeaSafeImageStream::TeaSafeImageStream(SharedCoreIO const &io, std::ios::openmode mode)
+        : m_stream(io->path.c_str(), mode)
+        , m_byteTransformer(boost::make_shared<cipher::XTEAByteTransformer>(io->password))
     {
     }
 

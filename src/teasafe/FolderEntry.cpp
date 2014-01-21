@@ -102,7 +102,7 @@ namespace teasafe
         }
     }
 
-    FolderEntry::FolderEntry(CoreTeaSafeIO const &io,
+    FolderEntry::FolderEntry(SharedCoreIO const &io,
                              uint64_t const startVolumeBlock,
                              std::string const &name)
         : m_io(io)
@@ -116,7 +116,7 @@ namespace teasafe
     {
     }
 
-    FolderEntry::FolderEntry(CoreTeaSafeIO const &io,
+    FolderEntry::FolderEntry(SharedCoreIO const &io,
                              std::string const &name,
                              bool const enforceRootBlock)
         : m_io(io)
@@ -433,7 +433,7 @@ namespace teasafe
     FolderEntry::doGetNumberOfEntries() const
     {
         teasafe::TeaSafeImageStream out(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartVolumeBlockIndex(), m_io.blocks);
+        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartVolumeBlockIndex(), m_io->blocks);
         (void)out.seekg(offset + detail::FILE_BLOCK_META);
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);

@@ -32,6 +32,8 @@ either expressed or implied, of the FreeBSD Project.
 
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 namespace teasafe
 {
 
@@ -39,9 +41,12 @@ namespace teasafe
     {
         std::string path;
         uint64_t blocks;
+        uint64_t freeBlocks;
         std::string password;
         uint64_t rootBlock;
     };
+
+    typedef boost::shared_ptr<CoreTeaSafeIO> SharedCoreIO;
 
 }
 

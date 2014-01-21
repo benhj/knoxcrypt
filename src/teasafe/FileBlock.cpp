@@ -34,7 +34,7 @@ either expressed or implied, of the FreeBSD Project.
 namespace teasafe
 {
 
-    FileBlock::FileBlock(CoreTeaSafeIO const &io,
+    FileBlock::FileBlock(SharedCoreIO const &io,
                          uint64_t const index,
                          uint64_t const next,
                          OpenDisposition const &openDisposition)
@@ -49,10 +49,10 @@ namespace teasafe
         , m_openDisposition(openDisposition)
     {
         // set m_offset
-        m_offset = detail::getOffsetOfFileBlock(m_index, io.blocks);
+        m_offset = detail::getOffsetOfFileBlock(m_index, io->blocks);
     }
 
-    FileBlock::FileBlock(CoreTeaSafeIO const &io,
+    FileBlock::FileBlock(SharedCoreIO const &io,
                          uint64_t const index,
                          OpenDisposition const &openDisposition)
         : m_io(io)
@@ -65,7 +65,7 @@ namespace teasafe
     {
         // set m_offset
         TeaSafeImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
-        m_offset = detail::getOffsetOfFileBlock(m_index, io.blocks);
+        m_offset = detail::getOffsetOfFileBlock(m_index, io->blocks);
         (void)stream.seekg(m_offset);
 
         // read m_bytesWritten
@@ -196,7 +196,7 @@ namespace teasafe
     FileBlock::registerBlockWithVolumeBitmap()
     {
         TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        detail::updateVolumeBitmapWithOne(stream, m_index, m_io.blocks);
+        detail::updateVolumeBitmapWithOne(stream, m_index, m_io->blocks);
         stream.close();
     }
 

@@ -36,6 +36,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/format.hpp>
+#include <boost/make_shared.hpp>
 
 #include <string>
 #include <vector>
@@ -48,13 +49,14 @@ int testFailures = 0;
 int passedPoints = 0;
 std::vector<std::string> failingTestPoints;
 
-teasafe::CoreTeaSafeIO createTestIO(boost::filesystem::path const &testPath)
+teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
 {
-    teasafe::CoreTeaSafeIO io;
-    io.path = testPath.string();
-    io.blocks = 2048;
-    io.password = "abcd1234";
-    io.rootBlock = 0;
+    teasafe::SharedCoreIO io = boost::make_shared<teasafe::CoreTeaSafeIO>();
+    io->path = testPath.string();
+    io->blocks = 2048;
+    io->freeBlocks = 2048;
+    io->password = "abcd1234";
+    io->rootBlock = 0;
     return io;
 }
 
@@ -62,7 +64,7 @@ inline boost::filesystem::path buildImage(boost::filesystem::path const &path, l
 {
     std::string testImage(boost::filesystem::unique_path().string());
     boost::filesystem::path testPath = path / testImage;
-    teasafe::CoreTeaSafeIO io = createTestIO(testPath);
+    teasafe::SharedCoreIO io(createTestIO(testPath));
     teasafe::MakeTeaSafe teasafe(io);
     return testPath;
 }

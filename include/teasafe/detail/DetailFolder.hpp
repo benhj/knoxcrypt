@@ -37,12 +37,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace teasafe { namespace detail
 {
 
-    void incrementFolderEntryCount(CoreTeaSafeIO const &io,
+    void incrementFolderEntryCount(SharedCoreIO const &io,
                                    uint64_t const startBlock,
                                    uint64_t const inc = 1)
     {
         teasafe::TeaSafeImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = getOffsetOfFileBlock(startBlock, io.blocks);
+        uint64_t const offset = getOffsetOfFileBlock(startBlock, io->blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);
@@ -54,12 +54,12 @@ namespace teasafe { namespace detail
         out.close();
     }
 
-    void decrementFolderEntryCount(CoreTeaSafeIO const &io,
+    void decrementFolderEntryCount(SharedCoreIO const &io,
                                    uint64_t const startBlock,
                                    uint64_t const dec = 1)
     {
         teasafe::TeaSafeImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = getOffsetOfFileBlock(startBlock, io.blocks);
+        uint64_t const offset = getOffsetOfFileBlock(startBlock, io->blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);

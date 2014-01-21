@@ -58,7 +58,7 @@ namespace teasafe
          * @param next the index of the next file block that makes up the file
          * @param openDisposition open mode
          */
-        FileBlock(CoreTeaSafeIO const &io,
+        FileBlock(SharedCoreIO const &io,
                   uint64_t const index,
                   uint64_t const next,
                   OpenDisposition const &openDisposition);
@@ -71,7 +71,7 @@ namespace teasafe
          * @note other params like size and next will be initialized when
          * the block is actually read
          */
-        FileBlock(CoreTeaSafeIO const &io,
+        FileBlock(SharedCoreIO const &io,
                   uint64_t const index,
                   OpenDisposition const &openDisposition);
 
@@ -126,7 +126,7 @@ namespace teasafe
          */
         void doSetNextIndex(TeaSafeImageStream &stream, uint64_t nextIndex) const;
 
-        CoreTeaSafeIO m_io;
+        SharedCoreIO m_io;
         uint64_t m_index;
         mutable uint32_t m_bytesWritten;
         mutable uint32_t m_initialBytesWritten;

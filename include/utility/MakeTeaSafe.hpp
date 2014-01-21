@@ -53,7 +53,7 @@ namespace teasafe
     {
       public:
 
-        MakeTeaSafe(CoreTeaSafeIO const &io, OptionalMagicPart const &omp = OptionalMagicPart())
+        MakeTeaSafe(SharedCoreIO const &io, OptionalMagicPart const &omp = OptionalMagicPart())
         : m_omp(omp)
         {
             buildImage(io);
@@ -74,14 +74,14 @@ namespace teasafe
             detail::convertUInt64ToInt8Array(fileCount, sizeBytes);
         }
 
-        void writeOutFileSpaceBytes(CoreTeaSafeIO const &io, TeaSafeImageStream &out)
+        void writeOutFileSpaceBytes(SharedCoreIO const &io, TeaSafeImageStream &out)
         {
-            for (uint64_t i(0); i < io.blocks ; ++i) {
+            for (uint64_t i(0); i < io->blocks ; ++i) {
                 std::vector<uint8_t> ints;
                 ints.assign(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META, 0);
 
                 // write out block metadata
-                uint64_t offset = detail::getOffsetOfFileBlock(i, io.blocks);
+                uint64_t offset = detail::getOffsetOfFileBlock(i, io->blocks);
                 (void)out.seekp(offset);
 
                 // write m_bytesWritten; 0 to begin with
@@ -144,20 +144,20 @@ namespace teasafe
          * @param imageName the name of the image
          * @param blocks the number of blocks in the file system
          */
-        void buildImage(CoreTeaSafeIO const &io)
+        void buildImage(SharedCoreIO const &io)
         {
 
             //
             // store the number of blocks in the first 8 bytes of the superblock
             //
             uint8_t sizeBytes[8];
-            buildBlockBytes(io.blocks, sizeBytes);
+            buildBlockBytes(io->blocks, sizeBytes);
 
             // write out size, and volume bitmap bytes
 
             TeaSafeImageStream out(io, std::ios::out | std::ios::binary);
             out.write((char*)sizeBytes, 8);
-            createVolumeBitMap(io.blocks, out);
+            createVolumeBitMap(io->blocks, out);
 
             // file count will always be 0 upon initialization
             uint64_t fileCount(0);
@@ -183,8 +183,8 @@ namespace teasafe
             // create an extra 'magic partition' which is another root folder
             // offset to a differing file block
             if(m_omp) {
-                CoreTeaSafeIO magicIo = io;
-                magicIo.rootBlock = *m_omp;
+                SharedCoreIO magicIo(io);
+                magicIo->rootBlock = *m_omp;
                 bool const setRoot = true;
                 FolderEntry magicDir(magicIo, "root", setRoot);
             }

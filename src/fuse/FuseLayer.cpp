@@ -36,6 +36,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
 
+#include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 
 #include <fuse.h>
@@ -344,31 +345,33 @@ int main(int argc, char *argv[])
 
     // Setup a core teasafe io object which stores highlevel info about accessing
     // the TeaSafe image
-    teasafe::CoreTeaSafeIO io;
-    io.path = vm["imageName"].as<std::string>().c_str();
-    io.password = teasafe::utility::getPassword();
-    io.rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;
+    teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
+    io->path = vm["imageName"].as<std::string>().c_str();
+    io->password = teasafe::utility::getPassword();
+    io->rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;
 
     // Obtain the number of blocks in the image by reading the image's block count
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
-    io.blocks = teasafe::detail::getBlockCount(stream);
+    io->blocks = teasafe::detail::getBlockCount(stream);
+    io->freeBlocks = io->blocks;
     stream.close();
 
     // Create the basic file system
     teasafe::TeaSafe theBfs(io);
 
     // make arguments fuse-compatable
-    argc = 3;
+    argc = 4;
     argv[1] = const_cast<char*>(vm["mountPoint"].as<std::string>().c_str());
 
-    // always run in single-threaded mode; multi-threaded not yet supported
+    // always run in single-threaded + debug mode; multi-threaded buggy
     argv[2] = const_cast<char*>(std::string("-s").c_str());
+    argv[3] = const_cast<char*>(std::string("-d").c_str());
 
     // debug mode? (this is also single-threaded)
     // debug mode prints out a load of debug info to console
-    if(debug) {
-        argv[2] = const_cast<char*>(std::string("-d").c_str());
-    }
+    //if(debug) {
+    //    argv[2] = const_cast<char*>(std::string("-d").c_str());
+    //}
 
     // turn over control to fuse
     fprintf(stderr, "about to call fuse_main\n");

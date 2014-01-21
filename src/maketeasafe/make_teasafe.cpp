@@ -31,6 +31,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "utility/EcholessPasswordPrompt.hpp"
 #include "utility/MakeTeaSafe.hpp"
 
+#include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 
 #include <iostream>
@@ -81,11 +82,11 @@ int main(int argc, char *argv[])
 
     uint64_t blocks = vm["blockCount"].as<uint64_t>();
 
-    teasafe::CoreTeaSafeIO io;
-    io.path = vm["imageName"].as<std::string>().c_str();
-    io.blocks = blocks;
-
-    io.password.append(teasafe::utility::getPassword());
+    teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
+    io->path = vm["imageName"].as<std::string>().c_str();
+    io->blocks = blocks;
+    io->freeBlocks = blocks;
+    io->password.append(teasafe::utility::getPassword());
 
     // magic partition?
     teasafe::OptionalMagicPart omp;

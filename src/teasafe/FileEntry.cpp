@@ -38,7 +38,7 @@ either expressed or implied, of the FreeBSD Project.
 namespace teasafe
 {
     // for writing a brand new entry where start block isn't known
-    FileEntry::FileEntry(CoreTeaSafeIO const &io, std::string const &name, bool const enforceStartBlock)
+    FileEntry::FileEntry(SharedCoreIO const &io, std::string const &name, bool const enforceStartBlock)
         : m_io(io)
         , m_name(name)
         , m_enforceStartBlock(enforceStartBlock)
@@ -54,7 +54,7 @@ namespace teasafe
     }
 
     // for appending or overwriting
-    FileEntry::FileEntry(CoreTeaSafeIO const &io,
+    FileEntry::FileEntry(SharedCoreIO const &io,
                          std::string const &name,
                          uint64_t const startBlock,
                          OpenDisposition const &openDisposition)
@@ -160,7 +160,7 @@ namespace teasafe
         // the fs doesn't have to contantly seek to the beginning of the fs for each
         // new block required. It only has to do it every N blocks
         if(m_blockIndexPool.empty()) {
-            std::vector<uint64_t> indices = detail::getNAvailableBlocks(stream, 10, m_io.blocks);
+            std::vector<uint64_t> indices = detail::getNAvailableBlocks(stream, 10, m_io->blocks);
             m_blockIndexPool.assign(indices.begin(), indices.end());
         }
 
@@ -170,12 +170,12 @@ namespace teasafe
         // if the starting file block is enforced, set to root block specified in m_io
         if(m_enforceStartBlock) {
             m_enforceStartBlock = false;
-            id = m_io.rootBlock;
+            id = m_io->rootBlock;
         } else {
             id = m_blockIndexPool[0];
             m_blockIndexPool.pop_front();
         }
-        //uint64_t id = *detail::getNextAvailableBlock(stream, m_io.blocks);
+        //uint64_t id = *detail::getNextAvailableBlock(stream, m_io->blocks);
         stream.close();
         FileBlock block(m_io, id, id, teasafe::OpenDisposition::buildAppendDisposition());
 
@@ -600,7 +600,7 @@ namespace teasafe
         for (; it != m_fileBlocks.end(); ++it) {
             uint64_t blockIndex = it->getIndex();
             // false means to deallocate
-            detail::updateVolumeBitmapWithOne(stream, blockIndex, m_io.blocks, false);
+            detail::updateVolumeBitmapWithOne(stream, blockIndex, m_io->blocks, false);
         }
         std::vector<FileBlock>().swap(m_fileBlocks);
         m_fileSize = 0;

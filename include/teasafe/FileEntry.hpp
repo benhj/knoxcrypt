@@ -54,7 +54,7 @@ namespace teasafe
          * @param name the name of the file entry
          * @param enforceStartBlock true if start block should be set
          */
-        FileEntry(CoreTeaSafeIO const &io, std::string const &name, bool const enforceStartBlock = false);
+        FileEntry(SharedCoreIO const &io, std::string const &name, bool const enforceStartBlock = false);
 
         /**
          * @brief when reading or appending or overwriting to the end of a file
@@ -64,7 +64,7 @@ namespace teasafe
          * @param block the starting block of the file entry
          * @param openDisposition open mode
          */
-        FileEntry(CoreTeaSafeIO const &io,
+        FileEntry(SharedCoreIO const &io,
                   std::string const &name,
                   uint64_t const startBlock,
                   OpenDisposition const &openDisposition);
@@ -131,7 +131,7 @@ namespace teasafe
       private:
 
         // the core teasafe io (path, blocks, password)
-        CoreTeaSafeIO m_io;
+        SharedCoreIO m_io;
 
         // the name of the file entry
         std::string m_name;
