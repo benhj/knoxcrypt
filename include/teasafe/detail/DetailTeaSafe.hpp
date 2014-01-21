@@ -212,29 +212,25 @@ namespace teasafe { namespace detail
                                 teasafe::TeaSafeImageStream &in,
                                 bool const set = true)
     {
-        uint64_t bytes = blocks / uint64_t(8);
-        // read the bytes in to a buffer
-        std::vector<uint8_t> buf;
-        buf.assign(bytes, 0);
-        (void)in.seekg(8);
-        (void)in.read((char*)&buf.front(), bytes);
-
         uint64_t byteThatStoresBit(0);
         if (block < 8) {
 
             (void)in.seekg(8);
-            uint8_t dat = buf[byteThatStoresBit];
+            uint8_t dat;
+            (void)in.read((char*)&dat, 1);
             setBitInByte(dat, block, set);
             (void)in.seekp(8);
             (void)in.write((char*)&dat, 1);
 
         } else {
-            (void)in.seekg(8);
+
             uint64_t const leftOver = block % 8;
             uint64_t withoutLeftOver = block - leftOver;
             byteThatStoresBit = (withoutLeftOver / 8) - 1;
             ++byteThatStoresBit;
-            uint8_t dat = buf[byteThatStoresBit];
+            (void)in.seekg(8 + byteThatStoresBit);
+            uint8_t dat;
+            (void)in.read((char*)&dat, 1);
             setBitInByte(dat, leftOver, set);
             (void)in.seekp(8 + byteThatStoresBit);
             (void)in.write((char*)&dat, 1);
