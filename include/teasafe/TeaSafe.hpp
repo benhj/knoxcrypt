@@ -332,8 +332,10 @@ namespace teasafe
          */
         void statvfs(struct statvfs *buf)
         {
-            buf->f_bsize = detail::FILE_BLOCK_SIZE;
-            buf->f_blocks = m_io->blocks;
+            buf->f_bsize   = detail::FILE_BLOCK_SIZE;
+            buf->f_blocks  = m_io->blocks;
+            buf->f_bfree   = m_io->freeBlocks;
+            buf->f_namemax = detail::MAX_FILENAME_LENGTH;
         }
 
       private:

@@ -601,6 +601,7 @@ namespace teasafe
             uint64_t blockIndex = it->getIndex();
             // false means to deallocate
             detail::updateVolumeBitmapWithOne(stream, blockIndex, m_io->blocks, false);
+            m_io->freeBlocks++;
         }
         std::vector<FileBlock>().swap(m_fileBlocks);
         m_fileSize = 0;
