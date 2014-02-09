@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
         ("imageName", po::value<std::string>(), "teasafe image path")
         ("mountPoint", po::value<std::string>(), "mountPoint path")
         ("debug", po::value<bool>(&debug)->default_value(true), "fuse debug")
-        ("magic", po::value<bool>(&magic)->default_value(false), "magic partition")
+        ("coffee", po::value<bool>(&magic)->default_value(false), "magic partition")
     ;
 
     po::positional_options_description positionalOptions;

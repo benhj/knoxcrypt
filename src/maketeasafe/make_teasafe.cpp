@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
         ("help", "produce help message")
         ("imageName", po::value<std::string>(), "teasafe image path")
         ("blockCount", po::value<uint64_t>(), "size of filesystem in blocks")
-        ("magic", po::value<bool>(&magicPartition)->default_value(false), "create a magic partition");
+        ("coffee", po::value<bool>(&magicPartition)->default_value(false), "create a magic partition");
 
     po::positional_options_description positionalOptions;
     (void)positionalOptions.add("imageName", 1);
