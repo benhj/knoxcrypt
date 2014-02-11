@@ -56,7 +56,9 @@ size is 4096 (note the block size is hardcoded into DetailTeaSafe.hpp and repres
 a good compromise between file speed and space efficiency). Example output:
 
 `image path: test.tea`
+
 `file system size in blocks: 128000`
+
 `password:`
 
 The password string will seed a sha256 hash used to generate the
@@ -67,11 +69,16 @@ both a default root folder offset at block 0 and an extra partition offset by a 
 'pin value' that must be less than 128000. Example output:
 
 `image path: test.tea`
+
 `file system size in blocks: 128000`
+
 `password:`
+
 `magic number:`
 
+
 The 'magic number' parameter specifies the pin value.
+
 
 `./teasafe image.tea testMount` will launch and mount image.teasf under 
 the directory testMount in fuse debug mode; note to disable debug
