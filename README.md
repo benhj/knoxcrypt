@@ -1,8 +1,10 @@
 TeaSafe: An experimental fuse-based filesystem
 ----------------------------------------------
 
-TeaSafe is an experimental filesystem designed with encryption in mind. 
-The whole filesystem is block-based, exising as a single 'image'
+TeaSafe was designed from the ground-up as a means to learn about 
+filesystem implementation. Built to be somewhat 'secure', it also 
+places an emphasis on encryption.
+The filesystem is block-based, existing as a single 'disk image'
 that can be mounted to a user-specified mount-point. Rather than encrypting each file entry
 individually, the whole image is transformed using a variant of the XTEA algorithm.
 TeaSafe also incorporates an experimental
@@ -31,7 +33,7 @@ are currently supported (the default and the coffee mode version).
 ### Development requirements
 
 All development was undertaken on a machine running osx10.9.
-The actual development requirements are thus:
+The development requirements are:
 
 - Because of the use of strongly-typed enums, a c++11 compiler 
 - a couple of boost libraries (system and filesystem) and the boost headers. Note, the makefile will need 
@@ -63,7 +65,7 @@ file system size in blocks: 128000
 password:
 </pre>
 
-The password string will seed a sha256 hash used to generate the
+The password string will seed a SHA256 hash used to generate the
 cipher stream.
 
 `./maketeasafe image.tea 128000 --coffee 1` will create a 500MB TeaSafe image with
