@@ -80,7 +80,7 @@ The 'magic number' input will specify the pin value.
 
 `./teasafe image.tea testMount` will launch and mount image.teasf under 
 the directory testMount in fuse debug mode; note to disable debug
-mode you need to specify `--debug 0' as an extra parameter. Disabling
+mode you need to specify `--debug 0` as an extra parameter. Disabling
 debug mode will mount the image in single-threaded mode. Multi-threaded mode
 is not currently supported.
 
