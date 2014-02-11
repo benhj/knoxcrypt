@@ -48,8 +48,8 @@ on modifying the Makefile to point to correct library and header paths.
 
 ### Running
 
-`./test` will run the test suite. This unit tests test various parts of TeaSafe. As I uncover
-new bugs and attemp to fix them, I will add new units to verify the fixes.
+`./test` will run the test suite. This unit tests various parts of TeaSafe. As I uncover
+new bugs and attempt to fix them, I will probably (but not always) add new units to verify the fixes.
 
 `./maketeasafe image.tea 128000` will create a 500MB TeaSafe image when the block
 size is 4096 (note the block size is hardcoded into DetailTeaSafe.hpp and represents
