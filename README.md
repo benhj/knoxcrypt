@@ -66,7 +66,8 @@ cipher stream.
 
 `./maketeasafe image.tea 128000 --coffee true` will create a 500MB TeaSafe image with
 both a default root folder offset at block 0 and an extra partition offset by a user-specified
-'pin value' that must be less than 128000. Example output:
+'pin value' that must be less than the number of blocks (128000 in this example)
+but greater than 0. Example output:
 
 <pre>
 image path: test.tea
