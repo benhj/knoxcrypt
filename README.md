@@ -5,8 +5,8 @@ TeaSafe is designed with encryption in mind. A primary aim is to learn about
 filesystem implementation -- the whole thing is based on ideas gleaned from various wiki 
 articles about previously implemented filesystems (most prevalently HFS) and chats with friends.
 The filesystem is block-based, existing as a single 'disk image'
-that can be mounted to a user-specified mount-point. Rather than encrypting each file entry
-individually, the whole image is transformed using a variant of the XTEA algorithm.
+that can be mounted to a user-specified mount-point. In addition, the disk image 
+is transformed using a variant of the XTEA algorithm to provide a measure of security.
 TeaSafe also incorporates an experimental
 'coffee mode' in which a 'sub-volume' can be specified at the time
 of image creation. At the time of mounting, the user can choose to mount this
