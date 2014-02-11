@@ -51,15 +51,40 @@ on modifying the Makefile to point to correct library and header paths.
 `./test` will run the test suite. This unit tests test various parts of TeaSafe. As I uncover
 new bugs and attemp to fix them, I will add new units to verify the fixes.
 
-`./maketeasafe 128000 image.teasf` will create a 500MB TeaSafe image when the block
+`./maketeasafe image.tea 128000` will create a 500MB TeaSafe image when the block
 size is 4096 (note the block size is hardcoded into DetailTeaSafe.hpp and represents
-a good compromise between file speed and space efficiency). 
+a good compromise between file speed and space efficiency). Example output:
 
-`./teasafe image.teasf testMount` will launch and mount image.teasf under 
+`image path: test.tea`
+`file system size in blocks: 128000`
+`password:`
+
+The password string will seed a sha256 hash used to generate the
+cipher stream.
+
+`./maketeasafe image.tea 128000 --coffee true` will create a 500MB TeaSafe image with
+both a default root folder offset at block 0 and an extra partition offset by a user-specified
+'pin value' that must be less than 128000. Example output:
+
+`image path: test.tea`
+`file system size in blocks: 128000`
+`password:`
+`magic number:`
+
+The 'magic number' parameter specifies the pin value.
+
+`./teasafe image.tea testMount` will launch and mount image.teasf under 
 the directory testMount in fuse debug mode; note to disable debug
 mode you need to specify `--debug 0' as an extra parameter. Disabling
 debug mode will mount the image in single-threaded mode. Multi-threaded mode
 is not currently supported.
+
+If the image was initialized with a coffee partition, then the image can be mounted
+with the coffee parameter, i.e.:
+
+./teasafe image.tea testMount --coffee true
+
+This will ask the user to enter both the decryption password and the magic number.
 
 Licensing
 ---------

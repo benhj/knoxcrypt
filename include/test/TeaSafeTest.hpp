@@ -550,6 +550,8 @@ class TeaSafeTest
             }
         }
 
+        //std::cout<<blocksInUse.size()<<"\t"<<blocksInUseB.size()<<std::endl;
+
         ASSERT_EQUAL(blocksInUse.size(), blocksInUseB.size(),
                 "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() blocks in use sizes");
 
