@@ -15,7 +15,7 @@ rather than the default root folder.
 ### Security
 
 The filesystem is encrypted using a varient of the XTEA algorithm. 
-I don't consider myself an expert in encryption so I would suggest you
+I don't consider myself an expert in encryption so I would invite you to
 review my code before you consider it secure or not.
 The more keen developer is encouraged to implement their own transformational cipher. All she 
 needs to do is implement the function `doTransform` in `IByteTransformer` as defined in `IByteTransformer.hpp`.
