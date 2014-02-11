@@ -237,4 +237,13 @@ namespace teasafe
         detail::convertUInt64ToInt8Array(nextIndex, nextDat);
         (void)stream.write((char*)nextDat, 8);
     }
+
+    void
+    FileBlock::unlink()
+    {
+        teasafe::TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
+        detail::updateVolumeBitmapWithOne(stream, m_index, m_io->blocks, false);
+        doSetNextIndex(stream, m_index);
+        stream.close();
+    }
 }

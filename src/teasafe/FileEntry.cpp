@@ -591,16 +591,12 @@ namespace teasafe
     {
         // loop over all file blocks and update the volume bitmap indicating
         // that block is no longer in use
-        teasafe::TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
         std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
         for (; it != m_fileBlocks.end(); ++it) {
-            uint64_t blockIndex = it->getIndex();
-            // false means to deallocate
-            detail::updateVolumeBitmapWithOne(stream, blockIndex, m_io->blocks, false);
+            it->unlink();
             m_io->freeBlocks++;
         }
         std::vector<FileBlock>().swap(m_fileBlocks);
         m_fileSize = 0;
-        stream.close();
     }
 }

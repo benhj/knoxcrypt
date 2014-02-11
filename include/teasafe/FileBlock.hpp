@@ -105,6 +105,8 @@ namespace teasafe
          */
         void setNextIndex(uint64_t nextIndex) const;
 
+        void unlink();
+
       private:
 
         FileBlock();
