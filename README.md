@@ -65,7 +65,7 @@ The password string will seed a sha256 hash used to generate the
 cipher stream.
 
 `./maketeasafe image.tea 128000 --coffee true` will create a 500MB TeaSafe image with
-both a default root folder offset at block 0 and an extra partition offset by a user-specified
+both a default root folder offset at block 0, and an extra partition offset by a user-specified
 'pin value' that must be less than the number of blocks (128000 in this example)
 but greater than 0. Example output:
 
@@ -76,7 +76,7 @@ password:
 magic number:
 </pre>
 
-The 'magic number' parameter specifies the pin value.
+The 'magic number' input will specify the pin value.
 
 `./teasafe image.tea testMount` will launch and mount image.teasf under 
 the directory testMount in fuse debug mode; note to disable debug
@@ -87,7 +87,7 @@ is not currently supported.
 If the image was initialized with a coffee partition, then the image can be mounted
 with the coffee parameter, i.e.:
 
-./teasafe image.tea testMount --coffee true
+`./teasafe image.tea testMount --coffee true`
 
 This will ask the user to enter both the decryption password and the magic number.
 
