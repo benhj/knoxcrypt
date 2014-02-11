@@ -66,7 +66,7 @@ password:
 The password string will seed a sha256 hash used to generate the
 cipher stream.
 
-`./maketeasafe image.tea 128000 --coffee true` will create a 500MB TeaSafe image with
+`./maketeasafe image.tea 128000 --coffee 1` will create a 500MB TeaSafe image with
 both a default root folder offset at block 0, and an extra sub-volume offset by a user-specified
 'pin value' that must be less than the number of blocks (128000 in this example)
 but greater than 0. Example output:
@@ -90,7 +90,7 @@ If the image was initialized with a coffee sub-volume, then the image can be mou
 with the coffee parameter, which will alternatively mount the image's coffee 
 (rather than default) sub-volume i.e.:
 
-`./teasafe image.tea testMount --coffee true`
+`./teasafe image.tea testMount --coffee 1`
 
 This will ask the user to enter both the decryption password and the magic number.
 
