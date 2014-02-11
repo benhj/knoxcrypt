@@ -1,8 +1,10 @@
 TeaSafe: An experimental fuse-based filesystem
 ----------------------------------------------
 
-TeaSafe is designed from the ground-up as a means to learn about 
-filesystem implementation and with encryption in mind.
+TeaSafe is designed with encryption in mind. A primary aim is to learn about 
+filesystem implementation -- the whole thing is based on ideas gleamed from various wiki 
+articles about previously implemented filesystems (most prevalently of which included 
+an article about HFS) and chats with friends.
 The filesystem is block-based, existing as a single 'disk image'
 that can be mounted to a user-specified mount-point. Rather than encrypting each file entry
 individually, the whole image is transformed using a variant of the XTEA algorithm.
