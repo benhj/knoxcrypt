@@ -6,7 +6,7 @@ The whole filesystem is block-based, exising as a single 'image'
 that can be mounted to a user-specified mount-point. Rather than encrypting each file entry
 individually, the whole image is transformed using a variant of the XTEA algorithm.
 TeaSafe also incorporates an experimental
-'coffee mode' in which a 'hidden partition' can be specified at the time
+'coffee mode' in which a 'sub-volume' can be specified at the time
 of image creation. At the time of mounting, the user can choose to mount this
 rather than the default root folder.
 
@@ -24,7 +24,9 @@ the developer's new implementation e.g.:
 `m_byteTransformer(boost::make_shared<cipher::BasicByteTransformer>(io.password))` --->
 `m_byteTransformer(boost::make_shared<cipher::SomeOtherImplementation>(io.password))`
 
-A hidden partition scheme is also supported in a similar vein to truecrypt. More details soon.
+An experimental 'coffee mode' is also supported which allows the user to specify
+an additional sub-volume. Although multiple sub-volumes are possible, only two 
+are currently supported (the default and the coffee mode version).
 
 ### Development requirements
 
@@ -65,7 +67,7 @@ The password string will seed a sha256 hash used to generate the
 cipher stream.
 
 `./maketeasafe image.tea 128000 --coffee true` will create a 500MB TeaSafe image with
-both a default root folder offset at block 0, and an extra partition offset by a user-specified
+both a default root folder offset at block 0, and an extra sub-volume offset by a user-specified
 'pin value' that must be less than the number of blocks (128000 in this example)
 but greater than 0. Example output:
 
@@ -84,8 +86,9 @@ mode you need to specify `--debug 0` as an extra parameter. Disabling
 debug mode will mount the image in single-threaded mode. Multi-threaded mode
 is not currently supported.
 
-If the image was initialized with a coffee partition, then the image can be mounted
-with the coffee parameter, i.e.:
+If the image was initialized with a coffee sub-volume, then the image can be mounted
+with the coffee parameter, which will alternatively mount the image's coffee 
+(rather than default) sub-volume i.e.:
 
 `./teasafe image.tea testMount --coffee true`
 
