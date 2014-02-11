@@ -10,7 +10,8 @@ is transformed using a variant of the XTEA algorithm to provide a measure of sec
 TeaSafe also incorporates an experimental
 'coffee mode' in which a 'sub-volume' can be specified at the time
 of image creation. At the time of mounting, the user can choose to mount this
-rather than the default root folder.
+rather than the default root folder. This is inspired by truecrypt's 'hidden partition'
+scheme and provides a small measure of obscurity.
 
 ### Security
 
