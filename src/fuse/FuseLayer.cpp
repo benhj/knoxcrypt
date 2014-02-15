@@ -26,6 +26,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
  * @brief an experimental fuse wrapper around the teasafe container
+ *
+ * Based on hello.c by Miklos Szeredi
+ *
  */
 
 #include "teasafe/TeaSafe.hpp"
@@ -175,8 +178,6 @@ static int teasafe_read(const char *path, char *buf, size_t size, off_t offset, 
 static int teasafe_write(const char *path, const char *buf, size_t size, off_t offset,
                      struct fuse_file_info *fi)
 {
-
-    std::cout<<"size: "<<size<<std::endl;
 
     teasafe::ReadOrWriteOrBoth openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
 
