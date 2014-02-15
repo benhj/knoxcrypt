@@ -1,5 +1,5 @@
-TeaSafe: An experimental fuse-based filesystem
-----------------------------------------------
+TeaSafe: A user-space encrypted filesystem
+------------------------------------------
 
 TeaSafe is designed with encryption in mind. The ongoing aim is to learn about 
 filesystem implementation -- the whole thing is based on ideas gleaned from various wiki 
