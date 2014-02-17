@@ -217,14 +217,6 @@ namespace teasafe
         std::vector<uint8_t>().swap(m_buffer);
     }
 
-    void
-    FileEntry::setNextOfLastBlockToIndexOfNewBlock() const
-    {
-        int64_t lastIndex(m_blockIndex - 1);
-        assert(lastIndex >= 0);
-        m_fileBlocks[lastIndex].setNextIndex(m_currentVolumeBlock);
-    }
-
     bool
     FileEntry::currentBlockHasAvailableSpace() const
     {
@@ -271,9 +263,6 @@ namespace teasafe
                 }
             }
             newWritableFileBlock();
-
-            // update next index of last block
-            setNextOfLastBlockToIndexOfNewBlock();
 
             return;
         }
@@ -584,6 +573,14 @@ namespace teasafe
     {
         writeBufferedDataToBlock(m_buffer.size());
         std::deque<uint64_t>().swap(m_blockIndexPool);
+
+        // rather than set the index after each file block which *might*
+        // slow things down, wait until end. Will hopefully make writing more
+        // efficient
+        std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
+        for(; it != m_fileBlocks.end() - 1; ++it) {
+            it->setNextIndex((it+1)->getIndex());
+        }
     }
 
     void

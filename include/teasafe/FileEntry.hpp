@@ -204,11 +204,6 @@ namespace teasafe
         void checkAndCreateWritableFileBlock() const;
 
         /**
-         * @brief sets the next index of the last block to that of the new block
-         */
-        void setNextOfLastBlockToIndexOfNewBlock() const;
-
-        /**
          * @brief used in the context of discovering if currently set block
          * has enough space to write more data to
          * @return true if space availble, false otherwise
