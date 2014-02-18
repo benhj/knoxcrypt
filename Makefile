@@ -1,7 +1,7 @@
 CXX=clang++
 CXXFLAGS=-ggdb -pg -std=c++11 -Os -I/usr/local/include/boost -Iinclude -D_FILE_OFFSET_BITS=64
-CXXFLAGS_FUSE=-I/usr/local/include/osxfuse  -DFUSE_USE_VERSION=26
-LDFLAGS=-pg -L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -losxfuse -lcrypto
+CXXFLAGS_FUSE=-I/usr/local/include/fuse  -DFUSE_USE_VERSION=26
+LDFLAGS=-pg -L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -lfuse -lcrypto
 SOURCES := $(wildcard src/teasafe/*.cpp)
 MAKE_TeaSafe_SRC := $(wildcard src/maketeasafe/*.cpp)
 TEST_SRC := $(wildcard src/test/*.cpp)
