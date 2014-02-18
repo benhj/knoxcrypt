@@ -88,6 +88,10 @@ namespace teasafe { namespace cipher
     // the first 256MB of cipher stream
     static std::vector<char> g_bigCipherBuffer;
 
+    // the size of the cipher buffer (prefer a #define rather than a const
+    // for minimal memory footprint and minimal time required to instantiate).
+#define CIPHER_BUFFER_SIZE 268435456
+
     class XTEAByteTransformer : public IByteTransformer
     {
       public:
@@ -129,9 +133,9 @@ namespace teasafe { namespace cipher
         {
             std::cout<<"Building big xtea cipher stream buffer. Please wait..."<<std::endl;
             std::vector<char> in;
-            in.resize(268435456);
-            g_bigCipherBuffer.resize(268435456);
-            doTransform(&in.front(), &g_bigCipherBuffer.front(), 0, 268435456);
+            in.resize(CIPHER_BUFFER_SIZE);
+            g_bigCipherBuffer.resize(CIPHER_BUFFER_SIZE);
+            doTransform(&in.front(), &g_bigCipherBuffer.front(), 0, CIPHER_BUFFER_SIZE);
         }
 
         void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
@@ -140,7 +144,7 @@ namespace teasafe { namespace cipher
 
             if(g_init) {
                 // prefer to use cipher buffer
-                if((startPosition + length) < 268435456) {
+                if((startPosition + length) < CIPHER_BUFFER_SIZE) {
                     for (long j = 0; j < length; ++j) {
                         out[j] = in[j] ^ g_bigCipherBuffer[j + startPosition];
                     }
