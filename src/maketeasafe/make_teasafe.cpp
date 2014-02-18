@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
         ("help", "produce help message")
         ("imageName", po::value<std::string>(), "teasafe image path")
         ("blockCount", po::value<uint64_t>(), "size of filesystem in blocks")
-        ("coffee", po::value<bool>(&magicPartition)->default_value(false), "create a magic partition");
+        ("coffee", po::value<bool>(&magicPartition)->default_value(false), "create alternative sub-volume");
 
     po::positional_options_description positionalOptions;
     (void)positionalOptions.add("imageName", 1);
@@ -82,12 +82,12 @@ int main(int argc, char *argv[])
     io->path = vm["imageName"].as<std::string>().c_str();
     io->blocks = blocks;
     io->freeBlocks = blocks;
-    io->password.append(teasafe::utility::getPassword());
+    io->password.append(teasafe::utility::getPassword("teasafe password: "));
 
     // magic partition?
     teasafe::OptionalMagicPart omp;
     if(magicPartition) {
-        omp = teasafe::OptionalMagicPart(atoi(teasafe::utility::getPassword("magic number: ").c_str()));
+        omp = teasafe::OptionalMagicPart(atoi(teasafe::utility::getPassword("sub-volume root block: ").c_str()));
     }
 
     teasafe::MakeTeaSafe teasafe(io, omp);

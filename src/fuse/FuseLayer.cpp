@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
         ("imageName", po::value<std::string>(), "teasafe image path")
         ("mountPoint", po::value<std::string>(), "mountPoint path")
         ("debug", po::value<bool>(&debug)->default_value(true), "fuse debug")
-        ("coffee", po::value<bool>(&magic)->default_value(false), "magic partition")
+        ("coffee", po::value<bool>(&magic)->default_value(false), "mount alternative sub-volume")
     ;
 
     po::positional_options_description positionalOptions;
@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
     // the TeaSafe image
     teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
     io->path = vm["imageName"].as<std::string>().c_str();
-    io->password = teasafe::utility::getPassword();
+    io->password = teasafe::utility::getPassword("teasafe password: ");
     io->rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;
 
     // Obtain the number of blocks in the image by reading the image's block count
@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
     // Create the basic file system
     teasafe::TeaSafe theBfs(io);
 
-    // make arguments fuse-compatable
+    // make arguments fuse-compatible
     char      arg0[] = "teasafe";
     char* arg1 = (char*)vm["mountPoint"].as<std::string>().c_str();
     char      arg2[] = "-s";
