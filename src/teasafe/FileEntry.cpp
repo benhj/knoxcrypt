@@ -1,26 +1,26 @@
 /*
-Copyright (c) <2013-2014>, <BenHJ>
-All rights reserved.
+  Copyright (c) <2013-2014>, <BenHJ>
+  All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+  1. Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "teasafe/TeaSafeImageStream.hpp"
@@ -151,30 +151,19 @@ namespace teasafe
     {
         teasafe::TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
 
-        // not sure about this..
-        // the idea is to maitain a 'pool' of available file blocks. This way,
-        // the fs doesn't have to contantly seek to the beginning of the fs for each
-        // new block required. It only has to do it every N blocks
-        if(m_blockIndexPool.empty()) {
-            std::vector<uint64_t> indices = detail::getNAvailableBlocks(stream, 10, m_io->blocks);
-            m_blockIndexPool.assign(indices.begin(), indices.end());
-        }
-
         // note building a new block to write to should always be in append mode
         uint64_t id;
 
         // if the starting file block is enforced, set to root block specified in m_io
-        if(m_enforceStartBlock) {
+        if (m_enforceStartBlock) {
             m_enforceStartBlock = false;
             id = m_io->rootBlock;
         } else {
-            id = m_blockIndexPool[0];
-            m_blockIndexPool.pop_front();
+            id = *(detail::getNextAvailableBlock(stream, m_io->blocks));
         }
         //uint64_t id = *detail::getNextAvailableBlock(stream, m_io->blocks);
         stream.close();
         FileBlock block(m_io, id, id, teasafe::OpenDisposition::buildAppendDisposition());
-
 
         m_fileBlocks.push_back(block);
         m_blockIndex = m_fileBlocks.size() - 1;
@@ -215,14 +204,6 @@ namespace teasafe
     {
         m_fileBlocks[m_blockIndex].write((char*)&m_buffer.front(), bytes);
         std::vector<uint8_t>().swap(m_buffer);
-    }
-
-    void
-    FileEntry::setNextOfLastBlockToIndexOfNewBlock() const
-    {
-        int64_t lastIndex(m_blockIndex - 1);
-        assert(lastIndex >= 0);
-        m_fileBlocks[lastIndex].setNextIndex(m_currentVolumeBlock);
     }
 
     bool
@@ -271,9 +252,6 @@ namespace teasafe
                 }
             }
             newWritableFileBlock();
-
-            // update next index of last block
-            setNextOfLastBlockToIndexOfNewBlock();
 
             return;
         }
@@ -353,7 +331,7 @@ namespace teasafe
             // NOTE: need to fix for when we start increasing size of file at end
 
             // this is the fix!
-            if(this->tell() == m_fileSize) {
+            if (this->tell() == m_fileSize) {
                 m_openDisposition = OpenDisposition::buildAppendDisposition();
             }
 
@@ -579,11 +557,26 @@ namespace teasafe
         return m_pos;
     }
 
+    void FileEntry::setBlockNextIndices()
+    {
+        // rather than set the index after each file block which *might*
+        // slow things down, wait until end. Will hopefully make writing more
+        // efficient
+        std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
+        for (; it != m_fileBlocks.end() - 1; ++it) {
+            it->setNextIndex((it + 1)->getIndex());
+        }
+    }
+
     void
     FileEntry::flush()
     {
         writeBufferedDataToBlock(m_buffer.size());
-        std::deque<uint64_t>().swap(m_blockIndexPool);
+
+        // rather than set the index after each file block which *might*
+        // slow things down, wait until end. Will hopefully make writing more
+        // efficient
+        setBlockNextIndices();
     }
 
     void

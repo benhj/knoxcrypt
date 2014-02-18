@@ -48,8 +48,7 @@ namespace teasafe
         std::vector<char> in;
         in.resize(n);
         (void)m_stream.read(&in.front(), n);
-        bool const encrypt = false;
-        m_byteTransformer->transform(&in.front(), buf, start, n, encrypt);
+        m_byteTransformer->transform(&in.front(), buf, start, n);
         return *this;
     }
 
@@ -59,8 +58,7 @@ namespace teasafe
         std::vector<char> out;
         out.resize(n);
         std::ios_base::streamoff start = m_stream.tellp();
-        bool const encrypt = true;
-        m_byteTransformer->transform((char*)buf, &out.front(), start, n, encrypt);
+        m_byteTransformer->transform((char*)buf, &out.front(), start, n);
         (void)m_stream.write(&out.front(), n);
         return *this;
     }

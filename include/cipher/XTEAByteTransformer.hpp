@@ -33,6 +33,9 @@
 #include <openssl/sha.h>
 #include <cstring>
 
+#include <iostream>
+#include <vector>
+
 namespace teasafe { namespace cipher
 {
 
@@ -75,8 +78,20 @@ namespace teasafe { namespace cipher
         }
     }
 
+
+    // prob a bad idea all these static vars; still for the sake of optimizing.. :-)
+    static bool g_init = false;
+
     // used for holding the hash-generated key
     static uint32_t g_key[4];
+
+    // used to optimize crypto process. This will store
+    // the first 256MB of cipher stream
+    static std::vector<char> g_bigCipherBuffer;
+
+    // the size of the cipher buffer (prefer a #define rather than a const
+    // for minimal memory footprint and minimal time required to instantiate).
+#define CIPHER_BUFFER_SIZE 268435456
 
     class XTEAByteTransformer : public IByteTransformer
     {
@@ -87,8 +102,7 @@ namespace teasafe { namespace cipher
             // is this key-gen secure? probably not...use at own risk
             // initialize the key by taking a hash of the password and then creating
             // a uint32_t array out of it
-            static bool init = false;
-            if (!init) {
+            if (!g_init) {
                 unsigned char temp[32];
                 SHA256((unsigned char*)password.c_str(), password.size(), temp);
                 int c = 0;
@@ -101,7 +115,8 @@ namespace teasafe { namespace cipher
                     g_key[c] = (buf[0] << 24) | (buf[1] << 16)  | (buf[2] << 8) | (buf[3]);
                     ++c;
                 }
-                init = true;
+                buildBigCipherBuffer();
+                g_init = true;
             }
 
         }
@@ -115,9 +130,28 @@ namespace teasafe { namespace cipher
 
         XTEAByteTransformer(); // not required
 
-        void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                         bool encrypt) const
+        void buildBigCipherBuffer()
         {
+            std::cout<<"Building big xtea cipher stream buffer. Please wait..."<<std::endl;
+            std::vector<char> in;
+            in.resize(CIPHER_BUFFER_SIZE);
+            g_bigCipherBuffer.resize(CIPHER_BUFFER_SIZE);
+            doTransform(&in.front(), &g_bigCipherBuffer.front(), 0, CIPHER_BUFFER_SIZE);
+        }
+
+        void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+        {
+            // big cipher buffer has been initialized
+
+            if(g_init) {
+                // prefer to use cipher buffer
+                if((startPosition + length) < CIPHER_BUFFER_SIZE) {
+                    for (long j = 0; j < length; ++j) {
+                        out[j] = in[j] ^ g_bigCipherBuffer[j + startPosition];
+                    }
+                    return;
+                }
+            }
 
             // how many blocks required? defaults to 1, if length greater
             // than 8 bytes then more blocks are needed
@@ -166,14 +200,22 @@ namespace teasafe { namespace cipher
                                   char *out,
                                   std::ios_base::streamoff const startPosition,
                                   std::ios_base::streamoff const startPositionOffset,
-                                  long const iterations,
+                                  long const blocksOfSize8BeingTransformed,
                                   long &c,
                                   int const uptoBit) const
         {
+            // the number of rounds is an XTEA thing. Reducing this number speeds
+            // things up but reduces the encryption strength. Note that the literature
+            // suggests a minimum of 64 rounds
+            // I wonder if we should have a large static cipher stream buffer that gets
+            // initialized to the most commonly used part of the stream (i.e., the
+            // start of the stream, say the first 256MB) when the class is first constructed;
+            // then, the cipher stream to xor the plain text against can be pulled from
+            // this 256MB buffer rather than generated on the fly as is currently done.
             int rounds = 32;
             uint8_t a[8];
             uint8_t b[8];
-            for (long i = 0; i < iterations; ++i) {
+            for (long i = 0; i < blocksOfSize8BeingTransformed; ++i) {
                 uint8_t cipherStream[16];
                 for (int j = 0; j < 16; ++j) {
                     cipherStream[j] = startPosition + c - startPositionOffset;
@@ -189,7 +231,6 @@ namespace teasafe { namespace cipher
                 }
                 memcpy(&b, cipherStream + 8, 8 * sizeof(uint8_t));
 
-                // todo: encipher here!
                 // part of above optimization
                 if (i == 0) {
                     detail::convertBytesAndEncipher(rounds, a, g_key);
@@ -216,4 +257,4 @@ namespace teasafe { namespace cipher
 }
 
 
-#endif // TeaSafe_CIPHER_BASIC_TRANSFORMER_CIPHER_HPP__
+#endif // TeaSafe_CIPHER_XTEA_BYTE_TRANSFORMER_HPP__

@@ -38,10 +38,9 @@ namespace teasafe { namespace cipher
     }
 
     void
-    IByteTransformer::transform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                                bool encrypt)
+    IByteTransformer::transform(char *in, char *out, std::ios_base::streamoff startPosition, long length)
     {
-        this->doTransform(in, out, startPosition, length, encrypt);
+        this->doTransform(in, out, startPosition, length);
     }
 }
 }
