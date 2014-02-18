@@ -214,4 +214,4 @@ namespace teasafe { namespace cipher
 }
 
 
-#endif // TeaSafe_CIPHER_BASIC_TRANSFORMER_CIPHER_HPP__
+#endif // TeaSafe_CIPHER_XTEA_BYTE_TRANSFORMER_HPP__
