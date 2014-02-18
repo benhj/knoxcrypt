@@ -363,22 +363,24 @@ int main(int argc, char *argv[])
     teasafe::TeaSafe theBfs(io);
 
     // make arguments fuse-compatable
-    argc = 4;
-    argv[1] = const_cast<char*>(vm["mountPoint"].as<std::string>().c_str());
+    char      arg0[] = "teasafe";
+    char* arg1 = (char*)vm["mountPoint"].as<std::string>().c_str();
+    char      arg2[] = "-s";
+    char      arg3[] = "-d";
 
-    // always run in single-threaded + debug mode; multi-threaded buggy
-    argv[2] = const_cast<char*>(std::string("-s").c_str());
-    argv[3] = const_cast<char*>(std::string("-d").c_str());
+#ifdef __APPLE__
+    char      arg4[] = "-o";
+    char      arg5[] = "noappledouble";
+    char* fuseArgs[] = { &arg0[0], &arg1[0], &arg2[0], &arg3[0], &arg4[0], &arg5[0], NULL };
+#else
+    char* fuseArgs[] = { &arg0[0], &arg1[0], &arg2[0], &arg3[0], NULL };
+#endif
 
-    // debug mode? (this is also single-threaded)
-    // debug mode prints out a load of debug info to console
-    //if(debug) {
-    //    argv[2] = const_cast<char*>(std::string("-d").c_str());
-    //}
+    int fuseArgCount = (int)(sizeof(fuseArgs) / sizeof(fuseArgs[0])) - 1;
 
     // turn over control to fuse
     fprintf(stderr, "about to call fuse_main\n");
-    int fuse_stat = fuse_main(argc, argv, &teasafe_oper, &theBfs);
+    int fuse_stat = fuse_main(fuseArgCount, fuseArgs, &teasafe_oper, &theBfs);
     fprintf(stderr, "fuse_main returned %d\n", fuse_stat);
 
     return fuse_stat;
