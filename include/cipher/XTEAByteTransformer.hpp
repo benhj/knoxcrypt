@@ -114,8 +114,7 @@ namespace teasafe { namespace cipher
 
         XTEAByteTransformer(); // not required
 
-        void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length,
-                         bool encrypt) const
+        void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
         {
 
             // how many blocks required? defaults to 1, if length greater
