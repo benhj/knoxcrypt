@@ -1,7 +1,12 @@
 CXX=clang++
-CXXFLAGS_FUSE=-I/usr/local/include/osxfuse  -DFUSE_USE_VERSION=26
+ifeq ($(OS), Linux)
+    CXXFLAGS_FUSE=-I/usr/local/include/fuse  -DFUSE_USE_VERSION=26
+    LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -lfuse -lcrypto
+else
+    CXXFLAGS_FUSE=-I/usr/local/include/osxfuse  -DFUSE_USE_VERSION=26
+    LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -losxfuse -lcrypto
+endif
 CXXFLAGS=-std=c++11 -Os -ffast-math -funroll-loops -Wno-ctor-dtor-privacy -I/usr/local/include/boost -Iinclude -D_FILE_OFFSET_BITS=64
-LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -losxfuse -lcrypto
 SOURCES := $(wildcard src/teasafe/*.cpp)
 MAKE_TeaSafe_SRC := $(wildcard src/maketeasafe/*.cpp)
 TEST_SRC := $(wildcard src/test/*.cpp)
