@@ -31,6 +31,7 @@
 #include "cipher/IByteTransformer.hpp"
 
 #include <openssl/sha.h>
+#include <cstring>
 
 #include <iostream>
 #include <vector>
