@@ -105,20 +105,21 @@ TeaSafe follows the BSD 2-Clause licence.
 Contributing
 ------------
 
-I'm quite new to git, but it seems that one approach is to:
+If you want to help out with the project, you can use the 'forking' approach
+as one suggested method. Basically, you'd do this:
 
 1. Fork the repository
 2. Clone the fork to your development machine
 <pre>
 git clone https://github.com/username/teasafe.git
 </pre>
-3. Configure your remotes so that you get updates 
+3. Configure your clone that that you get updates from the main repo:
 <pre>
 cd teasafe
 git remote add upstream https://github.com/benhj/teasafe.git
 git fetch upstream
 </pre>
-4. Edit files make changes, and commit back to your branch
+4. Edit files to make any changes and add/commit/push back to your branch
 5. Send me a pull request so that I can merge the changes
 
 More information here:
