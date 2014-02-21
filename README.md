@@ -119,9 +119,18 @@ cd teasafe
 git remote add upstream https://github.com/benhj/teasafe.git
 git fetch upstream
 </pre>
-4. Edit files to make any changes and add/commit/push back to your branch
-5. Send me a pull request so that I can merge the changes
+4. Rewrite your master branch so that any commits of yours that
+aren't already in upstream/master are replayed on top of that
+other branch:
+<pre>
+git rebase upstream/master
+</pre>
 
+If you want to edit files:
+
+1. Edit files to make any changes and add/commit/push back to your branch
+2. Send me a pull request so that I can merge the changes
+ 
 More information here:
 <pre>
 https://help.github.com/articles/fork-a-repo
