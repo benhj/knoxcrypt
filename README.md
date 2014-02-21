@@ -108,8 +108,10 @@ Contributing
 I'm quite new to git, but it seems that one approach is to:
 
 1. Fork the repository
-2. Clone the fork on to your development machine
-`git clone https://github.com/username/teasafe.git`
+2. Clone the fork to your development machine
+<pre>
+git clone https://github.com/username/teasafe.git
+</pre>
 3. Configure your remotes so that you get updates 
 <pre>
 cd teasafe
@@ -120,7 +122,8 @@ git fetch upstream
 5. Send me a pull request so that I can merge the changes
 
 More information here:
-`https://help.github.com/articles/fork-a-repo`
-and here:
-`https://help.github.com/articles/using-pull-requests`
+<pre>
+https://help.github.com/articles/fork-a-repo
+https://help.github.com/articles/using-pull-requests
+</pre>
 
