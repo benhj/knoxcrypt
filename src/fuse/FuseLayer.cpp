@@ -1,26 +1,26 @@
 /*
-Copyright (c) <2013-2014>, <BenHJ>
-All rights reserved.
+  Copyright (c) <2013-2014>, <BenHJ>
+  All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+  1. Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
@@ -176,7 +176,7 @@ static int teasafe_read(const char *path, char *buf, size_t size, off_t offset, 
 }
 
 static int teasafe_write(const char *path, const char *buf, size_t size, off_t offset,
-                     struct fuse_file_info *fi)
+                         struct fuse_file_info *fi)
 {
 
     teasafe::ReadOrWriteOrBoth openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
@@ -241,7 +241,7 @@ static int teasafe_opendir(const char *path, struct fuse_file_info *fi)
 
 // list the directory contents
 static int teasafe_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-                       off_t offset, struct fuse_file_info *fi)
+                           off_t offset, struct fuse_file_info *fi)
 {
     try {
         teasafe::FolderEntry folder = TeaSafe_DATA->getCurrent(path);
@@ -273,22 +273,32 @@ static int teasafe_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     return 0;
 }
 
+// for getting stats about the overall filesystem
+// (used when issuing a 'df' command). Note that in TeaSafe,
+// the number of inodes corresponds to the number of blocks
+int teasafe_statfs(const char *path, struct statvfs *statv)
+{
+    TeaSafe_DATA->statvfs(statv);
+    return 0;
+}
+
 static struct fuse_operations teasafe_oper =
 {
-    .mkdir = teasafe_mkdir,
-    .unlink = teasafe_unlink,
-    .rmdir = teasafe_rmdir,
-    .truncate = teasafe_truncate,
-    .open = teasafe_open,
-    .read = teasafe_read,
-    .write = teasafe_write,
-    .create = teasafe_create,
+    .mkdir     = teasafe_mkdir,
+    .unlink    = teasafe_unlink,
+    .rmdir     = teasafe_rmdir,
+    .truncate  = teasafe_truncate,
+    .open      = teasafe_open,
+    .read      = teasafe_read,
+    .write     = teasafe_write,
+    .create    = teasafe_create,
     .ftruncate = teasafe_ftruncate,
-    .opendir = teasafe_opendir,
-    .init = teasafe_init,
-    .readdir = teasafe_readdir,
-    .getattr = teasafe_getattr,
-    .rename = teasafe_rename
+    .opendir   = teasafe_opendir,
+    .init      = teasafe_init,
+    .readdir   = teasafe_readdir,
+    .getattr   = teasafe_getattr,
+    .rename    = teasafe_rename,
+    .statfs    = teasafe_statfs
 };
 
 int main(int argc, char *argv[])
@@ -306,7 +316,7 @@ int main(int argc, char *argv[])
         ("mountPoint", po::value<std::string>(), "mountPoint path")
         ("debug", po::value<bool>(&debug)->default_value(true), "fuse debug")
         ("coffee", po::value<bool>(&magic)->default_value(false), "mount alternative sub-volume")
-    ;
+        ;
 
     po::positional_options_description positionalOptions;
     (void)positionalOptions.add("imageName", 1);
@@ -324,7 +334,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        if(vm.count("help")) {
+        if (vm.count("help")) {
             std::cout<<desc<<"\n";
         } else {
 
@@ -353,7 +363,7 @@ int main(int argc, char *argv[])
 
     printf("Counting allocated blocks. Please wait...\n");
 
-    io->freeBlocks = teasafe::detail::getNumberOfAllocatedBlocks(stream);
+    io->freeBlocks = io->blocks - teasafe::detail::getNumberOfAllocatedBlocks(stream);
 
     printf("Finished counting allocated blocks.\n");
 

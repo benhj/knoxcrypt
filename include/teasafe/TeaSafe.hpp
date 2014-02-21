@@ -331,6 +331,13 @@ namespace teasafe
             buf->f_bsize   = detail::FILE_BLOCK_SIZE;
             buf->f_blocks  = m_io->blocks;
             buf->f_bfree   = m_io->freeBlocks;
+            buf->f_bavail  = m_io->freeBlocks;
+
+            // in teasafe, the concept of an inode doesn't really exist so the
+            // number of inodes is set to corresponds to the number of blocks
+            buf->f_files   = m_io->blocks;
+            buf->f_ffree   = m_io->freeBlocks;
+            buf->f_favail  = m_io->freeBlocks;
             buf->f_namemax = detail::MAX_FILENAME_LENGTH;
         }
 
