@@ -284,21 +284,21 @@ int teasafe_statfs(const char *path, struct statvfs *statv)
 
 static struct fuse_operations teasafe_oper =
 {
-    mkdir:      teasafe_mkdir,
-    unlink:     teasafe_unlink,
-    rmdir:      teasafe_rmdir,
-    truncate:   teasafe_truncate,
-    open:       teasafe_open,
-    read:       teasafe_read,
-    write:      teasafe_write,
-    create:     teasafe_create,
-    ftruncate:  teasafe_ftruncate,
-    opendir:    teasafe_opendir,
-    init:       teasafe_init,
-    readdir:    teasafe_readdir,
-    getattr:    teasafe_getattr,
-    rename:     teasafe_rename,
-    statfs:     teasafe_statfs
+    .mkdir     = teasafe_mkdir,
+    .unlink    = teasafe_unlink,
+    .rmdir     = teasafe_rmdir,
+    .truncate  = teasafe_truncate,
+    .open      = teasafe_open,
+    .read      = teasafe_read,
+    .write     = teasafe_write,
+    .create    = teasafe_create,
+    .ftruncate = teasafe_ftruncate,
+    .opendir   = teasafe_opendir,
+    .init      = teasafe_init,
+    .readdir   = teasafe_readdir,
+    .getattr   = teasafe_getattr,
+    .rename    = teasafe_rename,
+    .statfs    = teasafe_statfs
 };
 
 int main(int argc, char *argv[])
