@@ -1,7 +1,7 @@
 TeaSafe: A user-space encrypted filesystem
 ------------------------------------------
 
-TeaSafe is designed with encryption in mind. The ongoing aim is to learn about 
+The ongoing aim of TeaSafe is to learn about 
 filesystem implementation -- the whole thing is based on ideas gleaned from various wiki 
 articles about previously implemented filesystems (most prevalently HFS) and chats with friends.
 The filesystem is block-based, existing as a single 'disk image'
@@ -101,3 +101,26 @@ Licensing
 ---------
 
 TeaSafe follows the BSD 2-Clause licence. 
+
+Contributing
+------------
+
+I'm quite new to git, but it seems that one approach is to:
+
+1. Fork the repository
+2. Clone the fork on to your development machine
+`git clone https://github.com/username/teasafe.git`
+3. Configure your remotes so that you get updates 
+<pre>
+cd teasafe
+git remote add upstream https://github.com/benhj/teasafe.git
+git fetch upstream
+</pre>
+4. Edit files make changes, and commit back to your branch
+5. Send me a pull request so that I can merge the changes
+
+More information here:
+`https://help.github.com/articles/fork-a-repo`
+and here:
+`https://help.github.com/articles/using-pull-requests`
+
