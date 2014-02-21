@@ -1,4 +1,5 @@
-ifeq ($(OS), Linux)
+UNAME := $(shell uname)
+ifeq ($(UNAME), Linux)
     CXX=g++
     CXXFLAGS_FUSE=-I/usr/local/include/fuse  -DFUSE_USE_VERSION=26
     LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -lfuse -lcrypto
