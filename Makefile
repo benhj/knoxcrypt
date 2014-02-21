@@ -1,8 +1,9 @@
-CXX=clang++
 ifeq ($(OS), Linux)
+    CXX=g++
     CXXFLAGS_FUSE=-I/usr/local/include/fuse  -DFUSE_USE_VERSION=26
     LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -lfuse -lcrypto
 else
+    CXX=clang++
     CXXFLAGS_FUSE=-I/usr/local/include/osxfuse  -DFUSE_USE_VERSION=26
     LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -losxfuse -lcrypto
 endif
