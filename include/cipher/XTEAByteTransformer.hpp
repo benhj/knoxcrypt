@@ -137,6 +137,7 @@ namespace teasafe { namespace cipher
             in.resize(CIPHER_BUFFER_SIZE);
             g_bigCipherBuffer.resize(CIPHER_BUFFER_SIZE);
             doTransform(&in.front(), &g_bigCipherBuffer.front(), 0, CIPHER_BUFFER_SIZE);
+            std::cout<<"Built big xtea cipher stream buffer."<<std::endl;
         }
 
         void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
