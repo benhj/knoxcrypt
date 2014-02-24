@@ -90,7 +90,7 @@ teasafe_getattr(const char *path, struct stat *stbuf)
     return 0;
 }
 
-int teasafe_rename(const char *path, const char *newpath)
+static int teasafe_rename(const char *path, const char *newpath)
 {
     try {
         TeaSafe_DATA->renameEntry(path, newpath);
@@ -276,10 +276,21 @@ static int teasafe_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 // for getting stats about the overall filesystem
 // (used when issuing a 'df' command). Note that in TeaSafe,
 // the number of inodes corresponds to the number of blocks
-int teasafe_statfs(const char *path, struct statvfs *statv)
+static int teasafe_statfs(const char *path, struct statvfs *statv)
 {
     TeaSafe_DATA->statvfs(statv);
     return 0;
+}
+
+// not actually used, but pasted here to shut-up some warning messages
+static int teasafe_setxattr(const char *path,
+                            const char *name,
+                            const char *value,
+                            size_t size,
+                            int flags,
+                            uint32_t)
+{
+
 }
 
 
@@ -306,6 +317,7 @@ void initOperations(struct fuse_operations &ops)
     ops.getattr   = teasafe_getattr;
     ops.rename    = teasafe_rename;
     ops.statfs    = teasafe_statfs;
+    ops.setxattr  = teasafe_setxattr;
 }
 
 int main(int argc, char *argv[])
