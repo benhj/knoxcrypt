@@ -298,10 +298,37 @@ static int teasafe_setxattr(const char *path,
                             int flags)
 #endif
 {
-
+    return 0;
 }
 
+// to shut-up 'function not implemented warnings'
+// not presently required
+static int teasafe_flush(const char *, struct fuse_file_info *)
+{
+    return 0;
+}
 
+// to shut-up 'function not implemented warnings'
+// not presently required
+static int teasafe_chmod(const char *, mode_t)
+{
+    return 0;
+}
+
+// to shut-up 'function not implemented warnings'
+// not presently required
+static int teasafe_chown(const char *, uid_t, gid_t)
+{
+    return 0;
+}
+
+static int teasafe_utimens(const char *, const struct timespec tv[2])
+{
+    return 0;
+}
+
+// to shut-up 'function not implemented warnings'
+// not presently required
 static struct fuse_operations teasafe_oper;
 
 /**
@@ -326,6 +353,10 @@ void initOperations(struct fuse_operations &ops)
     ops.rename    = teasafe_rename;
     ops.statfs    = teasafe_statfs;
     ops.setxattr  = teasafe_setxattr;
+    ops.flush     = teasafe_flush;
+    ops.chmod     = teasafe_chmod;
+    ops.chown     = teasafe_chown;
+    ops.utimens   = teasafe_utimens;
 }
 
 int main(int argc, char *argv[])
