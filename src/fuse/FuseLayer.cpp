@@ -290,9 +290,6 @@ static int teasafe_setxattr(const char *path,
                             size_t size,
                             int flags,
                             uint32_t)
-{
-
-}
 #else
 static int teasafe_setxattr(const char *path,
                             const char *name,
@@ -300,6 +297,9 @@ static int teasafe_setxattr(const char *path,
                             size_t size,
                             int flags)
 #endif
+{
+
+}
 
 
 static struct fuse_operations teasafe_oper;
