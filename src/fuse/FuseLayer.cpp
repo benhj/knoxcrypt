@@ -283,6 +283,7 @@ static int teasafe_statfs(const char *path, struct statvfs *statv)
 }
 
 // not actually used, but pasted here to shut-up some warning messages
+#ifndef __linux__
 static int teasafe_setxattr(const char *path,
                             const char *name,
                             const char *value,
@@ -292,6 +293,13 @@ static int teasafe_setxattr(const char *path,
 {
 
 }
+#else
+static int teasafe_setxattr(const char *path,
+                            const char *name,
+                            const char *value,
+                            size_t size,
+                            int flags)
+#endif
 
 
 static struct fuse_operations teasafe_oper;
