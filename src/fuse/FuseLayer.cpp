@@ -282,24 +282,31 @@ int teasafe_statfs(const char *path, struct statvfs *statv)
     return 0;
 }
 
-static struct fuse_operations teasafe_oper =
+
+static struct fuse_operations teasafe_oper;
+
+/**
+ * @brief initialize the fuse operations struct
+ * @param ops the fue callback functions
+ */
+void initOperations(struct fuse_operations &ops)
 {
-    .mkdir     = teasafe_mkdir,
-    .unlink    = teasafe_unlink,
-    .rmdir     = teasafe_rmdir,
-    .truncate  = teasafe_truncate,
-    .open      = teasafe_open,
-    .read      = teasafe_read,
-    .write     = teasafe_write,
-    .create    = teasafe_create,
-    .ftruncate = teasafe_ftruncate,
-    .opendir   = teasafe_opendir,
-    .init      = teasafe_init,
-    .readdir   = teasafe_readdir,
-    .getattr   = teasafe_getattr,
-    .rename    = teasafe_rename,
-    .statfs    = teasafe_statfs
-};
+    ops.mkdir     = teasafe_mkdir;
+    ops.unlink    = teasafe_unlink;
+    ops.rmdir     = teasafe_rmdir;
+    ops.truncate  = teasafe_truncate;
+    ops.open      = teasafe_open;
+    ops.read      = teasafe_read;
+    ops.write     = teasafe_write;
+    ops.create    = teasafe_create;
+    ops.ftruncate = teasafe_ftruncate;
+    ops.opendir   = teasafe_opendir;
+    ops.init      = teasafe_init;
+    ops.readdir   = teasafe_readdir;
+    ops.getattr   = teasafe_getattr;
+    ops.rename    = teasafe_rename;
+    ops.statfs    = teasafe_statfs;
+}
 
 int main(int argc, char *argv[])
 {
@@ -390,6 +397,10 @@ int main(int argc, char *argv[])
 
     // turn over control to fuse
     fprintf(stderr, "about to call fuse_main\n");
+
+    // initializse fuse_operations
+    initOperations(teasafe_oper);
+
     int fuse_stat = fuse_main(fuseArgCount, fuseArgs, &teasafe_oper, &theBfs);
     fprintf(stderr, "fuse_main returned %d\n", fuse_stat);
 
