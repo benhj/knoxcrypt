@@ -23,8 +23,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/TeaSafe.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
+#include "teasafe/TeaSafe.hpp"
 #include "test/TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>

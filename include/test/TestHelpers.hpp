@@ -27,6 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TeaSafe_TEST_HELPERS_HPP__
 
 #include "teasafe/CoreTeaSafeIO.hpp"
+#include "teasafe/TeaSafeException.hpp"
 #include "utility/MakeTeaSafe.hpp"
 
 #include <boost/filesystem/path.hpp>

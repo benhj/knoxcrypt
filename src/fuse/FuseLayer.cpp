@@ -27,12 +27,13 @@
 /**
  * @brief an experimental fuse wrapper around the teasafe container
  *
- * Based on hello.c by Miklos Szeredi
+ * Based on fuse by Miklos Szeredi
  *
  */
 
-#include "teasafe/TeaSafe.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
+#include "teasafe/TeaSafe.hpp"
+#include "teasafe/TeaSafeException.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
 
 #include <boost/make_shared.hpp>
