@@ -48,25 +48,92 @@ namespace teasafe
       public:
         explicit TeaSafe(SharedCoreIO const &io);
 
-        FolderEntry getCurrent(std::string const &path);
+        /**
+         * @brief  retrieves folder entry for given path
+         * @param  path the path to retrieve entry for
+         * @return the FolderEntry
+         * @throw  TeaSafeException if path cannot be found
+         */
+        FolderEntry getFolderEntry(std::string const &path);
 
+        /**
+         * @brief  retrieves metadata for given path
+         * @param  path the path to retrieve metadata for
+         * @return the meta data
+         * @throw  TeaSafeException if path cannot be found
+         */
         EntryInfo getInfo(std::string const &path);
 
+        /**
+         * @brief  file existence check
+         * @param  path the path to check
+         * @return true if path exists, false otherwise
+         */
         bool fileExists(std::string const &path) const;
+
+        /**
+         * @brief  folder existence check
+         * @param  path the path to check
+         * @return true if path exists, false otherwise
+         */
         bool folderExists(std::string const &path);
 
+        /**
+         * @brief adds an empty file
+         * @param path the path of new file
+         * @throw TeaSafeException illegal filename if path has '/' on end
+         * @throw TeaSafeException if parent path cannot be found
+         * @throw TeaSafeException AlreadyExists if path exists
+         */
         void addFile(std::string const &path);
 
-        void renameEntry(std::string const &src, std::string const &dst);
-
+        /**
+         * @brief creates a new folder
+         * @param path the path of new folder
+         * @throw TeaSafeException if parent path cannot be found
+         * @throw TeaSafeException AlreadyExists if path exists
+         */
         void addFolder(std::string const &path) const;
 
+        /**
+         * @brief for renaming
+         * @param src entry to rename from
+         * @param dst entry to rename to
+         * @throw TeaSafeException NotFound if src or parent of dst cannot be found
+         * @throw TeaSafeException AlreadyExists if dst already present
+         */
+        void renameEntry(std::string const &src, std::string const &dst);
+
+        /**
+         * @brief removes a file
+         * @param path file to remove
+         * @throw TeaSafeException NotFound if not found
+         */
         void removeFile(std::string const &path);
 
+        /**
+         * @brief removes a folder
+         * @param path folder to remove
+         * @throw TeaSafeException NotFound if not found
+         * @throw TeaSafeException NotEmpty if removalType is MustBeEmpty and
+         * folder isn't empty
+         */
         void removeFolder(std::string const &path, FolderRemovalType const &removalType);
 
+        /**
+         * @brief  opens a file
+         * @param  path the file to open
+         * @param  openMode the open mode
+         * @return a seekable device to the opened file
+         * @throw  TeaSaFeException not found if can't be found
+         */
         FileEntryDevice openFile(std::string const &path, OpenDisposition const &openMode);
 
+        /**
+         * @brief chops off end a file at given offset
+         * @param path the file to truncate
+         * @param offset the position at which to 'chop' the file
+         */
         void truncateFile(std::string const &path, std::ios_base::streamoff offset);
 
         /**

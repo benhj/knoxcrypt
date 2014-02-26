@@ -37,7 +37,7 @@ namespace teasafe
     }
 
     FolderEntry
-    TeaSafe::getCurrent(std::string const &path)
+    TeaSafe::getFolderEntry(std::string const &path)
     {
         FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
         std::string thePath(path);
@@ -128,7 +128,28 @@ namespace teasafe
         throwIfAlreadyExists(path, rootFolder);
 
         parentEntry->addFileEntry(boost::filesystem::path(thePath).filename().string());
+    }
 
+    void
+    TeaSafe::addFolder(std::string const &path) const
+    {
+        FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
+        std::string thePath(path);
+        char ch = *path.rbegin();
+        // ignore trailing slash
+        if (ch == '/') {
+            std::string(path.begin(), path.end() - 1).swap(thePath);
+        }
+
+        OptionalFolderEntry parentEntry = doGetParentFolderEntry(thePath, rootFolder);
+        if (!parentEntry) {
+            throw TeaSafeException(TeaSafeError::NotFound);
+        }
+
+        // throw if already exists
+        throwIfAlreadyExists(path, rootFolder);
+
+        parentEntry->addFolderEntry(boost::filesystem::path(thePath).filename().string());
     }
 
     void
@@ -177,28 +198,6 @@ namespace teasafe
         std::string dstFilename = boost::filesystem::path(dstPath).filename().string();
         parentDst->writeNewMetaDataForEntry(dstFilename, childInfo->type(), childInfo->firstFileBlock());
 
-    }
-
-    void
-    TeaSafe::addFolder(std::string const &path) const
-    {
-        FolderEntry rootFolder(m_io, m_io->rootBlock, "root");
-        std::string thePath(path);
-        char ch = *path.rbegin();
-        // ignore trailing slash
-        if (ch == '/') {
-            std::string(path.begin(), path.end() - 1).swap(thePath);
-        }
-
-        OptionalFolderEntry parentEntry = doGetParentFolderEntry(thePath, rootFolder);
-        if (!parentEntry) {
-            throw TeaSafeException(TeaSafeError::NotFound);
-        }
-
-        // throw if already exists
-        throwIfAlreadyExists(path, rootFolder);
-
-        parentEntry->addFolderEntry(boost::filesystem::path(thePath).filename().string());
     }
 
     void

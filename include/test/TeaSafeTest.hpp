@@ -431,7 +431,7 @@ class TeaSafeTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
-        teasafe::FolderEntry fe = theTeaSafe.getCurrent("/");
+        teasafe::FolderEntry fe = theTeaSafe.getFolderEntry("/");
         std::vector<teasafe::EntryInfo> infos = fe.listAllEntries();
         ASSERT_EQUAL(infos.empty(), true, "TeaSafeTest::testListAllEntriesEmpty()");
     }

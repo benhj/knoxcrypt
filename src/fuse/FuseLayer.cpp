@@ -245,7 +245,7 @@ static int teasafe_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
                            off_t offset, struct fuse_file_info *fi)
 {
     try {
-        teasafe::FolderEntry folder = TeaSafe_DATA->getCurrent(path);
+        teasafe::FolderEntry folder = TeaSafe_DATA->getFolderEntry(path);
 
         std::vector<teasafe::EntryInfo> infos = folder.listAllEntries();
         std::vector<teasafe::EntryInfo>::iterator it = infos.begin();
