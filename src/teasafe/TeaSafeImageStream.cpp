@@ -25,7 +25,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "teasafe/TeaSafeImageStream.hpp"
-#include "cipher/BasicByteTransformer.hpp"
 #include "cipher/XTEAByteTransformer.hpp"
 
 #include <boost/make_shared.hpp>
