@@ -68,12 +68,22 @@ namespace teasafe
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
 
+        /**
+         * @brief  simply acceses the name of the teasafe file
+         * @return the teasafe file's name
+         */
         std::string filename() const;
 
+        /**
+         * @brief  accesses file size
+         * @return file size in bytes
+         */
         uint64_t fileSize() const;
 
-        uint64_t getCurrentVolumeBlockIndex();
-
+        /**
+         * @brief  retrieves the first file block making up this teasafe file
+         * @return the start block index of this file
+         */
         uint64_t getStartVolumeBlockIndex() const;
 
         /**
@@ -83,26 +93,27 @@ namespace teasafe
         void truncate(std::ios_base::streamoff newSize);
 
         /**
-         * @brief for reading
-         * @param s
-         * @param n
-         * @return
+         * @brief  for reading bytes from the teasafe file
+         * @param  s buffer to store the read bytes
+         * @param  n number of bytes to read
+         * @return number of bytes read
          */
         std::streamsize read(char* s, std::streamsize n);
 
         /**
-         * @brief for writing
-         * @param s
-         * @param n
-         * @return
+         * @brief  for writing bytes to the teasafe file
+         * @param  s buffer that stores the bytes to write
+         * @param  n the number of bytes to write
+         * @return the number of bytes written
          */
         std::streamsize write(const char* s, std::streamsize n);
 
         /**
-         * @brief for seeking
-         * @param off
-         * @param way
-         * @return
+         * @brief  allows seeking to a given position in the teasafe file
+         * @param  off the offset to seek to
+         * @param  way the position of where to offset from (begin, current, or end)
+         * @return returns the offset (NOTE: should this be returning the actual
+         * 'tell' position instead?
          */
         boost::iostreams::stream_offset seek(boost::iostreams::stream_offset off,
                                              std::ios_base::seekdir way = std::ios_base::beg);
@@ -161,6 +172,13 @@ namespace teasafe
 
         // the current 'stream position' of file entry
         std::streamoff m_pos;
+
+        /**
+         * @brief  for keeping track of what the current file block is when
+         *         reading or writing, it is stored in m_currentVolumeBlock
+         * @return the current volume block
+         */
+        uint64_t getCurrentVolumeBlockIndex();
 
         /**
          * @brief buffers a byte for writing

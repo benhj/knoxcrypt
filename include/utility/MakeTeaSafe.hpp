@@ -150,7 +150,6 @@ namespace teasafe
             buildBlockBytes(io->blocks, sizeBytes);
 
             // write out size, and volume bitmap bytes
-
             TeaSafeImageStream out(io, std::ios::out | std::ios::binary);
             out.write((char*)sizeBytes, 8);
             createVolumeBitMap(io->blocks, out);

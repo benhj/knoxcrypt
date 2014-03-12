@@ -34,11 +34,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
-#include <boost/iostreams/categories.hpp>  // sink_tag
-#include <boost/iostreams/positioning.hpp>  // stream_offset
-#include <iosfwd>                          // streamsize
+#include <boost/iostreams/categories.hpp>
+#include <boost/iostreams/positioning.hpp>
+#include <iosfwd>
 #include <string>
-
 
 namespace teasafe
 {
@@ -48,7 +47,7 @@ namespace teasafe
       public:
         /**
          * @brief for when a file block needs to be written for the first time
-         * use this constructor
+         *        use this constructor
          * @param io the core teasafe io (path, blocks, password)
          * @param index the index of this file block
          * @param next the index of the next file block that makes up the file
@@ -64,32 +63,75 @@ namespace teasafe
          * @param io the core teasafe io (path, blocks, password)
          * @param index the index of the file block
          * @param openDisposition open mode
-         * @note other params like size and next will be initialized when
+         * @note  other params like size and next will be initialized when
          * the block is actually read
          */
         FileBlock(SharedCoreIO const &io,
                   uint64_t const index,
                   OpenDisposition const &openDisposition);
 
+        /**
+         * @brief  reads from the current file block
+         * @param  buf the buffer to store the read data in
+         * @param  n the number of bytes to read
+         * @return the number of bytes read
+         */
         std::streamsize read(char * const buf, std::streamsize const n) const;
 
+        /**
+         * @brief  writes to the current file block
+         * @param  buf the data to write
+         * @param  n the number of bytes to write
+         * @return the number of bytes written
+         */
         std::streamsize write(char const * const buf, std::streamsize const n) const;
 
+        /**
+         * @brief  seeks to a position in this file block
+         * @param  off where to seek to given the seek-from type
+         * @param  way the seek from type (beg, cur, or end)
+         * @return the position offset to
+         */
         boost::iostreams::stream_offset seek(boost::iostreams::stream_offset off,
                                              std::ios_base::seekdir way = std::ios_base::beg);
 
+        /**
+         * @brief  tell reports the current position of the read or write head
+         * @return the current position of the read or write head
+         */
         boost::iostreams::stream_offset tell() const;
 
+        /**
+         * @brief  gets the data bytes written to the block so far
+         * @return the number of bytes written so far
+         */
         uint32_t getDataBytesWritten() const;
 
+        /**
+         * @brief  accesses the number of bytes occupied by the block before any
+         *         writing took place
+         * @return the initial number of bytes written
+         */
         uint32_t getInitialDataBytesWritten() const;
 
+        /**
+         * @brief  retrieves the pointer index to the next file block
+         * @return the index of the next file block
+         */
         uint64_t getNextIndex() const;
 
-        uint64_t getBlockOffset() const;
-
+        /**
+         * @brief  retrieves the index of the file block which signifies the block's
+         *         position in the set of file blocks
+         * @return the index of the file block
+         */
         uint64_t getIndex() const;
 
+        /**
+         * @brief when the block has been used, it registers itself with the
+         *        volume bitmap indicating that it's in use. The block can then
+         *        only be re-used once its been deallocated
+         */
         void registerBlockWithVolumeBitmap();
 
         /**
@@ -105,6 +147,10 @@ namespace teasafe
          */
         void setNextIndex(uint64_t nextIndex) const;
 
+        /**
+         * @brief this unregisters the block in the volume bitmap and sets the
+         *        next block pointer to the current block pointer
+         */
         void unlink();
 
       private:

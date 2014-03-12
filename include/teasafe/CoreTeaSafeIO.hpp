@@ -35,11 +35,11 @@ namespace teasafe
 
     struct CoreTeaSafeIO
     {
-        std::string path;
-        uint64_t blocks;
-        uint64_t freeBlocks;
-        std::string password;
-        uint64_t rootBlock;
+        std::string path;        // path of the tea safe image
+        uint64_t blocks;         // total number of blocks
+        uint64_t freeBlocks;     // number of free blocks
+        std::string password;    // password used to generate encryption key
+        uint64_t rootBlock;      // the start block of the root folder
     };
 
     typedef boost::shared_ptr<CoreTeaSafeIO> SharedCoreIO;

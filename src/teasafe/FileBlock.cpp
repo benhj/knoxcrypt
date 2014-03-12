@@ -177,12 +177,6 @@ namespace teasafe
     }
 
     uint64_t
-    FileBlock::getBlockOffset() const
-    {
-        return m_offset;
-    }
-
-    uint64_t
     FileBlock::getIndex() const
     {
         return m_index;

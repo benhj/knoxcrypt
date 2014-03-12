@@ -43,16 +43,42 @@ namespace teasafe
                   uint64_t const firstFileBlock,
                   uint64_t const folderIndex);
 
+        /**
+         * @brief  access the name of the entry
+         * @return the entry name
+         */
         std::string filename() const;
 
+        /**
+         * @brief  access the size of the entry; not a folder entry
+         *         has a size of zero bytes
+         * @return the size of the entry
+         */
         uint64_t size() const;
 
+        /**
+         * @brief  accesses the type of the entry (file or folder)
+         * @return EntryType::File if file, EntryType::Folder if folder
+         */
         EntryType type() const;
 
+        /**
+         * @brief  indicates if entry is wrtiable or not. In the current
+         *         implementation, all entries are writable
+         * @return true if the entry is writable, false otherwise
+         */
         bool writable() const;
 
+        /**
+         * @brief  reports the first file block index of the associated file data
+         * @return the index of the first file block
+         */
         uint64_t firstFileBlock() const;
 
+        /**
+         * @brief  reports the index of the entry's position in the folder's list of entries
+         * @return the index of the entry in the folder
+         */
         uint64_t folderIndex() const;
 
       private:
