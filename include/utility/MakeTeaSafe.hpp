@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlock.hpp"
-#include "teasafe/FolderEntry.hpp"
+#include "teasafe/TeaSafeFolder.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
 
@@ -173,7 +173,7 @@ namespace teasafe
             // automatically set the initial root block and set the initial
             // number of entries to zero. Note, the initial root block will
             // always be block 0
-            FolderEntry rootDir(io, "root");
+            TeaSafeFolder rootDir(io, "root");
 
             // create an extra 'magic partition' which is another root folder
             // offset to a differing file block
@@ -181,7 +181,7 @@ namespace teasafe
                 SharedCoreIO magicIo(io);
                 magicIo->rootBlock = *m_omp;
                 bool const setRoot = true;
-                FolderEntry magicDir(magicIo, "root", setRoot);
+                TeaSafeFolder magicDir(magicIo, "root", setRoot);
             }
         }
     };

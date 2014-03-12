@@ -43,7 +43,7 @@ class TeaSafeTest
         testFileExists();
         testFolderExists();
         testAddTeaSafeFile();
-        testAddFolderEntry();
+        testAddTeaSafeFolder();
         testAddFileThrowsIfParentNotFound();
         testAddFolderThrowsIfParentNotFound();
         testAddFileThrowsIfAlreadyExists();
@@ -69,30 +69,30 @@ class TeaSafeTest
         boost::filesystem::remove_all(m_uniquePath);
     }
 
-    teasafe::FolderEntry createTestFolder(boost::filesystem::path const &p, long const blocks)
+    teasafe::TeaSafeFolder createTestFolder(boost::filesystem::path const &p, long const blocks)
     {
         teasafe::SharedCoreIO io = createTestIO(p);
-        teasafe::FolderEntry folder(io, 0, std::string("root"));
+        teasafe::TeaSafeFolder folder(io, 0, std::string("root"));
         folder.addTeaSafeFile("test.txt");
         folder.addTeaSafeFile("some.log");
-        folder.addFolderEntry("folderA");
+        folder.addTeaSafeFolder("folderA");
         folder.addTeaSafeFile("picture.jpg");
         folder.addTeaSafeFile("vai.mp3");
-        folder.addFolderEntry("folderB");
+        folder.addTeaSafeFolder("folderB");
 
-        teasafe::FolderEntry folderA = folder.getFolderEntry("folderA");
+        teasafe::TeaSafeFolder folderA = folder.getTeaSafeFolder("folderA");
         folderA.addTeaSafeFile("fileA");
         folderA.addTeaSafeFile("fileB");
-        folderA.addFolderEntry("subFolderA");
+        folderA.addTeaSafeFolder("subFolderA");
 
-        teasafe::FolderEntry subFolderA = folderA.getFolderEntry("subFolderA");
-        subFolderA.addFolderEntry("subFolderB");
+        teasafe::TeaSafeFolder subFolderA = folderA.getTeaSafeFolder("subFolderA");
+        subFolderA.addTeaSafeFolder("subFolderB");
         subFolderA.addTeaSafeFile("fileX");
-        subFolderA.addFolderEntry("subFolderC");
+        subFolderA.addTeaSafeFolder("subFolderC");
         subFolderA.addTeaSafeFile("fileY");
 
-        teasafe::FolderEntry subFolderC = subFolderA.getFolderEntry("subFolderC");
-        subFolderC.addFolderEntry("finalFolder");
+        teasafe::TeaSafeFolder subFolderC = subFolderA.getTeaSafeFolder("subFolderC");
+        subFolderC.addTeaSafeFolder("finalFolder");
         subFolderC.addTeaSafeFile("finalFile.txt");
 
 
@@ -141,13 +141,13 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
 
         theTeaSafe.addFile("/folderA/subFolderA/subFolderC/testAdded.txt");
-        teasafe::FolderEntry parent = root.getFolderEntry("folderA").getFolderEntry("subFolderA").getFolderEntry("subFolderC");
+        teasafe::TeaSafeFolder parent = root.getTeaSafeFolder("folderA").getTeaSafeFolder("subFolderA").getTeaSafeFolder("subFolderC");
         teasafe::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
         bool good = entryInfo ? true : false;
         ASSERT_EQUAL(true, good, "TeaSafeTest::testAddTeaSafeFile() getting info");
@@ -155,29 +155,29 @@ class TeaSafeTest
         ASSERT_EQUAL("testAdded.txt", entryInfo->filename(), "TeaSafeTest::testAddTeaSafeFile() info name");
     }
 
-    void testAddFolderEntry()
+    void testAddTeaSafeFolder()
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
 
         theTeaSafe.addFolder("/folderA/subFolderA/subFolderC/testAdded");
-        teasafe::FolderEntry parent = root.getFolderEntry("folderA").getFolderEntry("subFolderA").getFolderEntry("subFolderC");
+        teasafe::TeaSafeFolder parent = root.getTeaSafeFolder("folderA").getTeaSafeFolder("subFolderA").getTeaSafeFolder("subFolderC");
         teasafe::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded");
         bool good = entryInfo ? true : false;
-        ASSERT_EQUAL(true, good, "TeaSafeTest::testAddFolderEntry() getting info");
-        ASSERT_EQUAL(teasafe::EntryType::FolderType, entryInfo->type(), "TeaSafeTest::testAddFolderEntry() info type");
-        ASSERT_EQUAL("testAdded", entryInfo->filename(), "TeaSafeTest::testAddFolderEntry() info name");
+        ASSERT_EQUAL(true, good, "TeaSafeTest::testAddTeaSafeFolder() getting info");
+        ASSERT_EQUAL(teasafe::EntryType::FolderType, entryInfo->type(), "TeaSafeTest::testAddTeaSafeFolder() info type");
+        ASSERT_EQUAL("testAdded", entryInfo->filename(), "TeaSafeTest::testAddTeaSafeFolder() info name");
     }
 
     void testAddFileThrowsIfParentNotFound()
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
@@ -197,7 +197,7 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
@@ -217,7 +217,7 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
@@ -237,7 +237,7 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
@@ -257,13 +257,13 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
         theTeaSafe.removeFile("/folderA/subFolderA/subFolderC/finalFile.txt");
-        teasafe::OptionalEntryInfo info = root.getFolderEntry("folderA")
-            .getFolderEntry("subFolderA")
-            .getFolderEntry("subFolderC")
+        teasafe::OptionalEntryInfo info = root.getTeaSafeFolder("folderA")
+            .getTeaSafeFolder("subFolderA")
+            .getTeaSafeFolder("subFolderC")
             .getEntryInfo("finalFile.txt");
         bool exists = info ? true : false;
         ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveTeaSafeFile()");
@@ -273,7 +273,7 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
@@ -292,7 +292,7 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
@@ -311,7 +311,7 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
@@ -330,16 +330,16 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
         theTeaSafe.removeFolder("/folderA/subFolderA/subFolderC/finalFolder",
                                 teasafe::FolderRemovalType::MustBeEmpty);
 
 
-        teasafe::OptionalEntryInfo info = root.getFolderEntry("folderA")
-            .getFolderEntry("subFolderA")
-            .getFolderEntry("subFolderC")
+        teasafe::OptionalEntryInfo info = root.getTeaSafeFolder("folderA")
+            .getTeaSafeFolder("subFolderA")
+            .getTeaSafeFolder("subFolderC")
             .getEntryInfo("finalFolder");
         bool exists = info ? true : false;
         ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveEmptyFolder()");
@@ -349,7 +349,7 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
         bool caught = false;
@@ -368,12 +368,12 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
         theTeaSafe.removeFolder("/folderA/subFolderA/",
                             teasafe::FolderRemovalType::Recursive);
-        teasafe::OptionalEntryInfo info = root.getFolderEntry("folderA")
+        teasafe::OptionalEntryInfo info = root.getTeaSafeFolder("folderA")
             .getEntryInfo("subFolderA");
         bool exists = info ? true : false;
         ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveNonEmptyFolder()");
@@ -383,7 +383,7 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
         bool caught = false;
@@ -402,7 +402,7 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::FolderEntry root = createTestFolder(testPath, blocks);
+        teasafe::TeaSafeFolder root = createTestFolder(testPath, blocks);
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
 
@@ -431,7 +431,7 @@ class TeaSafeTest
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
-        teasafe::FolderEntry fe = theTeaSafe.getFolderEntry("/");
+        teasafe::TeaSafeFolder fe = theTeaSafe.getTeaSafeFolder("/");
         std::vector<teasafe::EntryInfo> infos = fe.listAllEntries();
         ASSERT_EQUAL(infos.empty(), true, "TeaSafeTest::testListAllEntriesEmpty()");
     }

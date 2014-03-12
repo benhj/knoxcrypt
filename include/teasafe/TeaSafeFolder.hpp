@@ -23,8 +23,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_FOLDER_ENTRY_HPP__
-#define TeaSafe_FOLDER_ENTRY_HPP__
+#ifndef TeaSafe_TEASAFE_FOLDER_HPP__
+#define TeaSafe_TEASAFE_FOLDER_HPP__
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/EntryInfo.hpp"
@@ -38,11 +38,11 @@ namespace teasafe
     typedef boost::optional<EntryInfo> OptionalEntryInfo;
     typedef boost::optional<std::ios_base::streamoff> OptionalOffset;
 
-    class FolderEntry
+    class TeaSafeFolder
     {
       public:
         /**
-         * @brief constructs a FolderEntry to write to. In this case the
+         * @brief constructs a TeaSafeFolder to write to. In this case the
          * starting block is unknown
          * @param the core teasafe io (path, blocks, password)
          * @param startBlock the index of the starting file block making up entry data
@@ -50,20 +50,20 @@ namespace teasafe
          * @param name the name of the entry
          * @param enforceRootBlock true if we want to enforce the starting root block
          */
-        FolderEntry(SharedCoreIO const &io,
-                    std::string const &name = "root",
-                    bool const enforceRootBlock = false);
+        TeaSafeFolder(SharedCoreIO const &io,
+                      std::string const &name = "root",
+                      bool const enforceRootBlock = false);
 
         /**
-         * @brief constructs a FolderEntry to read from
+         * @brief constructs a TeaSafeFolder to read from
          * @param the core teasafe io (path, blocks, password)
          * @param startBlock the index of the starting file block making up entry data
          * @param writable if data entries can be added to folder
          * @param name the name of the entry
          */
-        FolderEntry(SharedCoreIO const &io,
-                    uint64_t const startBlock,
-                    std::string const &name = "root");
+        TeaSafeFolder(SharedCoreIO const &io,
+                      uint64_t const startBlock,
+                      std::string const &name = "root");
 
 
         /**
@@ -76,9 +76,9 @@ namespace teasafe
         /**
          * @brief appends a new folder entry and start index of the entry data
          * @param name the name of the entry
-         * @return a copy of a FolderEntry that will be used to reference the folder data
+         * @return a copy of a TeaSafeFolder that will be used to reference the folder data
          */
-        void addFolderEntry(std::string const &name);
+        void addTeaSafeFolder(std::string const &name);
 
         /**
          * @brief retrieves a TeaSafeFile with specific name
@@ -90,11 +90,11 @@ namespace teasafe
                                    OpenDisposition const &openDisposition) const;
 
         /**
-         * @brief retrieves a FolderEntry with specific name
+         * @brief retrieves a TeaSafeFolder with specific name
          * @param name the name of the entry to lookup
-         * @return a copy of the FolderEntry with name
+         * @return a copy of the TeaSafeFolder with name
          */
-        FolderEntry getFolderEntry(std::string const &name) const;
+        TeaSafeFolder getTeaSafeFolder(std::string const &name) const;
 
         /**
          * @brief retrieves the name of this folder
@@ -153,7 +153,7 @@ namespace teasafe
          * @brief removes a sub folder and all its content
          * @param name the name of the entry
          */
-        void removeFolderEntry(std::string const &name);
+        void removeTeaSafeFolder(std::string const &name);
 
         /**
          * @brief puts metadata for given entry out of use
@@ -173,7 +173,7 @@ namespace teasafe
 
       private:
 
-        FolderEntry();
+        TeaSafeFolder();
 
         /**
          * @brief for writing new entry metadata
@@ -317,4 +317,4 @@ namespace teasafe
 
 
 
-#endif // TeaSafe_FOLDER_ENTRY_HPP__
+#endif // TeaSafe_TEASAFE_FOLDER_HPP__

@@ -28,7 +28,7 @@
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileEntryDevice.hpp"
-#include "teasafe/FolderEntry.hpp"
+#include "teasafe/TeaSafeFolder.hpp"
 #include "teasafe/FolderRemovalType.hpp"
 #include "teasafe/OpenDisposition.hpp"
 
@@ -43,7 +43,7 @@ namespace teasafe
 {
     class TeaSafe
     {
-        typedef boost::optional<FolderEntry> OptionalFolderEntry;
+        typedef boost::optional<TeaSafeFolder> OptionalTeaSafeFolder;
 
       public:
         explicit TeaSafe(SharedCoreIO const &io);
@@ -51,10 +51,10 @@ namespace teasafe
         /**
          * @brief  retrieves folder entry for given path
          * @param  path the path to retrieve entry for
-         * @return the FolderEntry
+         * @return the TeaSafeFolder
          * @throw  TeaSafeException if path cannot be found
          */
-        FolderEntry getFolderEntry(std::string const &path);
+        TeaSafeFolder getTeaSafeFolder(std::string const &path);
 
         /**
          * @brief  retrieves metadata for given path
@@ -149,15 +149,15 @@ namespace teasafe
 
         TeaSafe(); // not required
 
-        void throwIfAlreadyExists(std::string const &path, FolderEntry &fe) const;
+        void throwIfAlreadyExists(std::string const &path, TeaSafeFolder &fe) const;
 
-        bool doFileExists(std::string const &path, FolderEntry &fe) const;
+        bool doFileExists(std::string const &path, TeaSafeFolder &fe) const;
 
-        bool doFolderExists(std::string const &path, FolderEntry &fe) const;
+        bool doFolderExists(std::string const &path, TeaSafeFolder &fe) const;
 
-        OptionalFolderEntry doGetParentFolderEntry(std::string const &path, FolderEntry &fe) const;
+        OptionalTeaSafeFolder doGetParentTeaSafeFolder(std::string const &path, TeaSafeFolder &fe) const;
 
-        bool doExistanceCheck(std::string const &path, EntryType const &entryType, FolderEntry &fe) const;
+        bool doExistanceCheck(std::string const &path, EntryType const &entryType, TeaSafeFolder &fe) const;
     };
 }
 

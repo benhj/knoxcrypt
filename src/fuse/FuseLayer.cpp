@@ -281,7 +281,7 @@ namespace fuselayer {
                                    off_t offset, struct fuse_file_info *fi)
         {
             try {
-                teasafe::FolderEntry folder = TeaSafe_DATA->getFolderEntry(path);
+                teasafe::TeaSafeFolder folder = TeaSafe_DATA->getTeaSafeFolder(path);
 
                 std::vector<teasafe::EntryInfo> infos = folder.listAllEntries();
                 std::vector<teasafe::EntryInfo>::iterator it = infos.begin();
