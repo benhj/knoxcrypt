@@ -1,26 +1,26 @@
 /*
-Copyright (c) <2013-2014>, <BenHJ>
-All rights reserved.
+  Copyright (c) <2013-2014>, <BenHJ>
+  All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+  1. Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "teasafe/TeaSafeImageStream.hpp"
@@ -40,7 +40,7 @@ namespace teasafe
          * @param folderData the data that stores the folder metadata
          * @param n the metadata chunk to put out of use
          */
-        void putMetaDataOutOfUse(FileEntry folderData, int n)
+        void putMetaDataOutOfUse(TeaSafeFile folderData, int n)
         {
             uint32_t bufferSize = 1 + MAX_FILENAME_LENGTH + 8;
             uint32_t seekTo = (8 + (n * bufferSize));
@@ -62,7 +62,7 @@ namespace teasafe
          * @param seekOff the seek offset
          * @return the read meta data
          */
-        std::vector<uint8_t> doSeekAndReadOfEntryMetaData(FileEntry folderData,
+        std::vector<uint8_t> doSeekAndReadOfEntryMetaData(TeaSafeFile folderData,
                                                           int n,
                                                           uint32_t bufSize = 0,
                                                           uint64_t seekOff = 0)
@@ -184,8 +184,8 @@ namespace teasafe
         OptionalOffset overWroteOld = doFindOffsetWhereMetaDataShouldBeWritten();
 
         if (overWroteOld) {
-            m_folderData = FileEntry(m_io, m_name, m_startVolumeBlock,
-                                     OpenDisposition::buildOverwriteDisposition());
+            m_folderData = TeaSafeFile(m_io, m_name, m_startVolumeBlock,
+                                       OpenDisposition::buildOverwriteDisposition());
             m_folderData.seek(*overWroteOld);
         } else {
             m_folderData.seek(0, std::ios_base::end);
@@ -211,10 +211,10 @@ namespace teasafe
     }
 
     void
-    FolderEntry::addFileEntry(std::string const &name)
+    FolderEntry::addTeaSafeFile(std::string const &name)
     {
         // Create a new file entry
-        FileEntry entry(m_io, name);
+        TeaSafeFile entry(m_io, name);
 
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FileType, entry.getStartVolumeBlockIndex());
@@ -230,9 +230,9 @@ namespace teasafe
         this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry.m_folderData.getStartVolumeBlockIndex());
     }
 
-    FileEntry
-    FolderEntry::getFileEntry(std::string const &name,
-                              OpenDisposition const &openDisposition) const
+    TeaSafeFile
+    FolderEntry::getTeaSafeFile(std::string const &name,
+                                OpenDisposition const &openDisposition) const
     {
 
         uint64_t i(0);
@@ -244,7 +244,7 @@ namespace teasafe
             std::string entryName(doGetEntryName(metaData));
             if (entryName == name && doGetTypeForEntry(metaData) == EntryType::FileType) {
                 uint64_t n = doGetBlockIndexForEntry(metaData);
-                return FileEntry(m_io, name, n, openDisposition);
+                return TeaSafeFile(m_io, name, n, openDisposition);
             }
         }
 
@@ -325,8 +325,8 @@ namespace teasafe
     {
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        FileEntry temp(m_io, m_name, m_startVolumeBlock,
-                       OpenDisposition::buildOverwriteDisposition());
+        TeaSafeFile temp(m_io, m_name, m_startVolumeBlock,
+                         OpenDisposition::buildOverwriteDisposition());
         detail::putMetaDataOutOfUse(temp, doGetMetaDataIndexForEntry(name));
     }
 
@@ -337,11 +337,11 @@ namespace teasafe
     }
 
     void
-    FolderEntry::removeFileEntry(std::string const &name)
+    FolderEntry::removeTeaSafeFile(std::string const &name)
     {
         // first unlink; this deallocates the file blocks, updating the
         // volume bitmap accordingly; note doesn't matter what opendisposition is here
-        FileEntry entry = getFileEntry(name, OpenDisposition::buildAppendDisposition());
+        TeaSafeFile entry = getTeaSafeFile(name, OpenDisposition::buildAppendDisposition());
         entry.unlink();
 
         // second set the metadata to an out of use state; this metadata can
@@ -360,7 +360,7 @@ namespace teasafe
         std::vector<EntryInfo>::iterator it = infos.begin();
         for (; it != infos.end(); ++it) {
             if (it->type() == EntryType::FileType) {
-                entry.removeFileEntry(it->filename());
+                entry.removeTeaSafeFile(it->filename());
             } else {
                 entry.removeFolderEntry(it->filename());
             }
@@ -383,7 +383,7 @@ namespace teasafe
             std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
             if (doEntryMetaDataIsEnabled(metaData)) {
                 EntryInfo info = doGetEntryInfo(metaData, entryIndex);
-                if(info.filename() == name) {
+                if (info.filename() == name) {
                     return OptionalEntryInfo(info);
                 }
             }
@@ -408,7 +408,7 @@ namespace teasafe
         if (entryType == EntryType::FileType) {
             // note disposition doesn't matter here, can be anything
             uint64_t n = doGetBlockIndexForEntry(metaData);
-            FileEntry fe(m_io, entryName, n, OpenDisposition::buildAppendDisposition());
+            TeaSafeFile fe(m_io, entryName, n, OpenDisposition::buildAppendDisposition());
             fileSize = fe.fileSize();
             startBlock = fe.getStartVolumeBlockIndex();
         } else {

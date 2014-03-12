@@ -24,7 +24,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "teasafe/TeaSafeImageStream.hpp"
-#include "teasafe/FileEntry.hpp"
+#include "teasafe/TeaSafeFile.hpp"
 #include "teasafe/FileEntryDevice.hpp"
 #include "teasafe/FileStreamPtr.hpp"
 #include "teasafe/OpenDisposition.hpp"
@@ -63,14 +63,14 @@ class FileEntryDeviceTest
         // test write get file size from same entry
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::FileEntry entry(io, "test.txt");
+            teasafe::TeaSafeFile entry(io, "test.txt");
             teasafe::FileStreamPtr stream(new teasafe::FileStream(teasafe::FileEntryDevice(entry)));
             std::string testData(createLargeStringToWrite());
             (*stream) << testData.c_str();
         }
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::FileEntry entry(io, "entry", uint64_t(1),
+            teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "FileStreamTest::testWriteReportsCorrectFileSize()");
         }
@@ -85,14 +85,14 @@ class FileEntryDeviceTest
         std::string testData(createLargeStringToWrite());
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::FileEntry entry(io, "test.txt");
+            teasafe::TeaSafeFile entry(io, "test.txt");
             teasafe::FileEntryDevice device(entry);
             std::streampos bytesWrote = device.write(testData.c_str(), testData.length());
             ASSERT_EQUAL(BIG_SIZE, bytesWrote, "FileStreamTest::testWriteFollowedByRead() bytes wrote");
         }
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::FileEntry entry(io, "entry", uint64_t(1),
+            teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
                                  teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> buffer;
             buffer.resize(entry.fileSize());

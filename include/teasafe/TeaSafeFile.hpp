@@ -23,8 +23,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_FILE_ENTRY_HPP__
-#define TeaSafe_FILE_ENTRY_HPP__
+#ifndef TeaSafe_TEASAFE_FILE_HPP__
+#define TeaSafe_TEASAFE_FILE_HPP__
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlock.hpp"
@@ -41,7 +41,7 @@
 namespace teasafe
 {
 
-    class FileEntry
+    class TeaSafeFile
     {
       public:
         /**
@@ -50,7 +50,7 @@ namespace teasafe
          * @param name the name of the file entry
          * @param enforceStartBlock true if start block should be set
          */
-        FileEntry(SharedCoreIO const &io, std::string const &name, bool const enforceStartBlock = false);
+        TeaSafeFile(SharedCoreIO const &io, std::string const &name, bool const enforceStartBlock = false);
 
         /**
          * @brief when reading or appending or overwriting to the end of a file
@@ -60,10 +60,10 @@ namespace teasafe
          * @param block the starting block of the file entry
          * @param openDisposition open mode
          */
-        FileEntry(SharedCoreIO const &io,
-                  std::string const &name,
-                  uint64_t const startBlock,
-                  OpenDisposition const &openDisposition);
+        TeaSafeFile(SharedCoreIO const &io,
+                    std::string const &name,
+                    uint64_t const startBlock,
+                    OpenDisposition const &openDisposition);
 
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
@@ -233,4 +233,4 @@ namespace teasafe
 
 }
 
-#endif // TeaSafe_TeaSafe_FILE_ENTRY_HPP__
+#endif // TeaSafe_TEASAFE_FILE_HPP__

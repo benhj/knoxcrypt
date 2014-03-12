@@ -25,7 +25,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "test/TeaSafeTest.hpp"
 #include "test/FileBlockTest.hpp"
-#include "test/FileEntryTest.hpp"
+#include "test/TeaSafeFileTest.hpp"
 #include "test/FileEntryDeviceTest.hpp"
 #include "test/MakeTeaSafeTest.hpp"
 #include "test/FolderEntryTest.hpp"
@@ -38,7 +38,7 @@ int main()
     MakeTeaSafeTest();
     FileEntryDeviceTest();
     FileBlockTest();
-    FileEntryTest();
+    TeaSafeFileTest();
     FolderEntryTest();
 
     std::cout<<"\n\nThere were "<<testFailures<<"/"<<passedPoints<<" assertion failures\n\n"<<std::endl;

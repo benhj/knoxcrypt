@@ -127,7 +127,7 @@ namespace teasafe
         // throw if already exists
         throwIfAlreadyExists(path, rootFolder);
 
-        parentEntry->addFileEntry(boost::filesystem::path(thePath).filename().string());
+        parentEntry->addTeaSafeFile(boost::filesystem::path(thePath).filename().string());
     }
 
     void
@@ -226,7 +226,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        parentEntry->removeFileEntry(boost::filesystem::path(thePath).filename().string());
+        parentEntry->removeTeaSafeFile(boost::filesystem::path(thePath).filename().string());
     }
 
     void
@@ -288,7 +288,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        FileEntry fe = parentEntry->getFileEntry(boost::filesystem::path(path).filename().string(), openMode);
+        TeaSafeFile fe = parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(), openMode);
 
         return FileEntryDevice(fe);
     }
@@ -310,7 +310,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        FileEntry fe = parentEntry->getFileEntry(boost::filesystem::path(path).filename().string(), OpenDisposition::buildOverwriteDisposition());
+        TeaSafeFile fe = parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(), OpenDisposition::buildOverwriteDisposition());
         fe.truncate(offset);
     }
 

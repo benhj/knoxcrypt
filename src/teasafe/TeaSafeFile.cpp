@@ -24,7 +24,7 @@
 */
 
 #include "teasafe/TeaSafeImageStream.hpp"
-#include "teasafe/FileEntry.hpp"
+#include "teasafe/TeaSafeFile.hpp"
 #include "teasafe/FileEntryException.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
@@ -34,7 +34,7 @@
 namespace teasafe
 {
     // for writing a brand new entry where start block isn't known
-    FileEntry::FileEntry(SharedCoreIO const &io, std::string const &name, bool const enforceStartBlock)
+    TeaSafeFile::TeaSafeFile(SharedCoreIO const &io, std::string const &name, bool const enforceStartBlock)
         : m_io(io)
         , m_name(name)
         , m_enforceStartBlock(enforceStartBlock)
@@ -50,10 +50,10 @@ namespace teasafe
     }
 
     // for appending or overwriting
-    FileEntry::FileEntry(SharedCoreIO const &io,
-                         std::string const &name,
-                         uint64_t const startBlock,
-                         OpenDisposition const &openDisposition)
+    TeaSafeFile::TeaSafeFile(SharedCoreIO const &io,
+                             std::string const &name,
+                             uint64_t const startBlock,
+                             OpenDisposition const &openDisposition)
         : m_io(io)
         , m_name(name)
         , m_enforceStartBlock(false)
@@ -93,19 +93,19 @@ namespace teasafe
     }
 
     std::string
-    FileEntry::filename() const
+    TeaSafeFile::filename() const
     {
         return m_name;
     }
 
     uint64_t
-    FileEntry::fileSize() const
+    TeaSafeFile::fileSize() const
     {
         return m_fileSize;
     }
 
     uint64_t
-    FileEntry::getCurrentVolumeBlockIndex()
+    TeaSafeFile::getCurrentVolumeBlockIndex()
     {
         if (m_fileBlocks.empty()) {
             checkAndCreateWritableFileBlock();
@@ -115,7 +115,7 @@ namespace teasafe
     }
 
     uint64_t
-    FileEntry::getStartVolumeBlockIndex() const
+    TeaSafeFile::getStartVolumeBlockIndex() const
     {
         if (m_fileBlocks.empty()) {
             checkAndCreateWritableFileBlock();
@@ -127,7 +127,7 @@ namespace teasafe
     }
 
     std::streamsize
-    FileEntry::readCurrentBlockBytes()
+    TeaSafeFile::readCurrentBlockBytes()
     {
 
         // need to take into account the currently seeked-to position and
@@ -147,7 +147,7 @@ namespace teasafe
         return size;
     }
 
-    void FileEntry::newWritableFileBlock() const
+    void TeaSafeFile::newWritableFileBlock() const
     {
         teasafe::TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
 
@@ -171,7 +171,7 @@ namespace teasafe
         m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     }
 
-    void FileEntry::setBlocks()
+    void TeaSafeFile::setBlocks()
     {
         // find very first block
         FileBlock block(m_io,
@@ -200,14 +200,14 @@ namespace teasafe
     }
 
     void
-    FileEntry::writeBufferedDataToBlock(uint32_t const bytes)
+    TeaSafeFile::writeBufferedDataToBlock(uint32_t const bytes)
     {
         m_fileBlocks[m_blockIndex].write((char*)&m_buffer.front(), bytes);
         std::vector<uint8_t>().swap(m_buffer);
     }
 
     bool
-    FileEntry::currentBlockHasAvailableSpace() const
+    TeaSafeFile::currentBlockHasAvailableSpace() const
     {
         // use tell to get bytes written so far as the read/write head position
         // is always updates after reads/writes
@@ -221,7 +221,7 @@ namespace teasafe
     }
 
     void
-    FileEntry::checkAndCreateWritableFileBlock() const
+    TeaSafeFile::checkAndCreateWritableFileBlock() const
     {
         // first case no file blocks so absolutely need one to write to
         if (m_fileBlocks.empty()) {
@@ -259,7 +259,7 @@ namespace teasafe
     }
 
     void
-    FileEntry::bufferByteForWriting(char const byte)
+    TeaSafeFile::bufferByteForWriting(char const byte)
     {
         m_buffer.push_back(byte);
 
@@ -282,7 +282,7 @@ namespace teasafe
     }
 
     std::streamsize
-    FileEntry::read(char* s, std::streamsize n)
+    TeaSafeFile::read(char* s, std::streamsize n)
     {
 
         if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
@@ -317,7 +317,7 @@ namespace teasafe
     }
 
     std::streamsize
-    FileEntry::write(const char* s, std::streamsize n)
+    TeaSafeFile::write(const char* s, std::streamsize n)
     {
 
         if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::ReadOnly) {
@@ -349,7 +349,7 @@ namespace teasafe
     }
 
     void
-    FileEntry::truncate(std::ios_base::streamoff newSize)
+    TeaSafeFile::truncate(std::ios_base::streamoff newSize)
     {
         uint64_t blockCount = m_fileBlocks.size();
 
@@ -484,7 +484,7 @@ namespace teasafe
     }
 
     boost::iostreams::stream_offset
-    FileEntry::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
+    TeaSafeFile::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
     {
         // reset any offset values to zero but only if not seeking from the current
         // position. When seeking from the current position, we need to keep
@@ -552,12 +552,12 @@ namespace teasafe
     }
 
     boost::iostreams::stream_offset
-    FileEntry::tell() const
+    TeaSafeFile::tell() const
     {
         return m_pos;
     }
 
-    void FileEntry::setBlockNextIndices()
+    void TeaSafeFile::setBlockNextIndices()
     {
         // rather than set the index after each file block which *might*
         // slow things down, wait until end. Will hopefully make writing more
@@ -569,7 +569,7 @@ namespace teasafe
     }
 
     void
-    FileEntry::flush()
+    TeaSafeFile::flush()
     {
         writeBufferedDataToBlock(m_buffer.size());
 
@@ -580,7 +580,7 @@ namespace teasafe
     }
 
     void
-    FileEntry::unlink()
+    TeaSafeFile::unlink()
     {
         // loop over all file blocks and update the volume bitmap indicating
         // that block is no longer in use

@@ -42,14 +42,14 @@ class TeaSafeTest
         boost::filesystem::create_directories(m_uniquePath);
         testFileExists();
         testFolderExists();
-        testAddFileEntry();
+        testAddTeaSafeFile();
         testAddFolderEntry();
         testAddFileThrowsIfParentNotFound();
         testAddFolderThrowsIfParentNotFound();
         testAddFileThrowsIfAlreadyExists();
         testAddFolderThrowsIfAlreadyExists();
-        testRemoveFileEntry();
-        testRemoveFileEntryThrowsIfBadParent();
+        testRemoveTeaSafeFile();
+        testRemoveTeaSafeFileThrowsIfBadParent();
         testRemoveFileThrowsIfNotFound();
         testRemoveFileThrowsIfFolder();
         testRemoveEmptyFolder();
@@ -73,27 +73,27 @@ class TeaSafeTest
     {
         teasafe::SharedCoreIO io = createTestIO(p);
         teasafe::FolderEntry folder(io, 0, std::string("root"));
-        folder.addFileEntry("test.txt");
-        folder.addFileEntry("some.log");
+        folder.addTeaSafeFile("test.txt");
+        folder.addTeaSafeFile("some.log");
         folder.addFolderEntry("folderA");
-        folder.addFileEntry("picture.jpg");
-        folder.addFileEntry("vai.mp3");
+        folder.addTeaSafeFile("picture.jpg");
+        folder.addTeaSafeFile("vai.mp3");
         folder.addFolderEntry("folderB");
 
         teasafe::FolderEntry folderA = folder.getFolderEntry("folderA");
-        folderA.addFileEntry("fileA");
-        folderA.addFileEntry("fileB");
+        folderA.addTeaSafeFile("fileA");
+        folderA.addTeaSafeFile("fileB");
         folderA.addFolderEntry("subFolderA");
 
         teasafe::FolderEntry subFolderA = folderA.getFolderEntry("subFolderA");
         subFolderA.addFolderEntry("subFolderB");
-        subFolderA.addFileEntry("fileX");
+        subFolderA.addTeaSafeFile("fileX");
         subFolderA.addFolderEntry("subFolderC");
-        subFolderA.addFileEntry("fileY");
+        subFolderA.addTeaSafeFile("fileY");
 
         teasafe::FolderEntry subFolderC = subFolderA.getFolderEntry("subFolderC");
         subFolderC.addFolderEntry("finalFolder");
-        subFolderC.addFileEntry("finalFile.txt");
+        subFolderC.addTeaSafeFile("finalFile.txt");
 
 
 
@@ -137,7 +137,7 @@ class TeaSafeTest
         ASSERT_EQUAL(false, theTeaSafe.folderExists(testNegative), "TeaSafeTest::testFolderExists() negative case");
     }
 
-    void testAddFileEntry()
+    void testAddTeaSafeFile()
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
@@ -150,9 +150,9 @@ class TeaSafeTest
         teasafe::FolderEntry parent = root.getFolderEntry("folderA").getFolderEntry("subFolderA").getFolderEntry("subFolderC");
         teasafe::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
         bool good = entryInfo ? true : false;
-        ASSERT_EQUAL(true, good, "TeaSafeTest::testAddFileEntry() getting info");
-        ASSERT_EQUAL(teasafe::EntryType::FileType, entryInfo->type(), "TeaSafeTest::testAddFileEntry() info type");
-        ASSERT_EQUAL("testAdded.txt", entryInfo->filename(), "TeaSafeTest::testAddFileEntry() info name");
+        ASSERT_EQUAL(true, good, "TeaSafeTest::testAddTeaSafeFile() getting info");
+        ASSERT_EQUAL(teasafe::EntryType::FileType, entryInfo->type(), "TeaSafeTest::testAddTeaSafeFile() info type");
+        ASSERT_EQUAL("testAdded.txt", entryInfo->filename(), "TeaSafeTest::testAddTeaSafeFile() info name");
     }
 
     void testAddFolderEntry()
@@ -253,7 +253,7 @@ class TeaSafeTest
         ASSERT_EQUAL(true, caught, "TeaSafeTest::testAddFolderThrowsIfAlreadyExists() caught");
     }
 
-    void testRemoveFileEntry()
+    void testRemoveTeaSafeFile()
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
@@ -266,10 +266,10 @@ class TeaSafeTest
             .getFolderEntry("subFolderC")
             .getEntryInfo("finalFile.txt");
         bool exists = info ? true : false;
-        ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveFileEntry()");
+        ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveTeaSafeFile()");
     }
 
-    void testRemoveFileEntryThrowsIfBadParent()
+    void testRemoveTeaSafeFileThrowsIfBadParent()
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
@@ -283,9 +283,9 @@ class TeaSafeTest
         } catch (teasafe::TeaSafeException const &e) {
             caught = true;
             ASSERT_EQUAL(teasafe::TeaSafeException(teasafe::TeaSafeError::NotFound), e,
-                         "TeaSafeTest::testRemoveFileEntryThrowsIfBadParent() asserting error type");
+                         "TeaSafeTest::testRemoveTeaSafeFileThrowsIfBadParent() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "TeaSafeTest::testRemoveFileEntryThrowsIfBadParent() caught");
+        ASSERT_EQUAL(true, caught, "TeaSafeTest::testRemoveTeaSafeFileThrowsIfBadParent() caught");
     }
 
     void testRemoveFileThrowsIfNotFound()
