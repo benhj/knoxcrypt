@@ -1,26 +1,26 @@
 /*
-Copyright (c) <2013-2014>, <BenHJ>
-All rights reserved.
+  Copyright (c) <2013-2014>, <BenHJ>
+  All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+  1. Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "teasafe/CoreTeaSafeIO.hpp"
@@ -355,7 +355,7 @@ class TeaSafeTest
         bool caught = false;
         try {
             theTeaSafe.removeFolder("/folderA/subFolderA/",
-                                teasafe::FolderRemovalType::MustBeEmpty);
+                                    teasafe::FolderRemovalType::MustBeEmpty);
         } catch (teasafe::TeaSafeException const &e) {
             caught = true;
             ASSERT_EQUAL(teasafe::TeaSafeException(teasafe::TeaSafeError::FolderNotEmpty), e,
@@ -372,7 +372,7 @@ class TeaSafeTest
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
         theTeaSafe.removeFolder("/folderA/subFolderA/",
-                            teasafe::FolderRemovalType::Recursive);
+                                teasafe::FolderRemovalType::Recursive);
         teasafe::OptionalEntryInfo info = root.getTeaSafeFolder("folderA")
             .getEntryInfo("subFolderA");
         bool exists = info ? true : false;
@@ -389,7 +389,7 @@ class TeaSafeTest
         bool caught = false;
         try {
             theTeaSafe.removeFolder("/folderA/subFolderQ/",
-                                teasafe::FolderRemovalType::MustBeEmpty);
+                                    teasafe::FolderRemovalType::MustBeEmpty);
         } catch (teasafe::TeaSafeException const &e) {
             caught = true;
             ASSERT_EQUAL(teasafe::TeaSafeException(teasafe::TeaSafeError::NotFound), e,
@@ -409,8 +409,8 @@ class TeaSafeTest
         // open file and append to end of it
         std::string const &testString(createLargeStringToWrite());
 
-        teasafe::FileEntryDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
-                                                      teasafe::OpenDisposition::buildAppendDisposition());
+        teasafe::TeaSafeFileDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
+                                                                teasafe::OpenDisposition::buildAppendDisposition());
 
         std::streampos wrote = device.write(testString.c_str(), testString.length());
         ASSERT_EQUAL(wrote, testString.length(), "TeaSafeTest::testWriteToStream() bytesWrote");
@@ -487,8 +487,8 @@ class TeaSafeTest
         // open file and append to end of it
         std::string const &testString(createLargeStringToWrite());
         {
-            teasafe::FileEntryDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
-                                                                  teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFileDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
+                                                                    teasafe::OpenDisposition::buildAppendDisposition());
             (void)device.write(testString.c_str(), testString.length());
         }
 
@@ -496,9 +496,9 @@ class TeaSafeTest
         std::vector<long> blocksInUse;
         {
             teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
-            for(long i = 0; i < blocks; ++i) {
+            for (long i = 0; i < blocks; ++i) {
 
-                if(teasafe::detail::isBlockInUse(i, blocks, in)) {
+                if (teasafe::detail::isBlockInUse(i, blocks, in)) {
                     blocksInUse.push_back(i);
                 }
             }
@@ -517,15 +517,15 @@ class TeaSafeTest
         {
             bool blockCheckPassed = true;
             teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
-            for(int i = 1; i<blocks; ++i) {
+            for (int i = 1; i<blocks; ++i) {
 
-                if(teasafe::detail::isBlockInUse(i, blocks, in)) {
+                if (teasafe::detail::isBlockInUse(i, blocks, in)) {
                     blockCheckPassed = false;
                     break;
                 }
             }
             ASSERT_EQUAL(true, blockCheckPassed,
-                    "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() blocks dealloc'd");
+                         "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() blocks dealloc'd");
         }
 
         // now re-add content and check that allocated blocks are same as previous allocation
@@ -533,8 +533,8 @@ class TeaSafeTest
             (void)createTestFolder(testPath, blocks);
         }
         {
-            teasafe::FileEntryDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
-                                                                  teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFileDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
+                                                                    teasafe::OpenDisposition::buildAppendDisposition());
             (void)device.write(testString.c_str(), testString.length());
         }
 
@@ -542,9 +542,9 @@ class TeaSafeTest
         std::vector<long> blocksInUseB;
         {
             teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
-            for(long i = 0; i < blocks; ++i) {
+            for (long i = 0; i < blocks; ++i) {
 
-                if(teasafe::detail::isBlockInUse(i, blocks, in)) {
+                if (teasafe::detail::isBlockInUse(i, blocks, in)) {
                     blocksInUseB.push_back(i);
                 }
             }
@@ -553,20 +553,20 @@ class TeaSafeTest
         //std::cout<<blocksInUse.size()<<"\t"<<blocksInUseB.size()<<std::endl;
 
         /* Known bug. See https://github.com/benhj/teasafe/issues/9
-        ASSERT_EQUAL(blocksInUse.size(), blocksInUseB.size(),
-                "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() blocks in use sizes");
+           ASSERT_EQUAL(blocksInUse.size(), blocksInUseB.size(),
+           "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() blocks in use sizes");
         */
 
         bool sameBlocks = true;
-        for(int i = 0;i < blocksInUse.size(); ++i) {
-            if(blocksInUse[i] != blocksInUseB[i]) {
+        for (int i = 0; i < blocksInUse.size(); ++i) {
+            if (blocksInUse[i] != blocksInUseB[i]) {
                 sameBlocks = false;
                 break;
             }
         }
 
         ASSERT_EQUAL(true, sameBlocks,
-                        "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() same blocks");
+                     "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() same blocks");
 
     }
 };

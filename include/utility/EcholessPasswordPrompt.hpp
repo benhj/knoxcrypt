@@ -12,7 +12,8 @@
 namespace teasafe
 {
 
-    namespace utility {
+    namespace utility
+    {
 
         /**
          * @brief retrieves an echoless password from the user

@@ -23,24 +23,24 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/FileEntryDevice.hpp"
+#include "teasafe/TeaSafeFileDevice.hpp"
 
 namespace teasafe
 {
 
-    FileEntryDevice::FileEntryDevice(TeaSafeFile const &entry)
+    TeaSafeFileDevice::TeaSafeFileDevice(TeaSafeFile const &entry)
         : m_entry(entry)
     {
     }
 
     std::streamsize
-    FileEntryDevice::read(char* s, std::streamsize n)
+    TeaSafeFileDevice::read(char* s, std::streamsize n)
     {
         return m_entry.read(s, n);
     }
 
     std::streamsize
-    FileEntryDevice::write(const char* s, std::streamsize n)
+    TeaSafeFileDevice::write(const char* s, std::streamsize n)
     {
         std::streamsize wrote = m_entry.write(s, n);
         m_entry.flush();
@@ -48,7 +48,7 @@ namespace teasafe
     }
 
     std::streampos
-    FileEntryDevice::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
+    TeaSafeFileDevice::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
     {
         return m_entry.seek(off, way);
     }

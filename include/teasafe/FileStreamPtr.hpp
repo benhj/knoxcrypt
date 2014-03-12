@@ -26,7 +26,7 @@
 #ifndef TeaSafe_FILE_STREAM_HPP__
 #define TeaSafe_FILE_STREAM_HPP__
 
-#include "teasafe/FileEntryDevice.hpp"
+#include "teasafe/TeaSafeFileDevice.hpp"
 
 #include <boost/iostreams/stream.hpp>
 
@@ -35,7 +35,7 @@
 
 namespace teasafe
 {
-    typedef boost::iostreams::stream<FileEntryDevice> FileStream;
+    typedef boost::iostreams::stream<TeaSafeFileDevice> FileStream;
 
     // shared_ptr until I can get c++11 supported properly at
     // which point I'll switch to unique_ptr

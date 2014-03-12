@@ -266,7 +266,7 @@ namespace teasafe
         parentEntry->removeTeaSafeFolder(boost::filesystem::path(thePath).filename().string());
     }
 
-    FileEntryDevice
+    TeaSafeFileDevice
     TeaSafe::openFile(std::string const &path, OpenDisposition const &openMode)
     {
         TeaSafeFolder rootFolder(m_io, m_io->rootBlock, "root");
@@ -290,7 +290,7 @@ namespace teasafe
 
         TeaSafeFile fe = parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(), openMode);
 
-        return FileEntryDevice(fe);
+        return TeaSafeFileDevice(fe);
     }
 
     void

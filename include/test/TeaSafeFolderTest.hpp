@@ -1,26 +1,26 @@
 /*
-Copyright (c) <2013-2014>, <BenHJ>
-All rights reserved.
+  Copyright (c) <2013-2014>, <BenHJ>
+  All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+  1. Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "teasafe/TeaSafeImageStream.hpp"
@@ -158,24 +158,24 @@ class TeaSafeFolderTest
     }
 
     /* Commented out, since block size dependent
-    void testAddEntryBlockIndexRetrieval()
-    {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-        teasafe::TeaSafeFolder folder = createTestFolder(testPath, blocks);
+       void testAddEntryBlockIndexRetrieval()
+       {
+       long const blocks = 2048;
+       boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+       teasafe::TeaSafeFolder folder = createTestFolder(testPath, blocks);
 
-        uint64_t b1 = folder.getEntryInfo(0).firstFileBlock();
-        uint64_t b2 = folder.getEntryInfo(1).firstFileBlock();
-        uint64_t b3 = folder.getEntryInfo(2).firstFileBlock();
-        uint64_t b4 = folder.getEntryInfo(3).firstFileBlock();
+       uint64_t b1 = folder.getEntryInfo(0).firstFileBlock();
+       uint64_t b2 = folder.getEntryInfo(1).firstFileBlock();
+       uint64_t b3 = folder.getEntryInfo(2).firstFileBlock();
+       uint64_t b4 = folder.getEntryInfo(3).firstFileBlock();
 
-        // !!!NOTE: These tests are contingent on the file block size
-        // being 512 bytes and will not work on other (e.g. 4096) byte block sizes
-        ASSERT_EQUAL(b1, 1, "testAddEntryBlockIndexRetrieval A");
-        ASSERT_EQUAL(b2, 2, "testAddEntryBlockIndexRetrieval B");
-        ASSERT_EQUAL(b3, 4, "testAddEntryBlockIndexRetrieval C");
-        ASSERT_EQUAL(b4, 5, "testAddEntryBlockIndexRetrieval D");
-    }*/
+       // !!!NOTE: These tests are contingent on the file block size
+       // being 512 bytes and will not work on other (e.g. 4096) byte block sizes
+       ASSERT_EQUAL(b1, 1, "testAddEntryBlockIndexRetrieval A");
+       ASSERT_EQUAL(b2, 2, "testAddEntryBlockIndexRetrieval B");
+       ASSERT_EQUAL(b3, 4, "testAddEntryBlockIndexRetrieval C");
+       ASSERT_EQUAL(b4, 5, "testAddEntryBlockIndexRetrieval D");
+       }*/
 
     void testEntryRetrievalAndAppendSmallData()
     {

@@ -144,9 +144,9 @@ namespace teasafe { namespace cipher
         {
             // big cipher buffer has been initialized
 
-            if(g_init) {
+            if (g_init) {
                 // prefer to use cipher buffer
-                if((startPosition + length) < CIPHER_BUFFER_SIZE) {
+                if ((startPosition + length) < CIPHER_BUFFER_SIZE) {
                     for (long j = 0; j < length; ++j) {
                         out[j] = in[j] ^ g_bigCipherBuffer[j + startPosition];
                     }

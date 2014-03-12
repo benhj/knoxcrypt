@@ -27,7 +27,7 @@
 #define TEASAFE_TEASAFE_HPP__
 
 #include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/FileEntryDevice.hpp"
+#include "teasafe/TeaSafeFileDevice.hpp"
 #include "teasafe/TeaSafeFolder.hpp"
 #include "teasafe/FolderRemovalType.hpp"
 #include "teasafe/OpenDisposition.hpp"
@@ -127,7 +127,7 @@ namespace teasafe
          * @return a seekable device to the opened file
          * @throw  TeaSaFeException not found if can't be found
          */
-        FileEntryDevice openFile(std::string const &path, OpenDisposition const &openMode);
+        TeaSafeFileDevice openFile(std::string const &path, OpenDisposition const &openMode);
 
         /**
          * @brief chops off end a file at given offset

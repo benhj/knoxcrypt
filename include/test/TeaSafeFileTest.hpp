@@ -1,26 +1,26 @@
 /*
-Copyright (c) <2013-2014>, <BenHJ>
-All rights reserved.
+  Copyright (c) <2013-2014>, <BenHJ>
+  All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+  1. Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "teasafe/TeaSafeImageStream.hpp"
@@ -95,7 +95,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "testFileSizeReportedCorrectly B");
         }
     }
@@ -118,13 +118,13 @@ class TeaSafeFileTest
             teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             ASSERT_EQUAL(true, teasafe::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
             teasafe::FileBlock block(io, startBlock,
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                     teasafe::OpenDisposition::buildReadOnlyDisposition());
             uint64_t nextBlock = block.getNextIndex();
             while (nextBlock != startBlock) {
                 startBlock = nextBlock;
                 ASSERT_EQUAL(true, teasafe::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
                 teasafe::FileBlock block(io, startBlock,
-                                     teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                         teasafe::OpenDisposition::buildReadOnlyDisposition());
                 nextBlock = block.getNextIndex();
             }
         }
@@ -153,12 +153,12 @@ class TeaSafeFileTest
             blockIndices.push_back(startBlock);
 
             teasafe::FileBlock block(io, startBlock,
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                     teasafe::OpenDisposition::buildReadOnlyDisposition());
             uint64_t nextBlock = block.getNextIndex();
             while (nextBlock != startBlock) {
                 startBlock = nextBlock;
                 teasafe::FileBlock block(io, startBlock,
-                                     teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                         teasafe::OpenDisposition::buildReadOnlyDisposition());
                 blockIndices.push_back(startBlock);
                 nextBlock = block.getNextIndex();
             }
@@ -203,7 +203,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
-                                 teasafe::OpenDisposition::buildWriteOnlyDisposition());
+                                       teasafe::OpenDisposition::buildWriteOnlyDisposition());
             std::vector<uint8_t> vec(entry.fileSize());
 
             bool pass = false;
@@ -238,7 +238,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
 
@@ -274,7 +274,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(createLargeStringToWrite());
             std::vector<char> vec;
             vec.resize(entry.fileSize());
@@ -304,7 +304,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildAppendDisposition());
+                                       teasafe::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
@@ -313,7 +313,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", 1,
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(createLargeStringToWrite());
             expected.append(appendString);
             std::vector<char> vec;
@@ -344,7 +344,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildOverwriteDisposition());
+                                       teasafe::OpenDisposition::buildOverwriteDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -354,7 +354,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", 1,
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length());
             entry.read((char*)&readBackIn.front(), testData.length());
@@ -383,7 +383,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildOverwriteDisposition());
+                                       teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - testData.length());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -394,7 +394,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", 1,
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length());
             entry.seek(BIG_SIZE - testData.length());
@@ -426,7 +426,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildOverwriteDisposition());
+                                       teasafe::OpenDisposition::buildOverwriteDisposition());
             assert(entry.seek(BIG_SIZE - testData.length()) != -1);
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -439,7 +439,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", 1,
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length() + testDataB.length());
             assert(entry.seek(BIG_SIZE - testData.length()) != -1);
@@ -469,7 +469,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildOverwriteDisposition());
+                                       teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - 50);
             std::string testData(createLargeStringToWrite("abcdefghijklm"));
             entry.write(testData.c_str(), testData.length());
@@ -479,7 +479,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", 1,
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(BIG_SIZE + BIG_SIZE - 50);
             entry.read((char*)&readBackIn.front(), BIG_SIZE + BIG_SIZE - 50);
@@ -512,7 +512,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildAppendDisposition());
+                                       teasafe::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
@@ -521,7 +521,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(testData.append(appendString));
             std::vector<char> vec;
             vec.resize(entry.fileSize());
@@ -551,7 +551,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::string expected("goodbye!");
             std::vector<char> vec;
             vec.resize(expected.size());
@@ -582,7 +582,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildAppendDisposition());
+                                       teasafe::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
@@ -590,7 +590,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildAppendDisposition());
+                                       teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<char> vec;
             vec.resize(appendString.length());
             entry.seek(BIG_SIZE);
@@ -621,7 +621,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildOverwriteDisposition());
+                                       teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(off, std::ios_base::end);
             entry.write(testData.c_str(), testData.length());
             entry.flush();
@@ -629,7 +629,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
@@ -661,7 +661,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildOverwriteDisposition());
+                                       teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(initialSeek);
             entry.seek(off, std::ios_base::cur);
             entry.write(testData.c_str(), testData.length());
@@ -671,7 +671,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
@@ -703,7 +703,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildOverwriteDisposition());
+                                       teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(initialSeek);
             entry.seek(off, std::ios_base::cur);
             entry.write(testData.c_str(), testData.length());
@@ -713,7 +713,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
@@ -743,7 +743,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildOverwriteDisposition());
+                                       teasafe::OpenDisposition::buildOverwriteDisposition());
             entry.seek(seekPos);
             entry.write(testData.c_str(), testData.length());
             entry.flush();
@@ -752,7 +752,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
@@ -781,7 +781,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "test.txt", 1,
-                                 teasafe::OpenDisposition::buildAppendDisposition());
+                                       teasafe::OpenDisposition::buildAppendDisposition());
             entry.write(testData.c_str(), testData.length());
             entry.flush();
         }
@@ -789,7 +789,7 @@ class TeaSafeFileTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFile entry(io, "entry", uint64_t(1),
-                                 teasafe::OpenDisposition::buildReadOnlyDisposition());
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
 
             ASSERT_EQUAL(entry.fileSize(), A_STRING_SIZE + testData.length(), "TeaSafeFileTest::testEdgeCaseEndOfBlockAppend() filesize");
             std::vector<uint8_t> vec;

@@ -23,8 +23,8 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_FILE_ENTRY_DEVICE_HPP__
-#define TeaSafe_FILE_ENTRY_DEVICE_HPP__
+#ifndef TeaSafe_TEASAFE_FILE_DEVICE_HPP__
+#define TeaSafe_TEASAFE_FILE_DEVICE_HPP__
 
 #include <teasafe/TeaSafeFile.hpp>
 
@@ -34,7 +34,7 @@
 
 namespace teasafe
 {
-    class FileEntryDevice
+    class TeaSafeFileDevice
     {
 
       public:
@@ -42,17 +42,17 @@ namespace teasafe
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
 
-        explicit FileEntryDevice(TeaSafeFile const &entry);
+        explicit TeaSafeFileDevice(TeaSafeFile const &entry);
 
         std::streamsize read(char* s, std::streamsize n);
         std::streamsize write(const char* s, std::streamsize n);
         std::streampos seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
 
       private:
-        FileEntryDevice();
+        TeaSafeFileDevice();
         TeaSafeFile m_entry;
     };
 
 }
 
-#endif // TeaSafe_FILE_ENTRY_DEVICE_HPP__
+#endif // TeaSafe_TEASAFE_FILE_DEVICE_HPP__

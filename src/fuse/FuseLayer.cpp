@@ -44,9 +44,11 @@
 
 #define TeaSafe_DATA ((teasafe::TeaSafe*) fuse_get_context()->private_data)
 
-namespace fuselayer {
+namespace fuselayer
+{
 
-    namespace detail {
+    namespace detail
+    {
 
         int exceptionDispatch(teasafe::TeaSafeException const &ex)
         {
@@ -64,7 +66,7 @@ namespace fuselayer {
 
     class FuseLayer
     {
-    public:
+      public:
         static
         int
         teasafe_getattr(const char *path, struct stat *stbuf)
@@ -195,7 +197,7 @@ namespace fuselayer {
         int
         teasafe_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
         {
-            teasafe::FileEntryDevice device = TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
+            teasafe::TeaSafeFileDevice device = TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
             device.seek(offset, std::ios_base::beg);
             return device.read(buf, size);
         }
@@ -203,7 +205,7 @@ namespace fuselayer {
         static
         int
         teasafe_write(const char *path, const char *buf, size_t size, off_t offset,
-                                 struct fuse_file_info *fi)
+                      struct fuse_file_info *fi)
         {
 
             teasafe::ReadOrWriteOrBoth openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
@@ -227,7 +229,7 @@ namespace fuselayer {
 
             teasafe::OpenDisposition od(openMode, appendType, teasafe::CreateOrDontCreate::Create, truncateType);
 
-            teasafe::FileEntryDevice device = TeaSafe_DATA->openFile(path, od);
+            teasafe::TeaSafeFileDevice device = TeaSafe_DATA->openFile(path, od);
             device.seek(offset, std::ios_base::beg);
             return device.write(buf, size);
         }
@@ -278,7 +280,7 @@ namespace fuselayer {
         static
         int
         teasafe_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-                                   off_t offset, struct fuse_file_info *fi)
+                        off_t offset, struct fuse_file_info *fi)
         {
             try {
                 teasafe::TeaSafeFolder folder = TeaSafe_DATA->getTeaSafeFolder(path);
@@ -322,24 +324,24 @@ namespace fuselayer {
         }
 
         // not actually used, but pasted here to shut-up some warning messages
-        #ifndef __linux__
+#ifndef __linux__
         static
         int
         teasafe_setxattr(const char *path,
-                                    const char *name,
-                                    const char *value,
-                                    size_t size,
-                                    int flags,
-                                    uint32_t)
-        #else
-        static
-        int
-        teasafe_setxattr(const char *path,
-                                    const char *name,
-                                    const char *value,
-                                    size_t size,
-                                    int flags)
-        #endif
+                         const char *name,
+                         const char *value,
+                         size_t size,
+                         int flags,
+                         uint32_t)
+#else
+            static
+            int
+            teasafe_setxattr(const char *path,
+                             const char *name,
+                             const char *value,
+                             size_t size,
+                             int flags)
+#endif
         {
             return 0;
         }
