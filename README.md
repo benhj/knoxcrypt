@@ -1,9 +1,23 @@
 TeaSafe: A user-space encrypted filesystem
 ------------------------------------------
 
+###### What is it?
+
+- an encrypted filesystem
+- uses the FUSE headers and libraries 
+- more like Truecrypt than EncFS
+- uses the XTEA cipher for encryption
+- employs a very simple and custom developed filesystem 
+- can create and utilize a 'hidden' sub-volume
+- might not be secure
+- probably buggy
+- in need of testers
+
+###### Slightly more wordy spiel..
+
 The ongoing aim of TeaSafe is to learn about 
 filesystem implementation -- the whole thing is based on ideas gleaned from various wiki 
-articles about previously implemented filesystems (most prevalently HFS) and chats with friends.
+articles about previously implemented filesystems (most prevalently HFS).
 The filesystem is block-based, existing as a single 'disk image'
 that can be mounted to a user-specified mount-point. In addition, the disk image 
 is transformed using a variant of the XTEA algorithm to provide a measure of security.
