@@ -1,7 +1,7 @@
 TeaSafe: A user-space encrypted filesystem
 ------------------------------------------
 
-###### What is it?
+##### What is it?
 
 - an encrypted filesystem
 - uses the FUSE headers and libraries 
@@ -13,7 +13,7 @@ TeaSafe: A user-space encrypted filesystem
 - probably buggy
 - in need of testers
 
-###### Slightly more wordy spiel..
+##### Slightly more wordy spiel..
 
 The ongoing aim of TeaSafe is to learn about 
 filesystem implementation -- the whole thing is based on ideas gleaned from various wiki 
