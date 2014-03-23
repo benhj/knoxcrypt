@@ -379,7 +379,7 @@ namespace teasafe
             OptionalEntryInfo entryInfo = folderOfInterest.getEntryInfo(it->string());
 
             if (!entryInfo) {
-                return false;
+                return OptionalTeaSafeFolder();
             }
 
             pathBuilder /= entryInfo->filename();
