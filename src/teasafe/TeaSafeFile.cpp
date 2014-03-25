@@ -559,13 +559,15 @@ namespace teasafe
 
     void TeaSafeFile::setBlockNextIndices()
     {
-        // rather than set the index after each file block which *might*
+        // rather than set the index and size after each file block write which *might*
         // slow things down, wait until end. Will hopefully make writing more
         // efficient
         std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
         for (; it != m_fileBlocks.end() - 1; ++it) {
             it->setNextIndex((it + 1)->getIndex());
+            //it->setSizeOnFlush();
         }
+        //it->setSizeOnFlush();
     }
 
     void

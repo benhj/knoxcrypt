@@ -141,6 +141,8 @@ namespace teasafe
          */
         void setSize(std::ios_base::streamoff size) const;
 
+        void setSizeOnFlush() const;
+
         /**
          * @brief sets the next index of 'this'
          * @param nextIndex the next index to set this to
@@ -179,6 +181,9 @@ namespace teasafe
         mutable boost::iostreams::stream_offset m_seekPos;
         mutable boost::iostreams::stream_offset m_positionBeforeWrite;
         OpenDisposition m_openDisposition;
+
+        // an optimization so that size can be written at end
+        mutable uint64_t m_bytesToWriteOnFlush;
 
     };
 

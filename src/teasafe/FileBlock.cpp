@@ -43,6 +43,7 @@ namespace teasafe
         , m_positionBeforeWrite(0)
         , m_initialBytesWritten(0)
         , m_openDisposition(openDisposition)
+        , m_bytesToWriteOnFlush(0)
     {
         // set m_offset
         m_offset = detail::getOffsetOfFileBlock(m_index, io->blocks);
@@ -55,13 +56,13 @@ namespace teasafe
         , m_index(index)
         , m_bytesWritten(0)
         , m_next(0)
-        , m_offset(0)
+        , m_offset(detail::getOffsetOfFileBlock(index, io->blocks))
         , m_seekPos(0)
         , m_openDisposition(openDisposition)
+        , m_bytesToWriteOnFlush(0)
     {
         // set m_offset
         TeaSafeImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
-        m_offset = detail::getOffsetOfFileBlock(m_index, io->blocks);
         (void)stream.seekg(m_offset);
 
         // read m_bytesWritten
@@ -137,14 +138,20 @@ namespace teasafe
             // to a position past its start as indicated by m_extraOffset
             m_bytesWritten += uint32_t(n);
 
-            // update m_bytesWritten
-            doSetSize(stream, m_bytesWritten);
+            // optimization. This number will be written on flush to record number bytes written
+            //m_bytesToWriteOnFlush = m_bytesWritten;
 
+            doSetSize(stream, m_bytesWritten);
         }
         // if in overwrite mode, we still need to check if writing goes above
         // the initial bytes written and update the size accordingly
         else if (m_seekPos + n > m_initialBytesWritten) {
+
             m_bytesWritten += uint32_t(n);
+
+            // optimization. This number will be written on flush to record number bytes written
+            //m_bytesToWriteOnFlush = m_seekPos + n;
+
             // update m_bytesWritten
             doSetSize(stream, m_seekPos + n);
         }
@@ -188,6 +195,15 @@ namespace teasafe
         TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
         detail::updateVolumeBitmapWithOne(stream, m_index, m_io->blocks);
         m_io->freeBlocks--;
+        stream.close();
+    }
+
+    void
+    FileBlock::setSizeOnFlush() const
+    {
+        TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
+        doSetSize(stream, m_seekPos);
+        stream.flush();
         stream.close();
     }
 
