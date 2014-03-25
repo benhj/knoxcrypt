@@ -34,22 +34,74 @@
 namespace teasafe
 {
 
+    namespace helper {
+
+        /**
+         * @brief converts at std::ios open mode to a c-style fopen mode
+         * @note  only considers those modes that are actually used (haven't bothered with trunc)
+         * @param mode the open mode
+         * @return the fopen mode string
+         */
+        inline std::string getModeString(std::ios::openmode mode)
+        {
+            std::string modeString("");
+            if((mode & std::ios::in) == std::ios::in) {
+                if((mode & std::ios::out) == std::ios::out) {
+                    if ((mode & std::ios::app) == std::ios::app) {
+
+                        //
+                        // read, write appending on end. Make new file
+                        // if it doesn't already exist
+                        //
+                        modeString.append("ab+");
+                        return modeString;
+                    } else {
+
+                        //
+                        // Read, write. Will fail if file does not already exist
+                        //
+                        modeString.append("rb+");
+                        return modeString;
+                    }
+                }
+                //
+                // Read-only
+                //
+                modeString.append("rb");
+                return modeString;
+            }
+            if((mode & std::ios::out) == std::ios::out) {
+                //
+                // Write-only
+                //
+                modeString.append("wb");
+                return modeString;
+            }
+
+        }
+
+    }
+
+
     TeaSafeImageStream::TeaSafeImageStream(SharedCoreIO const &io, std::ios::openmode mode)
-        : m_stream(io->path.c_str(), mode)
+        : m_stream(fopen(io->path.c_str(), helper::getModeString(mode).c_str()))
         , m_byteTransformer(boost::make_shared<cipher::XTEAByteTransformer>(io->password))
-        , m_gpos(0)
-        , m_ppos(0)
+        , m_pos(0)
+    {
+
+    }
+
+    TeaSafeImageStream::~TeaSafeImageStream()
     {
     }
 
     TeaSafeImageStream&
     TeaSafeImageStream::read(char * const buf, std::streamsize const n)
     {
-        std::ios_base::streamoff start = m_gpos;
+        std::ios_base::streamoff start = m_pos;
         std::vector<char> in;
         in.resize(n);
-        (void)m_stream.read(&in.front(), n);
-        m_gpos += n;
+        m_pos += fread(&in.front(), sizeof(char), n, m_stream);
         m_byteTransformer->transform(&in.front(), buf, start, n);
         return *this;
     }
@@ -59,64 +111,76 @@ namespace teasafe
     {
         std::vector<char> out;
         out.resize(n);
-        std::ios_base::streamoff start = m_ppos;
+        std::ios_base::streamoff start = m_pos;
         m_byteTransformer->transform((char*)buf, &out.front(), start, n);
-        (void)m_stream.write(&out.front(), n);
-        m_ppos += n;
+        m_pos += fwrite(&out.front(), sizeof(char), n, m_stream);
         return *this;
     }
 
     TeaSafeImageStream&
     TeaSafeImageStream::seekg(std::streampos pos)
     {
-        (void)m_stream.seekg(pos);
-        m_gpos = pos;
+        fseek(m_stream, pos, SEEK_SET);
+        m_pos = pos;
         return *this;
     }
     TeaSafeImageStream&
     TeaSafeImageStream::seekg(std::streamoff off, std::ios_base::seekdir way)
     {
-        (void)m_stream.seekg(off, way);
-        m_gpos = m_stream.tellg();
+        if(way == std::ios_base::beg) {
+            fseek(m_stream, off, SEEK_SET);
+        } else if(way == std::ios_base::cur) {
+            fseek(m_stream, off, SEEK_CUR);
+        } else {
+            fseek(m_stream, off, SEEK_END);
+        }
+        m_pos = ftell(m_stream);
+        std::cout<<m_pos<<"\t"<<off<<std::endl;
         return *this;
     }
 
     TeaSafeImageStream&
     TeaSafeImageStream::seekp(std::streampos pos)
     {
-        (void)m_stream.seekp(pos);
-        m_ppos = pos;
+        fseek(m_stream, pos, SEEK_SET);
+        m_pos = pos;
         return *this;
     }
     TeaSafeImageStream&
     TeaSafeImageStream::seekp(std::streamoff off, std::ios_base::seekdir way)
     {
-        (void)m_stream.seekp(off, way);
-        m_ppos = m_stream.tellp();
+        if(way == std::ios_base::beg) {
+            fseek(m_stream, off, SEEK_SET);
+        } else if(way == std::ios_base::cur) {
+            fseek(m_stream, off, SEEK_CUR);
+        } else {
+            fseek(m_stream, off, SEEK_END);
+        }
+        m_pos = ftell(m_stream);
         return *this;
     }
 
     std::streampos
     TeaSafeImageStream::tellg()
     {
-        return m_gpos;
+        return m_pos;
     }
     std::streampos
     TeaSafeImageStream::tellp()
     {
-        return m_ppos;
+        return m_pos;
     }
 
     void
     TeaSafeImageStream::close()
     {
-        m_stream.close();
+        fclose(m_stream);
     }
 
     void
     TeaSafeImageStream::flush()
     {
-        m_stream.flush();
+        fflush(m_stream);
     }
 
 }

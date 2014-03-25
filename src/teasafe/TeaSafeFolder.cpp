@@ -496,6 +496,9 @@ namespace teasafe
         // loop over all entries and try and find a previously deleted one
         // If its deleted, the first bit of the entry metadata will be unset
 
+        // Note possible way of optimizing this? Store in cache available entries
+        // to overwrite?
+
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
             std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
             if (!doEntryMetaDataIsEnabled(metaData)) {

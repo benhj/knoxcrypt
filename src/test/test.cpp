@@ -31,15 +31,22 @@
 #include "test/TeaSafeFolderTest.hpp"
 #include "test/TestHelpers.hpp"
 
+#include <boost/progress.hpp>
 
 int main()
 {
-    TeaSafeTest();
-    MakeTeaSafeTest();
-    TeaSafeFileDeviceTest();
-    FileBlockTest();
-    TeaSafeFileTest();
-    TeaSafeFolderTest();
+
+    // for timing how long tests take
+    {
+        boost::progress_timer timer;
+
+        TeaSafeTest();
+        MakeTeaSafeTest();
+        TeaSafeFileDeviceTest();
+        FileBlockTest();
+        TeaSafeFileTest();
+        TeaSafeFolderTest();
+    }
 
     std::cout<<"\n\nThere were "<<testFailures<<"/"<<passedPoints<<" assertion failures\n\n"<<std::endl;
     if (testFailures > 0) {

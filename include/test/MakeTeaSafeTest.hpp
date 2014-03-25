@@ -75,7 +75,6 @@ class MakeTeaSafeTest
 
         teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::binary);
         teasafe::detail::OptionalBlock p = teasafe::detail::getNextAvailableBlock(is);
-        assert(*p == 1);
         ASSERT_EQUAL(*p, 1, "firstBlockIsReportedAsBeingFree");
         is.close();
     }

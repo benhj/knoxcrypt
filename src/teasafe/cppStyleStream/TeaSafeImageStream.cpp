@@ -37,19 +37,18 @@ namespace teasafe
     TeaSafeImageStream::TeaSafeImageStream(SharedCoreIO const &io, std::ios::openmode mode)
         : m_stream(io->path.c_str(), mode)
         , m_byteTransformer(boost::make_shared<cipher::XTEAByteTransformer>(io->password))
-        , m_gpos(0)
-        , m_ppos(0)
+        , m_pos(0)
     {
     }
 
     TeaSafeImageStream&
     TeaSafeImageStream::read(char * const buf, std::streamsize const n)
     {
-        std::ios_base::streamoff start = m_gpos;
+        std::ios_base::streamoff start = m_pos;//m_stream.tellg();
         std::vector<char> in;
         in.resize(n);
         (void)m_stream.read(&in.front(), n);
-        m_gpos += n;
+        m_pos += n;
         m_byteTransformer->transform(&in.front(), buf, start, n);
         return *this;
     }
@@ -59,10 +58,10 @@ namespace teasafe
     {
         std::vector<char> out;
         out.resize(n);
-        std::ios_base::streamoff start = m_ppos;
+        std::ios_base::streamoff start = m_pos;//m_stream.tellp();
         m_byteTransformer->transform((char*)buf, &out.front(), start, n);
         (void)m_stream.write(&out.front(), n);
-        m_ppos += n;
+        m_pos += n;
         return *this;
     }
 
@@ -70,14 +69,14 @@ namespace teasafe
     TeaSafeImageStream::seekg(std::streampos pos)
     {
         (void)m_stream.seekg(pos);
-        m_gpos = pos;
+        m_pos = pos;
         return *this;
     }
     TeaSafeImageStream&
     TeaSafeImageStream::seekg(std::streamoff off, std::ios_base::seekdir way)
     {
         (void)m_stream.seekg(off, way);
-        m_gpos = m_stream.tellg();
+        m_pos = m_stream.tellg();
         return *this;
     }
 
@@ -85,26 +84,26 @@ namespace teasafe
     TeaSafeImageStream::seekp(std::streampos pos)
     {
         (void)m_stream.seekp(pos);
-        m_ppos = pos;
+        m_pos = pos;
         return *this;
     }
     TeaSafeImageStream&
     TeaSafeImageStream::seekp(std::streamoff off, std::ios_base::seekdir way)
     {
         (void)m_stream.seekp(off, way);
-        m_ppos = m_stream.tellp();
+        m_pos = m_stream.tellp();
         return *this;
     }
 
     std::streampos
     TeaSafeImageStream::tellg()
     {
-        return m_gpos;
+        return m_pos;//m_stream.tellg();
     }
     std::streampos
     TeaSafeImageStream::tellp()
     {
-        return m_ppos;
+        return m_pos;//m_stream.tellp();
     }
 
     void

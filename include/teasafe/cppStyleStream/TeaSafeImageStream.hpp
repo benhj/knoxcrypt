@@ -64,8 +64,7 @@ namespace teasafe
         TeaSafeImageStream();
         std::fstream m_stream;
         ByteTransformerPtr m_byteTransformer;
-        std::streampos m_gpos;
-        std::streampos m_ppos;
+        std::streampos m_pos;
     };
 
 }

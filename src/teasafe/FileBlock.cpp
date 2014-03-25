@@ -238,6 +238,7 @@ namespace teasafe
         teasafe::TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
         detail::updateVolumeBitmapWithOne(stream, m_index, m_io->blocks, false);
         doSetNextIndex(stream, m_index);
+        doSetSize(stream, 0);
         stream.close();
     }
 }
