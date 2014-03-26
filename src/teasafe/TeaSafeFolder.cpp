@@ -406,10 +406,10 @@ namespace teasafe
         std::string const entryName = doGetEntryName(metaData);
 
         // experimental optimization; insert info in to cache
-        /*EntryInfoCacheMap::const_iterator it = m_entryInfoCacheMap.find(entryName);
+        EntryInfoCacheMap::const_iterator it = m_entryInfoCacheMap.find(entryName);
         if(it != m_entryInfoCacheMap.end()) {
             return it->second;
-        }*/
+        }
 
         EntryType const entryType = doGetTypeForEntry(metaData);
         uint64_t fileSize = 0;
