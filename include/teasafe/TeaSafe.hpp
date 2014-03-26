@@ -152,15 +152,15 @@ namespace teasafe
 
         TeaSafe(); // not required
 
-        void throwIfAlreadyExists(std::string const &path, TeaSafeFolder &fe) const;
+        void throwIfAlreadyExists(std::string const &path) const;
 
-        bool doFileExists(std::string const &path, TeaSafeFolder &fe) const;
+        bool doFileExists(std::string const &path) const;
 
-        bool doFolderExists(std::string const &path, TeaSafeFolder &fe) const;
+        bool doFolderExists(std::string const &path) const;
 
-        OptionalTeaSafeFolder doGetParentTeaSafeFolder(std::string const &path, TeaSafeFolder &fe) const;
+        OptionalTeaSafeFolder doGetParentTeaSafeFolder(std::string const &path) const;
 
-        bool doExistanceCheck(std::string const &path, EntryType const &entryType, TeaSafeFolder &fe) const;
+        bool doExistanceCheck(std::string const &path, EntryType const &entryType) const;
     };
 }
 

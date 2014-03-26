@@ -40,7 +40,6 @@ namespace teasafe
     TeaSafeFolder
     TeaSafe::getTeaSafeFolder(std::string const &path)
     {
-        TeaSafeFolder rootFolder(m_io, m_io->rootBlock, "root");
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -50,7 +49,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath, m_rootFolder);
+        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             return m_rootFolder;
         }
@@ -79,7 +78,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath, m_rootFolder);
+        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -97,13 +96,13 @@ namespace teasafe
     bool
     TeaSafe::fileExists(std::string const &path) const
     {
-        return doFileExists(path, m_rootFolder);
+        return doFileExists(path);
     }
 
     bool
     TeaSafe::folderExists(std::string const &path)
     {
-        return doFolderExists(path, m_rootFolder);
+        return doFolderExists(path);
     }
 
     void
@@ -116,13 +115,13 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::IllegalFilename);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath, m_rootFolder);
+        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
         // throw if already exists
-        throwIfAlreadyExists(path, m_rootFolder);
+        throwIfAlreadyExists(path);
 
         parentEntry->addTeaSafeFile(boost::filesystem::path(thePath).filename().string());
     }
@@ -137,13 +136,13 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath, m_rootFolder);
+        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
         // throw if already exists
-        throwIfAlreadyExists(path, m_rootFolder);
+        throwIfAlreadyExists(path);
 
         parentEntry->addTeaSafeFolder(boost::filesystem::path(thePath).filename().string());
     }
@@ -165,19 +164,19 @@ namespace teasafe
         }
 
         // throw if source parent doesn't exist
-        OptionalTeaSafeFolder parentSrc = doGetParentTeaSafeFolder(srcPath, m_rootFolder);
+        OptionalTeaSafeFolder parentSrc = doGetParentTeaSafeFolder(srcPath);
         if (!parentSrc) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
         // throw if destination parent doesn't exist
-        OptionalTeaSafeFolder parentDst = doGetParentTeaSafeFolder(dstPath, m_rootFolder);
+        OptionalTeaSafeFolder parentDst = doGetParentTeaSafeFolder(dstPath);
         if (!parentSrc) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
         // throw if destination already exists
-        throwIfAlreadyExists(dstPath, m_rootFolder);
+        throwIfAlreadyExists(dstPath);
 
         // throw if source doesn't exist
         std::string const filename = boost::filesystem::path(srcPath).filename().string();
@@ -207,7 +206,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath, m_rootFolder);
+        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -235,7 +234,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath, m_rootFolder);
+        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -267,7 +266,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path, m_rootFolder);
+        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -288,7 +287,7 @@ namespace teasafe
     void
     TeaSafe::truncateFile(std::string const &path, std::ios_base::streamoff offset)
     {
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path, m_rootFolder);
+        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -326,44 +325,44 @@ namespace teasafe
     }
 
     void
-    TeaSafe::throwIfAlreadyExists(std::string const &path, TeaSafeFolder &fe) const
+    TeaSafe::throwIfAlreadyExists(std::string const &path) const
     {
         // throw if already exists
         boost::filesystem::path processedPath(path);
-        if (doFileExists(processedPath.string(), fe)) {
+        if (doFileExists(processedPath.string())) {
             throw TeaSafeException(TeaSafeError::AlreadyExists);
         }
-        if (doFolderExists(processedPath.string(), fe)) {
+        if (doFolderExists(processedPath.string())) {
             throw TeaSafeException(TeaSafeError::AlreadyExists);
         }
     }
 
     bool
-    TeaSafe::doFileExists(std::string const &path, TeaSafeFolder &fe) const
+    TeaSafe::doFileExists(std::string const &path) const
     {
-        return doExistanceCheck(path, EntryType::FileType, fe);
+        return doExistanceCheck(path, EntryType::FileType);
     }
 
     bool
-    TeaSafe::doFolderExists(std::string const &path, TeaSafeFolder &fe) const
+    TeaSafe::doFolderExists(std::string const &path) const
     {
-        return doExistanceCheck(path, EntryType::FolderType, fe);
+        return doExistanceCheck(path, EntryType::FolderType);
     }
 
     TeaSafe::OptionalTeaSafeFolder
-    TeaSafe::doGetParentTeaSafeFolder(std::string const &path, TeaSafeFolder &fe) const
+    TeaSafe::doGetParentTeaSafeFolder(std::string const &path) const
     {
         boost::filesystem::path pathToCheck(path);
 
         if (pathToCheck.parent_path().string() == "/") {
-            return OptionalTeaSafeFolder(fe);
+            return OptionalTeaSafeFolder(m_rootFolder);
         }
 
         pathToCheck = pathToCheck.relative_path().parent_path();
 
         // iterate over path parts extracting sub folders along the way
         boost::filesystem::path::iterator it = pathToCheck.begin();
-        TeaSafeFolder folderOfInterest = fe;
+        TeaSafeFolder folderOfInterest = m_rootFolder;
         boost::filesystem::path pathBuilder;
         for (; it != pathToCheck.end(); ++it) {
 
@@ -393,7 +392,7 @@ namespace teasafe
     }
 
     bool
-    TeaSafe::doExistanceCheck(std::string const &path, EntryType const &entryType, TeaSafeFolder &fe) const
+    TeaSafe::doExistanceCheck(std::string const &path, EntryType const &entryType) const
     {
         std::string thePath(path);
         char ch = *path.rbegin();
@@ -404,7 +403,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath, fe);
+        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             return false;
         }
