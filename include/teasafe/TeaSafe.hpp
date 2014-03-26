@@ -35,6 +35,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <map>
 #include <string>
@@ -156,6 +158,10 @@ namespace teasafe
         // them as they are built in map and prefer to query map in future
         typedef std::map<std::string, SharedTeaSafeFolder> FolderCache;
         mutable FolderCache m_folderCache;
+
+        typedef boost::mutex StateMutex;
+        typedef boost::lock_guard<StateMutex> StateLock;
+        mutable StateMutex m_stateMutex;
 
         TeaSafe(); // not required
 

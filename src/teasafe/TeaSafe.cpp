@@ -36,12 +36,14 @@ namespace teasafe
         : m_io(io)
         , m_rootFolder(io, io->rootBlock, "root")
         , m_folderCache()
+        , m_stateMutex()
     {
     }
 
     TeaSafeFolder
     TeaSafe::getTeaSafeFolder(std::string const &path)
     {
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -71,6 +73,7 @@ namespace teasafe
     EntryInfo
     TeaSafe::getInfo(std::string const &path)
     {
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -98,18 +101,21 @@ namespace teasafe
     bool
     TeaSafe::fileExists(std::string const &path) const
     {
+        StateLock lock(m_stateMutex);
         return doFileExists(path);
     }
 
     bool
     TeaSafe::folderExists(std::string const &path)
     {
+        StateLock lock(m_stateMutex);
         return doFolderExists(path);
     }
 
     void
     TeaSafe::addFile(std::string const &path)
     {
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // file entries with trailing slash should throw
@@ -131,6 +137,7 @@ namespace teasafe
     void
     TeaSafe::addFolder(std::string const &path) const
     {
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash
@@ -152,6 +159,7 @@ namespace teasafe
     void
     TeaSafe::renameEntry(std::string const &src, std::string const &dst)
     {
+        StateLock lock(m_stateMutex);
         std::string srcPath(src);
         char ch = *src.rbegin();
         // ignore trailing slash
@@ -199,6 +207,7 @@ namespace teasafe
     void
     TeaSafe::removeFile(std::string const &path)
     {
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -227,6 +236,7 @@ namespace teasafe
     void
     TeaSafe::removeFolder(std::string const &path, FolderRemovalType const &removalType)
     {
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -263,6 +273,7 @@ namespace teasafe
     TeaSafeFileDevice
     TeaSafe::openFile(std::string const &path, OpenDisposition const &openMode)
     {
+        StateLock lock(m_stateMutex);
         char ch = *path.rbegin();
         if (ch == '/') {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -289,6 +300,7 @@ namespace teasafe
     void
     TeaSafe::truncateFile(std::string const &path, std::ios_base::streamoff offset)
     {
+        StateLock lock(m_stateMutex);
         SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -313,6 +325,7 @@ namespace teasafe
     void
     TeaSafe::statvfs(struct statvfs *buf)
     {
+        StateLock lock(m_stateMutex);
         buf->f_bsize   = detail::FILE_BLOCK_SIZE;
         buf->f_blocks  = m_io->blocks;
         buf->f_bfree   = m_io->freeBlocks;
