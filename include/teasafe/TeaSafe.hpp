@@ -147,6 +147,9 @@ namespace teasafe
         // the core teasafe io (path, blocks, password)
         SharedCoreIO m_io;
 
+        // the root of the tea safe filesystem
+        mutable TeaSafeFolder m_rootFolder;
+
         TeaSafe(); // not required
 
         void throwIfAlreadyExists(std::string const &path, TeaSafeFolder &fe) const;
