@@ -27,6 +27,7 @@
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/TeaSafeException.hpp"
 
+#include <boost/make_shared.hpp>
 
 namespace teasafe
 {
@@ -34,6 +35,7 @@ namespace teasafe
     TeaSafe::TeaSafe(SharedCoreIO const &io)
         : m_io(io)
         , m_rootFolder(io, io->rootBlock, "root")
+        , m_folderCache()
     {
     }
 
@@ -49,7 +51,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
+        SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             return m_rootFolder;
         }
@@ -78,7 +80,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
+        SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -115,7 +117,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::IllegalFilename);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
+        SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -136,7 +138,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
+        SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -164,13 +166,13 @@ namespace teasafe
         }
 
         // throw if source parent doesn't exist
-        OptionalTeaSafeFolder parentSrc = doGetParentTeaSafeFolder(srcPath);
+        SharedTeaSafeFolder parentSrc = doGetParentTeaSafeFolder(srcPath);
         if (!parentSrc) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
         // throw if destination parent doesn't exist
-        OptionalTeaSafeFolder parentDst = doGetParentTeaSafeFolder(dstPath);
+        SharedTeaSafeFolder parentDst = doGetParentTeaSafeFolder(dstPath);
         if (!parentSrc) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -206,7 +208,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
+        SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -234,7 +236,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
+        SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -266,7 +268,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path);
+        SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -287,7 +289,7 @@ namespace teasafe
     void
     TeaSafe::truncateFile(std::string const &path, std::ios_base::streamoff offset)
     {
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path);
+        SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -349,16 +351,21 @@ namespace teasafe
         return doExistanceCheck(path, EntryType::FolderType);
     }
 
-    TeaSafe::OptionalTeaSafeFolder
+    TeaSafe::SharedTeaSafeFolder
     TeaSafe::doGetParentTeaSafeFolder(std::string const &path) const
     {
         boost::filesystem::path pathToCheck(path);
-
         if (pathToCheck.parent_path().string() == "/") {
-            return OptionalTeaSafeFolder(m_rootFolder);
+            return SharedTeaSafeFolder(boost::make_shared<TeaSafeFolder>(m_rootFolder));
         }
 
         pathToCheck = pathToCheck.relative_path().parent_path();
+
+        // prefer to pull out of cache if it exists
+        FolderCache::const_iterator cacheIt = m_folderCache.find(pathToCheck.string());
+        if(cacheIt != m_folderCache.end()) {
+            return cacheIt->second;
+        }
 
         // iterate over path parts extracting sub folders along the way
         boost::filesystem::path::iterator it = pathToCheck.begin();
@@ -369,7 +376,7 @@ namespace teasafe
             OptionalEntryInfo entryInfo = folderOfInterest.getEntryInfo(it->string());
 
             if (!entryInfo) {
-                return OptionalTeaSafeFolder();
+                return SharedTeaSafeFolder();
             }
 
             pathBuilder /= entryInfo->filename();
@@ -377,9 +384,11 @@ namespace teasafe
             if (pathBuilder == pathToCheck) {
 
                 if (entryInfo->type() == EntryType::FolderType) {
-                    return OptionalTeaSafeFolder(folderOfInterest.getTeaSafeFolder(entryInfo->filename()));
+                    SharedTeaSafeFolder folder(boost::make_shared<TeaSafeFolder>(folderOfInterest.getTeaSafeFolder(entryInfo->filename())));
+                    m_folderCache.insert(std::make_pair(pathToCheck.string(), folder));
+                    return folder;
                 } else {
-                    return OptionalTeaSafeFolder();
+                    return SharedTeaSafeFolder();
                 }
             }
             // recurse deeper
@@ -387,7 +396,7 @@ namespace teasafe
         }
 
 
-        return OptionalTeaSafeFolder();
+        return SharedTeaSafeFolder();
 
     }
 
@@ -403,7 +412,7 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        OptionalTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
+        SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             return false;
         }

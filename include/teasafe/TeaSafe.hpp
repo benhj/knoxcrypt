@@ -34,7 +34,9 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
+#include <map>
 #include <string>
 
 #include <sys/statvfs.h>
@@ -43,7 +45,7 @@ namespace teasafe
 {
     class TeaSafe
     {
-        typedef boost::optional<TeaSafeFolder> OptionalTeaSafeFolder;
+        typedef boost::shared_ptr<TeaSafeFolder> SharedTeaSafeFolder;
 
       public:
         explicit TeaSafe(SharedCoreIO const &io);
@@ -150,6 +152,11 @@ namespace teasafe
         // the root of the tea safe filesystem
         mutable TeaSafeFolder m_rootFolder;
 
+        // so that folders don't have to be consistently rebuilt store
+        // them as they are built in map and prefer to query map in future
+        typedef std::map<std::string, SharedTeaSafeFolder> FolderCache;
+        mutable FolderCache m_folderCache;
+
         TeaSafe(); // not required
 
         void throwIfAlreadyExists(std::string const &path) const;
@@ -158,7 +165,7 @@ namespace teasafe
 
         bool doFolderExists(std::string const &path) const;
 
-        OptionalTeaSafeFolder doGetParentTeaSafeFolder(std::string const &path) const;
+        SharedTeaSafeFolder doGetParentTeaSafeFolder(std::string const &path) const;
 
         bool doExistanceCheck(std::string const &path, EntryType const &entryType) const;
     };
