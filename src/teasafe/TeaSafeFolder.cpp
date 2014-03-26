@@ -109,6 +109,7 @@ namespace teasafe
         , m_startVolumeBlock(startVolumeBlock)
         , m_name(name)
         , m_entryCount(doGetNumberOfEntries())
+        , m_entryInfoCacheMap()
     {
     }
 
@@ -120,6 +121,7 @@ namespace teasafe
         , m_startVolumeBlock(m_folderData.getStartVolumeBlockIndex())
         , m_name(name)
         , m_entryCount(0)
+        , m_entryInfoCacheMap()
     {
         // set initial number of entries; there will be none to begin with
         uint64_t startCount(0);
@@ -402,6 +404,13 @@ namespace teasafe
     TeaSafeFolder::doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const entryIndex) const
     {
         std::string const entryName = doGetEntryName(metaData);
+
+        // experimental optimization; insert info in to cache
+        EntryInfoCacheMap::const_iterator it = m_entryInfoCacheMap.find(entryName);
+        if(it != m_entryInfoCacheMap.end()) {
+            return it->second;
+        }
+
         EntryType const entryType = doGetTypeForEntry(metaData);
         uint64_t fileSize = 0;
         uint64_t startBlock;
@@ -417,12 +426,16 @@ namespace teasafe
             startBlock = fe.m_folderData.getStartVolumeBlockIndex();
         }
 
-        return EntryInfo(entryName,
-                         fileSize,
-                         entryType,
-                         true, // writable
-                         startBlock,
-                         entryIndex);
+        EntryInfo info(entryName,
+                       fileSize,
+                       entryType,
+                       true, // writable
+                       startBlock,
+                       entryIndex);
+
+        m_entryInfoCacheMap.insert(std::make_pair(entryName, info));
+
+        return info;
     }
 
     uint64_t

@@ -32,6 +32,8 @@
 
 #include <boost/optional.hpp>
 
+#include <map>
+
 namespace teasafe
 {
 
@@ -310,6 +312,12 @@ namespace teasafe
         // as an optimization, store the number of entries so that we
         // don't have to read each time (read once during construction)
         uint64_t m_entryCount;
+
+        // An experimental optimization: a map will store entry infos as they
+        // are generated so that in future, they don't have to be regenerated.
+        // Question: when to invalidate/update an entry in the cache?
+        typedef std::map<std::string, EntryInfo> EntryInfoCacheMap;
+        mutable EntryInfoCacheMap m_entryInfoCacheMap;
 
     };
 
