@@ -28,6 +28,8 @@
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFolder.hpp"
 
+#include <boost/bind.hpp>
+
 #include <stdexcept>
 
 namespace teasafe
@@ -242,7 +244,9 @@ namespace teasafe
         OptionalEntryInfo info(doGetNamedEntryInfo(name));
         if(info) {
             if(info->type() == EntryType::FileType) {
-                return TeaSafeFile(m_io, name, info->firstFileBlock(), openDisposition);
+                TeaSafeFile file(m_io, name, info->firstFileBlock(), openDisposition);
+                //file.setOptionalSizeUpdateCallback(boost::bind(&EntryInfo::updateSize, info, _1));
+                return file;
             }
         }
         throw std::runtime_error("File entry with that name not found");

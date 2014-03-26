@@ -57,6 +57,12 @@ namespace teasafe
         uint64_t size() const;
 
         /**
+         * @brief updates size
+         * @param newSize
+         */
+        void updateSize(uint64_t newSize);
+
+        /**
          * @brief  accesses the type of the entry (file or folder)
          * @return EntryType::File if file, EntryType::Folder if folder
          */

@@ -92,6 +92,15 @@ namespace teasafe
         }
     }
 
+    TeaSafeFile
+    TeaSafeFile::copyTeaSafeFileWithSizeUpdateCallback(TeaSafeFile &file,
+                                                       SetEntryInfoSizeCallback &callback)
+    {
+        TeaSafeFile copy(file);
+        copy.setOptionalSizeUpdateCallback(callback);
+        return copy;
+    }
+
     std::string
     TeaSafeFile::filename() const
     {
@@ -579,6 +588,10 @@ namespace teasafe
         // slow things down, wait until end. Will hopefully make writing more
         // efficient
         setBlockNextIndices();
+
+        if(m_optionalSizeCallback) {
+            (*m_optionalSizeCallback)(m_fileSize);
+        }
     }
 
     void
@@ -593,5 +606,11 @@ namespace teasafe
         }
         std::vector<FileBlock>().swap(m_fileBlocks);
         m_fileSize = 0;
+    }
+
+    void
+    TeaSafeFile::setOptionalSizeUpdateCallback(SetEntryInfoSizeCallback &callback)
+    {
+        m_optionalSizeCallback = OptionalSizeCallback(callback);
     }
 }

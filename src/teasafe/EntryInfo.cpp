@@ -55,6 +55,12 @@ namespace teasafe
         return m_fileSize;
     }
 
+    void
+    EntryInfo::updateSize(uint64_t newSize)
+    {
+        m_fileSize = newSize;
+    }
+
     EntryType
     EntryInfo::type() const
     {

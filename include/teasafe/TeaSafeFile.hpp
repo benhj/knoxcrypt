@@ -30,6 +30,9 @@
 #include "teasafe/FileBlock.hpp"
 #include "teasafe/OpenDisposition.hpp"
 
+#include <boost/function.hpp>
+#include <boost/optional.hpp>
+
 #include <vector>
 
 #include <iosfwd>                           // streamsize, seekdir
@@ -43,6 +46,10 @@ namespace teasafe
 
     class TeaSafeFile
     {
+
+        typedef boost::function<void(uint64_t)> SetEntryInfoSizeCallback;
+        typedef boost::optional<SetEntryInfoSizeCallback> OptionalSizeCallback;
+
       public:
         /**
          * @brief when creating a new file this constructor should be used
@@ -64,6 +71,9 @@ namespace teasafe
                     std::string const &name,
                     uint64_t const startBlock,
                     OpenDisposition const &openDisposition);
+
+        static TeaSafeFile copyTeaSafeFileWithSizeUpdateCallback(TeaSafeFile &file,
+                                                                 SetEntryInfoSizeCallback &callback);
 
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
@@ -135,6 +145,13 @@ namespace teasafe
          */
         void unlink();
 
+        /**
+         * @brief sets the callback that will be used to updated the reported
+         * file size as stored in the entry info metadata of the parent
+         * @param callback the setSize function (probably) of EntryInfo
+         */
+        void setOptionalSizeUpdateCallback(SetEntryInfoSizeCallback &callback);
+
       private:
 
         // the core teasafe io (path, blocks, password)
@@ -172,6 +189,10 @@ namespace teasafe
 
         // the current 'stream position' of file entry
         std::streamoff m_pos;
+
+        // an optional size update callback to be used in setting the reported
+        // size in the entry info held in the parent folder entry info cache
+        OptionalSizeCallback m_optionalSizeCallback;
 
         /**
          * @brief  for keeping track of what the current file block is when
