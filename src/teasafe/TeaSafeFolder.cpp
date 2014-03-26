@@ -339,12 +339,24 @@ namespace teasafe
     }
 
     void
+    TeaSafeFolder::invalidateEntryInEntryInfoCache(std::string const &name)
+    {
+        EntryInfoCacheMap::iterator it = m_entryInfoCacheMap.find(name);
+        if(it != m_entryInfoCacheMap.end()) {
+            m_entryInfoCacheMap.erase(it);
+        }
+    }
+
+    void
     TeaSafeFolder::removeTeaSafeFile(std::string const &name)
     {
         // first unlink; this deallocates the file blocks, updating the
         // volume bitmap accordingly; note doesn't matter what opendisposition is here
         TeaSafeFile entry = getTeaSafeFile(name, OpenDisposition::buildAppendDisposition());
         entry.unlink();
+
+        // removes any info with name from cache
+        this->invalidateEntryInEntryInfoCache(name);
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
@@ -367,6 +379,9 @@ namespace teasafe
                 entry.removeTeaSafeFolder(it->filename());
             }
         }
+
+        // removes any info with name from cache
+        this->invalidateEntryInEntryInfoCache(name);
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added

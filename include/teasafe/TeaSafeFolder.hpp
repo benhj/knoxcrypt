@@ -298,6 +298,13 @@ namespace teasafe
          */
         std::vector<EntryInfo> doListEntriesBasedOnType(EntryType entryType) const;
 
+        /**
+         * @brief after unlinking this will be called to indicate that cache entry
+         * should be removed
+         * @param name entry name
+         */
+        void invalidateEntryInEntryInfoCache(std::string const &name);
+
         // the core teasafe io (path, blocks, password)
         SharedCoreIO m_io;
 
