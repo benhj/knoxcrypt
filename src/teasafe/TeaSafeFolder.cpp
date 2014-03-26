@@ -348,12 +348,13 @@ namespace teasafe
         TeaSafeFile entry = getTeaSafeFile(name, OpenDisposition::buildAppendDisposition());
         entry.unlink();
 
-        // removes any info with name from cache
-        this->invalidateEntryInEntryInfoCache(name);
-
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
         this->doPutMetaDataOutOfUse(name);
+
+        // removes any info with name from cache
+        this->invalidateEntryInEntryInfoCache(name);
+
     }
 
     void
@@ -373,15 +374,15 @@ namespace teasafe
             }
         }
 
-        // removes any info with name from cache
-        this->invalidateEntryInEntryInfoCache(name);
-
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
         this->doPutMetaDataOutOfUse(name);
 
         // unlink entry's data
         entry.m_folderData.unlink();
+
+        // removes any info with name from cache
+        this->invalidateEntryInEntryInfoCache(name);
     }
 
     OptionalEntryInfo
