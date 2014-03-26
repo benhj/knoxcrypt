@@ -120,6 +120,15 @@ namespace teasafe
          */
         OptionalEntryInfo getEntryInfo(std::string const &name) const;
 
+
+        /**
+         * @brief  a private version of getEntryInfo
+         * @see    getEntryInfo
+         * @param  name
+         * @return entryInfo
+         */
+        OptionalEntryInfo doGetNamedEntryInfo(std::string const &name) const;
+
         /**
          * @brief retrieves an entry info of a file if it exists
          * @param name the name of the info

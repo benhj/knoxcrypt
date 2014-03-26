@@ -237,19 +237,14 @@ namespace teasafe
                                   OpenDisposition const &openDisposition) const
     {
 
-        uint64_t i(0);
-
-        // loop over entries until name found
-        for (; i < m_entryCount; ++i) {
-            // read all metadata
-            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, i);
-            std::string entryName(doGetEntryName(metaData));
-            if (entryName == name && doGetTypeForEntry(metaData) == EntryType::FileType) {
-                uint64_t n = doGetBlockIndexForEntry(metaData);
-                return TeaSafeFile(m_io, name, n, openDisposition);
+        // optimization is to build the file based on metadata stored in the
+        // entry info which is hopefully cached
+        OptionalEntryInfo info(doGetNamedEntryInfo(name));
+        if(info) {
+            if(info->type() == EntryType::FileType) {
+                return TeaSafeFile(m_io, name, info->firstFileBlock(), openDisposition);
             }
         }
-
         throw std::runtime_error("File entry with that name not found");
     }
 
@@ -259,16 +254,14 @@ namespace teasafe
 
         uint64_t i(0);
 
-        // loop over entries until name found
-        for (; i < m_entryCount; ++i) {
-            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, i);
-            std::string entryName(doGetEntryName(metaData));
-            if (entryName == name && doGetTypeForEntry(metaData) == EntryType::FolderType) {
-                uint64_t n = doGetBlockIndexForEntry(metaData);
-                return TeaSafeFolder(m_io, n, name);
+        // optimization is to build the file based on metadata stored in the
+        // entry info which is hopefully cached
+        OptionalEntryInfo info(doGetNamedEntryInfo(name));
+        if(info) {
+            if(info->type() == EntryType::FolderType) {
+                return TeaSafeFolder(m_io, info->firstFileBlock(), name);
             }
         }
-
         throw std::runtime_error("Folder entry with that name not found");
     }
 
@@ -394,6 +387,12 @@ namespace teasafe
     OptionalEntryInfo
     TeaSafeFolder::getEntryInfo(std::string const &name) const
     {
+        return this->doGetNamedEntryInfo(name);
+    }
+
+    OptionalEntryInfo
+    TeaSafeFolder::doGetNamedEntryInfo(std::string const &name) const
+    {
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
 
             // read all metadata
@@ -434,11 +433,11 @@ namespace teasafe
             uint64_t n = doGetBlockIndexForEntry(metaData);
             TeaSafeFile fe(m_io, entryName, n, OpenDisposition::buildAppendDisposition());
             fileSize = fe.fileSize();
-            startBlock = fe.getStartVolumeBlockIndex();
+            startBlock = n;
         } else {
             uint64_t n = doGetBlockIndexForEntry(metaData);
             TeaSafeFolder fe(m_io, n, entryName);
-            startBlock = fe.m_folderData.getStartVolumeBlockIndex();
+            startBlock = n;
         }
 
         EntryInfo info(entryName,
