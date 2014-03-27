@@ -34,7 +34,7 @@ namespace teasafe
 
     TeaSafe::TeaSafe(SharedCoreIO const &io)
         : m_io(io)
-        , m_rootFolder(io, io->rootBlock, "root")
+        , m_rootFolder(boost::make_shared<TeaSafeFolder>(io, io->rootBlock, "root"))
         , m_folderCache()
         , m_stateMutex()
     {
@@ -55,7 +55,7 @@ namespace teasafe
 
         SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
-            return m_rootFolder;
+            return *m_rootFolder;
         }
 
         OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
@@ -369,7 +369,7 @@ namespace teasafe
     {
         boost::filesystem::path pathToCheck(path);
         if (pathToCheck.parent_path().string() == "/") {
-            return SharedTeaSafeFolder(boost::make_shared<TeaSafeFolder>(m_rootFolder));
+            return m_rootFolder;
         }
 
         pathToCheck = pathToCheck.relative_path().parent_path();
@@ -382,7 +382,7 @@ namespace teasafe
 
         // iterate over path parts extracting sub folders along the way
         boost::filesystem::path::iterator it = pathToCheck.begin();
-        TeaSafeFolder folderOfInterest = m_rootFolder;
+        TeaSafeFolder folderOfInterest = *m_rootFolder;
         boost::filesystem::path pathBuilder;
         for (; it != pathToCheck.end(); ++it) {
 

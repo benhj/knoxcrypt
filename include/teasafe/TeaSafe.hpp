@@ -152,7 +152,7 @@ namespace teasafe
         SharedCoreIO m_io;
 
         // the root of the tea safe filesystem
-        mutable TeaSafeFolder m_rootFolder;
+        mutable SharedTeaSafeFolder m_rootFolder;
 
         // so that folders don't have to be consistently rebuilt store
         // them as they are built in map and prefer to query map in future
