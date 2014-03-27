@@ -29,6 +29,7 @@
 #include "teasafe/detail/DetailFolder.hpp"
 
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 
 #include <stdexcept>
 
@@ -241,12 +242,12 @@ namespace teasafe
 
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
-        OptionalEntryInfo info(doGetNamedEntryInfo(name));
+        SharedEntryInfo info(doGetNamedEntryInfo(name));
         if(info) {
             if(info->type() == EntryType::FileType) {
-                //TeaSafeFile file(m_io, name, info->firstFileBlock(), openDisposition);
-                //file.setOptionalSizeUpdateCallback(boost::bind(&EntryInfo::updateSize, info, _1));
-                return TeaSafeFile(m_io, name, info->firstFileBlock(), openDisposition);
+                TeaSafeFile file(m_io, name, info->firstFileBlock(), openDisposition);
+                file.setOptionalSizeUpdateCallback(boost::bind(&EntryInfo::updateSize, info, _1));
+                return file;
             }
         }
         throw std::runtime_error("File entry with that name not found");
@@ -260,7 +261,7 @@ namespace teasafe
 
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
-        OptionalEntryInfo info(doGetNamedEntryInfo(name));
+        SharedEntryInfo info(doGetNamedEntryInfo(name));
         if(info) {
             if(info->type() == EntryType::FolderType) {
                 return TeaSafeFolder(m_io, info->firstFileBlock(), name);
@@ -285,7 +286,7 @@ namespace teasafe
             // read all metadata
             std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
             if (doEntryMetaDataIsEnabled(metaData)) {
-                entries.push_back(doGetEntryInfo(metaData, entryIndex));
+                entries.push_back(*doGetEntryInfo(metaData, entryIndex));
             }
         }
         return entries;
@@ -301,7 +302,7 @@ namespace teasafe
 
             if (doEntryMetaDataIsEnabled(metaData) &&
                 doGetTypeForEntry(metaData) == entryType) {
-                entries.push_back(doGetEntryInfo(metaData, entryIndex));
+                entries.push_back(*doGetEntryInfo(metaData, entryIndex));
             }
         }
         return entries;
@@ -389,13 +390,13 @@ namespace teasafe
         this->invalidateEntryInEntryInfoCache(name);
     }
 
-    OptionalEntryInfo
+    SharedEntryInfo
     TeaSafeFolder::getEntryInfo(std::string const &name) const
     {
         return this->doGetNamedEntryInfo(name);
     }
 
-    OptionalEntryInfo
+    SharedEntryInfo
     TeaSafeFolder::doGetNamedEntryInfo(std::string const &name) const
     {
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
@@ -403,23 +404,23 @@ namespace teasafe
             // read all metadata
             std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
             if (doEntryMetaDataIsEnabled(metaData)) {
-                EntryInfo info = doGetEntryInfo(metaData, entryIndex);
-                if (info.filename() == name) {
-                    return OptionalEntryInfo(info);
+                SharedEntryInfo info = doGetEntryInfo(metaData, entryIndex);
+                if (info->filename() == name) {
+                    return info;
                 }
             }
         }
-        return OptionalEntryInfo();
+        return SharedEntryInfo();
     }
 
     EntryInfo
     TeaSafeFolder::getEntryInfo(uint64_t const entryIndex) const
     {
         std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
-        return doGetEntryInfo(metaData, entryIndex);
+        return *doGetEntryInfo(metaData, entryIndex);
     }
 
-    EntryInfo
+    SharedEntryInfo
     TeaSafeFolder::doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const entryIndex) const
     {
         std::string const entryName = doGetEntryName(metaData);
@@ -445,12 +446,12 @@ namespace teasafe
             startBlock = n;
         }
 
-        EntryInfo info(entryName,
-                       fileSize,
-                       entryType,
-                       true, // writable
-                       startBlock,
-                       entryIndex);
+        SharedEntryInfo info(boost::make_shared<EntryInfo>(entryName,
+                                                           fileSize,
+                                                           entryType,
+                                                           true, // writable
+                                                           startBlock,
+                                                           entryIndex));
 
         m_entryInfoCacheMap.insert(std::make_pair(entryName, info));
 

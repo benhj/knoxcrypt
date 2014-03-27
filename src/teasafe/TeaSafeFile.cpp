@@ -92,15 +92,6 @@ namespace teasafe
         }
     }
 
-    TeaSafeFile
-    TeaSafeFile::copyTeaSafeFileWithSizeUpdateCallback(TeaSafeFile &file,
-                                                       SetEntryInfoSizeCallback &callback)
-    {
-        TeaSafeFile copy(file);
-        copy.setOptionalSizeUpdateCallback(callback);
-        return copy;
-    }
-
     std::string
     TeaSafeFile::filename() const
     {
@@ -609,7 +600,7 @@ namespace teasafe
     }
 
     void
-    TeaSafeFile::setOptionalSizeUpdateCallback(SetEntryInfoSizeCallback &callback)
+    TeaSafeFile::setOptionalSizeUpdateCallback(SetEntryInfoSizeCallback callback)
     {
         m_optionalSizeCallback = OptionalSizeCallback(callback);
     }

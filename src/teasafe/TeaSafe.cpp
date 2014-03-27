@@ -58,7 +58,7 @@ namespace teasafe
             return *m_rootFolder;
         }
 
-        OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
+        SharedEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -89,7 +89,7 @@ namespace teasafe
         }
 
         std::string fname = boost::filesystem::path(thePath).filename().string();
-        OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
+        SharedEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
 
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -190,7 +190,7 @@ namespace teasafe
 
         // throw if source doesn't exist
         std::string const filename = boost::filesystem::path(srcPath).filename().string();
-        OptionalEntryInfo childInfo = parentSrc->getEntryInfo(filename);
+        SharedEntryInfo childInfo = parentSrc->getEntryInfo(filename);
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -222,7 +222,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
+        SharedEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -251,7 +251,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
+        SharedEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -284,7 +284,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
+        SharedEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -306,7 +306,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        OptionalEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
+        SharedEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -386,7 +386,7 @@ namespace teasafe
         boost::filesystem::path pathBuilder;
         for (; it != pathToCheck.end(); ++it) {
 
-            OptionalEntryInfo entryInfo = folderOfInterest.getEntryInfo(it->string());
+            SharedEntryInfo entryInfo = folderOfInterest.getEntryInfo(it->string());
 
             if (!entryInfo) {
                 return SharedTeaSafeFolder();
@@ -432,7 +432,8 @@ namespace teasafe
 
         std::string filename = boost::filesystem::path(thePath).filename().string();
 
-        OptionalEntryInfo entryInfo = parentEntry->getEntryInfo(filename);
+
+        SharedEntryInfo entryInfo = parentEntry->getEntryInfo(filename);
 
         if (!entryInfo) {
             return false;

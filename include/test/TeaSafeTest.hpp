@@ -148,7 +148,7 @@ class TeaSafeTest
 
         theTeaSafe.addFile("/folderA/subFolderA/subFolderC/testAdded.txt");
         teasafe::TeaSafeFolder parent = root.getTeaSafeFolder("folderA").getTeaSafeFolder("subFolderA").getTeaSafeFolder("subFolderC");
-        teasafe::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
+        teasafe::SharedEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
         bool good = entryInfo ? true : false;
         ASSERT_EQUAL(true, good, "TeaSafeTest::testAddTeaSafeFile() getting info");
         ASSERT_EQUAL(teasafe::EntryType::FileType, entryInfo->type(), "TeaSafeTest::testAddTeaSafeFile() info type");
@@ -166,7 +166,7 @@ class TeaSafeTest
 
         theTeaSafe.addFolder("/folderA/subFolderA/subFolderC/testAdded");
         teasafe::TeaSafeFolder parent = root.getTeaSafeFolder("folderA").getTeaSafeFolder("subFolderA").getTeaSafeFolder("subFolderC");
-        teasafe::OptionalEntryInfo entryInfo = parent.getEntryInfo("testAdded");
+        teasafe::SharedEntryInfo entryInfo = parent.getEntryInfo("testAdded");
         bool good = entryInfo ? true : false;
         ASSERT_EQUAL(true, good, "TeaSafeTest::testAddTeaSafeFolder() getting info");
         ASSERT_EQUAL(teasafe::EntryType::FolderType, entryInfo->type(), "TeaSafeTest::testAddTeaSafeFolder() info type");
@@ -261,7 +261,7 @@ class TeaSafeTest
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
         theTeaSafe.removeFile("/folderA/subFolderA/subFolderC/finalFile.txt");
-        teasafe::OptionalEntryInfo info = root.getTeaSafeFolder("folderA")
+        teasafe::SharedEntryInfo info = root.getTeaSafeFolder("folderA")
             .getTeaSafeFolder("subFolderA")
             .getTeaSafeFolder("subFolderC")
             .getEntryInfo("finalFile.txt");
@@ -337,7 +337,7 @@ class TeaSafeTest
                                 teasafe::FolderRemovalType::MustBeEmpty);
 
 
-        teasafe::OptionalEntryInfo info = root.getTeaSafeFolder("folderA")
+        teasafe::SharedEntryInfo info = root.getTeaSafeFolder("folderA")
             .getTeaSafeFolder("subFolderA")
             .getTeaSafeFolder("subFolderC")
             .getEntryInfo("finalFolder");
@@ -373,7 +373,7 @@ class TeaSafeTest
         teasafe::TeaSafe theTeaSafe(io);
         theTeaSafe.removeFolder("/folderA/subFolderA/",
                                 teasafe::FolderRemovalType::Recursive);
-        teasafe::OptionalEntryInfo info = root.getTeaSafeFolder("folderA")
+        teasafe::SharedEntryInfo info = root.getTeaSafeFolder("folderA")
             .getEntryInfo("subFolderA");
         bool exists = info ? true : false;
         ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveNonEmptyFolder()");

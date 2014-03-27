@@ -72,9 +72,6 @@ namespace teasafe
                     uint64_t const startBlock,
                     OpenDisposition const &openDisposition);
 
-        static TeaSafeFile copyTeaSafeFileWithSizeUpdateCallback(TeaSafeFile &file,
-                                                                 SetEntryInfoSizeCallback &callback);
-
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
 
@@ -150,7 +147,7 @@ namespace teasafe
          * file size as stored in the entry info metadata of the parent
          * @param callback the setSize function (probably) of EntryInfo
          */
-        void setOptionalSizeUpdateCallback(SetEntryInfoSizeCallback &callback);
+        void setOptionalSizeUpdateCallback(SetEntryInfoSizeCallback callback);
 
       private:
 

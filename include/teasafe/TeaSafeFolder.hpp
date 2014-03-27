@@ -31,14 +31,15 @@
 #include "teasafe/TeaSafeFile.hpp"
 
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <map>
 
 namespace teasafe
 {
 
-    typedef boost::optional<EntryInfo> OptionalEntryInfo;
     typedef boost::optional<std::ios_base::streamoff> OptionalOffset;
+    typedef boost::shared_ptr<EntryInfo> SharedEntryInfo;
 
     class TeaSafeFolder
     {
@@ -118,7 +119,7 @@ namespace teasafe
          * @param name the name of the info
          * @return an entry info if it exsist
          */
-        OptionalEntryInfo getEntryInfo(std::string const &name) const;
+        SharedEntryInfo getEntryInfo(std::string const &name) const;
 
 
         /**
@@ -127,14 +128,14 @@ namespace teasafe
          * @param  name
          * @return entryInfo
          */
-        OptionalEntryInfo doGetNamedEntryInfo(std::string const &name) const;
+        SharedEntryInfo doGetNamedEntryInfo(std::string const &name) const;
 
         /**
          * @brief retrieves an entry info of a file if it exists
          * @param name the name of the info
          * @return an entry info if it exsist
          */
-        OptionalEntryInfo getFolderEntryInfo(std::string const &name) const;
+        SharedEntryInfo getFolderEntryInfo(std::string const &name) const;
 
         /**
          * @brief returns a vector of all entry infos
@@ -202,7 +203,7 @@ namespace teasafe
          * @param index the index of the entry
          * @return the info metadata in entry info struct
          */
-        EntryInfo doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const index) const;
+        SharedEntryInfo doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const index) const;
 
         /**
          * @brief puts metadata for given entry out of use
@@ -332,7 +333,7 @@ namespace teasafe
         // An experimental optimization: a map will store entry infos as they
         // are generated so that in future, they don't have to be regenerated.
         // Question: when to invalidate/update an entry in the cache?
-        typedef std::map<std::string, EntryInfo> EntryInfoCacheMap;
+        typedef std::map<std::string, SharedEntryInfo> EntryInfoCacheMap;
         mutable EntryInfoCacheMap m_entryInfoCacheMap;
 
     };
