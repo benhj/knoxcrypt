@@ -244,9 +244,9 @@ namespace teasafe
         OptionalEntryInfo info(doGetNamedEntryInfo(name));
         if(info) {
             if(info->type() == EntryType::FileType) {
-                TeaSafeFile file(m_io, name, info->firstFileBlock(), openDisposition);
+                //TeaSafeFile file(m_io, name, info->firstFileBlock(), openDisposition);
                 //file.setOptionalSizeUpdateCallback(boost::bind(&EntryInfo::updateSize, info, _1));
-                return file;
+                return TeaSafeFile(m_io, name, info->firstFileBlock(), openDisposition);
             }
         }
         throw std::runtime_error("File entry with that name not found");
