@@ -180,7 +180,7 @@ namespace teasafe
          * if it exists. Use this function to do so
          * @param path parent path
          */
-        void removeDeletedParentFromCache(std::string const &path);
+        void removeDeletedParentFromCache(boost::filesystem::path const &path);
     };
 }
 

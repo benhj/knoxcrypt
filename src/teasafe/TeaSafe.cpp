@@ -270,7 +270,7 @@ namespace teasafe
         parentEntry->removeTeaSafeFolder(boost::filesystem::path(thePath).filename().string());
 
         // also remove entry from parent cache
-        this->removeDeletedParentFromCache(path);
+        this->removeDeletedParentFromCache(boost::filesystem::path(thePath));
 
     }
 
@@ -379,11 +379,10 @@ namespace teasafe
         pathToCheck = pathToCheck.relative_path().parent_path();
 
         // prefer to pull out of cache if it exists
-        /*
         FolderCache::const_iterator cacheIt = m_folderCache.find(pathToCheck.string());
         if(cacheIt != m_folderCache.end()) {
             return cacheIt->second;
-        }*/
+        }
 
 
         // iterate over path parts extracting sub folders along the way
@@ -404,7 +403,7 @@ namespace teasafe
 
                 if (entryInfo->type() == EntryType::FolderType) {
                     SharedTeaSafeFolder folder(boost::make_shared<TeaSafeFolder>(folderOfInterest.getTeaSafeFolder(entryInfo->filename())));
-                    //m_folderCache.insert(std::make_pair(pathToCheck.string(), folder));
+                    m_folderCache.insert(std::make_pair(pathToCheck.string(), folder));
                     return folder;
                 } else {
                     return SharedTeaSafeFolder();
@@ -453,9 +452,9 @@ namespace teasafe
     }
 
     void
-    TeaSafe::removeDeletedParentFromCache(std::string const &path)
+    TeaSafe::removeDeletedParentFromCache(boost::filesystem::path const &path)
     {
-        FolderCache::iterator it = m_folderCache.find(path);
+        FolderCache::iterator it = m_folderCache.find(path.relative_path().string());
         if(it != m_folderCache.end()) {
             m_folderCache.erase(it);
         }
