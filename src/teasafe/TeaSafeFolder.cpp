@@ -256,9 +256,6 @@ namespace teasafe
     TeaSafeFolder
     TeaSafeFolder::getTeaSafeFolder(std::string const &name) const
     {
-
-        uint64_t i(0);
-
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
         SharedEntryInfo info(doGetNamedEntryInfo(name));
@@ -328,6 +325,9 @@ namespace teasafe
         TeaSafeFile temp(m_io, m_name, m_startVolumeBlock,
                          OpenDisposition::buildOverwriteDisposition());
         detail::putMetaDataOutOfUse(temp, doGetMetaDataIndexForEntry(name));
+
+        // removes any info with name from cache
+        this->invalidateEntryInEntryInfoCache(name);
     }
 
     void
@@ -357,9 +357,6 @@ namespace teasafe
         // then be later overwritten when a new entry is then added
         this->doPutMetaDataOutOfUse(name);
 
-        // removes any info with name from cache
-        this->invalidateEntryInEntryInfoCache(name);
-
     }
 
     void
@@ -385,9 +382,6 @@ namespace teasafe
 
         // unlink entry's data
         entry.m_folderData.unlink();
-
-        // removes any info with name from cache
-        this->invalidateEntryInEntryInfoCache(name);
     }
 
     SharedEntryInfo
@@ -399,6 +393,14 @@ namespace teasafe
     SharedEntryInfo
     TeaSafeFolder::doGetNamedEntryInfo(std::string const &name) const
     {
+
+        // try and pul out of cache fisrt
+        EntryInfoCacheMap::const_iterator it = m_entryInfoCacheMap.find(name);
+        if(it != m_entryInfoCacheMap.end()) {
+            return it->second;
+        }
+
+        // wasn't in cache so need to build
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
 
             // read all metadata
