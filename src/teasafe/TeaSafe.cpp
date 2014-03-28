@@ -375,10 +375,12 @@ namespace teasafe
         pathToCheck = pathToCheck.relative_path().parent_path();
 
         // prefer to pull out of cache if it exists
+        /*
         FolderCache::const_iterator cacheIt = m_folderCache.find(pathToCheck.string());
         if(cacheIt != m_folderCache.end()) {
             return cacheIt->second;
         }
+        */
 
         // iterate over path parts extracting sub folders along the way
         boost::filesystem::path::iterator it = pathToCheck.begin();
@@ -398,7 +400,7 @@ namespace teasafe
 
                 if (entryInfo->type() == EntryType::FolderType) {
                     SharedTeaSafeFolder folder(boost::make_shared<TeaSafeFolder>(folderOfInterest.getTeaSafeFolder(entryInfo->filename())));
-                    m_folderCache.insert(std::make_pair(pathToCheck.string(), folder));
+                    //m_folderCache.insert(std::make_pair(pathToCheck.string(), folder));
                     return folder;
                 } else {
                     return SharedTeaSafeFolder();
