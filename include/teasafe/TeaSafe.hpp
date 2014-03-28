@@ -174,6 +174,13 @@ namespace teasafe
         SharedTeaSafeFolder doGetParentTeaSafeFolder(std::string const &path) const;
 
         bool doExistanceCheck(std::string const &path, EntryType const &entryType) const;
+
+        /**
+         * @brief when a folder is deleted, need to remove it from the parent cache
+         * if it exists. Use this function to do so
+         * @param path parent path
+         */
+        void removeDeletedParentFromCache(std::string const &path);
     };
 }
 

@@ -268,6 +268,10 @@ namespace teasafe
         }
 
         parentEntry->removeTeaSafeFolder(boost::filesystem::path(thePath).filename().string());
+
+        // also remove entry from parent cache
+        this->removeDeletedParentFromCache(path);
+
     }
 
     TeaSafeFileDevice
@@ -379,8 +383,8 @@ namespace teasafe
         FolderCache::const_iterator cacheIt = m_folderCache.find(pathToCheck.string());
         if(cacheIt != m_folderCache.end()) {
             return cacheIt->second;
-        }
-        */
+        }*/
+
 
         // iterate over path parts extracting sub folders along the way
         boost::filesystem::path::iterator it = pathToCheck.begin();
@@ -446,6 +450,15 @@ namespace teasafe
         }
 
         return false;
+    }
+
+    void
+    TeaSafe::removeDeletedParentFromCache(std::string const &path)
+    {
+        FolderCache::iterator it = m_folderCache.find(path);
+        if(it != m_folderCache.end()) {
+            m_folderCache.erase(it);
+        }
     }
 
 }
