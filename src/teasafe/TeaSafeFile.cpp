@@ -25,6 +25,7 @@
 
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "teasafe/TeaSafeFile.hpp"
+#include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/FileEntryException.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
@@ -149,25 +150,14 @@ namespace teasafe
 
     void TeaSafeFile::newWritableFileBlock() const
     {
-        teasafe::TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-
-        // note building a new block to write to should always be in append mode
-        uint64_t id;
-
-        // if the starting file block is enforced, set to root block specified in m_io
-        if (m_enforceStartBlock) {
-            m_enforceStartBlock = false;
-            id = m_io->rootBlock;
-        } else {
-            id = *(detail::getNextAvailableBlock(stream, m_io->blocks));
-        }
-        //uint64_t id = *detail::getNextAvailableBlock(stream, m_io->blocks);
-        stream.close();
-        FileBlock block(m_io, id, id, teasafe::OpenDisposition::buildAppendDisposition());
+        FileBlock block(FileBlockBuilder::buildWritableFileBlock(m_io,
+                                                                 teasafe::OpenDisposition::buildAppendDisposition(),
+                                                                 m_enforceStartBlock));
+        if(m_enforceStartBlock) { m_enforceStartBlock = false; }
 
         m_fileBlocks.push_back(block);
         m_blockIndex = m_fileBlocks.size() - 1;
-        m_currentVolumeBlock = id;
+        m_currentVolumeBlock = block.getIndex();
         m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     }
 
