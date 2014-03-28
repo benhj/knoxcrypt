@@ -96,19 +96,20 @@ namespace teasafe
     std::streamsize
     FileBlock::read(char * const buf, std::streamsize const n) const
     {
+        if(n > 0) {
+            if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
+                throw FileBlockException(FileBlockError::NotReadable);
+            }
 
-        if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
-            throw FileBlockException(FileBlockError::NotReadable);
+            // open the image stream for reading
+            TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
+            (void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_seekPos);
+            (void)stream.read((char*)buf, n);
+            stream.close();
+
+            // update the stream position
+            m_seekPos += n;
         }
-
-        // open the image stream for reading
-        TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        (void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_seekPos);
-        (void)stream.read((char*)buf, n);
-        stream.close();
-
-        // update the stream position
-        m_seekPos += n;
 
         return n;
     }

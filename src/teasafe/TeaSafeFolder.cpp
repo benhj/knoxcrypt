@@ -423,6 +423,7 @@ namespace teasafe
     SharedEntryInfo
     TeaSafeFolder::doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const entryIndex) const
     {
+
         std::string const entryName = doGetEntryName(metaData);
 
         // experimental optimization; insert info in to cache

@@ -130,7 +130,6 @@ namespace teasafe
     std::streamsize
     TeaSafeFile::readCurrentBlockBytes()
     {
-
         // need to take into account the currently seeked-to position and
         // subtract that because we then only want to read from the told position
         uint32_t size =  m_fileBlocks[m_blockIndex].getDataBytesWritten() -
@@ -274,7 +273,6 @@ namespace teasafe
     std::streamsize
     TeaSafeFile::read(char* s, std::streamsize n)
     {
-
         if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
             throw FileEntryException(FileEntryError::NotReadable);
         }
