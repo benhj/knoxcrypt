@@ -296,6 +296,9 @@ namespace teasafe
             }
 
             offset += count;
+
+            // edge case bug fix
+            if(count == 0) { break; }
         }
 
         // update stream position
