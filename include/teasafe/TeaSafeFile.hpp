@@ -247,6 +247,12 @@ namespace teasafe
          * @brief sets next block index for each file block
          */
         void setBlockNextIndices();
+
+        /**
+         * @brief  computes number of bytes available for writing in block
+         * @return number of bytes left for writing
+         */
+        uint32_t getBytesLeftInBlock();
     };
 
 }

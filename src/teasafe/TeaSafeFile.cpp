@@ -154,10 +154,11 @@ namespace teasafe
                                                                  m_enforceStartBlock));
         if(m_enforceStartBlock) { m_enforceStartBlock = false; }
 
+        block.registerBlockWithVolumeBitmap();
+
         m_fileBlocks.push_back(block);
         m_blockIndex = m_fileBlocks.size() - 1;
         m_currentVolumeBlock = block.getIndex();
-        m_fileBlocks[m_blockIndex].registerBlockWithVolumeBitmap();
     }
 
     void TeaSafeFile::setBlocks()
@@ -247,6 +248,19 @@ namespace teasafe
 
     }
 
+    uint32_t
+    TeaSafeFile::getBytesLeftInBlock()
+    {
+        // if given the stream position no more bytes can be written
+        // then write out buffer
+        uint32_t streamPosition(m_fileBlocks[m_blockIndex].tell());
+
+        // the stream position is subtracted since block may have already
+        // had bytes written to it in which case the available size left
+        // is approx. block size - stream position
+        return (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) - streamPosition;
+    }
+
     void
     TeaSafeFile::bufferByteForWriting(char const byte)
     {
@@ -257,16 +271,13 @@ namespace teasafe
         // mode if no data bytes have yet been written
         checkAndCreateWritableFileBlock();
 
-        // if given the stream position no more bytes can be written
-        // then write out buffer
-        uint32_t streamPosition(m_fileBlocks[m_blockIndex].tell());
+        // how many bytes can be written at this moment in time?
+        uint32_t bytesToWriteCount = getBytesLeftInBlock();
 
-        if (m_buffer.size() == (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
-            - streamPosition) {
+        if (m_buffer.size() == bytesToWriteCount) {
 
             // write the data
-            writeBufferedDataToBlock((detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META)
-                                     - streamPosition);
+            writeBufferedDataToBlock(bytesToWriteCount);
         }
     }
 
@@ -291,9 +302,9 @@ namespace teasafe
 
             read += count;
 
-            for (int b = 0; b < count; ++b) {
-                s[offset + b] = m_buffer[b];
-            }
+            // optimization; use this rather than for loop
+            // copies from m_buffer to s + offset
+            std::copy(&m_buffer[0], &m_buffer[count], s + offset);
 
             offset += count;
 
