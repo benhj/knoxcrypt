@@ -93,6 +93,15 @@ namespace teasafe
         }
     }
 
+    namespace detail {
+
+        uint32_t blockWriteSpace()
+        {
+            return FILE_BLOCK_SIZE - FILE_BLOCK_META;
+        }
+
+    }
+
     std::string
     TeaSafeFile::filename() const
     {
@@ -203,7 +212,7 @@ namespace teasafe
         // is always updates after reads/writes
         uint32_t const bytesWritten = m_fileBlocks[m_blockIndex].tell();
 
-        if (bytesWritten < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+        if (bytesWritten < detail::blockWriteSpace()) {
             return true;
         }
         return false;
@@ -228,13 +237,13 @@ namespace teasafe
                 // if the reported stream position in the block is less that
                 // the block's total capacity, then we don't create a new block
                 // we simply overwrite
-                if (m_fileBlocks[m_blockIndex].tell() < detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+                if (m_fileBlocks[m_blockIndex].tell() < detail::blockWriteSpace()) {
                     return;
                 }
 
                 // edge case; if right at the very end of the block, need to
                 // iterate the block index and return if possible
-                if (m_fileBlocks[m_blockIndex].tell() == detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) {
+                if (m_fileBlocks[m_blockIndex].tell() == detail::blockWriteSpace()) {
                     if (m_blockIndex < m_fileBlocks.size() - 1) {
                         ++m_blockIndex;
                         return;
@@ -258,27 +267,7 @@ namespace teasafe
         // the stream position is subtracted since block may have already
         // had bytes written to it in which case the available size left
         // is approx. block size - stream position
-        return (detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META) - streamPosition;
-    }
-
-    void
-    TeaSafeFile::bufferByteForWriting(char const byte)
-    {
-        m_buffer.push_back(byte);
-
-        // make a new block to write to. Not necessarily the case that
-        // we want a new file block if in append mode. Won't be in append
-        // mode if no data bytes have yet been written
-        checkAndCreateWritableFileBlock();
-
-        // how many bytes can be written at this moment in time?
-        uint32_t bytesToWriteCount = getBytesLeftInBlock();
-
-        if (m_buffer.size() == bytesToWriteCount) {
-
-            // write the data
-            writeBufferedDataToBlock(bytesToWriteCount);
-        }
+        return (detail::blockWriteSpace()) - streamPosition;
     }
 
     std::streamsize
@@ -318,6 +307,32 @@ namespace teasafe
         return n;
     }
 
+    uint32_t
+    TeaSafeFile::bufferBytesForCurrentBlock(const char* s, std::streamsize n, uint32_t offset)
+    {
+        // make a new block to write to. Not necessarily the case that
+        // we want a new file block if in append mode. Won't be in append
+        // mode if no data bytes have yet been written
+        checkAndCreateWritableFileBlock();
+
+        uint32_t const spaceAvailable = getBytesLeftInBlock();
+
+        // if n is smaller than space available, just copy in to buffer
+        if(n < spaceAvailable) {
+            m_buffer.resize(n);
+            std::copy(&s[offset], &s[offset + n], &m_buffer[0]);
+            return n;
+        }
+
+        // if space available > 0 copy in to the buffer spaceAvailable bytes
+        if(spaceAvailable > 0) {
+            m_buffer.resize(spaceAvailable);
+            std::copy(&s[offset], &s[offset + spaceAvailable], &m_buffer[0]);
+            return spaceAvailable;
+        }
+        return 0;
+    }
+
     std::streamsize
     TeaSafeFile::write(const char* s, std::streamsize n)
     {
@@ -326,22 +341,24 @@ namespace teasafe
             throw FileEntryException(FileEntryError::NotWritable);
         }
 
-        for (int i = 0; i < n; ++i) {
+        std::streamsize wrote(0);
+        while(wrote < n) {
+            uint32_t actualWritten = bufferBytesForCurrentBlock(s, (n-wrote), wrote);
 
             // if in overwrite mode, filesize won't be updated
             // since we're simply overwriting bytes that already exist
             // NOTE: need to fix for when we start increasing size of file at end
-
-            // this is the fix!
-            if (this->tell() == m_fileSize) {
+            if(this->tell() >= m_fileSize) {
                 m_openDisposition = OpenDisposition::buildAppendDisposition();
             }
 
-            if (m_openDisposition.append() == AppendOrOverwrite::Append) {
-                ++m_fileSize;
-            }
+            writeBufferedDataToBlock(actualWritten);
 
-            bufferByteForWriting(s[i]);
+            wrote += actualWritten;
+
+            if (m_openDisposition.append() == AppendOrOverwrite::Append) {
+                m_fileSize+=actualWritten;
+            }
         }
 
         // update stream position
@@ -356,7 +373,7 @@ namespace teasafe
         uint64_t blockCount = m_fileBlocks.size();
 
         // compute number of block required
-        uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+        uint16_t const blockSize = detail::blockWriteSpace();
 
         // edge case
         if (newSize < blockSize) {
@@ -391,7 +408,7 @@ namespace teasafe
     {
         // find what file block the offset would relate to and set extra offset in file block
         // to that position
-        uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+        uint16_t const blockSize = detail::blockWriteSpace();
         boost::iostreams::stream_offset casted = off;
         boost::iostreams::stream_offset const leftOver = casted % blockSize;
         int64_t block = 0;
@@ -433,7 +450,7 @@ namespace teasafe
         boost::iostreams::stream_offset blockPosition = bytesWrittenToEnd - treatLikeBegin.second;
 
         if (blockPosition < 0) {
-            uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+            uint16_t const blockSize = detail::blockWriteSpace();
             blockPosition = blockSize + blockPosition;
             --block;
         }
@@ -450,7 +467,7 @@ namespace teasafe
 
         // find what file block the offset would relate to and set extra offset in file block
         // to that position
-        uint16_t const blockSize = detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+        uint16_t const blockSize = detail::blockWriteSpace();
         boost::iostreams::stream_offset const casted = off;
 
         boost::iostreams::stream_offset addition = casted + indexedBlockPosition;

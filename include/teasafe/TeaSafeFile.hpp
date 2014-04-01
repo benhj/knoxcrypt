@@ -199,12 +199,6 @@ namespace teasafe
         uint64_t getCurrentVolumeBlockIndex();
 
         /**
-         * @brief buffers a byte for writing
-         * @param byte the byte to buffer for writing
-         */
-        void bufferByteForWriting(char const byte);
-
-        /**
          * @brief creates and pushes back a new file block for writing
          */
         void newWritableFileBlock() const;
@@ -215,6 +209,15 @@ namespace teasafe
          * @param stream the teasafe image stream
          */
         void setBlocks();
+
+        /**
+         * @brief  buffers as many bytes as permitted by the current available block
+         * @param  s the data to buffer
+         * @param  n the number of bytes to try and buffer
+         * @param  offset where abouts in 's' we are
+         * @return the actual number of bytes buffered
+         */
+        uint32_t bufferBytesForCurrentBlock(const char* s, std::streamsize n, uint32_t offset);
 
         /**
          * @brief writes data to file block
