@@ -26,6 +26,7 @@
 #ifndef TeaSafe_CORE_TeaSafe_IO_HPP__
 #define TeaSafe_CORE_TeaSafe_IO_HPP__
 
+
 #include <string>
 
 #include <boost/shared_ptr.hpp>
@@ -33,13 +34,17 @@
 namespace teasafe
 {
 
+    class FileBlockBuilder;
+    typedef boost::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
+
     struct CoreTeaSafeIO
     {
-        std::string path;        // path of the tea safe image
-        uint64_t blocks;         // total number of blocks
-        uint64_t freeBlocks;     // number of free blocks
-        std::string password;    // password used to generate encryption key
-        uint64_t rootBlock;      // the start block of the root folder
+        std::string path;                // path of the tea safe image
+        uint64_t blocks;                 // total number of blocks
+        uint64_t freeBlocks;             // number of free blocks
+        std::string password;            // password used to generate encryption key
+        uint64_t rootBlock;              // the start block of the root folder
+        SharedBlockBuilder blockBuilder; // a block factory / resource manage
     };
 
     typedef boost::shared_ptr<CoreTeaSafeIO> SharedCoreIO;

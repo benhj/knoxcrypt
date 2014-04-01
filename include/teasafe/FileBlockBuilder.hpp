@@ -30,19 +30,37 @@
 #include "teasafe/FileBlock.hpp"
 #include "teasafe/OpenDisposition.hpp"
 
+#include <boost/shared_ptr.hpp>
+
+#include <deque>
+
 namespace teasafe
 {
+
+class FileBlockBuilder;
+typedef boost::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
+typedef std::deque<uint64_t> BlockDeque;
 
 class FileBlockBuilder
 {
 public:
-    static FileBlock buildWritableFileBlock(SharedCoreIO const &io,
-                                            OpenDisposition const &openDisposition,
-                                            bool const enforceRootBlock = false);
+    FileBlockBuilder();
+    FileBlockBuilder(SharedCoreIO const &io);
 
-    static FileBlock buildFileBlock(SharedCoreIO const &io,
-                                    uint64_t const index,
-                                    OpenDisposition const &openDisposition);
+    FileBlock buildWritableFileBlock(SharedCoreIO const &io,
+                                    OpenDisposition const &openDisposition,
+                                    bool const enforceRootBlock = false);
+
+    FileBlock buildFileBlock(SharedCoreIO const &io,
+                            uint64_t const index,
+                            OpenDisposition const &openDisposition);
+
+    void putBlockBack(uint64_t const);
+
+private:
+
+    BlockDeque m_blockDeque;
+
 };
 
 }

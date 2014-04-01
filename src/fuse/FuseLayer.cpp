@@ -32,6 +32,7 @@
  */
 
 #include "teasafe/CoreTeaSafeIO.hpp"
+#include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/TeaSafeException.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
@@ -479,6 +480,7 @@ int main(int argc, char *argv[])
     printf("Counting allocated blocks. Please wait...\n");
 
     io->freeBlocks = io->blocks - teasafe::detail::getNumberOfAllocatedBlocks(stream);
+    io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
 
     printf("Finished counting allocated blocks.\n");
 

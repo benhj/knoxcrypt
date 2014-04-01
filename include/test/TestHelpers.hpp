@@ -27,6 +27,7 @@
 #define TeaSafe_TEST_HELPERS_HPP__
 
 #include "teasafe/CoreTeaSafeIO.hpp"
+#include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/TeaSafeException.hpp"
 #include "utility/MakeTeaSafe.hpp"
 
@@ -54,6 +55,7 @@ teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
     io->freeBlocks = 2048;
     io->password = "abcd1234";
     io->rootBlock = 0;
+    io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
     return io;
 }
 
@@ -82,6 +84,11 @@ std::string createAString()
         theString.append("a");
     }
     return theString;
+}
+
+teasafe::SharedBlockBuilder testBlockBuilder()
+{
+    return boost::make_shared<teasafe::FileBlockBuilder>();
 }
 
 #define ASSERT_EQUAL(A, B, C)                                          \

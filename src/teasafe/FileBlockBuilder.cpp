@@ -30,6 +30,34 @@
 namespace teasafe
 {
 
+    namespace {
+
+        teasafe::BlockDeque populateBlockDeque(SharedCoreIO const &io)
+        {
+            // obtain all available blocks and store in a map for quick lookup
+            teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
+            std::vector<uint64_t> allBlocks = detail::getNAvailableBlocks(stream,
+                                                                          io->freeBlocks,
+                                                                          io->blocks);
+
+            BlockDeque deque(allBlocks.begin(), allBlocks.end());
+            return deque;
+        }
+
+    }
+
+
+    FileBlockBuilder::FileBlockBuilder()
+    {
+
+    }
+
+    FileBlockBuilder::FileBlockBuilder(SharedCoreIO const &io)
+        : m_blockDeque(populateBlockDeque(io))
+    {
+
+    }
+
     FileBlock
     FileBlockBuilder::buildWritableFileBlock(SharedCoreIO const &io,
                                              OpenDisposition const &openDisposition,
@@ -45,7 +73,8 @@ namespace teasafe
         if (enforceRootBlock) {
             id = io->rootBlock;
         } else {
-            id = *(detail::getNextAvailableBlock(stream, io->blocks));
+            id = m_blockDeque.front(); //*(detail::getNextAvailableBlock(stream, io->blocks));
+            m_blockDeque.pop_front();
         }
 
         stream.close();
@@ -58,6 +87,12 @@ namespace teasafe
                                      OpenDisposition const &openDisposition)
     {
         return FileBlock(io, index, openDisposition);
+    }
+
+    void
+    FileBlockBuilder::putBlockBack(uint64_t const block)
+    {
+        m_blockDeque.push_front(block);
     }
 
 

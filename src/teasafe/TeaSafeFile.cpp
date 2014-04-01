@@ -158,9 +158,9 @@ namespace teasafe
 
     void TeaSafeFile::newWritableFileBlock() const
     {
-        FileBlock block(FileBlockBuilder::buildWritableFileBlock(m_io,
-                                                                 teasafe::OpenDisposition::buildAppendDisposition(),
-                                                                 m_enforceStartBlock));
+        FileBlock block(m_io->blockBuilder->buildWritableFileBlock(m_io,
+                                                                   teasafe::OpenDisposition::buildAppendDisposition(),
+                                                                   m_enforceStartBlock));
         if(m_enforceStartBlock) { m_enforceStartBlock = false; }
 
         block.registerBlockWithVolumeBitmap();

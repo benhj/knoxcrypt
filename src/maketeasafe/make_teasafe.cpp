@@ -24,6 +24,7 @@
 */
 
 #include "teasafe/CoreTeaSafeIO.hpp"
+#include "teasafe/FileBlockBuilder.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
 #include "utility/MakeTeaSafe.hpp"
 
@@ -89,6 +90,10 @@ int main(int argc, char *argv[])
     if (magicPartition) {
         omp = teasafe::OptionalMagicPart(atoi(teasafe::utility::getPassword("sub-volume root block: ").c_str()));
     }
+
+    io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
+
+
 
     teasafe::MakeTeaSafe teasafe(io, omp);
 
