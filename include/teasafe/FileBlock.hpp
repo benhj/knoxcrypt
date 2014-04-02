@@ -155,6 +155,13 @@ namespace teasafe
          */
         void unlink();
 
+        /**
+         * @brief  are two file block equivalent?
+         * @param  other the block to compare against
+         * @return true if equal, false otherwise
+         */
+        bool operator==(FileBlock const &other) const;
+
       private:
 
         FileBlock();

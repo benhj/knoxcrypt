@@ -260,4 +260,10 @@ namespace teasafe
         doSetSize(stream, 0);
         stream.close();
     }
+
+    bool
+    FileBlock::operator==(FileBlock const &other) const
+    {
+        return this->m_index == other.m_index;
+    }
 }
