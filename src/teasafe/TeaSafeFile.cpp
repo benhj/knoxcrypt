@@ -26,6 +26,7 @@
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "teasafe/TeaSafeFile.hpp"
 #include "teasafe/FileBlockBuilder.hpp"
+#include "teasafe/FileBlockIterator.hpp"
 #include "teasafe/FileEntryException.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
@@ -173,28 +174,13 @@ namespace teasafe
     void TeaSafeFile::setBlocks()
     {
         // find very first block
-        FileBlock block(m_io,
-                        m_currentVolumeBlock,
-                        m_openDisposition);
-
-        uint64_t nextBlock = block.getNextIndex();
-
-        m_fileSize += block.getDataBytesWritten();
-
-        m_fileBlocks.push_back(block);
-
-        // seek to the very end block
-        while (nextBlock != m_currentVolumeBlock) {
-
-            m_currentVolumeBlock = nextBlock;
-            FileBlock newBlock(m_io,
-                               m_currentVolumeBlock,
-                               m_openDisposition);
-
-            nextBlock = newBlock.getNextIndex();
-
-            m_fileSize += newBlock.getDataBytesWritten();
-            m_fileBlocks.push_back(newBlock);
+        FileBlockIterator block(m_io,
+                                m_currentVolumeBlock,
+                                m_openDisposition);
+        FileBlockIterator end;
+        for(; block != end; ++block) {
+            m_fileSize += block->getDataBytesWritten();
+            m_fileBlocks.push_back(*block);
         }
     }
 

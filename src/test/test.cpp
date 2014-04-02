@@ -25,6 +25,7 @@
 
 #include "test/TeaSafeTest.hpp"
 #include "test/FileBlockTest.hpp"
+#include "test/FileBlockIteratorTest.hpp"
 #include "test/TeaSafeFileTest.hpp"
 #include "test/TeaSafeFileDeviceTest.hpp"
 #include "test/MakeTeaSafeTest.hpp"
@@ -44,6 +45,7 @@ int main()
         MakeTeaSafeTest();
         TeaSafeFileDeviceTest();
         FileBlockTest();
+        FileBlockIteratorTest();
         TeaSafeFileTest();
         TeaSafeFolderTest();
     }
