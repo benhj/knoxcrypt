@@ -56,6 +56,12 @@ namespace teasafe
          */
         FileBlockIterator();
 
+        void increment();
+
+        bool equal(FileBlockIterator const& other) const;
+
+        FileBlock dereference() const;
+
     private:
 
         SharedCoreIO m_io;
@@ -63,12 +69,6 @@ namespace teasafe
 
         typedef boost::optional<FileBlock> WorkingFileBlock;
         WorkingFileBlock m_workingFileBlock;
-
-        void increment();
-
-        bool equal(FileBlockIterator const& other) const;
-
-        FileBlock dereference() const;
 
     };
 
