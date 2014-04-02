@@ -166,6 +166,10 @@ namespace teasafe
 
         block.registerBlockWithVolumeBitmap();
 
+        if(!m_fileBlocks.empty()) {
+            m_fileBlocks[m_blockIndex].setNextIndex(block.getIndex());
+        }
+
         m_fileBlocks.push_back(block);
         m_blockIndex = m_fileBlocks.size() - 1;
         m_currentVolumeBlock = block.getIndex();
@@ -494,7 +498,6 @@ namespace teasafe
         // reset any offset values to zero but only if not seeking from the current
         // position. When seeking from the current position, we need to keep
         // track of the original block offset
-
         if (way != std::ios_base::cur) {
             std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
             for (; it != m_fileBlocks.end(); ++it) {
@@ -562,29 +565,10 @@ namespace teasafe
         return m_pos;
     }
 
-    void TeaSafeFile::setBlockNextIndices()
-    {
-        // rather than set the index and size after each file block write which *might*
-        // slow things down, wait until end. Will hopefully make writing more
-        // efficient
-        std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
-        for (; it != m_fileBlocks.end() - 1; ++it) {
-            it->setNextIndex((it + 1)->getIndex());
-            //it->setSizeOnFlush();
-        }
-        //it->setSizeOnFlush();
-    }
-
     void
     TeaSafeFile::flush()
     {
         writeBufferedDataToBlock(m_buffer.size());
-
-        // rather than set the index after each file block which *might*
-        // slow things down, wait until end. Will hopefully make writing more
-        // efficient
-        setBlockNextIndices();
-
         if(m_optionalSizeCallback) {
             (*m_optionalSizeCallback)(m_fileSize);
         }
@@ -595,11 +579,14 @@ namespace teasafe
     {
         // loop over all file blocks and update the volume bitmap indicating
         // that block is no longer in use
-        std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
-        for (; it != m_fileBlocks.end(); ++it) {
+        FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition);
+        FileBlockIterator end;
+
+        for(; it != end; ++it) {
             it->unlink();
             m_io->freeBlocks++;
         }
+
         std::vector<FileBlock>().swap(m_fileBlocks);
         m_fileSize = 0;
     }

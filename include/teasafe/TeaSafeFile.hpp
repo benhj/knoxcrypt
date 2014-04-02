@@ -247,11 +247,6 @@ namespace teasafe
         bool currentBlockHasAvailableSpace() const;
 
         /**
-         * @brief sets next block index for each file block
-         */
-        void setBlockNextIndices();
-
-        /**
          * @brief  computes number of bytes available for writing in block
          * @return number of bytes left for writing
          */
