@@ -31,6 +31,8 @@
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
 
+#include <boost/make_shared.hpp>
+
 #include <stdexcept>
 
 namespace teasafe
@@ -42,12 +44,13 @@ namespace teasafe
         , m_enforceStartBlock(enforceStartBlock)
         , m_fileSize(0)
         , m_fileBlocks()
+        , m_workingBlock()
         , m_buffer()
-        , m_currentVolumeBlock(0)
         , m_startVolumeBlock(0)
         , m_blockIndex(0)
         , m_openDisposition(OpenDisposition::buildAppendDisposition())
         , m_pos(0)
+        , m_blockCount(0)
     {
     }
 
@@ -61,19 +64,22 @@ namespace teasafe
         , m_enforceStartBlock(false)
         , m_fileSize(0)
         , m_fileBlocks()
+        , m_workingBlock()
         , m_buffer()
-        , m_currentVolumeBlock(startBlock)
         , m_startVolumeBlock(startBlock)
         , m_blockIndex(0)
         , m_openDisposition(openDisposition)
         , m_pos(0)
+        , m_blockCount(0)
     {
         // store all file blocks associated with file in container
         // also updates the file size as it does this
         setBlocks();
 
         // essentially seek right to the very last block
-        m_blockIndex = m_fileBlocks.size() - 1;
+        m_blockIndex = m_blockCount - 1;
+
+        m_workingBlock = boost::make_shared<FileBlock>(io, startBlock, openDisposition);
 
         // by default seek to 0 position
         this->seek(0);
@@ -118,21 +124,21 @@ namespace teasafe
     uint64_t
     TeaSafeFile::getCurrentVolumeBlockIndex()
     {
-        if (m_fileBlocks.empty()) {
+        if (!m_workingBlock) {
             checkAndCreateWritableFileBlock();
-            m_startVolumeBlock = m_currentVolumeBlock;
+            m_startVolumeBlock = m_workingBlock->getIndex();
         }
-        return m_currentVolumeBlock;
+        return m_workingBlock->getIndex();
     }
 
     uint64_t
     TeaSafeFile::getStartVolumeBlockIndex() const
     {
-        if (m_fileBlocks.empty()) {
+        if (!m_workingBlock) {
             checkAndCreateWritableFileBlock();
-            m_startVolumeBlock = m_currentVolumeBlock;
+            m_startVolumeBlock = m_workingBlock->getIndex();
         } else {
-            m_startVolumeBlock = m_fileBlocks[0].getIndex();
+            m_startVolumeBlock = getBlockWithIndex(0).getIndex();
         }
         return m_startVolumeBlock;
     }
@@ -142,16 +148,15 @@ namespace teasafe
     {
         // need to take into account the currently seeked-to position and
         // subtract that because we then only want to read from the told position
-        uint32_t size =  m_fileBlocks[m_blockIndex].getDataBytesWritten() -
-            m_fileBlocks[m_blockIndex].tell();
+        uint32_t size =  m_workingBlock->getDataBytesWritten() - m_workingBlock->tell();
 
         std::vector<uint8_t>().swap(m_buffer);
         m_buffer.resize(size);
-        (void)m_fileBlocks[m_blockIndex].read((char*)&m_buffer.front(), size);
+        (void)m_workingBlock->read((char*)&m_buffer.front(), size);
 
-        if (m_blockIndex + 1 < m_fileBlocks.size()) {
+        if (m_blockIndex + 1 < m_blockCount) {
             ++m_blockIndex;
-            m_currentVolumeBlock = m_fileBlocks[m_blockIndex].getIndex();
+            m_workingBlock = boost::make_shared<FileBlock>(this->getBlockWithIndex(m_blockIndex));
         }
 
         return size;
@@ -166,32 +171,34 @@ namespace teasafe
 
         block.registerBlockWithVolumeBitmap();
 
-        if(!m_fileBlocks.empty()) {
-            m_fileBlocks[m_blockIndex].setNextIndex(block.getIndex());
+        if(m_workingBlock) {
+            m_workingBlock->setNextIndex(block.getIndex());
         }
 
-        m_fileBlocks.push_back(block);
-        m_blockIndex = m_fileBlocks.size() - 1;
-        m_currentVolumeBlock = block.getIndex();
+        //m_fileBlocks.push_back(block);
+        ++m_blockCount;
+        m_blockIndex = m_blockCount - 1;
+        m_workingBlock = boost::make_shared<FileBlock>(block);
     }
 
     void TeaSafeFile::setBlocks()
     {
         // find very first block
         FileBlockIterator block(m_io,
-                                m_currentVolumeBlock,
+                                m_startVolumeBlock,
                                 m_openDisposition);
         FileBlockIterator end;
         for(; block != end; ++block) {
             m_fileSize += block->getDataBytesWritten();
-            m_fileBlocks.push_back(*block);
+            //m_fileBlocks.push_back(*block);
+            ++m_blockCount;
         }
     }
 
     void
     TeaSafeFile::writeBufferedDataToBlock(uint32_t const bytes)
     {
-        m_fileBlocks[m_blockIndex].write((char*)&m_buffer.front(), bytes);
+        m_workingBlock->write((char*)&m_buffer.front(), bytes);
         std::vector<uint8_t>().swap(m_buffer);
     }
 
@@ -200,7 +207,7 @@ namespace teasafe
     {
         // use tell to get bytes written so far as the read/write head position
         // is always updates after reads/writes
-        uint32_t const bytesWritten = m_fileBlocks[m_blockIndex].tell();
+        uint32_t const bytesWritten = m_workingBlock->tell();
 
         if (bytesWritten < detail::blockWriteSpace()) {
             return true;
@@ -213,7 +220,7 @@ namespace teasafe
     TeaSafeFile::checkAndCreateWritableFileBlock() const
     {
         // first case no file blocks so absolutely need one to write to
-        if (m_fileBlocks.empty()) {
+        if (!m_workingBlock) {
             newWritableFileBlock();
             return;
         }
@@ -227,17 +234,16 @@ namespace teasafe
                 // if the reported stream position in the block is less that
                 // the block's total capacity, then we don't create a new block
                 // we simply overwrite
-                if (m_fileBlocks[m_blockIndex].tell() < detail::blockWriteSpace()) {
+                if (m_workingBlock->tell() < detail::blockWriteSpace()) {
                     return;
                 }
 
                 // edge case; if right at the very end of the block, need to
                 // iterate the block index and return if possible
-                if (m_fileBlocks[m_blockIndex].tell() == detail::blockWriteSpace()) {
-                    if (m_blockIndex < m_fileBlocks.size() - 1) {
-                        ++m_blockIndex;
-                        return;
-                    }
+                if (m_workingBlock->tell() == detail::blockWriteSpace()) {
+                    ++m_blockIndex;
+                    m_workingBlock = boost::make_shared<FileBlock>(this->getBlockWithIndex(m_blockIndex));
+                    return;
                 }
             }
             newWritableFileBlock();
@@ -252,7 +258,7 @@ namespace teasafe
     {
         // if given the stream position no more bytes can be written
         // then write out buffer
-        uint32_t streamPosition(m_fileBlocks[m_blockIndex].tell());
+        uint32_t streamPosition(m_workingBlock->tell());
 
         // the stream position is subtracted since block may have already
         // had bytes written to it in which case the available size left
@@ -339,20 +345,23 @@ namespace teasafe
             // since we're simply overwriting bytes that already exist
             // NOTE: need to fix for when we start increasing size of file at end
             if(this->tell() >= m_fileSize) {
+                std::cout<<"YES!"<<std::endl;
                 m_openDisposition = OpenDisposition::buildAppendDisposition();
+                m_workingBlock = boost::make_shared<FileBlock>(m_io, m_workingBlock->getIndex(), m_openDisposition);
             }
 
             writeBufferedDataToBlock(actualWritten);
-
             wrote += actualWritten;
+
+            // update stream position
+            m_pos += actualWritten;
 
             if (m_openDisposition.append() == AppendOrOverwrite::Append) {
                 m_fileSize+=actualWritten;
             }
         }
 
-        // update stream position
-        m_pos += n;
+
 
         return n;
     }
@@ -360,15 +369,15 @@ namespace teasafe
     void
     TeaSafeFile::truncate(std::ios_base::streamoff newSize)
     {
-        uint64_t blockCount = m_fileBlocks.size();
+        uint64_t blockCount = m_blockCount;
 
         // compute number of block required
         uint16_t const blockSize = detail::blockWriteSpace();
 
         // edge case
         if (newSize < blockSize) {
-            m_fileBlocks[0].setSize(newSize);
-            m_fileBlocks[0].setNextIndex(m_fileBlocks[0].getIndex());
+            getBlockWithIndex(0).setSize(newSize);
+            getBlockWithIndex(0).setNextIndex(getBlockWithIndex(0).getIndex());
             return;
         }
 
@@ -381,15 +390,15 @@ namespace teasafe
         // edge case
         if (leftOver == 0) {
             --blocksRequired;
-            m_fileBlocks[blocksRequired].setSize(blockSize);
+            getBlockWithIndex(blocksRequired).setSize(blockSize);
         } else {
-            m_fileBlocks[blocksRequired].setSize(leftOver);
+            getBlockWithIndex(blocksRequired).setSize(leftOver);
         }
 
-        m_fileBlocks[blocksRequired].setNextIndex(m_fileBlocks[blocksRequired].getIndex());
+        getBlockWithIndex(blocksRequired).setNextIndex(getBlockWithIndex(blocksRequired).getIndex());
 
-        std::vector<FileBlock> tempBlocks(m_fileBlocks.begin(), m_fileBlocks.begin() + blocksRequired);
-        tempBlocks.swap(m_fileBlocks);
+        m_blockCount = blocksRequired;
+
     }
 
     typedef std::pair<int64_t, boost::iostreams::stream_offset> SeekPair;
@@ -499,9 +508,8 @@ namespace teasafe
         // position. When seeking from the current position, we need to keep
         // track of the original block offset
         if (way != std::ios_base::cur) {
-            std::vector<FileBlock>::iterator it = m_fileBlocks.begin();
-            for (; it != m_fileBlocks.end(); ++it) {
-                it->seek(0);
+            if(m_workingBlock) {
+                m_workingBlock->seek(0);
             }
         }
 
@@ -509,9 +517,9 @@ namespace teasafe
         SeekPair seekPair;
         if (way == std::ios_base::end) {
 
-            size_t endBlock = m_fileBlocks.size() - 1;
+            size_t endBlock = m_blockCount - 1;
             seekPair = getPositionFromEnd(off, endBlock,
-                                          m_fileBlocks[endBlock].getDataBytesWritten());
+                                  getBlockWithIndex(endBlock).getDataBytesWritten());
 
         }
 
@@ -525,20 +533,21 @@ namespace teasafe
         // seek relative to the current position
         if (way == std::ios_base::cur) {
             seekPair = getPositionFromCurrent(off, m_blockIndex,
-                                              m_fileBlocks[m_blockIndex].tell());
+                                              m_workingBlock->tell());
         }
 
         // check bounds and error if too big
-        if (seekPair.first >= m_fileBlocks.size() || seekPair.first < 0) {
+        if (seekPair.first >= m_blockCount || seekPair.first < 0) {
             return -1; // fail
         } else {
 
             // update block where we start reading/writing from
             m_blockIndex = seekPair.first;
+            m_workingBlock = boost::make_shared<FileBlock>(this->getBlockWithIndex(m_blockIndex));
 
             // set the position to seek to for given block
             // this will be the point from which we read or write
-            m_fileBlocks[m_blockIndex].seek(seekPair.second);
+            m_workingBlock->seek(seekPair.second);
 
             switch (way) {
               case std::ios_base::cur:
@@ -587,13 +596,28 @@ namespace teasafe
             m_io->freeBlocks++;
         }
 
-        std::vector<FileBlock>().swap(m_fileBlocks);
         m_fileSize = 0;
+        m_blockCount = 0;
+        m_workingBlock = WorkingFileBlock();
     }
 
     void
     TeaSafeFile::setOptionalSizeUpdateCallback(SetEntryInfoSizeCallback callback)
     {
         m_optionalSizeCallback = OptionalSizeCallback(callback);
+    }
+
+    FileBlock
+    TeaSafeFile::getBlockWithIndex(uint64_t n) const
+    {
+        FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition);
+        FileBlockIterator end;
+        uint64_t c(0);
+        for(; it != end; ++it) {
+            if(c==n) {
+                return *it;
+            }
+            ++c;
+        }
     }
 }

@@ -115,7 +115,7 @@ namespace teasafe { namespace cipher
                     g_key[c] = (buf[0] << 24) | (buf[1] << 16)  | (buf[2] << 8) | (buf[3]);
                     ++c;
                 }
-                buildBigCipherBuffer();
+                //buildBigCipherBuffer();
                 g_init = true;
             }
 
@@ -143,7 +143,7 @@ namespace teasafe { namespace cipher
         void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
         {
             // big cipher buffer has been initialized
-
+            /*
             if (g_init) {
                 // prefer to use cipher buffer
                 if ((startPosition + length) < CIPHER_BUFFER_SIZE) {
@@ -152,7 +152,7 @@ namespace teasafe { namespace cipher
                     }
                     return;
                 }
-            }
+            }*/
 
             // how many blocks required? defaults to 1, if length greater
             // than 8 bytes then more blocks are needed

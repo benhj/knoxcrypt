@@ -32,6 +32,7 @@
 
 #include <boost/function.hpp>
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <vector>
 
@@ -49,6 +50,7 @@ namespace teasafe
 
         typedef boost::function<void(uint64_t)> SetEntryInfoSizeCallback;
         typedef boost::optional<SetEntryInfoSizeCallback> OptionalSizeCallback;
+        typedef boost::shared_ptr<FileBlock> WorkingFileBlock;
 
       public:
         /**
@@ -166,12 +168,10 @@ namespace teasafe
         // the file blocks making up the file
         mutable std::vector<FileBlock> m_fileBlocks;
 
+        mutable WorkingFileBlock m_workingBlock;
+
         // a buffer used for storing chunks of data
         std::vector<uint8_t> m_buffer;
-
-        // the index of the current file block being read from or written to
-        // note, this is the position of the block in the teasafe
-        mutable uint64_t m_currentVolumeBlock;
 
         // the start file block index
         mutable uint64_t m_startVolumeBlock;
@@ -187,13 +187,15 @@ namespace teasafe
         // the current 'stream position' of file entry
         std::streamoff m_pos;
 
+        mutable uint64_t m_blockCount;
+
         // an optional size update callback to be used in setting the reported
         // size in the entry info held in the parent folder entry info cache
         OptionalSizeCallback m_optionalSizeCallback;
 
         /**
-         * @brief  for keeping track of what the current file block is when
-         *         reading or writing, it is stored in m_currentVolumeBlock
+         * @brief  for keeping track of what the current file block as indicated
+         *         by the current working file block
          * @return the current volume block
          */
         uint64_t getCurrentVolumeBlockIndex();
@@ -251,6 +253,8 @@ namespace teasafe
          * @return number of bytes left for writing
          */
         uint32_t getBytesLeftInBlock();
+
+        FileBlock getBlockWithIndex(uint64_t n) const;
     };
 
 }
