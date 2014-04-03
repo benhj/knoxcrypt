@@ -126,7 +126,6 @@ namespace teasafe
     {
         if (!m_workingBlock) {
             checkAndCreateWritableFileBlock();
-            m_startVolumeBlock = m_workingBlock->getIndex();
         }
         return m_workingBlock->getIndex();
     }
