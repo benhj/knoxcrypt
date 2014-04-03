@@ -182,7 +182,7 @@ namespace teasafe
         mutable int64_t m_blockIndex;
 
         // open mode
-        OpenDisposition m_openDisposition;
+        mutable OpenDisposition m_openDisposition;
 
         // the current 'stream position' of file entry
         std::streamoff m_pos;

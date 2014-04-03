@@ -45,25 +45,25 @@ class TeaSafeFileTest
     TeaSafeFileTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
-//        testFileSizeReportedCorrectly();
-//        testBlocksAllocated();
-//        testFileUnlink();
-//        testReadingFromNonReadableThrows();
-//        testWritingToNonWritableThrows();
-//        testBigWriteFollowedByRead();
-//        testBigWriteFollowedBySmallAppend();
-//        testBigWriteFollowedBySmallOverwriteAtStart();
-//        testBigWriteFollowedBySmallOverwriteAtEnd();
-//        testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength();
+        testFileSizeReportedCorrectly();
+        testBlocksAllocated();
+        testFileUnlink();
+        testReadingFromNonReadableThrows();
+        testWritingToNonWritableThrows();
+        testBigWriteFollowedByRead();
+        testBigWriteFollowedBySmallAppend();
+        testBigWriteFollowedBySmallOverwriteAtStart();
+        testBigWriteFollowedBySmallOverwriteAtEnd();
+        testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength();
         testBigWriteFollowedByBigOverwriteAtEndThatGoesOverOriginalLength();
-//        testSmallWriteFollowedByBigAppend();
-//        testSeekAndReadSmallFile();
-//        testWriteBigDataAppendSmallStringSeekToAndReadAppendedString();
-//        testSeekingFromEnd();
-//        testSeekingFromCurrentNegative();
-//        testSeekingFromCurrentPositive();
-//        testEdgeCaseEndOfBlockOverWrite();
-//        testEdgeCaseEndOfBlockAppend();
+        testSmallWriteFollowedByBigAppend();
+        testSeekAndReadSmallFile();
+        testWriteBigDataAppendSmallStringSeekToAndReadAppendedString();
+        testSeekingFromEnd();
+        testSeekingFromCurrentNegative();
+        testSeekingFromCurrentPositive();
+        testEdgeCaseEndOfBlockOverWrite();
+        testEdgeCaseEndOfBlockAppend();
     }
 
     ~TeaSafeFileTest()
@@ -466,8 +466,6 @@ class TeaSafeFileTest
             entry.flush();
         }
 
-        std::cout<<"A"<<std::endl;
-
         // secondary overwrite
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
@@ -478,8 +476,6 @@ class TeaSafeFileTest
             entry.write(testData.c_str(), testData.length());
             entry.flush();
         }
-
-        std::cout<<"B"<<std::endl;
 
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));

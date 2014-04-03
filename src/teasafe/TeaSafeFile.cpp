@@ -207,6 +207,7 @@ namespace teasafe
     {
         // use tell to get bytes written so far as the read/write head position
         // is always updates after reads/writes
+        assert(m_workingBlock);
         uint32_t const bytesWritten = m_workingBlock->tell();
 
         if (bytesWritten < detail::blockWriteSpace()) {
@@ -228,6 +229,12 @@ namespace teasafe
         // in this case the current block is exhausted so we need a new one
         if (!currentBlockHasAvailableSpace()) {
 
+            // EDGE case: if overwrite causes us to go over end, need to
+            // switch to append mode
+            if(this->tell() >= m_fileSize) {
+                m_openDisposition = OpenDisposition::buildAppendDisposition();
+            }
+
             // if in overwrite mode, maybe we want to overwrite current bytes
             if (m_openDisposition.append() == AppendOrOverwrite::Overwrite) {
 
@@ -245,6 +252,7 @@ namespace teasafe
                     m_workingBlock = boost::make_shared<FileBlock>(this->getBlockWithIndex(m_blockIndex));
                     return;
                 }
+
             }
             newWritableFileBlock();
 
@@ -341,15 +349,6 @@ namespace teasafe
         while(wrote < n) {
             uint32_t actualWritten = bufferBytesForCurrentBlock(s, (n-wrote), wrote);
 
-            // if in overwrite mode, filesize won't be updated
-            // since we're simply overwriting bytes that already exist
-            // NOTE: need to fix for when we start increasing size of file at end
-            if(this->tell() >= m_fileSize) {
-                std::cout<<"YES!"<<std::endl;
-                m_openDisposition = OpenDisposition::buildAppendDisposition();
-                m_workingBlock = boost::make_shared<FileBlock>(m_io, m_workingBlock->getIndex(), m_openDisposition);
-            }
-
             writeBufferedDataToBlock(actualWritten);
             wrote += actualWritten;
 
@@ -360,8 +359,6 @@ namespace teasafe
                 m_fileSize+=actualWritten;
             }
         }
-
-
 
         return n;
     }

@@ -41,13 +41,13 @@ int main()
     {
         boost::progress_timer timer;
 
-//        TeaSafeTest();
-//        MakeTeaSafeTest();
-//        TeaSafeFileDeviceTest();
-//        FileBlockTest();
-//        FileBlockIteratorTest();
+        TeaSafeTest();
+        MakeTeaSafeTest();
+        TeaSafeFileDeviceTest();
+        FileBlockTest();
+        FileBlockIteratorTest();
         TeaSafeFileTest();
-//        TeaSafeFolderTest();
+        TeaSafeFolderTest();
     }
 
     std::cout<<"\n\nThere were "<<testFailures<<"/"<<passedPoints<<" assertion failures\n\n"<<std::endl;
