@@ -148,7 +148,9 @@ namespace teasafe
 
         if (m_blockIndex + 1 < m_blockCount) {
             ++m_blockIndex;
-            m_workingBlock = boost::make_shared<FileBlock>(this->getBlockWithIndex(m_blockIndex));
+            m_workingBlock = boost::make_shared<FileBlock>(m_io,
+                                                           m_workingBlock->getNextIndex(),
+                                                           m_openDisposition);
         }
 
         return size;
@@ -242,7 +244,9 @@ namespace teasafe
                 // iterate the block index and return if possible
                 if (m_workingBlock->tell() == detail::blockWriteSpace()) {
                     ++m_blockIndex;
-                    m_workingBlock = boost::make_shared<FileBlock>(this->getBlockWithIndex(m_blockIndex));
+                    m_workingBlock = boost::make_shared<FileBlock>(m_io,
+                                                                   m_workingBlock->getNextIndex(),
+                                                                   m_openDisposition);
                     return;
                 }
 
