@@ -206,11 +206,9 @@ namespace teasafe
         void newWritableFileBlock() const;
 
         /**
-         * @brief when appending, set all blocks in the block list
-         * @note also updates file size as it seeks to end block
-         * @param stream the teasafe image stream
+         * @brief counts the number of blocks and sets file size
          */
-        void setBlocks();
+        void enumerateBlockStats();
 
         /**
          * @brief  buffers as many bytes as permitted by the current available block
@@ -219,13 +217,13 @@ namespace teasafe
          * @param  offset where abouts in 's' we are
          * @return the actual number of bytes buffered
          */
-        uint32_t bufferBytesForCurrentBlock(const char* s, std::streamsize n, uint32_t offset);
+        uint32_t bufferBytesForWorkingBlock(const char* s, std::streamsize n, uint32_t offset);
 
         /**
          * @brief writes data to file block
          * @param bytes the number of bytes to write
          */
-        void writeBufferedDataToBlock(uint32_t const bytes);
+        void writeBufferedDataToWorkingBlock(uint32_t const bytes);
 
         /**
          * @brief reads bytes from the block in to buffer
@@ -239,20 +237,20 @@ namespace teasafe
          * no file blocks or if there are file blocks and it is determined
          * that we're not in append mode
          */
-        void checkAndCreateWritableFileBlock() const;
+        void checkAndUpdateWorkingBlockWithNew() const;
 
         /**
          * @brief used in the context of discovering if currently set block
          * has enough space to write more data to
          * @return true if space availble, false otherwise
          */
-        bool currentBlockHasAvailableSpace() const;
+        bool workingBlockHasAvailableSpace() const;
 
         /**
          * @brief  computes number of bytes available for writing in block
          * @return number of bytes left for writing
          */
-        uint32_t getBytesLeftInBlock();
+        uint32_t getBytesLeftInWorkingBlock();
 
         FileBlock getBlockWithIndex(uint64_t n) const;
     };

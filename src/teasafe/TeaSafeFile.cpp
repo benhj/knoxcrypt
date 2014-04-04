@@ -72,17 +72,11 @@ namespace teasafe
         , m_pos(0)
         , m_blockCount(0)
     {
-        // store all file blocks associated with file in container
-        // also updates the file size as it does this
-        setBlocks();
+        // counts number of blocks and sets file size
+        enumerateBlockStats();
 
-        // essentially seek right to the very last block
-        m_blockIndex = m_blockCount - 1;
-
+        // sets the current working block to the very first file block
         m_workingBlock = boost::make_shared<FileBlock>(io, startBlock, openDisposition);
-
-        // by default seek to 0 position
-        this->seek(0);
 
         // set up for specific write-mode
         if (m_openDisposition.readWrite() != ReadOrWriteOrBoth::ReadOnly) {
@@ -125,7 +119,7 @@ namespace teasafe
     TeaSafeFile::getCurrentVolumeBlockIndex()
     {
         if (!m_workingBlock) {
-            checkAndCreateWritableFileBlock();
+            checkAndUpdateWorkingBlockWithNew();
         }
         return m_workingBlock->getIndex();
     }
@@ -134,7 +128,7 @@ namespace teasafe
     TeaSafeFile::getStartVolumeBlockIndex() const
     {
         if (!m_workingBlock) {
-            checkAndCreateWritableFileBlock();
+            checkAndUpdateWorkingBlockWithNew();
             m_startVolumeBlock = m_workingBlock->getIndex();
         }
         return m_startVolumeBlock;
@@ -178,7 +172,7 @@ namespace teasafe
         m_workingBlock = boost::make_shared<FileBlock>(block);
     }
 
-    void TeaSafeFile::setBlocks()
+    void TeaSafeFile::enumerateBlockStats()
     {
         // find very first block
         FileBlockIterator block(m_io,
@@ -193,14 +187,14 @@ namespace teasafe
     }
 
     void
-    TeaSafeFile::writeBufferedDataToBlock(uint32_t const bytes)
+    TeaSafeFile::writeBufferedDataToWorkingBlock(uint32_t const bytes)
     {
         m_workingBlock->write((char*)&m_buffer.front(), bytes);
         std::vector<uint8_t>().swap(m_buffer);
     }
 
     bool
-    TeaSafeFile::currentBlockHasAvailableSpace() const
+    TeaSafeFile::workingBlockHasAvailableSpace() const
     {
         // use tell to get bytes written so far as the read/write head position
         // is always updates after reads/writes
@@ -215,17 +209,20 @@ namespace teasafe
     }
 
     void
-    TeaSafeFile::checkAndCreateWritableFileBlock() const
+    TeaSafeFile::checkAndUpdateWorkingBlockWithNew() const
     {
         // first case no file blocks so absolutely need one to write to
         if (!m_workingBlock) {
             newWritableFileBlock();
+
+            // when writing the file, the working block will be empty
+            // and the start volume block will be unset so need to set now
             m_startVolumeBlock = m_workingBlock->getIndex();
             return;
         }
 
         // in this case the current block is exhausted so we need a new one
-        if (!currentBlockHasAvailableSpace()) {
+        if (!workingBlockHasAvailableSpace()) {
 
             // EDGE case: if overwrite causes us to go over end, need to
             // switch to append mode
@@ -260,7 +257,7 @@ namespace teasafe
     }
 
     uint32_t
-    TeaSafeFile::getBytesLeftInBlock()
+    TeaSafeFile::getBytesLeftInWorkingBlock()
     {
         // if given the stream position no more bytes can be written
         // then write out buffer
@@ -310,14 +307,10 @@ namespace teasafe
     }
 
     uint32_t
-    TeaSafeFile::bufferBytesForCurrentBlock(const char* s, std::streamsize n, uint32_t offset)
+    TeaSafeFile::bufferBytesForWorkingBlock(const char* s, std::streamsize n, uint32_t offset)
     {
-        // make a new block to write to. Not necessarily the case that
-        // we want a new file block if in append mode. Won't be in append
-        // mode if no data bytes have yet been written
-        checkAndCreateWritableFileBlock();
 
-        uint32_t const spaceAvailable = getBytesLeftInBlock();
+        uint32_t const spaceAvailable = getBytesLeftInWorkingBlock();
 
         // if n is smaller than space available, just copy in to buffer
         if(n < spaceAvailable) {
@@ -345,9 +338,17 @@ namespace teasafe
 
         std::streamsize wrote(0);
         while(wrote < n) {
-            uint32_t actualWritten = bufferBytesForCurrentBlock(s, (n-wrote), wrote);
 
-            writeBufferedDataToBlock(actualWritten);
+            // check if the working block needs to be updated with a new one
+            checkAndUpdateWorkingBlockWithNew();
+
+            // buffers the data that will be written to the working block
+            // computed as a function of the data left to write and the
+            // working block's available space
+            uint32_t actualWritten = bufferBytesForWorkingBlock(s, (n-wrote), wrote);
+
+            // does what it says
+            writeBufferedDataToWorkingBlock(actualWritten);
             wrote += actualWritten;
 
             // update stream position
@@ -358,21 +359,20 @@ namespace teasafe
             }
         }
 
-        return n;
+        return wrote;
     }
 
     void
     TeaSafeFile::truncate(std::ios_base::streamoff newSize)
     {
-        uint64_t blockCount = m_blockCount;
-
         // compute number of block required
         uint16_t const blockSize = detail::blockWriteSpace();
 
         // edge case
         if (newSize < blockSize) {
-            getBlockWithIndex(0).setSize(newSize);
-            getBlockWithIndex(0).setNextIndex(getBlockWithIndex(0).getIndex());
+            FileBlock zeroBlock = getBlockWithIndex(0);
+            zeroBlock.setSize(newSize);
+            zeroBlock.setNextIndex(zeroBlock.getIndex());
             return;
         }
 
@@ -572,7 +572,7 @@ namespace teasafe
     void
     TeaSafeFile::flush()
     {
-        writeBufferedDataToBlock(m_buffer.size());
+        writeBufferedDataToWorkingBlock(m_buffer.size());
         if(m_optionalSizeCallback) {
             (*m_optionalSizeCallback)(m_fileSize);
         }
