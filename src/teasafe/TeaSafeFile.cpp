@@ -385,14 +385,17 @@ namespace teasafe
         uint64_t blocksRequired = roundedDown / blockSize;
 
         // edge case
+        SharedFileBlock block;
         if (leftOver == 0) {
             --blocksRequired;
-            getBlockWithIndex(blocksRequired).setSize(blockSize);
+            block = boost::make_shared<FileBlock>(getBlockWithIndex(blocksRequired));
+            block->setSize(blockSize);
         } else {
-            getBlockWithIndex(blocksRequired).setSize(leftOver);
+            block = boost::make_shared<FileBlock>(getBlockWithIndex(blocksRequired));
+            block->setSize(leftOver);
         }
 
-        getBlockWithIndex(blocksRequired).setNextIndex(getBlockWithIndex(blocksRequired).getIndex());
+        block->setNextIndex(block->getIndex());
 
         m_blockCount = blocksRequired;
 
@@ -595,7 +598,7 @@ namespace teasafe
 
         m_fileSize = 0;
         m_blockCount = 0;
-        m_workingBlock = WorkingFileBlock();
+        m_workingBlock = SharedFileBlock();
     }
 
     void

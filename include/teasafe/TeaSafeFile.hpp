@@ -53,7 +53,7 @@ namespace teasafe
 
         typedef boost::function<void(uint64_t)> SetEntryInfoSizeCallback;
         typedef boost::optional<SetEntryInfoSizeCallback> OptionalSizeCallback;
-        typedef boost::shared_ptr<FileBlock> WorkingFileBlock;
+        typedef boost::shared_ptr<FileBlock> SharedFileBlock;
 
       public:
         /**
@@ -168,7 +168,7 @@ namespace teasafe
         uint64_t m_fileSize;
 
         // the current block being read from / written to
-        mutable WorkingFileBlock m_workingBlock;
+        mutable SharedFileBlock m_workingBlock;
 
         // a buffer used for storing chunks of data
         std::vector<uint8_t> m_buffer;
