@@ -51,7 +51,7 @@ namespace teasafe
     FileBlockIterator::increment()
     {
         uint64_t nextBlock = m_workingFileBlock->getNextIndex();
-        if(nextBlock != m_workingFileBlock->getIndex()) {
+        if (nextBlock != m_workingFileBlock->getIndex()) {
             m_workingFileBlock = FileBlock(m_io, nextBlock, m_openDisposition);
         } else {
             m_workingFileBlock = WorkingFileBlock();

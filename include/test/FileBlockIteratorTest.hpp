@@ -73,7 +73,7 @@ class FileBlockIteratorTest
 
         ASSERT_EQUAL(false, (begin.equal(end)), "FileBlockIteratorTest::test equality BEFORE false");
 
-        for(; begin != end; ++begin) {
+        for (; begin != end; ++begin) {
             ++count;
         }
 

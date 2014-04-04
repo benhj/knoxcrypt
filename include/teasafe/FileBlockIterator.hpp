@@ -43,7 +43,7 @@ namespace teasafe
                                                              boost::forward_traversal_tag,
                                                              FileBlock>
     {
-    public:
+      public:
         /**
          * @brief for constructing begin iterator
          * @param io
@@ -65,7 +65,7 @@ namespace teasafe
 
         FileBlock dereference() const;
 
-    private:
+      private:
 
         SharedCoreIO m_io;
         OpenDisposition m_openDisposition;

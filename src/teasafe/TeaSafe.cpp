@@ -383,7 +383,7 @@ namespace teasafe
 
         // prefer to pull out of cache if it exists
         FolderCache::const_iterator cacheIt = m_folderCache.find(pathToCheck.string());
-        if(cacheIt != m_folderCache.end()) {
+        if (cacheIt != m_folderCache.end()) {
             return cacheIt->second;
         }
 
@@ -458,7 +458,7 @@ namespace teasafe
     TeaSafe::removeDeletedParentFromCache(boost::filesystem::path const &path)
     {
         FolderCache::iterator it = m_folderCache.find(path.relative_path().string());
-        if(it != m_folderCache.end()) {
+        if (it != m_folderCache.end()) {
             m_folderCache.erase(it);
         }
     }

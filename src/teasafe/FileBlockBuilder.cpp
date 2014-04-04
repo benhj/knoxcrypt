@@ -33,7 +33,8 @@
 namespace teasafe
 {
 
-    namespace {
+    namespace
+    {
 
         teasafe::BlockDeque populateBlockDeque(SharedCoreIO const &io)
         {

@@ -40,31 +40,31 @@
 namespace teasafe
 {
 
-class FileBlockBuilder;
-typedef boost::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
-typedef std::deque<uint64_t> BlockDeque;
+    class FileBlockBuilder;
+    typedef boost::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
+    typedef std::deque<uint64_t> BlockDeque;
 
-class FileBlockBuilder
-{
-public:
-    FileBlockBuilder();
-    FileBlockBuilder(SharedCoreIO const &io);
+    class FileBlockBuilder
+    {
+      public:
+        FileBlockBuilder();
+        FileBlockBuilder(SharedCoreIO const &io);
 
-    FileBlock buildWritableFileBlock(SharedCoreIO const &io,
-                                    OpenDisposition const &openDisposition,
-                                    bool const enforceRootBlock = false);
+        FileBlock buildWritableFileBlock(SharedCoreIO const &io,
+                                         OpenDisposition const &openDisposition,
+                                         bool const enforceRootBlock = false);
 
-    FileBlock buildFileBlock(SharedCoreIO const &io,
-                            uint64_t const index,
-                            OpenDisposition const &openDisposition);
+        FileBlock buildFileBlock(SharedCoreIO const &io,
+                                 uint64_t const index,
+                                 OpenDisposition const &openDisposition);
 
-    void putBlockBack(uint64_t const);
+        void putBlockBack(uint64_t const);
 
-private:
+      private:
 
-    BlockDeque m_blockDeque;
+        BlockDeque m_blockDeque;
 
-};
+    };
 
 }
 

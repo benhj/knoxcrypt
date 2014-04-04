@@ -95,7 +95,8 @@ namespace teasafe
         }
     }
 
-    namespace detail {
+    namespace detail
+    {
 
         uint32_t blockWriteSpace()
         {
@@ -161,11 +162,11 @@ namespace teasafe
         FileBlock block(m_io->blockBuilder->buildWritableFileBlock(m_io,
                                                                    teasafe::OpenDisposition::buildAppendDisposition(),
                                                                    m_enforceStartBlock));
-        if(m_enforceStartBlock) { m_enforceStartBlock = false; }
+        if (m_enforceStartBlock) { m_enforceStartBlock = false; }
 
         block.registerBlockWithVolumeBitmap();
 
-        if(m_workingBlock) {
+        if (m_workingBlock) {
             m_workingBlock->setNextIndex(block.getIndex());
         }
 
@@ -181,7 +182,7 @@ namespace teasafe
                                 m_startVolumeBlock,
                                 m_openDisposition);
         FileBlockIterator end;
-        for(; block != end; ++block) {
+        for (; block != end; ++block) {
             m_fileSize += block->getDataBytesWritten();
             ++m_blockCount;
         }
@@ -226,7 +227,7 @@ namespace teasafe
 
             // EDGE case: if overwrite causes us to go over end, need to
             // switch to append mode
-            if(this->tell() >= m_fileSize) {
+            if (this->tell() >= m_fileSize) {
                 m_openDisposition = OpenDisposition::buildAppendDisposition();
             }
 
@@ -299,7 +300,7 @@ namespace teasafe
             offset += count;
 
             // edge case bug fix
-            if(count == 0) { break; }
+            if (count == 0) { break; }
         }
 
         // update stream position
@@ -315,14 +316,14 @@ namespace teasafe
         uint32_t const spaceAvailable = getBytesLeftInWorkingBlock();
 
         // if n is smaller than space available, just copy in to buffer
-        if(n < spaceAvailable) {
+        if (n < spaceAvailable) {
             m_buffer.resize(n);
             std::copy(&s[offset], &s[offset + n], &m_buffer[0]);
             return n;
         }
 
         // if space available > 0 copy in to the buffer spaceAvailable bytes
-        if(spaceAvailable > 0) {
+        if (spaceAvailable > 0) {
             m_buffer.resize(spaceAvailable);
             std::copy(&s[offset], &s[offset + spaceAvailable], &m_buffer[0]);
             return spaceAvailable;
@@ -339,7 +340,7 @@ namespace teasafe
         }
 
         std::streamsize wrote(0);
-        while(wrote < n) {
+        while (wrote < n) {
 
             // check if the working block needs to be updated with a new one
             checkAndUpdateWorkingBlockWithNew();
@@ -508,7 +509,7 @@ namespace teasafe
         // position. When seeking from the current position, we need to keep
         // track of the original block offset
         if (way != std::ios_base::cur) {
-            if(m_workingBlock) {
+            if (m_workingBlock) {
                 m_workingBlock->seek(0);
             }
         }
@@ -519,7 +520,7 @@ namespace teasafe
 
             size_t endBlock = m_blockCount - 1;
             seekPair = getPositionFromEnd(off, endBlock,
-                                  getBlockWithIndex(endBlock).getDataBytesWritten());
+                                          getBlockWithIndex(endBlock).getDataBytesWritten());
 
         }
 
@@ -578,7 +579,7 @@ namespace teasafe
     TeaSafeFile::flush()
     {
         writeBufferedDataToWorkingBlock(m_buffer.size());
-        if(m_optionalSizeCallback) {
+        if (m_optionalSizeCallback) {
             (*m_optionalSizeCallback)(m_fileSize);
         }
     }
@@ -591,7 +592,7 @@ namespace teasafe
         FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition);
         FileBlockIterator end;
 
-        for(; it != end; ++it) {
+        for (; it != end; ++it) {
             it->unlink();
             m_io->freeBlocks++;
         }
@@ -613,8 +614,8 @@ namespace teasafe
         FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition);
         FileBlockIterator end;
         uint64_t c(0);
-        for(; it != end; ++it) {
-            if(c==n) {
+        for (; it != end; ++it) {
+            if (c==n) {
                 return *it;
             }
             ++c;

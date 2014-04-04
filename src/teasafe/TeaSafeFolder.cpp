@@ -246,8 +246,8 @@ namespace teasafe
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
         SharedEntryInfo info(doGetNamedEntryInfo(name));
-        if(info) {
-            if(info->type() == EntryType::FileType) {
+        if (info) {
+            if (info->type() == EntryType::FileType) {
                 TeaSafeFile file(m_io, name, info->firstFileBlock(), openDisposition);
                 file.setOptionalSizeUpdateCallback(boost::bind(&EntryInfo::updateSize, info, _1));
                 return file;
@@ -262,8 +262,8 @@ namespace teasafe
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
         SharedEntryInfo info(doGetNamedEntryInfo(name));
-        if(info) {
-            if(info->type() == EntryType::FolderType) {
+        if (info) {
+            if (info->type() == EntryType::FolderType) {
                 return TeaSafeFolder(m_io, info->firstFileBlock(), name);
             }
         }
@@ -343,7 +343,7 @@ namespace teasafe
     TeaSafeFolder::invalidateEntryInEntryInfoCache(std::string const &name)
     {
         EntryInfoCacheMap::iterator it = m_entryInfoCacheMap.find(name);
-        if(it != m_entryInfoCacheMap.end()) {
+        if (it != m_entryInfoCacheMap.end()) {
             m_entryInfoCacheMap.erase(it);
         }
     }
@@ -399,7 +399,7 @@ namespace teasafe
 
         // try and pul out of cache fisrt
         EntryInfoCacheMap::const_iterator it = m_entryInfoCacheMap.find(name);
-        if(it != m_entryInfoCacheMap.end()) {
+        if (it != m_entryInfoCacheMap.end()) {
             return it->second;
         }
 
@@ -433,7 +433,7 @@ namespace teasafe
 
         // experimental optimization; insert info in to cache
         EntryInfoCacheMap::const_iterator it = m_entryInfoCacheMap.find(entryName);
-        if(it != m_entryInfoCacheMap.end()) {
+        if (it != m_entryInfoCacheMap.end()) {
             return it->second;
         }
 
