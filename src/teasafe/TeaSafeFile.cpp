@@ -135,7 +135,7 @@ namespace teasafe
     }
 
     std::streamsize
-    TeaSafeFile::readCurrentBlockBytes()
+    TeaSafeFile::readWorkingBlockBytes()
     {
         // need to take into account the currently seeked-to position and
         // subtract that because we then only want to read from the told position
@@ -166,7 +166,6 @@ namespace teasafe
             m_workingBlock->setNextIndex(block.getIndex());
         }
 
-        //m_fileBlocks.push_back(block);
         ++m_blockCount;
         m_blockIndex = m_blockCount - 1;
         m_workingBlock = boost::make_shared<FileBlock>(block);
@@ -181,7 +180,6 @@ namespace teasafe
         FileBlockIterator end;
         for(; block != end; ++block) {
             m_fileSize += block->getDataBytesWritten();
-            //m_fileBlocks.push_back(*block);
             ++m_blockCount;
         }
     }
@@ -198,7 +196,6 @@ namespace teasafe
     {
         // use tell to get bytes written so far as the read/write head position
         // is always updates after reads/writes
-        assert(m_workingBlock);
         uint32_t const bytesWritten = m_workingBlock->tell();
 
         if (bytesWritten < detail::blockWriteSpace()) {
@@ -281,7 +278,7 @@ namespace teasafe
         uint64_t offset(0);
         while (read < n) {
 
-            uint32_t count = readCurrentBlockBytes();
+            uint32_t count = readWorkingBlockBytes();
 
             // check that we don't read too much!
             if (read + count >= n) {

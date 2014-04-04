@@ -62,8 +62,7 @@ namespace teasafe
         TeaSafeFile(SharedCoreIO const &io, std::string const &name, bool const enforceStartBlock = false);
 
         /**
-         * @brief when reading or appending or overwriting to the end of a file
-         * this constructor should be used
+         * @brief when reading or appending or overwriting this constructor should be used
          * @param io the core teasafe io (path, blocks, password)
          * @param name the name of the file entry
          * @param block the starting block of the file entry
@@ -122,13 +121,13 @@ namespace teasafe
          * @param  off the offset to seek to
          * @param  way the position of where to offset from (begin, current, or end)
          * @return returns the offset (NOTE: should this be returning the actual
-         * 'tell' position instead?
+         * 'tell' position instead?)
          */
         boost::iostreams::stream_offset seek(boost::iostreams::stream_offset off,
                                              std::ios_base::seekdir way = std::ios_base::beg);
 
         /**
-         * @brief indicates the stream position
+         * @brief  indicates the stream position
          * @return the current stream position
          */
         boost::iostreams::stream_offset tell() const;
@@ -153,7 +152,7 @@ namespace teasafe
 
       private:
 
-        // the core teasafe io (path, blocks, password)
+        // the core teasafe io (path, blocks, rootBlock, password)
         SharedCoreIO m_io;
 
         // the name of the file entry
@@ -165,9 +164,7 @@ namespace teasafe
         // the size of the file
         uint64_t m_fileSize;
 
-        // the file blocks making up the file
-        mutable std::vector<FileBlock> m_fileBlocks;
-
+        // the current block being read from / written to
         mutable WorkingFileBlock m_workingBlock;
 
         // a buffer used for storing chunks of data
@@ -187,6 +184,7 @@ namespace teasafe
         // the current 'stream position' of file entry
         std::streamoff m_pos;
 
+        // how many blocks make up the file?
         mutable uint64_t m_blockCount;
 
         // an optional size update callback to be used in setting the reported
@@ -201,7 +199,7 @@ namespace teasafe
         uint64_t getCurrentVolumeBlockIndex();
 
         /**
-         * @brief creates and pushes back a new file block for writing
+         * @brief creates a new file block for writing and updates the working block
          */
         void newWritableFileBlock() const;
 
@@ -211,7 +209,7 @@ namespace teasafe
         void enumerateBlockStats();
 
         /**
-         * @brief  buffers as many bytes as permitted by the current available block
+         * @brief  buffers as many bytes as permitted by the working block
          * @param  s the data to buffer
          * @param  n the number of bytes to try and buffer
          * @param  offset where abouts in 's' we are
@@ -220,16 +218,16 @@ namespace teasafe
         uint32_t bufferBytesForWorkingBlock(const char* s, std::streamsize n, uint32_t offset);
 
         /**
-         * @brief writes data to file block
+         * @brief writes data to working block
          * @param bytes the number of bytes to write
          */
         void writeBufferedDataToWorkingBlock(uint32_t const bytes);
 
         /**
-         * @brief reads bytes from the block in to buffer
+         * @brief  reads bytes from the working block in to buffer
          * @return the number of bytes read
          */
-        std::streamsize readCurrentBlockBytes();
+        std::streamsize readWorkingBlockBytes();
 
 
         /**
@@ -242,7 +240,7 @@ namespace teasafe
         /**
          * @brief used in the context of discovering if currently set block
          * has enough space to write more data to
-         * @return true if space availble, false otherwise
+         * @return true if space available, false otherwise
          */
         bool workingBlockHasAvailableSpace() const;
 
@@ -252,6 +250,11 @@ namespace teasafe
          */
         uint32_t getBytesLeftInWorkingBlock();
 
+        /**
+         * @brief  retrieves a specific block making up the file
+         * @param  n the block to retrieve
+         * @return a file block
+         */
         FileBlock getBlockWithIndex(uint64_t n) const;
     };
 
