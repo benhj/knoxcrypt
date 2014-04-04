@@ -136,8 +136,6 @@ namespace teasafe
         if (!m_workingBlock) {
             checkAndCreateWritableFileBlock();
             m_startVolumeBlock = m_workingBlock->getIndex();
-        } else {
-            m_startVolumeBlock = getBlockWithIndex(0).getIndex();
         }
         return m_startVolumeBlock;
     }
@@ -222,6 +220,7 @@ namespace teasafe
         // first case no file blocks so absolutely need one to write to
         if (!m_workingBlock) {
             newWritableFileBlock();
+            m_startVolumeBlock = m_workingBlock->getIndex();
             return;
         }
 
