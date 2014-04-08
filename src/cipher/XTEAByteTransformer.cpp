@@ -197,6 +197,7 @@ namespace teasafe { namespace cipher
                                               long &c,
                                               int const uptoBit) const
     {
+        //
         // the number of rounds is an XTEA thing. Reducing this number speeds
         // things up but reduces the encryption strength. Note that the literature
         // suggests a minimum of 64 rounds
@@ -205,32 +206,57 @@ namespace teasafe { namespace cipher
         // start of the stream, say the first 256MB) when the class is first constructed;
         // then, the cipher stream to xor the plain text against can be pulled from
         // this 256MB buffer rather than generated on the fly as is currently done.
+        //
         int rounds = 32;
         uint8_t a[8];
         uint8_t b[8];
-        for (long i = 0; i < blocksOfSize8BeingTransformed; ++i) {
+
+        // process the first block
+        {
             uint8_t cipherStream[16];
             for (int j = 0; j < 16; ++j) {
                 cipherStream[j] = startPosition + c - startPositionOffset;
                 ++c;
             }
             c -= 16;
-
-            // optimization
-            if (i == 0) {
-                memcpy(&a, cipherStream, 8 * sizeof(uint8_t));
-            } else {
-                memcpy(&a, b, 8 * sizeof(uint8_t));
-            }
+            memcpy(&a, cipherStream, 8 * sizeof(uint8_t));
             memcpy(&b, cipherStream + 8, 8 * sizeof(uint8_t));
-
-            // part of above optimization
-            if (i == 0) {
-                detail::convertBytesAndEncipher(rounds, a, g_key);
-            }
+            detail::convertBytesAndEncipher(rounds, a, g_key);
             detail::convertBytesAndEncipher(rounds, b, g_key);
 
-            // now xor plain with key stream
+            // now xor plain with key stream. Encrypts a maximum of 16 bytes
+            // If j < 8, then the a cipher buffer is used; if j >= 8, then the b cipher buffer
+            // is used
+            int k = 0;
+            for (int j = startPositionOffset; j < uptoBit; ++j) {
+                if (j >= 8) {
+                    out[c] = in[c] ^ b[k];
+                    ++k;
+                } else {
+                    out[c] = in[c] ^ a[j];
+                }
+                ++c;
+            }
+        }
+
+        // do all remaining blocks
+        for (long i = 1; i < blocksOfSize8BeingTransformed; ++i) {
+
+            // optimization, next time we use a, it will be 'this' b
+            memcpy(&a, b, 8 * sizeof(uint8_t));
+
+            // re-fill b
+            for (int j = 0; j < 8; ++j) {
+                b[j] = startPosition + c - startPositionOffset;
+                ++c;
+            }
+            c -= 8;
+
+            detail::convertBytesAndEncipher(rounds, b, g_key);
+
+            // now xor plain with key stream. Encrypts a maximum of 16 bytes
+            // If j < 8, then the a cipher buffer is used; if j >= 8, then the b cipher buffer
+            // is used
             int k = 0;
             for (int j = startPositionOffset; j < uptoBit; ++j) {
                 if (j >= 8) {
