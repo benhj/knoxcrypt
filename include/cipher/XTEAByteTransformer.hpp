@@ -34,9 +34,12 @@
 #include "cipher/IByteTransformer.hpp"
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace teasafe { namespace cipher
 {
+
+    typedef std::vector<uint8_t> UIntVector;
 
     class XTEAByteTransformer : public IByteTransformer
     {
@@ -47,11 +50,31 @@ namespace teasafe { namespace cipher
 
       private:
 
+        // number of rounds used by xtea
+        int m_rounds;
+
         XTEAByteTransformer(); // not required
 
         void buildBigCipherBuffer();
 
         void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
+
+        void doXOR(char *in,
+                   char *out,
+                   std::ios_base::streamoff const startPositionOffset,
+                   long &c,
+                   int const uptoBit,
+                   UIntVector &aBuf,
+                   UIntVector &bBuf) const;
+
+        void processFirstBlock(char *in,
+                               char *out,
+                               std::ios_base::streamoff const startPosition,
+                               std::ios_base::streamoff const startPositionOffset,
+                               long &c,
+                               int const uptoBit,
+                               UIntVector &a,
+                               UIntVector &b) const;
 
         void doSubTransformations(char *in,
                                   char *out,

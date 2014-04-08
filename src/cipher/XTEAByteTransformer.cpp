@@ -93,6 +93,7 @@ namespace teasafe { namespace cipher
 
     XTEAByteTransformer::XTEAByteTransformer(std::string const &password)
         : IByteTransformer(password)
+        , m_rounds(32) // note, the suggested xtea rounds is 64 in the literature
     {
         // is this key-gen secure? probably not...use at own risk
         // initialize the key by taking a hash of the password and then creating
@@ -189,6 +190,53 @@ namespace teasafe { namespace cipher
     }
 
     void
+    XTEAByteTransformer::doXOR(char *in,
+                               char *out,
+                               std::ios_base::streamoff const startPositionOffset,
+                               long &c,
+                               int const uptoBit,
+                               UIntVector &aBuf,
+                               UIntVector &bBuf) const
+    {
+        // now xor plain with key stream. Encrypts a maximum of 16 bytes
+        // If j < 8, then the a cipher buffer is used; if j >= 8, then the b cipher buffer
+        // is used
+        int k = 0;
+        for (int j = startPositionOffset; j < uptoBit; ++j) {
+            if (j >= 8) {
+                out[c] = in[c] ^ bBuf[k];
+                ++k;
+            } else {
+                out[c] = in[c] ^ aBuf[j];
+            }
+            ++c;
+        }
+    }
+
+    void
+    XTEAByteTransformer::processFirstBlock(char *in,
+                                           char *out,
+                                           std::ios_base::streamoff const startPosition,
+                                           std::ios_base::streamoff const startPositionOffset,
+                                           long &c,
+                                           int const uptoBit,
+                                           UIntVector &aBuf,
+                                           UIntVector &bBuf) const
+    {
+        uint8_t cipherStream[16];
+        for (int j = 0; j < 16; ++j) {
+            cipherStream[j] = startPosition + c - startPositionOffset;
+            ++c;
+        }
+        c -= 16;
+        memcpy(&aBuf.front(), cipherStream, 8 * sizeof(uint8_t));
+        memcpy(&bBuf.front(), cipherStream + 8, 8 * sizeof(uint8_t));
+        detail::convertBytesAndEncipher(m_rounds, &aBuf.front(), g_key);
+        detail::convertBytesAndEncipher(m_rounds, &bBuf.front(), g_key);
+        this->doXOR(in, out, startPositionOffset, c, uptoBit, aBuf, bBuf);
+    }
+
+    void
     XTEAByteTransformer::doSubTransformations(char *in,
                                               char *out,
                                               std::ios_base::streamoff const startPosition,
@@ -197,76 +245,33 @@ namespace teasafe { namespace cipher
                                               long &c,
                                               int const uptoBit) const
     {
-        //
-        // the number of rounds is an XTEA thing. Reducing this number speeds
-        // things up but reduces the encryption strength. Note that the literature
-        // suggests a minimum of 64 rounds
-        // I wonder if we should have a large static cipher stream buffer that gets
-        // initialized to the most commonly used part of the stream (i.e., the
-        // start of the stream, say the first 256MB) when the class is first constructed;
-        // then, the cipher stream to xor the plain text against can be pulled from
-        // this 256MB buffer rather than generated on the fly as is currently done.
-        //
-        int rounds = 32;
-        uint8_t a[8];
-        uint8_t b[8];
+
+        // create a couple of buffers for holder the cipher text
+        UIntVector aBuf;
+        UIntVector bBuf;
+        aBuf.resize(8);
+        bBuf.resize(8);
 
         // process the first block
-        {
-            uint8_t cipherStream[16];
-            for (int j = 0; j < 16; ++j) {
-                cipherStream[j] = startPosition + c - startPositionOffset;
-                ++c;
-            }
-            c -= 16;
-            memcpy(&a, cipherStream, 8 * sizeof(uint8_t));
-            memcpy(&b, cipherStream + 8, 8 * sizeof(uint8_t));
-            detail::convertBytesAndEncipher(rounds, a, g_key);
-            detail::convertBytesAndEncipher(rounds, b, g_key);
-
-            // now xor plain with key stream. Encrypts a maximum of 16 bytes
-            // If j < 8, then the a cipher buffer is used; if j >= 8, then the b cipher buffer
-            // is used
-            int k = 0;
-            for (int j = startPositionOffset; j < uptoBit; ++j) {
-                if (j >= 8) {
-                    out[c] = in[c] ^ b[k];
-                    ++k;
-                } else {
-                    out[c] = in[c] ^ a[j];
-                }
-                ++c;
-            }
-        }
+        this->processFirstBlock(in, out, startPosition, startPositionOffset, c, uptoBit, aBuf, bBuf);
 
         // do all remaining blocks
         for (long i = 1; i < blocksOfSize8BeingTransformed; ++i) {
 
             // optimization, next time we use a, it will be 'this' b
-            memcpy(&a, b, 8 * sizeof(uint8_t));
+            memcpy(&aBuf.front(), &bBuf.front(), 8 * sizeof(uint8_t));
 
             // re-fill b
             for (int j = 0; j < 8; ++j) {
-                b[j] = startPosition + c - startPositionOffset;
+                bBuf[j] = startPosition + c - startPositionOffset + 8; // the last 8 is a bug fix for BC.
                 ++c;
             }
             c -= 8;
 
-            detail::convertBytesAndEncipher(rounds, b, g_key);
+            detail::convertBytesAndEncipher(m_rounds, &bBuf.front(), g_key);
 
-            // now xor plain with key stream. Encrypts a maximum of 16 bytes
-            // If j < 8, then the a cipher buffer is used; if j >= 8, then the b cipher buffer
-            // is used
-            int k = 0;
-            for (int j = startPositionOffset; j < uptoBit; ++j) {
-                if (j >= 8) {
-                    out[c] = in[c] ^ b[k];
-                    ++k;
-                } else {
-                    out[c] = in[c] ^ a[j];
-                }
-                ++c;
-            }
+            // now xor plain with key stream.
+            this->doXOR(in, out, startPositionOffset, c, uptoBit, aBuf, bBuf);
         }
     }
 }
