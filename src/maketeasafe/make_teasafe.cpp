@@ -85,7 +85,6 @@ int main(int argc, char *argv[])
     io->blocks = blocks;
     io->freeBlocks = blocks;
     io->password.append(teasafe::utility::getPassword("teasafe password: "));
-    io->iv = uint64_t(time(NULL)); // the crypter initialization vector
 
     // magic partition?
     teasafe::OptionalMagicPart omp;
