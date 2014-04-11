@@ -44,7 +44,7 @@ int main()
     {
         boost::progress_timer timer;
 
-//        TeaSafeTest();
+        TeaSafeTest();
         MakeTeaSafeTest();
         TeaSafeFileDeviceTest();
         FileBlockTest();

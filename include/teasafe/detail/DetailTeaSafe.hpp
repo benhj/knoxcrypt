@@ -291,7 +291,7 @@ namespace teasafe { namespace detail
         if (blocks == 0) {
             blocks = getNumberOfBlocks(in);
         } else {
-            (void)in.seekg(beginning());
+            (void)in.seekg(beginning() + 8);
         }
 
         // how many bytes does this value fit in to?
@@ -349,7 +349,7 @@ namespace teasafe { namespace detail
         // read the bytes in to a buffer
         std::vector<uint8_t> buf;
         buf.assign(bytes, 0);
-        (void)in.seekg(beginning());
+        (void)in.seekg(beginning() + 8);
         (void)in.read((char*)&buf.front(), bytes);
 
 
