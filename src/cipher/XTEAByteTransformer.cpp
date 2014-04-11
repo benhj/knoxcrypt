@@ -264,7 +264,7 @@ namespace teasafe { namespace cipher
 
             // re-fill b
             for (int j = 0; j < 8; ++j) {
-                bBuf[j] = startPosition + c - startPositionOffset + 8; // the last 8 is a bug fix for BC.
+                bBuf[j] = startPosition + c - startPositionOffset + m_iv;
                 ++c;
             }
             c -= 8;
