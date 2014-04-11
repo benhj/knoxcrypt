@@ -32,10 +32,12 @@
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlock.hpp"
+#include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/TeaSafeFolder.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
 
+#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 
 #include <string>
@@ -188,6 +190,7 @@ namespace teasafe
             // automatically set the initial root block and set the initial
             // number of entries to zero. Note, the initial root block will
             // always be block 0
+            io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
             TeaSafeFolder rootDir(io, "root");
 
             // create an extra 'magic partition' which is another root folder
