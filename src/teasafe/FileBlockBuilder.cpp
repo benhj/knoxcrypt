@@ -43,7 +43,6 @@ namespace teasafe
             std::vector<uint64_t> allBlocks = detail::getNAvailableBlocks(stream,
                                                                           io->freeBlocks,
                                                                           io->blocks);
-
             BlockDeque deque(allBlocks.begin(), allBlocks.end());
             return deque;
         }
@@ -80,7 +79,6 @@ namespace teasafe
             id = m_blockDeque.front(); //*(detail::getNextAvailableBlock(stream, io->blocks));
             m_blockDeque.pop_front();
         }
-
         stream.close();
         return FileBlock(io, id, id, openDisposition);
     }

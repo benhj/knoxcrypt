@@ -32,10 +32,12 @@
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlock.hpp"
+#include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/TeaSafeFolder.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
 
+#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 
 #include <string>
@@ -101,7 +103,7 @@ namespace teasafe
 
         void zeroOutBits(std::vector<uint8_t> &bitMapData)
         {
-            uint8_t byte;
+            uint8_t byte(0);
             for (int i = 0; i < 8; ++i) {
                 detail::setBitInByte(byte, i, false);
             }
@@ -171,11 +173,13 @@ namespace teasafe
             out.flush();
             out.close();
 
-
             // create the root folder directory. Calling this constructor will
             // automatically set the initial root block and set the initial
             // number of entries to zero. Note, the initial root block will
             // always be block 0
+            // added block builder here since can only work after bitmap created
+            // fixes issue https://github.com/benhj/teasafe/issues/15
+            io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
             TeaSafeFolder rootDir(io, "root");
 
             // create an extra 'magic partition' which is another root folder
