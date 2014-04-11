@@ -84,8 +84,8 @@ namespace teasafe
             if (folderData.seek(8 + (n * bufferSize) + seekOff) != -1) {
 
                 std::vector<uint8_t> metaData;
-                metaData.resize(bufSize==0?bufferSize:bufSize);
-                folderData.read((char*)&metaData.front(), bufSize==0?bufferSize:bufSize);
+                metaData.resize(bufSize == 0 ? bufferSize : bufSize);
+                folderData.read((char*)&metaData.front(), bufSize==0 ? bufferSize : bufSize);
                 return metaData;
             }
             throw std::runtime_error("Problem retrieving metadata");
