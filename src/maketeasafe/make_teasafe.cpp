@@ -33,6 +33,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 
+#include <ctime>
 #include <iostream>
 #include <string>
 
@@ -85,6 +86,7 @@ int main(int argc, char *argv[])
     io->blocks = blocks;
     io->freeBlocks = blocks;
     io->password.append(teasafe::utility::getPassword("teasafe password: "));
+    io->iv = time(NULL);
 
     // magic partition?
     teasafe::OptionalMagicPart omp;
