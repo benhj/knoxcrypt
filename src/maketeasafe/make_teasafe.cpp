@@ -34,9 +34,9 @@
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 
+#include <ctime>
 #include <iostream>
 #include <string>
-
 
 int main(int argc, char *argv[])
 {
@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
     io->blocks = blocks;
     io->freeBlocks = blocks;
     io->password.append(teasafe::utility::getPassword("teasafe password: "));
+    io->iv = uint64_t(time(NULL)); // the crypter initialization vector
 
     // magic partition?
     teasafe::OptionalMagicPart omp;
@@ -95,9 +96,6 @@ int main(int argc, char *argv[])
     }
 
     io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
-
-
-
     teasafe::MakeTeaSafe teasafe(io, omp);
 
     return 0;
