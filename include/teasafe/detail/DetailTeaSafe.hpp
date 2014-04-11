@@ -45,6 +45,7 @@ namespace teasafe { namespace detail
     uint64_t const MAX_FILENAME_LENGTH = 255;
     uint64_t const FILE_BLOCK_SIZE = 4096;
     uint64_t const FILE_BLOCK_META = 12;
+    uint64_t const IV_BYTES = 8;
 
     inline void convertUInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
     {
@@ -81,6 +82,16 @@ namespace teasafe { namespace detail
     }
 
     /**
+     * @brief get where the main encrypted bytes starts, i.e. after the initial
+     * iv data
+     * @return
+     */
+    inline uint64_t beginning()
+    {
+        return IV_BYTES;
+    }
+
+    /**
      * @brief gets the size of the TeaSafe image
      * @param in the image stream
      * @return image size
@@ -99,7 +110,7 @@ namespace teasafe { namespace detail
      */
     inline uint64_t getBlockCount(teasafe::TeaSafeImageStream &in)
     {
-        in.seekg(0);
+        in.seekg(beginning());
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         return convertInt8ArrayToInt64(dat);
@@ -112,7 +123,7 @@ namespace teasafe { namespace detail
      */
     inline uint64_t getNumberOfBlocks(teasafe::TeaSafeImageStream &in)
     {
-        (void)in.seekg(0);
+        (void)in.seekg(beginning());
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         return convertInt8ArrayToInt64(dat);
@@ -173,11 +184,11 @@ namespace teasafe { namespace detail
         uint64_t byteThatStoresBit(0);
         if (block < 8) {
 
-            (void)in.seekg(8);
+            (void)in.seekg(beginning() + 8);
             uint8_t dat;
             (void)in.read((char*)&dat, 1);
             setBitInByte(dat, block, set);
-            (void)in.seekp(8);
+            (void)in.seekp(beginning() + 8);
             (void)in.write((char*)&dat, 1);
 
         } else {
@@ -186,11 +197,11 @@ namespace teasafe { namespace detail
             uint64_t withoutLeftOver = block - leftOver;
             byteThatStoresBit = (withoutLeftOver / 8) - 1;
             ++byteThatStoresBit;
-            (void)in.seekg(8 + byteThatStoresBit);
+            (void)in.seekg(beginning() + 8 + byteThatStoresBit);
             uint8_t dat;
             (void)in.read((char*)&dat, 1);
             setBitInByte(dat, leftOver, set);
-            (void)in.seekp(8 + byteThatStoresBit);
+            (void)in.seekp(beginning() + 8 + byteThatStoresBit);
             (void)in.write((char*)&dat, 1);
         }
     }
@@ -210,7 +221,7 @@ namespace teasafe { namespace detail
         // read the bytes in to a buffer
         std::vector<uint8_t> buf;
         buf.assign(bytes, 0);
-        (void)in.seekg(8);
+        (void)in.seekg(beginning() + 8);
         (void)in.read((char*)&buf.front(), bytes);
 
         uint64_t byteThatStoresBit(0);
@@ -234,7 +245,7 @@ namespace teasafe { namespace detail
      */
     inline uint64_t getNumberOfAllocatedBlocks(teasafe::TeaSafeImageStream &in)
     {
-        (void)in.seekg(0);
+        (void)in.seekg(beginning());
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
         uint64_t blocks = convertInt8ArrayToInt64(dat);
@@ -280,7 +291,7 @@ namespace teasafe { namespace detail
         if (blocks == 0) {
             blocks = getNumberOfBlocks(in);
         } else {
-            (void)in.seekg(8);
+            (void)in.seekg(beginning() + 8);
         }
 
         // how many bytes does this value fit in to?
@@ -338,7 +349,7 @@ namespace teasafe { namespace detail
         // read the bytes in to a buffer
         std::vector<uint8_t> buf;
         buf.assign(bytes, 0);
-        (void)in.seekg(8);
+        (void)in.seekg(beginning() + 8);
         (void)in.read((char*)&buf.front(), bytes);
 
 

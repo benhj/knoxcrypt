@@ -65,7 +65,7 @@ class MakeTeaSafeTest
 
         // test that enough bytes are written
         teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::binary);
-        ASSERT_EQUAL(blocks, teasafe::detail::getBlockCount(is), "correctBlockCountIsReported");
+        ASSERT_EQUAL(blocks, teasafe::detail::getBlockCount(is), "MakeTeaSafeTest::correctBlockCountIsReported");
         is.close();
     }
 
@@ -78,7 +78,7 @@ class MakeTeaSafeTest
 
         teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::binary);
         teasafe::detail::OptionalBlock p = teasafe::detail::getNextAvailableBlock(is);
-        ASSERT_EQUAL(*p, 1, "firstBlockIsReportedAsBeingFree");
+        ASSERT_EQUAL(*p, 1, "MakeTeaSafeTest::firstBlockIsReportedAsBeingFree");
         is.close();
     }
 
@@ -92,7 +92,7 @@ class MakeTeaSafeTest
         teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
         teasafe::detail::setBlockToInUse(1, blocks, is);
         teasafe::detail::OptionalBlock p = teasafe::detail::getNextAvailableBlock(is);
-        assert(*p == 2);
+        ASSERT_EQUAL(2, *p, "MakeTeaSafeTest::blocksCanBeSetAndCleared next available block");
 
         // check that rest of map can also be set correctly
         bool broken = false;
@@ -104,22 +104,22 @@ class MakeTeaSafeTest
                 break;
             }
         }
-        ASSERT_EQUAL(broken, false, "blocksCanBeSetAndCleared A");
+        ASSERT_EQUAL(broken, false, "MakeTeaSafeTest::blocksCanBeSetAndCleared A");
 
         // check that bit 25 (arbitrary) can be unset again
         teasafe::detail::setBlockToInUse(25, blocks, is, false);
         p = teasafe::detail::getNextAvailableBlock(is);
-        ASSERT_EQUAL(*p, 25, "blocksCanBeSetAndCleared B");
+        ASSERT_EQUAL(*p, 25, "MakeTeaSafeTest::blocksCanBeSetAndCleared B");
 
         // should still be 25 when blocks after 25 are also made available
         teasafe::detail::setBlockToInUse(27, blocks, is, false);
         p = teasafe::detail::getNextAvailableBlock(is);
-        ASSERT_EQUAL(*p, 25, "blocksCanBeSetAndCleared C");
+        ASSERT_EQUAL(*p, 25, "MakeTeaSafeTest::blocksCanBeSetAndCleared C");
 
         // should now be 27 since block 25 is made unavailable
         teasafe::detail::setBlockToInUse(25, blocks, is);
         p = teasafe::detail::getNextAvailableBlock(is);
-        ASSERT_EQUAL(*p, 27, "blocksCanBeSetAndCleared D");
+        ASSERT_EQUAL(*p, 27, "MakeTeaSafeTest::blocksCanBeSetAndCleared D");
 
         is.close();
     }

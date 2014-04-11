@@ -43,7 +43,8 @@
 #include <boost/program_options.hpp>
 
 #include <fuse.h>
-
+#include <stdint.h>
+#include <vector>
 
 #define TeaSafe_DATA ((teasafe::TeaSafe*) fuse_get_context()->private_data)
 
@@ -474,6 +475,16 @@ int main(int argc, char *argv[])
     io->path = vm["imageName"].as<std::string>().c_str();
     io->password = teasafe::utility::getPassword("teasafe password: ");
     io->rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;
+
+    // Obtain the initialization vector from the first 8 bytes
+    {
+        std::ifstream in(io->path.c_str(), std::ios::in | std::ios::binary);
+        std::vector<uint8_t> ivBuffer;
+        ivBuffer.resize(8);
+        (void)in.read((char*)&ivBuffer.front(), teasafe::detail::IV_BYTES);
+        in.close();
+        io->iv = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer.front());
+    }
 
     // Obtain the number of blocks in the image by reading the image's block count
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);

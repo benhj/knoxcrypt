@@ -67,7 +67,7 @@ namespace teasafe { namespace cipher
     {
       public:
         explicit BasicByteTransformer(std::string const &password)
-            : IByteTransformer(password)
+            : IByteTransformer(password, uint64_t(12345) /*not used*/)
         {
             // we statically initialize as an optimization
             static bool init = false;

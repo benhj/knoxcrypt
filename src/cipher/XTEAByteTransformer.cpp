@@ -91,8 +91,9 @@ namespace teasafe { namespace cipher
 #define CIPHER_BUFFER_SIZE 268435456
 
 
-    XTEAByteTransformer::XTEAByteTransformer(std::string const &password)
-        : IByteTransformer(password)
+    XTEAByteTransformer::XTEAByteTransformer(std::string const &password, uint64_t const iv)
+        : IByteTransformer(password, iv)
+        , m_iv(iv)
         , m_rounds(32) // note, the suggested xtea rounds is 64 in the literature
     {
         // is this key-gen secure? probably not...use at own risk
@@ -225,7 +226,7 @@ namespace teasafe { namespace cipher
     {
         uint8_t cipherStream[16];
         for (int j = 0; j < 16; ++j) {
-            cipherStream[j] = startPosition + c - startPositionOffset;
+            cipherStream[j] = startPosition + c - startPositionOffset + m_iv;
             ++c;
         }
         c -= 16;
@@ -263,7 +264,7 @@ namespace teasafe { namespace cipher
 
             // re-fill b
             for (int j = 0; j < 8; ++j) {
-                bBuf[j] = startPosition + c - startPositionOffset + 8; // the last 8 is a bug fix for BC.
+                bBuf[j] = startPosition + c - startPositionOffset + m_iv;
                 ++c;
             }
             c -= 8;

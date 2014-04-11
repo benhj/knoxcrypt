@@ -147,6 +147,17 @@ namespace teasafe
          */
         void buildImage(SharedCoreIO const &io)
         {
+            //
+            // write out initial IV
+            //
+            {
+                uint8_t ivBytes[8];
+                detail::convertUInt64ToInt8Array(io->iv, ivBytes);
+                std::ofstream ivout(io->path.c_str(), std::ios::out | std::ios::binary);
+                (void)ivout.write((char*)ivBytes, 8);
+                ivout.flush();
+                ivout.close();
+            }
 
             //
             // store the number of blocks in the first 8 bytes of the superblock
@@ -155,7 +166,8 @@ namespace teasafe
             buildBlockBytes(io->blocks, sizeBytes);
 
             // write out size, and volume bitmap bytes
-            TeaSafeImageStream out(io, std::ios::out | std::ios::binary);
+            TeaSafeImageStream out(io, std::ios::out | std::ios::app | std::ios::binary);
+            out.seekp(detail::beginning()); // seek past iv bytes
             out.write((char*)sizeBytes, 8);
             createVolumeBitMap(io->blocks, out);
 

@@ -39,6 +39,7 @@
 #include <boost/format.hpp>
 #include <boost/make_shared.hpp>
 
+#include <ctime>
 #include <string>
 #include <vector>
 
@@ -57,6 +58,7 @@ teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
     io->blocks = 2048;
     io->freeBlocks = 2048;
     io->password = "abcd1234";
+    io->iv = uint64_t(time(NULL));
     io->rootBlock = 0;
     io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
     return io;
