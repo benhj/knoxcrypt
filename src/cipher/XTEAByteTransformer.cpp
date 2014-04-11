@@ -226,7 +226,7 @@ namespace teasafe { namespace cipher
     {
         uint8_t cipherStream[16];
         for (int j = 0; j < 16; ++j) {
-            cipherStream[j] = startPosition + c - startPositionOffset + m_iv;
+            cipherStream[j] = startPosition + c - startPositionOffset;// + m_iv;
             ++c;
         }
         c -= 16;
@@ -264,7 +264,7 @@ namespace teasafe { namespace cipher
 
             // re-fill b
             for (int j = 0; j < 8; ++j) {
-                bBuf[j] = startPosition + c - startPositionOffset + m_iv;
+                bBuf[j] = startPosition + c - startPositionOffset;// + m_iv;
                 ++c;
             }
             c -= 8;
