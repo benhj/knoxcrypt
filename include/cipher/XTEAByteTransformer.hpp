@@ -44,11 +44,14 @@ namespace teasafe { namespace cipher
     class XTEAByteTransformer : public IByteTransformer
     {
       public:
-        explicit XTEAByteTransformer(std::string const &password);
+        XTEAByteTransformer(std::string const &password, uint64_t const iv);
 
         ~XTEAByteTransformer();
 
       private:
+
+        // the iv used to initialize the CTR
+        uint64_t m_iv;
 
         // number of rounds used by xtea
         int m_rounds;

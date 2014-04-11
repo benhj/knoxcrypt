@@ -145,6 +145,17 @@ namespace teasafe
          */
         void buildImage(SharedCoreIO const &io)
         {
+            //
+            // write out initial IV
+            //
+            {
+                uint8_t ivBytes[8];
+                detail::convertUInt64ToInt8Array(io->iv, ivBytes);
+                std::ofstream ivout(io->path.c_str(), std::ios::out | std::ios::binary);
+                (void)ivout.write((char*)ivBytes, 8);
+                ivout.flush();
+                ivout.close();
+            }
 
             //
             // store the number of blocks in the first 8 bytes of the superblock

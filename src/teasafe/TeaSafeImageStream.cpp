@@ -39,7 +39,7 @@ namespace teasafe
 
     TeaSafeImageStream::TeaSafeImageStream(SharedCoreIO const &io, std::ios::openmode mode)
         : m_stream(io->path.c_str(), mode)
-        , m_byteTransformer(boost::make_shared<cipher::XTEAByteTransformer>(io->password))
+        , m_byteTransformer(boost::make_shared<cipher::XTEAByteTransformer>(io->password, io->iv))
         , m_gpos(0)
         , m_ppos(0)
     {
