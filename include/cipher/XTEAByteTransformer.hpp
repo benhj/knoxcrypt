@@ -51,7 +51,7 @@ namespace teasafe { namespace cipher
       private:
 
         // the iv used to initialize the CTR
-        uint64_t m_iv;
+        mutable uint64_t m_iv;
 
         // number of rounds used by xtea
         int m_rounds;
