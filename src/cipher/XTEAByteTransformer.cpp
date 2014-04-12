@@ -28,7 +28,7 @@
 
 // an implementation of XTEA
 
-
+#include "teasafe/detail/DetailTeaSafe.hpp"
 #include "cipher/XTEAByteTransformer.hpp"
 #include <openssl/sha.h>
 #include <vector>
@@ -94,7 +94,7 @@ namespace teasafe { namespace cipher
     XTEAByteTransformer::XTEAByteTransformer(std::string const &password, uint64_t const iv)
         : IByteTransformer(password, iv)
         , m_iv(iv)
-        , m_rounds(32) // note, the suggested xtea rounds is 64 in the literature
+        , m_rounds(64) // note, the suggested xtea rounds is 64 in the literature
     {
         // is this key-gen secure? probably not...use at own risk
         // initialize the key by taking a hash of the password and then creating
@@ -112,7 +112,7 @@ namespace teasafe { namespace cipher
                 g_key[c] = (buf[0] << 24) | (buf[1] << 16)  | (buf[2] << 8) | (buf[3]);
                 ++c;
             }
-            buildBigCipherBuffer();
+            //buildBigCipherBuffer();
             g_init = true;
         }
 
@@ -137,6 +137,7 @@ namespace teasafe { namespace cipher
     XTEAByteTransformer::doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {
         // big cipher buffer has been initialized
+        /*
         if (g_init) {
             // prefer to use cipher buffer
             if ((startPosition + length) < CIPHER_BUFFER_SIZE) {
@@ -145,7 +146,7 @@ namespace teasafe { namespace cipher
                 }
                 return;
             }
-        }
+        }*/
 
         // how many blocks required? defaults to 1, if length greater
         // than 8 bytes then more blocks are needed
@@ -153,41 +154,47 @@ namespace teasafe { namespace cipher
 
         std::ios_base::streamoff const startPositionOffset = startPosition % 8;
 
+        // the counter used to determine where we start in the cipher stream
+        uint64_t startRD = (startPosition - startPositionOffset);
+        uint64_t ctr = (startRD / 8);
+
+        // encipher the initial 64 bit counter.
+        UIntVector buf;
+        buf.resize(8);
+        cypherBytes(ctr, buf);
+
+        // c is a counter used to store which byte is currently being encrypted
+        long c = 0;
+
+        // if the length is > 8, we need to encrypt in multiples of 8
         if (length > 8) {
+
+            // compute how many blocks of size 8 bytes will be encrypted
             long remainder = length % 8;
             long roundedDown = length - remainder;
             blocksRequired += (roundedDown / 8);
-            long c = 0;
 
+            // encrypt blocksRequired times 8 byte blocks of data
             doSubTransformations(in,                         // input buffer
                                  out,                        // output buffer
                                  startPosition,              // seeked-to position
                                  startPositionOffset,        // 8-byte block offset
                                  blocksRequired,             // number of iterations
                                  c,                          // stream position
-                                 8 + startPositionOffset);   // upper bound of xor loop
+                                 ctr,                        // the CTR counter
+                                 buf);                       // the cipher text buffer
 
+            // encrypt the final block which is of length remainder bytes
             if (remainder > 0) {
-                doSubTransformations(in,
-                                     out,
-                                     startPosition,
-                                     startPositionOffset,
-                                     1, // do remaining bytes once
-                                     c,
-                                     remainder + startPositionOffset);
+                doSubTransformations(in, out, startPosition, startPositionOffset, 1, c, ctr, buf, remainder);
             }
 
             return;
         }
 
-        long c = 0;
-        doSubTransformations(in,
-                             out,
-                             startPosition,
-                             startPositionOffset,
-                             1, // only need to do once
-                             c,
-                             length + startPositionOffset);
+        // else the length < 8 so just encrypt length bytes
+        doSubTransformations(in, out, startPosition, startPositionOffset, 1, c, ctr, buf, length);
+
     }
 
     void
@@ -195,46 +202,32 @@ namespace teasafe { namespace cipher
                                char *out,
                                std::ios_base::streamoff const startPositionOffset,
                                long &c,
-                               int const uptoBit,
-                               UIntVector &aBuf,
-                               UIntVector &bBuf) const
+                               uint64_t &ctr,
+                               int const bytesToEncrypt,
+                               UIntVector &buf) const
     {
-        // now xor plain with key stream. Encrypts a maximum of 16 bytes
-        // If j < 8, then the a cipher buffer is used; if j >= 8, then the b cipher buffer
-        // is used
+        // now xor plain with key stream
         int k = 0;
-        for (int j = startPositionOffset; j < uptoBit; ++j) {
+        for (int j = startPositionOffset; j < bytesToEncrypt + startPositionOffset; ++j) {
             if (j >= 8) {
-                out[c] = in[c] ^ bBuf[k];
+
+                // iterate cipher counter and update cipher buffer
+                if(j == 8) { cypherBytes(ctr, buf); }
+
+                out[c] = in[c] ^ buf[k];
                 ++k;
-            } else {
-                out[c] = in[c] ^ aBuf[j];
-            }
+
+            } else { out[c] = in[c] ^ buf[j]; }
             ++c;
         }
     }
 
     void
-    XTEAByteTransformer::processFirstBlock(char *in,
-                                           char *out,
-                                           std::ios_base::streamoff const startPosition,
-                                           std::ios_base::streamoff const startPositionOffset,
-                                           long &c,
-                                           int const uptoBit,
-                                           UIntVector &aBuf,
-                                           UIntVector &bBuf) const
+    XTEAByteTransformer::cypherBytes(uint64_t &ctr, UIntVector &buf) const
     {
-        uint8_t cipherStream[16];
-        for (int j = 0; j < 16; ++j) {
-            cipherStream[j] = startPosition + c - startPositionOffset + m_iv;
-            ++c;
-        }
-        c -= 16;
-        memcpy(&aBuf.front(), cipherStream, 8 * sizeof(uint8_t));
-        memcpy(&bBuf.front(), cipherStream + 8, 8 * sizeof(uint8_t));
-        detail::convertBytesAndEncipher(m_rounds, &aBuf.front(), g_key);
-        detail::convertBytesAndEncipher(m_rounds, &bBuf.front(), g_key);
-        this->doXOR(in, out, startPositionOffset, c, uptoBit, aBuf, bBuf);
+        teasafe::detail::convertUInt64ToInt8Array(ctr, &buf.front());
+        detail::convertBytesAndEncipher(m_rounds, &buf.front(), g_key);
+        ++ctr;
     }
 
     void
@@ -244,35 +237,19 @@ namespace teasafe { namespace cipher
                                               std::ios_base::streamoff const startPositionOffset,
                                               long const blocksOfSize8BeingTransformed,
                                               long &c,
-                                              int const uptoBit) const
+                                              uint64_t &ctr,
+                                              UIntVector &buf,
+                                              int const bytesToEncrypt) const
     {
+        // transform  blocks
+        for (long i = 0; i < blocksOfSize8BeingTransformed; ++i) {
 
-        // create a couple of buffers for holder the cipher text
-        UIntVector aBuf;
-        UIntVector bBuf;
-        aBuf.resize(8);
-        bBuf.resize(8);
+            // now XOR plain with key stream.
+            this->doXOR(in, out, startPositionOffset, c, ctr, bytesToEncrypt, buf);
 
-        // process the first block
-        this->processFirstBlock(in, out, startPosition, startPositionOffset, c, uptoBit, aBuf, bBuf);
-
-        // do all remaining blocks
-        for (long i = 1; i < blocksOfSize8BeingTransformed; ++i) {
-
-            // optimization, next time we use a, it will be 'this' b
-            memcpy(&aBuf.front(), &bBuf.front(), 8 * sizeof(uint8_t));
-
-            // re-fill b
-            for (int j = 0; j < 8; ++j) {
-                bBuf[j] = startPosition + c - startPositionOffset + m_iv;
-                ++c;
-            }
-            c -= 8;
-
-            detail::convertBytesAndEncipher(m_rounds, &bBuf.front(), g_key);
-
-            // now xor plain with key stream.
-            this->doXOR(in, out, startPositionOffset, c, uptoBit, aBuf, bBuf);
+            // cipher buffer needs updating if the start position is 0 in which
+            // case it won't have been updated by the XOR loop
+            if(startPositionOffset == 0) { cypherBytes(ctr, buf); }
         }
     }
 }

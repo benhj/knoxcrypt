@@ -66,9 +66,9 @@ namespace teasafe { namespace cipher
                    char *out,
                    std::ios_base::streamoff const startPositionOffset,
                    long &c,
-                   int const uptoBit,
-                   UIntVector &aBuf,
-                   UIntVector &bBuf) const;
+                   uint64_t &ctr,
+                   int const bytesToEncrypt,
+                   UIntVector &buf) const;
 
         void processFirstBlock(char *in,
                                char *out,
@@ -85,7 +85,11 @@ namespace teasafe { namespace cipher
                                   std::ios_base::streamoff const startPositionOffset,
                                   long const blocksOfSize8BeingTransformed,
                                   long &c,
-                                  int const uptoBit) const;
+                                  uint64_t &ctr,
+                                  UIntVector &buf,
+                                  int const bytesToEncrypt = 8) const;
+
+        void cypherBytes(uint64_t &ctr, UIntVector &buf) const;
 
     };
 }
