@@ -46,6 +46,7 @@ namespace teasafe { namespace detail
     uint64_t const FILE_BLOCK_SIZE = 4096;
     uint64_t const FILE_BLOCK_META = 12;
     uint64_t const IV_BYTES = 8;
+    uint64_t const HEADER_BYTES = 8;
 
     inline void convertUInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
     {
@@ -88,7 +89,7 @@ namespace teasafe { namespace detail
      */
     inline uint64_t beginning()
     {
-        return IV_BYTES;
+        return IV_BYTES + HEADER_BYTES;
     }
 
     /**

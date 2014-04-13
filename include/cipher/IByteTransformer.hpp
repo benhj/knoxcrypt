@@ -37,12 +37,10 @@ namespace teasafe { namespace cipher
     class IByteTransformer
     {
       public:
-        IByteTransformer(std::string const &password, uint64_t const iv);
+        IByteTransformer();
         void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length);
         virtual ~IByteTransformer();
       private:
-        std::string const m_password;
-        IByteTransformer(); // no impl required
         virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
     };
 }

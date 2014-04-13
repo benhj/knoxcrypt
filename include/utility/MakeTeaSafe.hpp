@@ -148,13 +148,17 @@ namespace teasafe
         void buildImage(SharedCoreIO const &io)
         {
             //
-            // write out initial IV
+            // write out initial IV and header.
+            // Note, the header will store extra metainfo about other needed
+            // stuff such as the number of round used in xtea and other
+            // as-of-yet, undecided info
             //
             {
                 uint8_t ivBytes[8];
                 detail::convertUInt64ToInt8Array(io->iv, ivBytes);
                 std::ofstream ivout(io->path.c_str(), std::ios::out | std::ios::binary);
                 (void)ivout.write((char*)ivBytes, 8);
+                (void)ivout.write((char*)ivBytes, 8); // placeholder
                 ivout.flush();
                 ivout.close();
             }

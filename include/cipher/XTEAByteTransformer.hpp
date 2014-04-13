@@ -44,7 +44,9 @@ namespace teasafe { namespace cipher
     class XTEAByteTransformer : public IByteTransformer
     {
       public:
-        XTEAByteTransformer(std::string const &password, uint64_t const iv);
+        XTEAByteTransformer(std::string const &password,
+                            uint64_t const iv,
+                            unsigned int const rounds);
 
         ~XTEAByteTransformer();
 
@@ -54,7 +56,7 @@ namespace teasafe { namespace cipher
         mutable uint64_t m_iv;
 
         // number of rounds used by xtea
-        int m_rounds;
+        unsigned int m_rounds;
 
         XTEAByteTransformer(); // not required
 

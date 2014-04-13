@@ -48,7 +48,7 @@ namespace teasafe { namespace detail
                                          uint64_t const totalBlocks)
     {
         uint64_t const volumeBitMapBytes = totalBlocks / uint64_t(8);
-        return IV_BYTES                    // where main start after IV
+        return beginning()                 // where main start after IV
             + 8                            // number of fs blocks
             + volumeBitMapBytes            // volume bit map
             + 8                            // total number of files

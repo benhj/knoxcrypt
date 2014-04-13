@@ -91,10 +91,12 @@ namespace teasafe { namespace cipher
 #define CIPHER_BUFFER_SIZE 268435456
 
 
-    XTEAByteTransformer::XTEAByteTransformer(std::string const &password, uint64_t const iv)
-        : IByteTransformer(password, iv)
+    XTEAByteTransformer::XTEAByteTransformer(std::string const &password,
+                                             uint64_t const iv,
+                                             unsigned int const rounds)
+        : IByteTransformer()
         , m_iv(iv)
-        , m_rounds(64) // note, the suggested xtea rounds is 64 in the literature
+        , m_rounds(rounds) // note, the suggested xtea rounds is 64 in the literature
     {
         // is this key-gen secure? probably not...use at own risk
         // initialize the key by taking a hash of the password and then creating

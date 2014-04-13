@@ -30,8 +30,7 @@
 
 namespace teasafe { namespace cipher
 {
-    IByteTransformer::IByteTransformer(std::string const &password, uint64_t const)
-        : m_password(password)
+    IByteTransformer::IByteTransformer()
     {
     }
 

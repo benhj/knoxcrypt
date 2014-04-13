@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
     io->freeBlocks = blocks;
     io->password.append(teasafe::utility::getPassword("teasafe password: "));
     io->iv = time(NULL);
+    io->rounds = 64;
 
     // magic partition?
     teasafe::OptionalMagicPart omp;

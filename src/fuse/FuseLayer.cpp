@@ -486,6 +486,8 @@ int main(int argc, char *argv[])
         io->iv = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer.front());
     }
 
+    io->rounds = 64;
+
     // Obtain the number of blocks in the image by reading the image's block count
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
     io->blocks = teasafe::detail::getBlockCount(stream);

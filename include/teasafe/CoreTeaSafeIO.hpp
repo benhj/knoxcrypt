@@ -47,6 +47,7 @@ namespace teasafe
         uint64_t freeBlocks;             // number of free blocks
         std::string password;            // password used to generate encryption key
         uint64_t iv;                     // IV used to initialize the cipher stream
+        unsigned int rounds;             // number of rounds used by enc. process
         uint64_t rootBlock;              // the start block of the root folder
         SharedBlockBuilder blockBuilder; // a block factory / resource manage
     };
