@@ -150,7 +150,7 @@ namespace teasafe
             //
             // write out initial IV and header.
             // Note, the header will store extra metainfo about other needed
-            // stuff such as the number of round used in xtea and other
+            // stuff such as the number of rounds used by xtea and other
             // as-of-yet, undecided info
             //
             {
@@ -158,7 +158,12 @@ namespace teasafe
                 detail::convertUInt64ToInt8Array(io->iv, ivBytes);
                 std::ofstream ivout(io->path.c_str(), std::ios::out | std::ios::binary);
                 (void)ivout.write((char*)ivBytes, 8);
-                (void)ivout.write((char*)ivBytes, 8); // placeholder
+                for(int i = 0; i < 8; ++i) {
+                    // note although char is smaller that io->rounds, which
+                    // is an unsigned int, io->rounds should always be less than
+                    // size 255 (but > 0). Perhaps a different var type therefore?
+                    (void)ivout.write((char*)&io->rounds, 1);
+                }
                 ivout.flush();
                 ivout.close();
             }
