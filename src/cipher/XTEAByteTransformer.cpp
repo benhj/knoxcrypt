@@ -30,6 +30,7 @@
 
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "cipher/XTEAByteTransformer.hpp"
+#include <boost/progress.hpp>
 #include <openssl/sha.h>
 #include <vector>
 
@@ -88,7 +89,7 @@ namespace teasafe { namespace cipher
 
     // the size of the cipher buffer (prefer a #define rather than a const
     // for minimal memory footprint and minimal time required to instantiate).
-#define CIPHER_BUFFER_SIZE 268435456
+#define CIPHER_BUFFER_SIZE 27000000
 
 
     XTEAByteTransformer::XTEAByteTransformer(std::string const &password,
@@ -131,7 +132,12 @@ namespace teasafe { namespace cipher
         std::vector<char> in;
         in.resize(CIPHER_BUFFER_SIZE);
         g_bigCipherBuffer.resize(CIPHER_BUFFER_SIZE);
-        doTransform(&in.front(), &g_bigCipherBuffer.front(), 0, CIPHER_BUFFER_SIZE);
+        uint64_t div = CIPHER_BUFFER_SIZE / 100000;
+        boost::progress_display pd(div);
+        for(uint64_t i = 0;i<div;++i) {
+            doTransform((&in.front()) + (i * 100000), (&g_bigCipherBuffer.front()) + (i*100000), 0, 100000);
+            ++pd;
+        }
         std::cout<<"\nBuilt big xtea cipher stream buffer."<<std::endl;
     }
 
