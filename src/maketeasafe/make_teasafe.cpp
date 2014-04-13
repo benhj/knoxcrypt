@@ -42,17 +42,21 @@ int main(int argc, char *argv[])
 
     namespace po = boost::program_options;
     bool magicPartition;
+    unsigned int rounds;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
         ("imageName", po::value<std::string>(), "teasafe image path")
         ("blockCount", po::value<uint64_t>(), "size of filesystem in blocks")
-        ("coffee", po::value<bool>(&magicPartition)->default_value(false), "create alternative sub-volume");
+        ("coffee", po::value<bool>(&magicPartition)->default_value(false), "create alternative sub-volume")
+        ("rounds", po::value<unsigned int>(&rounds)->default_value(64), "number of encryption rounds");
 
     po::positional_options_description positionalOptions;
     (void)positionalOptions.add("imageName", 1);
     (void)positionalOptions.add("blockCount", 1);
 
+    teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
+    io->iv = time(NULL);
     po::variables_map vm;
     try {
         po::store(po::command_line_parser(argc, argv).
@@ -71,7 +75,8 @@ int main(int argc, char *argv[])
 
             std::cout<<"image path: "<<vm["imageName"].as<std::string>()<<std::endl;
             std::cout<<"file system size in blocks: "<<vm["blockCount"].as<uint64_t>()<<std::endl;
-
+            std::cout<<"number of encryption rounds: "<<vm["rounds"].as<unsigned int>()<<std::endl;
+            std::cout<<"initialization vector: "<<io->iv<<std::endl;
         }
     } catch (...) {
         std::cout<<"Problem parsing options"<<std::endl;
@@ -81,13 +86,13 @@ int main(int argc, char *argv[])
 
     uint64_t blocks = vm["blockCount"].as<uint64_t>();
 
-    teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
+
     io->path = vm["imageName"].as<std::string>().c_str();
     io->blocks = blocks;
     io->freeBlocks = blocks;
     io->password.append(teasafe::utility::getPassword("teasafe password: "));
-    io->iv = time(NULL);
-    io->rounds = 64;
+
+    io->rounds = rounds;
 
     // magic partition?
     teasafe::OptionalMagicPart omp;
