@@ -90,9 +90,10 @@ The password string will seed a SHA256 hash used to generate the
 cipher stream. The cipher itself will use 64 rounds of encyption. This
 is the default. To set a higher number of rounds, use the `--rounds` argument.
 Note, a higher number of rounds results in slower, but more secure encryption thus
-a slower overall performance. Note however that internally, a cache is used to cache 
-the first 250MB of the cipher stream. Speed should be uniform up to this point
-but will drop down once more space is occupied.
+slower performance. Note however that internally, a cache is used to cache 
+the first 250MB of the cipher stream. Up to this point performance, speed-wise, should be uniform
+but will become slightly degraded once the number of file blocks is greater than
+250MB worth.
 
 `./maketeasafe image.tea 128000 --coffee 1` will create a 500MB TeaSafe image with
 both a default root folder offset at block 0, and an extra sub-volume offset by a user-specified
@@ -125,7 +126,7 @@ with the coffee parameter, which will alternatively mount the image's coffee
 `./teasafe image.tea testMount --coffee 1`
 
 This will ask the user to enter both the decryption password and the magic number.
-When running teasafe, there is no need to specify the number of rounds originally used
+When running the teasafe command, there is no need to specify the number of rounds originally used
 by the encryption process as this is stored in the container header.
 
 Licensing
@@ -138,7 +139,7 @@ Contributing
 
 Firstly, please use the google group TeaSafe for reporting feedback.
 
-I am really in need to any feedback and testers and people who may like to
+I am really in need of any feedback and testers and people who may like to
 contribute. In particular, I need a UI that makes the whole image creation
 and mounting process a little more user-friendly. Any takers?
 
