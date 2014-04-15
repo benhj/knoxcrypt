@@ -9,9 +9,11 @@ TeaSafe: A user-space encrypted filesystem
 - uses the XTEA cipher for encryption
 - employs a very simple and custom developed filesystem 
 - can create and utilize a 'hidden' sub-volume
-- might not be secure
-- probably buggy
-- in need of testers
+- might not be secure*
+- probably buggy*
+- in need of testers*
+
+*That's where I need you to contribute! Please see below!
 
 ##### Slightly more wordy spiel..
 
