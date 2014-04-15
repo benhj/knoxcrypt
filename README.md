@@ -81,7 +81,6 @@ a good compromise between file speed and space efficiency). Example output:
 <pre>
 image path: test.tea
 file system size in blocks: 128000
-file system size in blocks: 128000
 number of encryption rounds: 64
 initialization vector: 1397590358
 password:
