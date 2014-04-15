@@ -38,8 +38,10 @@ See file `BasicByteTransformer.hpp` as an example of how this is done. The point
 as initialized in the constructor argument list of `TeaSafeImageStream.cpp` then needs to be updated to
 the developer's new implementation e.g.:
 
-`m_byteTransformer(boost::make_shared<cipher::BasicByteTransformer>(io.password))` --->
-`m_byteTransformer(boost::make_shared<cipher::SomeOtherImplementation>(io.password))`
+`m_byteTransformer(boost::make_shared<cipher::BasicByteTransformer>(io.password, io.iv, io.rounds))` --->
+`m_byteTransformer(boost::make_shared<cipher::SomeOtherImplementation>(io.password, io.iv, io.rounds))`
+
+Note that the parameters io.iv and io.rounds are XTEA cipher-specific. Yours may not require them.
 
 An experimental 'coffee mode' is also supported which allows the user to specify
 an additional sub-volume. Although multiple sub-volumes are possible, only two 
@@ -70,32 +72,44 @@ on modifying the Makefile to point to correct library and header paths.
 `./test` will run the test suite. This unit tests various parts of TeaSafe. As I uncover
 new bugs and attempt to fix them, I will probably (but not always) add new units to verify the fixes.
 
-`./maketeasafe image.tea 128000` will create a 500MB TeaSafe image when the block
-size is 4096 (note the block size is hardcoded into DetailTeaSafe.hpp and represents
+`./maketeasafe image.tea 128000` will create a 500MB TeaSafe image from 128000 x 4096
+byte blocks (note a block size of 4096 block size is hardcoded into DetailTeaSafe.hpp and represents
 a good compromise between file speed and space efficiency). Example output:
 
 <pre>
 image path: test.tea
 file system size in blocks: 128000
+file system size in blocks: 128000
+number of encryption rounds: 64
+initialization vector: 1397590358
 password:
 </pre>
 
 The password string will seed a SHA256 hash used to generate the
-cipher stream.
+cipher stream. The cipher itself will use 64 rounds of encyption. This
+is the default. To set a higher number of rounds, use the `--rounds` argument.
+Note, a higher number of rounds results in slower, but more secure encryption thus
+a slower overall performance. Note however that internally, a cache is used to cache 
+the first 250MB of the cipher stream. Speed should be uniform up to this point
+but will drop down once more space is occupied.
 
 `./maketeasafe image.tea 128000 --coffee 1` will create a 500MB TeaSafe image with
 both a default root folder offset at block 0, and an extra sub-volume offset by a user-specified
-'pin value' that must be less than the number of blocks (128000 in this example)
+block number value that must be less than the number of blocks (128000 in this example)
 but greater than 0. Example output:
 
 <pre>
 image path: test.tea
 file system size in blocks: 128000
+number of encryption rounds: 64
+initialiation vector: 1397590358
 password:
-magic number:
+sub-volume root block:
 </pre>
 
-The 'magic number' input will specify the pin value.
+The first 4 lines are general information about the image being created while
+`password` and `sub-volume root block` are user prompts, the latter of which
+is for when coffee mode was specified.
 
 `./teasafe image.tea testMount` will launch and mount image.teasf under 
 the directory testMount in fuse debug mode; note to disable debug
@@ -110,16 +124,24 @@ with the coffee parameter, which will alternatively mount the image's coffee
 `./teasafe image.tea testMount --coffee 1`
 
 This will ask the user to enter both the decryption password and the magic number.
+When running teasafe, there is no need to specify the number of rounds originally used
+by the encryption process as this is stored in the container header.
 
 Licensing
 ---------
 
-TeaSafe follows the BSD 2-Clause licence. 
+TeaSafe follows the BSD 3-Clause licence. 
 
 Contributing
 ------------
 
-If you want to help out with the project, you can use the 'forking' approach
+Firstly, please use the google group TeaSafe for reporting feedback.
+
+I am really in need to any feedback and testers and people who may like to
+contribute. In particular, I need a UI that makes the whole image creation
+and mounting process a little more user-friendly. Any takers?
+
+If you do want to help out with the project -- awesome! --, you can use the 'forking' approach
 as one suggested method. Basically, you'd do this:
 
 1. Fork the repository
