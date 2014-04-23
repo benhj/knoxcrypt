@@ -620,5 +620,7 @@ namespace teasafe
             }
             ++c;
         }
+
+        throw std::runtime_error("Whoops! Something went wrong in TeaSafeFile::getBlockWithIndex");
     }
 }

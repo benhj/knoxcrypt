@@ -29,9 +29,12 @@
 // an implementation of XTEA
 
 #include "teasafe/detail/DetailTeaSafe.hpp"
+
+#include "cipher/sha2.hpp"
 #include "cipher/XTEAByteTransformer.hpp"
+
 #include <boost/progress.hpp>
-#include <openssl/sha.h>
+
 #include <vector>
 
 namespace teasafe { namespace cipher
@@ -104,7 +107,7 @@ namespace teasafe { namespace cipher
         // a uint32_t array out of it
         if (!g_init) {
             unsigned char temp[32];
-            SHA256((unsigned char*)password.c_str(), password.size(), temp);
+            ::sha256((unsigned char*)password.c_str(), password.size(), temp);
             int c = 0;
             for (int i = 0; i < 16; i += 4) {
                 unsigned char buf[4];
