@@ -6,7 +6,7 @@ else
     CXX=clang++
     FUSE=osxfuse
 endif
-LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -l$(FUSE)
+LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options 
 CXXFLAGS_FUSE=-I/usr/local/include/$(FUSE)  -DFUSE_USE_VERSION=26
 CXXFLAGS=-ggdb -std=c++11 -Os -ffast-math -funroll-loops -Wno-ctor-dtor-privacy -I/usr/local/include/boost -Iinclude -D_FILE_OFFSET_BITS=64
 SOURCES := $(wildcard src/teasafe/*.cpp)
@@ -47,7 +47,7 @@ $(MAKETeaSafe_EXECUTABLE): directoryObj directoryObjMakeBfs directoryObjCipher $
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJECTS_UTIL) $(OBJECTS_CIPHER) -o $@
 
 $(FUSE_LAYER): directoryObj directoryObjFuse directoryObjCipher $(OBJECTS) $(OBJECTS_FUSE) $(OBJECTS_CIPHER)
-	$(CXX) $(LDFLAGS) $(OBJECTS) $(OBJECTS_FUSE) $(OBJECTS_CIPHER) -o $@
+	$(CXX) $(LDFLAGS) -l$(FUSE) $(OBJECTS) $(OBJECTS_FUSE) $(OBJECTS_CIPHER) -o $@
 	
 clean:
 	/bin/rm -fr obj obj-maketeasafe obj-test obj-fuse test maketeasafe teasafe obj-cipher
