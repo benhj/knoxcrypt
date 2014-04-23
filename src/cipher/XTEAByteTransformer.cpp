@@ -89,7 +89,7 @@ namespace teasafe { namespace cipher
 
     // the size of the cipher buffer (prefer a #define rather than a const
     // for minimal memory footprint and minimal time required to instantiate).
-#define CIPHER_BUFFER_SIZE 27000000
+#define CIPHER_BUFFER_SIZE 270000000
 
 
     XTEAByteTransformer::XTEAByteTransformer(std::string const &password,
@@ -138,7 +138,7 @@ namespace teasafe { namespace cipher
             doTransform((&in.front()) + (i * 100000), (&g_bigCipherBuffer.front()) + (i*100000), 0, 100000);
             ++pd;
         }
-        std::cout<<"\nBuilt big xtea cipher stream buffer."<<std::endl;
+        std::cout<<"\nBuilt big xtea cipher stream buffer.\n"<<std::endl;
     }
 
     void

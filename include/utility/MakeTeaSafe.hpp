@@ -103,6 +103,7 @@ namespace teasafe
                 (void)out.write((char*)&ints.front(), detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
                 ++progDisplay;
             }
+            std::cout<<"\nFile space bytes written."<<std::endl;
         }
 
         void zeroOutBits(std::vector<uint8_t> &bitMapData)
@@ -120,7 +121,6 @@ namespace teasafe
          */
         void createVolumeBitMap(uint64_t const blocks, TeaSafeImageStream &out)
         {
-            std::cout<<"Creating volume bit map..."<<std::endl;
             //
             // each block will be represented by a bit. If allocated this
             // bit will be set to 1. If not allocated it will be set to 0
@@ -135,6 +135,8 @@ namespace teasafe
                 zeroOutBits(bitMapData);
             }
             (void)out.write((char*)&bitMapData.front(), bytesRequired);
+
+            std::cout<<"Created volume bit map.\n"<<std::endl;
         }
 
         /**
@@ -159,18 +161,19 @@ namespace teasafe
             // as-of-yet, undecided info
             //
             {
-                std::cout<<"Writing out IV..."<<std::endl;
                 uint8_t ivBytes[8];
                 detail::convertUInt64ToInt8Array(io->iv, ivBytes);
                 std::ofstream ivout(io->path.c_str(), std::ios::out | std::ios::binary);
                 (void)ivout.write((char*)ivBytes, 8);
-                std::cout<<"Writing out header..."<<std::endl;
+                std::cout<<"Wrote out IV...\n"<<std::endl;
+
                 for(int i = 0; i < 8; ++i) {
                     // note although char is smaller that io->rounds, which
                     // is an unsigned int, io->rounds should always be less than
                     // size 255 (but > 0). Perhaps a different var type therefore?
                     (void)ivout.write((char*)&io->rounds, 1);
                 }
+                std::cout<<"Wrote out header.\n"<<std::endl;
                 ivout.flush();
                 ivout.close();
             }
@@ -207,7 +210,6 @@ namespace teasafe
             // always be block 0
             // added block builder here since can only work after bitmap created
             // fixes issue https://github.com/benhj/teasafe/issues/15
-            std::cout<<"Creating root directory entry.."<<std::endl;
             io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
             TeaSafeFolder rootDir(io, "root");
 
@@ -219,6 +221,7 @@ namespace teasafe
                 bool const setRoot = true;
                 TeaSafeFolder magicDir(magicIo, "root", setRoot);
             }
+            std::cout<<"\nCreated root entry.\n"<<std::endl;
         }
     };
 }
