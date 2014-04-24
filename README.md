@@ -56,10 +56,9 @@ The development requirements are:
 
 - Because of the use of strongly-typed enums, a c++11 compiler 
 - a couple of boost libraries (system and filesystem) and the boost headers. Note, the makefile will need 
-updating according to where boost is installed
-- OpenSSL crypto library and sha.h header which is only used for generating SHA256 hashes
+updating according to where boost is installed on your machine
 - the latest version of osxfuse (I'm using 2.6.2). As with boost, you might need to update the makefile
-(afaik, on linux, an implementation of FUSE is part of the kernel already).
+(on linux, an implementation of FUSE should be part of the kernel already).
 
 I envisage no problems running and compiling on linux. Windows unfortunately is a completely different beast
 not least of which is due to a lack of a FUSE implementation.
