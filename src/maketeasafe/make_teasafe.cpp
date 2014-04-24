@@ -73,6 +73,13 @@ int main(int argc, char *argv[])
             std::cout<<desc<<"\n";
         } else {
 
+            if(rounds > 255) {
+                std::cout<<"Rounds must be <= 255 (and > 0). By design, the resulting image ";
+                std::cout<<"allocates only one byte to storing this value. Note, ";
+                std::cout<<"a value of 64 is suggested by the literature to be a 'good' value."<<std::endl;
+                return 1;
+            }
+
             std::cout<<"image path: "<<vm["imageName"].as<std::string>()<<std::endl;
             std::cout<<"file system size in blocks: "<<vm["blockCount"].as<uint64_t>()<<std::endl;
             std::cout<<"number of encryption rounds: "<<vm["rounds"].as<unsigned int>()<<std::endl;
@@ -86,18 +93,22 @@ int main(int argc, char *argv[])
 
     uint64_t blocks = vm["blockCount"].as<uint64_t>();
 
-
     io->path = vm["imageName"].as<std::string>().c_str();
     io->blocks = blocks;
     io->freeBlocks = blocks;
     io->password.append(teasafe::utility::getPassword("teasafe password: "));
-
     io->rounds = rounds;
 
     // magic partition?
     teasafe::OptionalMagicPart omp;
     if (magicPartition) {
-        omp = teasafe::OptionalMagicPart(atoi(teasafe::utility::getPassword("sub-volume root block: ").c_str()));
+        unsigned long partBlock = atoi(teasafe::utility::getPassword("sub-volume root block: ").c_str());
+        if(partBlock == 0 || partBlock >= blocks) {
+            std::cout<<"Error: sub-volume root block must be less than "<<blocks<<" AND greater than 0"<<std::endl;
+            return 1;
+        }
+
+        omp = teasafe::OptionalMagicPart(partBlock);
     }
 
     teasafe::MakeTeaSafe teasafe(io, omp);
