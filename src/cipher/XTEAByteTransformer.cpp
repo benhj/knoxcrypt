@@ -30,8 +30,7 @@
 
 #include "teasafe/detail/DetailTeaSafe.hpp"
 
-#include "cipher/sha2.hpp"
-#include "cipher/scrypt.hpp"
+#include "cipher/scrypt/crypto_scrypt.hpp"
 #include "cipher/XTEAByteTransformer.hpp"
 
 #include <boost/progress.hpp>
@@ -107,8 +106,13 @@ namespace teasafe { namespace cipher
         // The following key generation algorithm uses scrypt, with N = 1024; r = 64; p = 64
         //
         if (!g_init) {
-            unsigned char temp[32];
-            ::scrypt_N_1_1_256(password.c_str(), password.size(), (char*)temp);
+            unsigned char temp[16];
+
+            // proof of concept, currently making the salt the same as the password
+            ::crypto_scrypt((uint8_t*)password.c_str(), password.size(),
+                            (uint8_t*)password.c_str(), password.size(),
+                            1048576, 1, 1, temp, 16);
+
             int c = 0;
 
             for (int i = 0; i < 16; i += 4) {
