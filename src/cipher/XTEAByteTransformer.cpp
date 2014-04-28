@@ -108,7 +108,7 @@ namespace teasafe { namespace cipher
         //
         if (!g_init) {
             unsigned char temp[32];
-            ::scrypt_1024_1_1_256(password.c_str(), password.size(), (char*)temp);
+            ::scrypt_N_1_1_256(password.c_str(), password.size(), (char*)temp);
             int c = 0;
 
             for (int i = 0; i < 16; i += 4) {
