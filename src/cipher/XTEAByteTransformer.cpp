@@ -31,6 +31,7 @@
 #include "teasafe/detail/DetailTeaSafe.hpp"
 
 #include "cipher/sha2.hpp"
+#include "cipher/scrypt.hpp"
 #include "cipher/XTEAByteTransformer.hpp"
 
 #include <boost/progress.hpp>
@@ -103,15 +104,13 @@ namespace teasafe { namespace cipher
         , m_rounds(rounds) // note, the suggested xtea rounds is 64 in the literature
     {
         //
-        // The following key generation algorithm is very naive. It simply generates
-        // a sha256 hash and uses that as the basis for the key
-        // NOTE: NOT VERY SECURE given the key derivation's susceptibility to brute-force
-        // attacks. A stronger algorithm like scrypt is suggested (todo).
+        // The following key generation algorithm uses scrypt, with N = 1024; r = 64; p = 64
         //
         if (!g_init) {
             unsigned char temp[32];
-            ::sha256((unsigned char*)password.c_str(), password.size(), temp);
+            ::scrypt_1024_1_1_256(password.c_str(), password.size(), (char*)temp);
             int c = 0;
+
             for (int i = 0; i < 16; i += 4) {
                 unsigned char buf[4];
                 buf[0] = temp[i];

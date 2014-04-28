@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Colin Percival, 2011 ArtForz, 2012-2013 pooler
+ * Copyright 2009 Colin Percival, 2011 ArtForz, 2012-2013 pooler, 2014 BenHJ
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@
 
 #include "cipher/scrypt.hpp"
 #include "cipher/sha2.hpp"
-#include "util.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -253,7 +252,7 @@ static inline void xor_salsa8(uint32_t B[16], const uint32_t Bx[16])
 	B[15] += x15;
 }
 
-void scrypt_1024_1_1_256_sp_generic(const char *input, char *output, char *scratchpad)
+void scrypt_1024_1_1_256_sp_generic(const char *input, size_t length, char *output, char *scratchpad)
 {
 	uint8_t B[128];
 	uint32_t X[32];
@@ -262,7 +261,7 @@ void scrypt_1024_1_1_256_sp_generic(const char *input, char *output, char *scrat
 
 	V = (uint32_t *)(((uintptr_t)(scratchpad) + 63) & ~ (uintptr_t)(63));
 
-	PBKDF2_SHA256((const uint8_t *)input, 80, (const uint8_t *)input, 80, 1, B, 128);
+	PBKDF2_SHA256((const uint8_t *)input, length, (const uint8_t *)input, length, 1, B, 128);
 
 	for (k = 0; k < 32; k++)
 		X[k] = le32dec(&B[4 * k]);
@@ -283,12 +282,12 @@ void scrypt_1024_1_1_256_sp_generic(const char *input, char *output, char *scrat
 	for (k = 0; k < 32; k++)
 		le32enc(&B[4 * k], X[k]);
 
-	PBKDF2_SHA256((const uint8_t *)input, 80, B, 128, 1, (uint8_t *)output, 32);
+	PBKDF2_SHA256((const uint8_t *)input, length, B, 128, 1, (uint8_t *)output, 32);
 }
 
 #if defined(USE_SSE2)
 // By default, set to generic scrypt function. This will prevent crash in case when scrypt_detect_sse2() wasn't called
-void (*scrypt_1024_1_1_256_sp_detected)(const char *input, char *output, char *scratchpad) = &scrypt_1024_1_1_256_sp_generic;
+void (*scrypt_1024_1_1_256_sp_detected)(const char *input, size_t length, char *output, char *scratchpad) = &scrypt_1024_1_1_256_sp_generic;
 
 void scrypt_detect_sse2()
 {
@@ -322,8 +321,8 @@ void scrypt_detect_sse2()
 }
 #endif
 
-void scrypt_1024_1_1_256(const char *input, char *output)
+void scrypt_1024_1_1_256(const char *input, size_t length, char *output)
 {
 	char scratchpad[SCRYPT_SCRATCHPAD_SIZE];
-    scrypt_1024_1_1_256_sp(input, output, scratchpad);
+    scrypt_1024_1_1_256_sp(input, length, output, scratchpad);
 }
