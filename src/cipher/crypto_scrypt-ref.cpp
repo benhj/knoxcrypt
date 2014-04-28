@@ -28,6 +28,7 @@
  */
 
 #include <errno.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -221,6 +222,8 @@ crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 	uint32_t i;
 
 	/* Sanity-check parameters. */
+	// UNTIL I can find out where SIZE_MAX is defined, will comment this sanity check out
+	/*
 #if SIZE_MAX > UINT32_MAX
 	if (buflen > (((uint64_t)(1) << 32) - 1) * 32) {
 		errno = EFBIG;
@@ -242,7 +245,7 @@ crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 	    (N > SIZE_MAX / 128 / r)) {
 		errno = ENOMEM;
 		goto err0;
-	}
+	}*/
 
 	/* Allocate memory. */
 	if ((B = (uint8_t*)malloc(128 * r * p)) == NULL)
