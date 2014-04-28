@@ -6,7 +6,8 @@ TeaSafe: A user-space encrypted filesystem
 - an encrypted filesystem
 - uses the FUSE headers and libraries 
 - more like Truecrypt than EncFS
-- uses the XTEA cipher for encryption
+- uses the XTEA cipher in CTR mode for encryption
+- employs the scrypt key derivation function
 - employs a very simple and custom developed filesystem 
 - can create and utilize a 'hidden' sub-volume
 - might not be secure*
