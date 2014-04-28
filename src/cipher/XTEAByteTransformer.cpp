@@ -102,9 +102,12 @@ namespace teasafe { namespace cipher
         , m_iv(iv)
         , m_rounds(rounds) // note, the suggested xtea rounds is 64 in the literature
     {
-        // is this key-gen secure? probably not...use at own risk
-        // initialize the key by taking a hash of the password and then creating
-        // a uint32_t array out of it
+        //
+        // The following key generation algorithm is very naive. It simply generates
+        // a sha256 hash and uses that as the basis for the key
+        // NOTE: NOT VERY SECURE given the key derivation's susceptibility to brute-force
+        // attacks. A stronger algorithm like scrypt is suggested (todo).
+        //
         if (!g_init) {
             unsigned char temp[32];
             ::sha256((unsigned char*)password.c_str(), password.size(), temp);
