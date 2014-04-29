@@ -32,6 +32,8 @@
 
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
+#include <boost/random.hpp>
+#include <boost/nondet_random.hpp>
 
 #include <ctime>
 #include <iostream>
@@ -56,7 +58,13 @@ int main(int argc, char *argv[])
     (void)positionalOptions.add("blockCount", 1);
 
     teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
-    io->iv = time(NULL);
+
+    // use a mersenne twister PRNG for IV
+    boost::random_device rd;
+    boost::random::mt19937_64 gen(rd());
+    boost::random::uniform_int_distribution<unsigned long long> dis;
+    io->iv = dis(gen);
+
     po::variables_map vm;
     try {
         po::store(po::command_line_parser(argc, argv).

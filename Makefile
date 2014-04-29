@@ -6,7 +6,7 @@ else
     CXX=clang++
     FUSE=osxfuse
 endif
-LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options 
+LDFLAGS=-L/usr/local/lib -lboost_filesystem -lboost_system -lboost_program_options -lboost_random
 CXXFLAGS_FUSE=-I/usr/local/include/$(FUSE)  -DFUSE_USE_VERSION=26
 CXXFLAGS=-ggdb -std=c++11 -Os -ffast-math -funroll-loops -Wno-ctor-dtor-privacy -I/usr/local/include/boost -Iinclude -D_FILE_OFFSET_BITS=64
 SOURCES := $(wildcard src/teasafe/*.cpp)
