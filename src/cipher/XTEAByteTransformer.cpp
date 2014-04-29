@@ -103,15 +103,17 @@ namespace teasafe { namespace cipher
         , m_rounds(rounds) // note, the suggested xtea rounds is 64 in the literature
     {
         //
-        // The following key generation algorithm uses scrypt, with N = 1024; r = 64; p = 64
+        // The following key generation algorithm uses scrypt, with N = 2^20; r = 8; p = 1
         //
         if (!g_init) {
             unsigned char temp[16];
 
-            // proof of concept, currently making the salt the same as the password
-            ::crypto_scrypt((uint8_t*)password.c_str(), password.size(),
-                            (uint8_t*)password.c_str(), password.size(),
-                            1048576, 1, 1, temp, 16);
+            std::cout<<"Generating key...\n"<<std::endl;
+            uint8_t salt[8];
+            teasafe::detail::convertUInt64ToInt8Array(iv, salt);
+            ::crypto_scrypt((uint8_t*)password.c_str(), password.size(), salt, 8,
+                            1048576, 8, 1, temp, 16);
+            std::cout<<"Key generated.\n"<<std::endl;
 
             int c = 0;
 
