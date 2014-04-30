@@ -30,6 +30,7 @@
 #include "utility/EcholessPasswordPrompt.hpp"
 #include "utility/MakeTeaSafe.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 #include <boost/random.hpp>
@@ -59,11 +60,12 @@ int main(int argc, char *argv[])
 
     teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
 
-    // use a mersenne twister PRNG for IV
+    // use a non-deterministic random device to generate the iv. This
+    // allegedly pulls data from /dev/urandom
     boost::random_device rd;
-    boost::random::mt19937_64 gen(rd());
-    boost::random::uniform_int_distribution<unsigned long long> dis;
-    io->iv = dis(gen);
+    boost::random::uniform_int_distribution<uint64_t> dis;
+    boost::function<uint64_t()> gen = boost::bind(dis, boost::ref(rd));
+    io->iv = gen();
 
     po::variables_map vm;
     try {
