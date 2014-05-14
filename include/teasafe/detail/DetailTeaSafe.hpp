@@ -407,6 +407,30 @@ namespace teasafe { namespace detail
         setBlockToInUse(blockUsed, totalBlocks, in, set);
     }
 
+    /**
+     * @brief checks the g position of the stream and updates if necessary
+     * @param stream the stream to update
+     * @param offset the position to seek to
+     */
+    inline void checkAndSeekG(TeaSafeImageStream &stream, uint64_t offset)
+    {
+        if(stream.tellg() != offset) {
+            (void)stream.seekg(offset);
+        }
+    }
+
+    /**
+     * @brief checks the p position of the stream and updates if necessary
+     * @param stream the stream to update
+     * @param offset the position to seek to
+     */
+    inline void checkAndSeekP(TeaSafeImageStream &stream, uint64_t offset)
+    {
+        if(stream.tellp() != offset) {
+            (void)stream.seekp(offset);
+        }
+    }
+
 }
 }
 

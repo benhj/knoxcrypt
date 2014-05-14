@@ -66,9 +66,6 @@ namespace teasafe
                                              OpenDisposition const &openDisposition,
                                              bool const enforceRootBlock)
     {
-
-        teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
-
         // note building a new block to write to should always be in append mode
         uint64_t id;
 
@@ -79,7 +76,6 @@ namespace teasafe
             id = m_blockDeque.front(); //*(detail::getNextAvailableBlock(stream, io->blocks));
             m_blockDeque.pop_front();
         }
-        stream.close();
         return FileBlock(io, id, id, openDisposition);
     }
 

@@ -42,6 +42,9 @@ namespace teasafe
 
     typedef boost::shared_ptr<cipher::IByteTransformer> ByteTransformerPtr;
 
+    class TeaSafeImageStream;
+    typedef boost::shared_ptr<TeaSafeImageStream> SharedImageStream;
+
     class TeaSafeImageStream
     {
       public:

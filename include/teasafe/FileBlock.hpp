@@ -182,6 +182,12 @@ namespace teasafe
          */
         void doSetNextIndex(TeaSafeImageStream &stream, uint64_t nextIndex) const;
 
+        /**
+         * @brief check if the image stream pointer is initialized,
+         * initializing it if not
+         */
+        void initImageStream() const;
+
         SharedCoreIO m_io;
         uint64_t m_index;
         mutable uint32_t m_bytesWritten;
@@ -194,6 +200,9 @@ namespace teasafe
 
         // an optimization so that size can be written at end
         mutable uint64_t m_bytesToWriteOnFlush;
+
+        // used for writing to the underlying image stream
+        mutable SharedImageStream m_stream;
 
     };
 

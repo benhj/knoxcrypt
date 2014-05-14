@@ -31,6 +31,8 @@
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/FileBlockException.hpp"
 
+#include <boost/make_shared.hpp>
+
 namespace teasafe
 {
 
@@ -48,6 +50,7 @@ namespace teasafe
         , m_initialBytesWritten(0)
         , m_openDisposition(openDisposition)
         , m_bytesToWriteOnFlush(0)
+        , m_stream()
     {
         // set m_offset
         m_offset = detail::getOffsetOfFileBlock(m_index, io->blocks);
@@ -64,23 +67,30 @@ namespace teasafe
         , m_seekPos(0)
         , m_openDisposition(openDisposition)
         , m_bytesToWriteOnFlush(0)
+        , m_stream()
     {
         // set m_offset
-        TeaSafeImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
-        (void)stream.seekg(m_offset);
+        initImageStream();
+        detail::checkAndSeekG(*m_stream, m_offset);
 
         // read m_bytesWritten
         uint8_t sizeDat[4];
-        (void)stream.read((char*)sizeDat, 4);
+        (void)m_stream->read((char*)sizeDat, 4);
         m_bytesWritten = detail::convertInt4ArrayToInt32(sizeDat);
         m_initialBytesWritten = m_bytesWritten;
 
         // read m_next
         uint8_t nextDat[8];
-        (void)stream.read((char*)nextDat, 8);
+        (void)m_stream->read((char*)nextDat, 8);
         m_next = detail::convertInt8ArrayToInt64(nextDat);
+    }
 
-        stream.close();
+    void
+    FileBlock::initImageStream() const
+    {
+        if(!m_stream) {
+            m_stream = boost::make_shared<TeaSafeImageStream>(m_io, std::ios::in | std::ios::out | std::ios::binary);
+        }
     }
 
     boost::iostreams::stream_offset
@@ -106,10 +116,9 @@ namespace teasafe
             }
 
             // open the image stream for reading
-            TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-            (void)stream.seekg(m_offset + detail::FILE_BLOCK_META + m_seekPos);
-            (void)stream.read((char*)buf, n);
-            stream.close();
+            initImageStream();
+            detail::checkAndSeekG(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos);
+            (void)m_stream->read((char*)buf, n);
 
             // update the stream position
             m_seekPos += n;
@@ -127,9 +136,9 @@ namespace teasafe
         }
 
         // open the image stream for writing
-        TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        (void)stream.seekp(m_offset + detail::FILE_BLOCK_META + m_seekPos);
-        (void)stream.write((char*)buf, n);
+        this->initImageStream();
+        detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos);
+        (void)m_stream->write((char*)buf, n);
 
         // do updates to file block metadata only if in append mode
         // note update to next index taken care of in FileEntry
@@ -146,7 +155,7 @@ namespace teasafe
             // optimization. This number will be written on flush to record number bytes written
             //m_bytesToWriteOnFlush = m_bytesWritten;
 
-            doSetSize(stream, m_bytesWritten);
+            doSetSize(*m_stream, m_bytesWritten);
         }
         // if in overwrite mode, we still need to check if writing goes above
         // the initial bytes written and update the size accordingly
@@ -158,11 +167,10 @@ namespace teasafe
             //m_bytesToWriteOnFlush = m_seekPos + n;
 
             // update m_bytesWritten
-            doSetSize(stream, m_seekPos + n);
+            doSetSize(*m_stream, m_seekPos + n);
         }
 
-        stream.flush();
-        stream.close();
+        m_stream->flush();
 
         // update the stream position
         m_seekPos += n;
@@ -197,30 +205,27 @@ namespace teasafe
     void
     FileBlock::registerBlockWithVolumeBitmap()
     {
-        TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        detail::updateVolumeBitmapWithOne(stream, m_index, m_io->blocks);
+        this->initImageStream();
+        detail::updateVolumeBitmapWithOne(*m_stream, m_index, m_io->blocks);
         m_io->freeBlocks--;
-        stream.close();
     }
 
     void
     FileBlock::setSizeOnFlush() const
     {
-        TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        doSetSize(stream, m_seekPos);
-        stream.flush();
-        stream.close();
+        this->initImageStream();
+        doSetSize(*m_stream, m_seekPos);
+        m_stream->flush();
     }
 
     void
     FileBlock::setSize(std::ios_base::streamoff size) const
     {
-        TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        doSetSize(stream, size);
+        this->initImageStream();
+        doSetSize(*m_stream, size);
         m_initialBytesWritten = size;
         m_bytesWritten = size;
-        stream.flush();
-        stream.close();
+        m_stream->flush();
     }
 
     void
@@ -236,11 +241,10 @@ namespace teasafe
     void
     FileBlock::setNextIndex(uint64_t nextIndex) const
     {
-        TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        doSetNextIndex(stream, nextIndex);
+        this->initImageStream();
+        doSetNextIndex(*m_stream, nextIndex);
         m_next = nextIndex;
-        stream.flush();
-        stream.close();
+        m_stream->flush();
     }
 
     void
@@ -256,12 +260,11 @@ namespace teasafe
     void
     FileBlock::unlink()
     {
-        teasafe::TeaSafeImageStream stream(m_io, std::ios::in | std::ios::out | std::ios::binary);
-        detail::updateVolumeBitmapWithOne(stream, m_index, m_io->blocks, false);
+        this->initImageStream();
+        detail::updateVolumeBitmapWithOne(*m_stream, m_index, m_io->blocks, false);
         m_io->blockBuilder->putBlockBack(m_index);
-        doSetNextIndex(stream, m_index);
-        doSetSize(stream, 0);
-        stream.close();
+        doSetNextIndex(*m_stream, m_index);
+        doSetSize(*m_stream, 0);
     }
 
     bool
