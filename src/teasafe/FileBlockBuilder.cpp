@@ -64,6 +64,7 @@ namespace teasafe
     FileBlock
     FileBlockBuilder::buildWritableFileBlock(SharedCoreIO const &io,
                                              OpenDisposition const &openDisposition,
+                                             SharedImageStream &stream,
                                              bool const enforceRootBlock)
     {
         // note building a new block to write to should always be in append mode
@@ -76,15 +77,16 @@ namespace teasafe
             id = m_blockDeque.front(); //*(detail::getNextAvailableBlock(stream, io->blocks));
             m_blockDeque.pop_front();
         }
-        return FileBlock(io, id, id, openDisposition);
+        return FileBlock(io, id, id, openDisposition, stream);
     }
 
     FileBlock
     FileBlockBuilder::buildFileBlock(SharedCoreIO const &io,
                                      uint64_t const index,
-                                     OpenDisposition const &openDisposition)
+                                     OpenDisposition const &openDisposition,
+                                     SharedImageStream &stream)
     {
-        return FileBlock(io, index, openDisposition);
+        return FileBlock(io, index, openDisposition, stream);
     }
 
     void

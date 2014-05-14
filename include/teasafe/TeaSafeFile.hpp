@@ -32,6 +32,7 @@
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlock.hpp"
 #include "teasafe/OpenDisposition.hpp"
+#include "teasafe/TeaSafeImageStream.hpp"
 
 #include <boost/function.hpp>
 #include <boost/optional.hpp>
@@ -193,6 +194,10 @@ namespace teasafe
         // an optional size update callback to be used in setting the reported
         // size in the entry info held in the parent folder entry info cache
         OptionalSizeCallback m_optionalSizeCallback;
+
+        // hold on to the image stream globally to reduce seek time when
+        // instantiating a new FileBlock
+        mutable SharedImageStream m_stream;
 
         /**
          * @brief  for keeping track of what the current file block as indicated

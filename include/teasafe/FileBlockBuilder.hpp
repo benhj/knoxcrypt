@@ -52,11 +52,13 @@ namespace teasafe
 
         FileBlock buildWritableFileBlock(SharedCoreIO const &io,
                                          OpenDisposition const &openDisposition,
+                                         SharedImageStream &stream,
                                          bool const enforceRootBlock = false);
 
         FileBlock buildFileBlock(SharedCoreIO const &io,
                                  uint64_t const index,
-                                 OpenDisposition const &openDisposition);
+                                 OpenDisposition const &openDisposition,
+                                 SharedImageStream &stream);
 
         void putBlockBack(uint64_t const);
 

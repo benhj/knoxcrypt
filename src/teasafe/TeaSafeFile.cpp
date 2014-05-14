@@ -53,6 +53,7 @@ namespace teasafe
         , m_openDisposition(OpenDisposition::buildAppendDisposition())
         , m_pos(0)
         , m_blockCount(0)
+        , m_stream()
     {
     }
 
@@ -72,12 +73,13 @@ namespace teasafe
         , m_openDisposition(openDisposition)
         , m_pos(0)
         , m_blockCount(0)
+        , m_stream()
     {
         // counts number of blocks and sets file size
         enumerateBlockStats();
 
         // sets the current working block to the very first file block
-        m_workingBlock = boost::make_shared<FileBlock>(io, startBlock, openDisposition);
+        m_workingBlock = boost::make_shared<FileBlock>(io, startBlock, openDisposition, m_stream);
 
         // set up for specific write-mode
         if (m_openDisposition.readWrite() != ReadOrWriteOrBoth::ReadOnly) {
@@ -161,6 +163,7 @@ namespace teasafe
     {
         FileBlock block(m_io->blockBuilder->buildWritableFileBlock(m_io,
                                                                    teasafe::OpenDisposition::buildAppendDisposition(),
+                                                                   m_stream,
                                                                    m_enforceStartBlock));
         if (m_enforceStartBlock) { m_enforceStartBlock = false; }
 
@@ -180,7 +183,8 @@ namespace teasafe
         // find very first block
         FileBlockIterator block(m_io,
                                 m_startVolumeBlock,
-                                m_openDisposition);
+                                m_openDisposition,
+                                m_stream);
         FileBlockIterator end;
         for (; block != end; ++block) {
             m_fileSize += block->getDataBytesWritten();
@@ -589,7 +593,7 @@ namespace teasafe
     {
         // loop over all file blocks and update the volume bitmap indicating
         // that block is no longer in use
-        FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition);
+        FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition, m_stream);
         FileBlockIterator end;
 
         for (; it != end; ++it) {
@@ -611,7 +615,7 @@ namespace teasafe
     FileBlock
     TeaSafeFile::getBlockWithIndex(uint64_t n) const
     {
-        FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition);
+        FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition, m_stream);
         FileBlockIterator end;
         uint64_t c(0);
         for (; it != end; ++it) {

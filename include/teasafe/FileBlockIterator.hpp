@@ -52,7 +52,8 @@ namespace teasafe
          */
         FileBlockIterator(SharedCoreIO const &io,
                           uint64_t rootBlock,
-                          OpenDisposition const &openDisposition);
+                          OpenDisposition const &openDisposition,
+                          SharedImageStream const &stream = SharedImageStream());
 
         /**
          * @brief for constructing end iterator
@@ -69,6 +70,8 @@ namespace teasafe
 
         SharedCoreIO m_io;
         OpenDisposition m_openDisposition;
+
+        SharedImageStream m_stream;
 
         typedef boost::optional<FileBlock> WorkingFileBlock;
         WorkingFileBlock m_workingFileBlock;

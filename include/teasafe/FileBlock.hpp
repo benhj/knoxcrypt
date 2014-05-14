@@ -55,23 +55,27 @@ namespace teasafe
          * @param index the index of this file block
          * @param next the index of the next file block that makes up the file
          * @param openDisposition open mode
+         * @param stream the image stream that holds the TS data
          */
         FileBlock(SharedCoreIO const &io,
                   uint64_t const index,
                   uint64_t const next,
-                  OpenDisposition const &openDisposition);
+                  OpenDisposition const &openDisposition,
+                  SharedImageStream const &stream = SharedImageStream());
 
         /**
          * @brief for when a file block needs to be read or written use this constructor
          * @param io the core teasafe io (path, blocks, password)
          * @param index the index of the file block
          * @param openDisposition open mode
+         * @param stream the image stream that holds the TS data
          * @note  other params like size and next will be initialized when
          * the block is actually read
          */
         FileBlock(SharedCoreIO const &io,
                   uint64_t const index,
-                  OpenDisposition const &openDisposition);
+                  OpenDisposition const &openDisposition,
+                  SharedImageStream const &stream = SharedImageStream());
 
         /**
          * @brief  reads from the current file block

@@ -33,16 +33,19 @@ namespace teasafe
 
     FileBlockIterator::FileBlockIterator(SharedCoreIO const &io,
                                          uint64_t rootBlock,
-                                         OpenDisposition const &openDisposition)
+                                         OpenDisposition const &openDisposition,
+                                         SharedImageStream const &stream)
         : m_io(io)
         , m_openDisposition(openDisposition)
-        , m_workingFileBlock(FileBlock(io, rootBlock, openDisposition))
+        , m_stream(stream)
+        , m_workingFileBlock(FileBlock(io, rootBlock, openDisposition, stream))
     {
     }
 
     FileBlockIterator::FileBlockIterator()
         : m_io()
         , m_openDisposition(OpenDisposition::buildAppendDisposition())
+        , m_stream()
         , m_workingFileBlock()
     {
     }
@@ -52,7 +55,7 @@ namespace teasafe
     {
         uint64_t nextBlock = m_workingFileBlock->getNextIndex();
         if (nextBlock != m_workingFileBlock->getIndex()) {
-            m_workingFileBlock = FileBlock(m_io, nextBlock, m_openDisposition);
+            m_workingFileBlock = FileBlock(m_io, nextBlock, m_openDisposition, m_stream);
         } else {
             m_workingFileBlock = WorkingFileBlock();
         }

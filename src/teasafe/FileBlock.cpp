@@ -39,7 +39,8 @@ namespace teasafe
     FileBlock::FileBlock(SharedCoreIO const &io,
                          uint64_t const index,
                          uint64_t const next,
-                         OpenDisposition const &openDisposition)
+                         OpenDisposition const &openDisposition,
+                         SharedImageStream const &stream)
         : m_io(io)
         , m_index(index)
         , m_bytesWritten(0)
@@ -50,7 +51,7 @@ namespace teasafe
         , m_initialBytesWritten(0)
         , m_openDisposition(openDisposition)
         , m_bytesToWriteOnFlush(0)
-        , m_stream()
+        , m_stream(stream)
     {
         // set m_offset
         m_offset = detail::getOffsetOfFileBlock(m_index, io->blocks);
@@ -58,7 +59,8 @@ namespace teasafe
 
     FileBlock::FileBlock(SharedCoreIO const &io,
                          uint64_t const index,
-                         OpenDisposition const &openDisposition)
+                         OpenDisposition const &openDisposition,
+                         SharedImageStream const &stream)
         : m_io(io)
         , m_index(index)
         , m_bytesWritten(0)
@@ -67,7 +69,7 @@ namespace teasafe
         , m_seekPos(0)
         , m_openDisposition(openDisposition)
         , m_bytesToWriteOnFlush(0)
-        , m_stream()
+        , m_stream(stream)
     {
         // set m_offset
         initImageStream();
