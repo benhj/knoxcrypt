@@ -31,7 +31,7 @@
 namespace teasafe
 {
 
-    TeaSafeFileDevice::TeaSafeFileDevice(TeaSafeFile const &entry)
+    TeaSafeFileDevice::TeaSafeFileDevice(SharedTeaSafeFile const &entry)
         : m_entry(entry)
     {
     }
@@ -39,20 +39,20 @@ namespace teasafe
     std::streamsize
     TeaSafeFileDevice::read(char* s, std::streamsize n)
     {
-        return m_entry.read(s, n);
+        return m_entry->read(s, n);
     }
 
     std::streamsize
     TeaSafeFileDevice::write(const char* s, std::streamsize n)
     {
-        std::streamsize wrote = m_entry.write(s, n);
-        m_entry.flush();
+        std::streamsize wrote = m_entry->write(s, n);
+        m_entry->flush();
         return wrote;
     }
 
     std::streampos
     TeaSafeFileDevice::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
     {
-        return m_entry.seek(off, way);
+        return m_entry->seek(off, way);
     }
 }

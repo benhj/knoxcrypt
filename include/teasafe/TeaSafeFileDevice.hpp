@@ -45,7 +45,7 @@ namespace teasafe
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
 
-        explicit TeaSafeFileDevice(TeaSafeFile const &entry);
+        explicit TeaSafeFileDevice(SharedTeaSafeFile const &entry);
 
         std::streamsize read(char* s, std::streamsize n);
         std::streamsize write(const char* s, std::streamsize n);
@@ -53,7 +53,7 @@ namespace teasafe
 
       private:
         TeaSafeFileDevice();
-        TeaSafeFile m_entry;
+        SharedTeaSafeFile m_entry;
     };
 
 }

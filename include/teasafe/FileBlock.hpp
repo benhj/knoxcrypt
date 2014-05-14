@@ -169,6 +169,8 @@ namespace teasafe
          */
         bool operator==(FileBlock const &other) const;
 
+        SharedImageStream getStream() const;
+
       private:
 
         FileBlock();

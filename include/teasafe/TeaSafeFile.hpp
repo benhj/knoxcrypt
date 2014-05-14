@@ -49,6 +49,9 @@
 namespace teasafe
 {
 
+    class TeaSafeFile;
+    typedef boost::shared_ptr<TeaSafeFile> SharedTeaSafeFile;
+
     class TeaSafeFile
     {
 

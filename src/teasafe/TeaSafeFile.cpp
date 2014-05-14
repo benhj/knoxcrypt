@@ -41,7 +41,9 @@
 namespace teasafe
 {
     // for writing a brand new entry where start block isn't known
-    TeaSafeFile::TeaSafeFile(SharedCoreIO const &io, std::string const &name, bool const enforceStartBlock)
+    TeaSafeFile::TeaSafeFile(SharedCoreIO const &io,
+                             std::string const &name,
+                             bool const enforceStartBlock)
         : m_io(io)
         , m_name(name)
         , m_enforceStartBlock(enforceStartBlock)
@@ -80,6 +82,8 @@ namespace teasafe
 
         // sets the current working block to the very first file block
         m_workingBlock = boost::make_shared<FileBlock>(io, startBlock, openDisposition, m_stream);
+
+        m_stream = m_workingBlock->getStream();
 
         // set up for specific write-mode
         if (m_openDisposition.readWrite() != ReadOrWriteOrBoth::ReadOnly) {
@@ -153,7 +157,8 @@ namespace teasafe
             ++m_blockIndex;
             m_workingBlock = boost::make_shared<FileBlock>(m_io,
                                                            m_workingBlock->getNextIndex(),
-                                                           m_openDisposition);
+                                                           m_openDisposition,
+                                                           m_stream);
         }
 
         return size;
@@ -197,6 +202,11 @@ namespace teasafe
     {
         m_workingBlock->write((char*)&m_buffer.front(), bytes);
         std::vector<uint8_t>().swap(m_buffer);
+
+        // stream would have been initialized in block's write function
+        if(!m_stream) {
+            m_stream = m_workingBlock->getStream();
+        }
     }
 
     bool
@@ -251,7 +261,8 @@ namespace teasafe
                     ++m_blockIndex;
                     m_workingBlock = boost::make_shared<FileBlock>(m_io,
                                                                    m_workingBlock->getNextIndex(),
-                                                                   m_openDisposition);
+                                                                   m_openDisposition,
+                                                                   m_stream);
                     return;
                 }
 

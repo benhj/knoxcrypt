@@ -91,8 +91,15 @@ namespace teasafe
     FileBlock::initImageStream() const
     {
         if(!m_stream) {
+            //std::cout<<"Here!"<<std::endl;
             m_stream = boost::make_shared<TeaSafeImageStream>(m_io, std::ios::in | std::ios::out | std::ios::binary);
         }
+    }
+
+    SharedImageStream
+    FileBlock::getStream() const
+    {
+        return m_stream;
     }
 
     boost::iostreams::stream_offset

@@ -40,6 +40,10 @@ namespace teasafe
         , m_stream(stream)
         , m_workingFileBlock(FileBlock(io, rootBlock, openDisposition, stream))
     {
+        // optimization, make sure global stream ptr is updated
+        if(m_stream) {
+            m_stream = m_workingFileBlock->getStream();
+        }
     }
 
     FileBlockIterator::FileBlockIterator()

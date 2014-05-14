@@ -166,6 +166,10 @@ namespace teasafe
         typedef boost::lock_guard<StateMutex> StateLock;
         mutable StateMutex m_stateMutex;
 
+        // so that a new file doesn't need to be created each time the same file is opened
+        typedef std::map<std::string, SharedTeaSafeFile> FileCache;
+        mutable FileCache m_fileCache;
+
         TeaSafe(); // not required
 
         void throwIfAlreadyExists(std::string const &path) const;
@@ -184,6 +188,13 @@ namespace teasafe
          * @param path parent path
          */
         void removeDeletedParentFromCache(boost::filesystem::path const &path);
+
+        SharedTeaSafeFile setAndGetCachedFile(std::string const &path,
+                                              SharedTeaSafeFolder const &parentEntry,
+                                              OpenDisposition const &openMode) const;
+
+
+
     };
 }
 

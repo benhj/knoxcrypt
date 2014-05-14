@@ -40,6 +40,7 @@ namespace teasafe
         , m_rootFolder(boost::make_shared<TeaSafeFolder>(io, io->rootBlock, "root"))
         , m_folderCache()
         , m_stateMutex()
+        , m_fileCache()
     {
     }
 
@@ -299,7 +300,9 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        TeaSafeFile fe = parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(), openMode);
+        //TeaSafeFile fe = parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(), openMode);
+
+        SharedTeaSafeFile fe = this->setAndGetCachedFile(path, parentEntry, openMode);
 
         return TeaSafeFileDevice(fe);
     }
@@ -323,6 +326,21 @@ namespace teasafe
 
         TeaSafeFile fe = parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(), OpenDisposition::buildOverwriteDisposition());
         fe.truncate(offset);
+    }
+
+    SharedTeaSafeFile
+    TeaSafe::setAndGetCachedFile(std::string const &path,
+                                 SharedTeaSafeFolder const &parentEntry,
+                                 OpenDisposition const &openMode) const
+    {
+        FileCache::iterator it = m_fileCache.find(path);
+        if(it != m_fileCache.end()) {
+            //it->second->setOpenMode(openMode);
+            return it->second;
+        }
+        SharedTeaSafeFile sf = boost::make_shared<TeaSafeFile>(parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(), openMode));
+        m_fileCache.insert(std::make_pair(path, sf));
+        return sf;
     }
 
     /**
