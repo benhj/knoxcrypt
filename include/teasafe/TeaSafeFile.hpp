@@ -80,6 +80,8 @@ namespace teasafe
                     uint64_t const startBlock,
                     OpenDisposition const &openDisposition);
 
+        ~TeaSafeFile();
+
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
 
@@ -156,6 +158,14 @@ namespace teasafe
          * @param callback the setSize function (probably) of EntryInfo
          */
         void setOptionalSizeUpdateCallback(SetEntryInfoSizeCallback callback);
+
+        /**
+         * @brief  queries what the current open mode is
+         * @return the open disposition
+         */
+        OpenDisposition getOpenDisposition() const;
+
+        SharedImageStream getStream() const;
 
       private:
 

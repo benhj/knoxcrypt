@@ -205,6 +205,7 @@ namespace teasafe { namespace detail
             (void)in.seekp(beginning() + 8 + byteThatStoresBit);
             (void)in.write((char*)&dat, 1);
         }
+        in.flush();
     }
 
     /**

@@ -104,6 +104,14 @@ namespace teasafe
             return m_trunc;
         }
 
+        bool equals(OpenDisposition const &other) const
+        {
+            return (m_readWrite == other.m_readWrite) &&
+                   (m_append    == other.m_append)    &&
+                   (m_create    == other.m_create)    &&
+                   (m_trunc     == other.m_trunc);
+        }
+
       private:
         ReadOrWriteOrBoth m_readWrite;
         AppendOrOverwrite m_append;

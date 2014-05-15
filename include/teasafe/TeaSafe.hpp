@@ -189,12 +189,22 @@ namespace teasafe
          */
         void removeDeletedParentFromCache(boost::filesystem::path const &path);
 
+        /**
+         * @brief  updates the file cache / retrieves a cached entry
+         * @param  path the path of the file to update / retrieve
+         * @param  parentEntry the parent of the entry
+         * @param  openMode the mode to open the file in
+         * @return the cached file
+         */
         SharedTeaSafeFile setAndGetCachedFile(std::string const &path,
                                               SharedTeaSafeFolder const &parentEntry,
-                                              OpenDisposition const &openMode) const;
+                                              OpenDisposition openMode) const;
 
-
-
+        /**
+         * @brief removed a file from the cache if it exists in cache
+         * @param path the path of the file to remove
+         */
+        void removeFileFromFileCache(std::string const &path);
     };
 }
 

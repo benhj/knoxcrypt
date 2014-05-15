@@ -40,11 +40,12 @@
 namespace teasafe { namespace detail
 {
 
-    void incrementFolderEntryCount(SharedCoreIO const &io,
+    void incrementFolderEntryCount(teasafe::TeaSafeImageStream &out,
+                                   teasafe::SharedCoreIO const& io,
                                    uint64_t const startBlock,
                                    uint64_t const inc = 1)
     {
-        teasafe::TeaSafeImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
+        //teasafe::TeaSafeImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, io->blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
@@ -54,7 +55,6 @@ namespace teasafe { namespace detail
         (void)out.seekp(offset + FILE_BLOCK_META);
         convertUInt64ToInt8Array(count, buf);
         (void)out.write((char*)buf, 8);
-        out.close();
     }
 
     void decrementFolderEntryCount(SharedCoreIO const &io,
@@ -71,7 +71,6 @@ namespace teasafe { namespace detail
         (void)out.seekp(offset + FILE_BLOCK_META);
         convertUInt64ToInt8Array(count, buf);
         (void)out.write((char*)buf, 8);
-        out.close();
     }
 
 }
