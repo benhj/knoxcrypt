@@ -87,12 +87,25 @@ namespace teasafe
         m_next = detail::convertInt8ArrayToInt64(nextDat);
     }
 
+    FileBlock::~FileBlock()
+    {
+        /*
+        if(m_stream) {
+            if(m_stream->is_open()) {
+                m_stream->close();
+            }
+        }*/
+    }
+
     void
     FileBlock::initImageStream() const
     {
         if(!m_stream) {
-            //std::cout<<"Here!"<<std::endl;
             m_stream = boost::make_shared<TeaSafeImageStream>(m_io, std::ios::in | std::ios::out | std::ios::binary);
+        } else {
+            if(!m_stream->is_open()) {
+                m_stream->open(m_io, std::ios::in | std::ios::out | std::ios::binary);
+            }
         }
     }
 
@@ -217,6 +230,7 @@ namespace teasafe
         this->initImageStream();
         detail::updateVolumeBitmapWithOne(*m_stream, m_index, m_io->blocks);
         m_io->freeBlocks--;
+        m_stream->flush();
     }
 
     void
@@ -274,6 +288,7 @@ namespace teasafe
         m_io->blockBuilder->putBlockBack(m_index);
         doSetNextIndex(*m_stream, m_index);
         doSetSize(*m_stream, 0);
+        m_stream->flush();
     }
 
     bool

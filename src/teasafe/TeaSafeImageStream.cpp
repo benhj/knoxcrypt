@@ -53,9 +53,10 @@ namespace teasafe
         std::ios_base::streamoff start = m_gpos;
         std::vector<char> in;
         in.resize(n);
-        (void)m_stream.read(&in.front(), n);
+        //(void)m_stream.read(&in.front(), n);
+        (void)m_stream.read(buf, n);
         m_gpos += n;
-        m_byteTransformer->transform(&in.front(), buf, start, n);
+        //m_byteTransformer->transform(&in.front(), buf, start, n);
         return *this;
     }
 
@@ -65,8 +66,9 @@ namespace teasafe
         std::vector<char> out;
         out.resize(n);
         std::ios_base::streamoff start = m_ppos;
-        m_byteTransformer->transform((char*)buf, &out.front(), start, n);
-        (void)m_stream.write(&out.front(), n);
+        //m_byteTransformer->transform((char*)buf, &out.front(), start, n);
+        //(void)m_stream.write(&out.front(), n);
+        (void)m_stream.write(buf, n);
         m_ppos += n;
         return *this;
     }
@@ -122,6 +124,21 @@ namespace teasafe
     TeaSafeImageStream::flush()
     {
         m_stream.flush();
+    }
+
+    bool
+    TeaSafeImageStream::is_open() const
+    {
+        return m_stream.is_open();
+    }
+
+    void
+    TeaSafeImageStream::open(SharedCoreIO const &io,
+                             std::ios::openmode mode)
+    {
+        m_stream.open(io->path.c_str(), mode);
+        m_ppos = 0;
+        m_gpos = 0;
     }
 
 }

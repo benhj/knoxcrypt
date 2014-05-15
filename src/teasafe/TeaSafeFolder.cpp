@@ -208,14 +208,16 @@ namespace teasafe
         // write the first block index to the file entry metadata
         (void)doWriteFirstBlockIndexToEntryMetaData(startBlock);
 
-        // make sure all data has been written
-        m_folderData.flush();
-
         // increment entry count, but only if brand new
         if (!overWroteOld) {
-            detail::incrementFolderEntryCount(m_io, m_folderData.getStartVolumeBlockIndex());
+            detail::incrementFolderEntryCount(*m_folderData.getStream(),
+                                              m_io,
+                                              m_folderData.getStartVolumeBlockIndex());
             ++m_entryCount;
         }
+
+        // make sure all data has been written
+        m_folderData.flush();
     }
 
     void
@@ -414,6 +416,7 @@ namespace teasafe
                     return info;
                 }
             }
+
         }
         return SharedEntryInfo();
     }
@@ -467,12 +470,11 @@ namespace teasafe
     uint64_t
     TeaSafeFolder::doGetNumberOfEntries() const
     {
-        teasafe::TeaSafeImageStream out(m_io, std::ios::in | std::ios::out | std::ios::binary);
+        teasafe::SharedImageStream out(m_folderData.getStream());
         uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartVolumeBlockIndex(), m_io->blocks);
-        (void)out.seekg(offset + detail::FILE_BLOCK_META);
+        (void)out->seekg(offset + detail::FILE_BLOCK_META);
         uint8_t buf[8];
-        (void)out.read((char*)buf, 8);
-        out.close();
+        (void)out->read((char*)buf, 8);
         return detail::convertInt8ArrayToInt64(buf);
     }
 

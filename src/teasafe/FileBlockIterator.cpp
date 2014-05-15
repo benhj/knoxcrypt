@@ -44,6 +44,7 @@ namespace teasafe
         if(m_stream) {
             m_stream = m_workingFileBlock->getStream();
         }
+
     }
 
     FileBlockIterator::FileBlockIterator()

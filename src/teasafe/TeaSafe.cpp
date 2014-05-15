@@ -47,7 +47,7 @@ namespace teasafe
     TeaSafeFolder
     TeaSafe::getTeaSafeFolder(std::string const &path)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -77,7 +77,7 @@ namespace teasafe
     EntryInfo
     TeaSafe::getInfo(std::string const &path)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -105,21 +105,21 @@ namespace teasafe
     bool
     TeaSafe::fileExists(std::string const &path) const
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         return doFileExists(path);
     }
 
     bool
     TeaSafe::folderExists(std::string const &path)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         return doFolderExists(path);
     }
 
     void
     TeaSafe::addFile(std::string const &path)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // file entries with trailing slash should throw
@@ -128,6 +128,7 @@ namespace teasafe
         }
 
         SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
+
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -141,7 +142,7 @@ namespace teasafe
     void
     TeaSafe::addFolder(std::string const &path) const
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash
@@ -163,7 +164,7 @@ namespace teasafe
     void
     TeaSafe::renameEntry(std::string const &src, std::string const &dst)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         std::string srcPath(src);
         char ch = *src.rbegin();
         // ignore trailing slash
@@ -211,16 +212,13 @@ namespace teasafe
     void
     TeaSafe::removeFile(std::string const &path)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
-        // ignore trailing slash, but only if folder type
-        // an entry of file type should never have a trailing
-        // slash and is allowed to fail in this case
+        // ignore trailing slash
         if (ch == '/') {
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
-
         SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(thePath);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -235,12 +233,16 @@ namespace teasafe
         }
 
         parentEntry->removeTeaSafeFile(boost::filesystem::path(thePath).filename().string());
+
+        // also remove it from the cache if it exists
+        this->removeFileFromFileCache(path);
+
     }
 
     void
     TeaSafe::removeFolder(std::string const &path, FolderRemovalType const &removalType)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -281,7 +283,7 @@ namespace teasafe
     TeaSafeFileDevice
     TeaSafe::openFile(std::string const &path, OpenDisposition const &openMode)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         char ch = *path.rbegin();
         if (ch == '/') {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -300,17 +302,14 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        //TeaSafeFile fe = parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(), openMode);
-
         SharedTeaSafeFile fe = this->setAndGetCachedFile(path, parentEntry, openMode);
-
         return TeaSafeFileDevice(fe);
     }
 
     void
     TeaSafe::truncateFile(std::string const &path, std::ios_base::streamoff offset)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -324,21 +323,29 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        TeaSafeFile fe = parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(), OpenDisposition::buildOverwriteDisposition());
-        fe.truncate(offset);
+        SharedTeaSafeFile fe = this->setAndGetCachedFile(path, parentEntry, OpenDisposition::buildOverwriteDisposition());
+        fe->truncate(offset);
     }
 
     SharedTeaSafeFile
     TeaSafe::setAndGetCachedFile(std::string const &path,
                                  SharedTeaSafeFolder const &parentEntry,
-                                 OpenDisposition const &openMode) const
+                                 OpenDisposition openMode) const
     {
         FileCache::iterator it = m_fileCache.find(path);
         if(it != m_fileCache.end()) {
-            //it->second->setOpenMode(openMode);
-            return it->second;
+
+            // note: need to also check if the openMode is different to the cached
+            // version in which case the cached version should probably be rebuilt
+            if(!it->second->getOpenDisposition().equals(openMode)) {
+                m_fileCache.erase(path);
+            } else {
+                return it->second;
+            }
         }
-        SharedTeaSafeFile sf = boost::make_shared<TeaSafeFile>(parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(), openMode));
+
+        SharedTeaSafeFile sf(boost::make_shared<TeaSafeFile>(parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(),
+                                                                                         openMode)));
         m_fileCache.insert(std::make_pair(path, sf));
         return sf;
     }
@@ -350,7 +357,7 @@ namespace teasafe
     void
     TeaSafe::statvfs(struct statvfs *buf)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         buf->f_bsize   = detail::FILE_BLOCK_SIZE;
         buf->f_blocks  = m_io->blocks;
         buf->f_bfree   = m_io->freeBlocks;
@@ -478,6 +485,15 @@ namespace teasafe
         FolderCache::iterator it = m_folderCache.find(path.relative_path().string());
         if (it != m_folderCache.end()) {
             m_folderCache.erase(it);
+        }
+    }
+
+    void
+    TeaSafe::removeFileFromFileCache(std::string const &path)
+    {
+        FileCache::iterator it = m_fileCache.find(path);
+        if(it != m_fileCache.end()) {
+            m_fileCache.erase(it);
         }
     }
 

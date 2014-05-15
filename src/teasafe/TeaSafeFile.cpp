@@ -101,6 +101,16 @@ namespace teasafe
         }
     }
 
+    TeaSafeFile::~TeaSafeFile()
+    {
+        /*
+        if(m_stream) {
+            if(m_stream->is_open()) {
+                m_stream->close();
+            }
+        }*/
+    }
+
     namespace detail
     {
 
@@ -121,6 +131,18 @@ namespace teasafe
     TeaSafeFile::fileSize() const
     {
         return m_fileSize;
+    }
+
+    OpenDisposition
+    TeaSafeFile::getOpenDisposition() const
+    {
+        return m_openDisposition;
+    }
+
+    SharedImageStream
+    TeaSafeFile::getStream() const
+    {
+        return m_stream;
     }
 
     uint64_t
