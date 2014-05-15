@@ -108,6 +108,8 @@ namespace teasafe
          */
         std::string getName() const;
 
+        SharedImageStream getStream() const;
+
 
         /**
          * @brief retrieves the entry info attributes of a given indexed entry

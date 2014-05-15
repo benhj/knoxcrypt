@@ -101,16 +101,6 @@ namespace teasafe
         }
     }
 
-    TeaSafeFile::~TeaSafeFile()
-    {
-        /*
-        if(m_stream) {
-            if(m_stream->is_open()) {
-                m_stream->close();
-            }
-        }*/
-    }
-
     namespace detail
     {
 

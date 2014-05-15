@@ -87,16 +87,6 @@ namespace teasafe
         m_next = detail::convertInt8ArrayToInt64(nextDat);
     }
 
-    FileBlock::~FileBlock()
-    {
-        /*
-        if(m_stream) {
-            if(m_stream->is_open()) {
-                m_stream->close();
-            }
-        }*/
-    }
-
     void
     FileBlock::initImageStream() const
     {

@@ -80,8 +80,6 @@ namespace teasafe
                     uint64_t const startBlock,
                     OpenDisposition const &openDisposition);
 
-        ~TeaSafeFile();
-
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
 

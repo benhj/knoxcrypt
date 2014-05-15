@@ -77,8 +77,6 @@ namespace teasafe
                   OpenDisposition const &openDisposition,
                   SharedImageStream const &stream = SharedImageStream());
 
-        ~FileBlock();
-
         /**
          * @brief  reads from the current file block
          * @param  buf the buffer to store the read data in

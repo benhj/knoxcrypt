@@ -47,7 +47,7 @@ namespace teasafe
     TeaSafeFolder
     TeaSafe::getTeaSafeFolder(std::string const &path)
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -77,7 +77,7 @@ namespace teasafe
     EntryInfo
     TeaSafe::getInfo(std::string const &path)
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -105,7 +105,7 @@ namespace teasafe
     bool
     TeaSafe::fileExists(std::string const &path) const
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         return doFileExists(path);
     }
 
@@ -119,7 +119,7 @@ namespace teasafe
     void
     TeaSafe::addFile(std::string const &path)
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // file entries with trailing slash should throw
@@ -142,7 +142,7 @@ namespace teasafe
     void
     TeaSafe::addFolder(std::string const &path) const
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash
@@ -159,12 +159,14 @@ namespace teasafe
         throwIfAlreadyExists(path);
 
         parentEntry->addTeaSafeFolder(boost::filesystem::path(thePath).filename().string());
+
+        parentEntry->getStream()->close();
     }
 
     void
     TeaSafe::renameEntry(std::string const &src, std::string const &dst)
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         std::string srcPath(src);
         char ch = *src.rbegin();
         // ignore trailing slash
@@ -212,7 +214,7 @@ namespace teasafe
     void
     TeaSafe::removeFile(std::string const &path)
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash
@@ -242,7 +244,7 @@ namespace teasafe
     void
     TeaSafe::removeFolder(std::string const &path, FolderRemovalType const &removalType)
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         std::string thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -283,7 +285,7 @@ namespace teasafe
     TeaSafeFileDevice
     TeaSafe::openFile(std::string const &path, OpenDisposition const &openMode)
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         char ch = *path.rbegin();
         if (ch == '/') {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -309,7 +311,7 @@ namespace teasafe
     void
     TeaSafe::truncateFile(std::string const &path, std::ios_base::streamoff offset)
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         SharedTeaSafeFolder parentEntry = doGetParentTeaSafeFolder(path);
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -332,6 +334,14 @@ namespace teasafe
                                  SharedTeaSafeFolder const &parentEntry,
                                  OpenDisposition openMode) const
     {
+
+        // very strictly limit the size of the cache to being able to hold
+        // on to one entry only. TODO. does this mean that a map is a map
+        // idea? We could just use a single pair.
+        if(m_fileCache.size() > 1) {
+            FileCache().swap(m_fileCache);
+        }
+
         FileCache::iterator it = m_fileCache.find(path);
         if(it != m_fileCache.end()) {
 

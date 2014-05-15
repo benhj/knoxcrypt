@@ -220,6 +220,12 @@ namespace teasafe
         m_folderData.flush();
     }
 
+    SharedImageStream
+    TeaSafeFolder::getStream() const
+    {
+        return m_folderData.getStream();
+    }
+
     void
     TeaSafeFolder::addTeaSafeFile(std::string const &name)
     {
