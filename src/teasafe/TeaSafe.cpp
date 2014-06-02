@@ -62,14 +62,14 @@ namespace teasafe
             return *m_rootFolder;
         }
 
-        SharedEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
+        SharedEntryInfo childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
         if (childInfo->type() == EntryType::FileType) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
-        return parentEntry->getTeaSafeFolder(boost::filesystem::path(path).filename().string());
+        return parentEntry->getTeaSafeFolder(boost::filesystem::path(thePath).filename().string());
 
 
     }
@@ -112,7 +112,7 @@ namespace teasafe
     bool
     TeaSafe::folderExists(std::string const &path)
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         return doFolderExists(path);
     }
 
@@ -460,6 +460,12 @@ namespace teasafe
     TeaSafe::doExistanceCheck(std::string const &path, EntryType const &entryType) const
     {
         std::string thePath(path);
+
+        // special case, check if we're the root folder
+        if(thePath == "/" && entryType == EntryType::FolderType) {
+            return true;
+        }
+
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
         // an entry of file type should never have a trailing

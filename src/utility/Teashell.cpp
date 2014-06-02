@@ -52,7 +52,7 @@
 /// the 'ls' command for listing dir contents
 void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
 {
-    std::string thePath("/");
+    std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
     teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(thePath);
     std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
@@ -69,7 +69,7 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
 /// the 'rm' command for removing a folder or file
 void com_rm(teasafe::TeaSafe &theBfs, std::string const &path)
 {
-    std::string thePath("/");
+    std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
     teasafe::EntryInfo info = theBfs.getInfo(thePath);
     if(info.type() == teasafe::EntryType::FileType) {
@@ -79,19 +79,22 @@ void com_rm(teasafe::TeaSafe &theBfs, std::string const &path)
     }
 }
 
-/// the 'mkdir' command for adding a folder
+/// the 'mkdir' command for adding a folder to the current working dir
 void com_mkdir(teasafe::TeaSafe &theBfs, std::string const &path)
 {
-    std::string thePath("/");
+    std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
     theBfs.addFolder(thePath);
 }
 
-/// the 'add' command for adding a files
+/// the 'add' command for copying a file from the physical fs to the current
+/// working directory
+/// example usage:
+/// add file://path/to/file.txt
 void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string const &fileResource)
 {
-
     // add the file to the container
+    // this removed the first several chars assumes to be "file://"
     std::string resPath(fileResource.begin() + 7, fileResource.end());
     boost::filesystem::path p(resPath);
     std::string addPath(parent);
@@ -103,19 +106,51 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
     std::ifstream in(resPath.c_str(), std::ios_base::binary);
     teasafe::TeaSafeFileDevice device = theBfs.openFile(addPath, teasafe::OpenDisposition::buildWriteOnlyDisposition());
     boost::iostreams::copy(in, device);
+}
 
-    std::cout<<"Added file "<<addPath<<std::endl;
+/// takes a path and pushes a new path bit to it, going into that path
+/// example usage when working path is /hello
+/// push there
+/// result: /hello/there
+void com_push(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string &fragment)
+{
+    std::string thePath(workingDir);
+    if(*thePath.rbegin() != '/') {
+        (void)thePath.append("/");
+    }
+    (void)thePath.append(fragment);
+    if(theBfs.folderExists(thePath)) {
+        workingDir = thePath;
+    }
+}
+
+/// takes a path and pops a path bit from it, going into that path
+/// example usage when working path is /hello/there
+/// pop
+/// result: /hello
+void com_pop(teasafe::TeaSafe &theBfs, std::string &workingDir)
+{
+    boost::filesystem::path p(workingDir);
+
+    if(!p.has_parent_path()) {
+        workingDir = "/";
+        return;
+    }
+
+    if(theBfs.folderExists(p.parent_path().string())) {
+        workingDir = p.parent_path().string();
+    }
 }
 
 /// parses the command string
-void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string &path)
+void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string &workingDir)
 {
     std::vector<std::string> comTokens;
     boost::algorithm::split_regex(comTokens, commandStr, boost::regex( "\\s+" ));
 
     if(comTokens[0] == "ls") {
 
-        std::string thePath = path;
+        std::string thePath = workingDir;
         if(comTokens.size() > 1) {
             thePath = comTokens[1];
         }
@@ -123,7 +158,7 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
 
     } else if(comTokens[0] == "pwd") {
 
-        std::cout<<path<<std::endl;
+        std::cout<<workingDir<<std::endl;
 
     } else if(comTokens[0] == "rm") {
 
@@ -138,15 +173,26 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
         if(comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
-            com_mkdir(theBfs, comTokens[1]);
+            com_mkdir(theBfs, std::string(workingDir.append(comTokens[1])));
         }
     } else if(comTokens[0] == "add") {
 
         if(comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
-            com_add(theBfs, path, comTokens[1]);
+            com_add(theBfs, workingDir, comTokens[1]);
         }
+    } else if(comTokens[0] == "push") {
+
+        if(comTokens.size() < 2) {
+            std::cout<<"Error: please specify path"<<std::endl;
+        } else {
+            com_push(theBfs, workingDir, comTokens[1]);
+        }
+    }  else if(comTokens[0] == "pop") {
+
+        com_pop(theBfs, workingDir);
+
     }
 }
 
