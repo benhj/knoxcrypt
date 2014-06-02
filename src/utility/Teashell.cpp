@@ -57,8 +57,8 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
     teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(thePath);
     std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
     std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
-    for(; it != entries.end(); ++it) {
-        if(it->type() == teasafe::EntryType::FileType) {
+    for (; it != entries.end(); ++it) {
+        if (it->type() == teasafe::EntryType::FileType) {
             std::cout<<boost::format("%1% %|30t|%2%\n") % it->filename() % "<F>";
         } else {
             std::cout<<boost::format("%1% %|30t|%2%\n") % it->filename() % "<D>";
@@ -72,7 +72,7 @@ void com_rm(teasafe::TeaSafe &theBfs, std::string const &path)
     std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
     teasafe::EntryInfo info = theBfs.getInfo(thePath);
-    if(info.type() == teasafe::EntryType::FileType) {
+    if (info.type() == teasafe::EntryType::FileType) {
         theBfs.removeFile(thePath);
     } else {
         theBfs.removeFolder(thePath, teasafe::FolderRemovalType::Recursive);
@@ -115,11 +115,11 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
 void com_push(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string &fragment)
 {
     std::string thePath(workingDir);
-    if(*thePath.rbegin() != '/') {
+    if (*thePath.rbegin() != '/') {
         (void)thePath.append("/");
     }
     (void)thePath.append(fragment);
-    if(theBfs.folderExists(thePath)) {
+    if (theBfs.folderExists(thePath)) {
         workingDir = thePath;
     }
 }
@@ -132,12 +132,12 @@ void com_pop(teasafe::TeaSafe &theBfs, std::string &workingDir)
 {
     boost::filesystem::path p(workingDir);
 
-    if(!p.has_parent_path()) {
+    if (!p.has_parent_path()) {
         workingDir = "/";
         return;
     }
 
-    if(theBfs.folderExists(p.parent_path().string())) {
+    if (theBfs.folderExists(p.parent_path().string())) {
         workingDir = p.parent_path().string();
     }
 }
@@ -146,50 +146,68 @@ void com_pop(teasafe::TeaSafe &theBfs, std::string &workingDir)
 void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string &workingDir)
 {
     std::vector<std::string> comTokens;
-    boost::algorithm::split_regex(comTokens, commandStr, boost::regex( "\\s+" ));
+    boost::algorithm::split_regex(comTokens, commandStr, boost::regex("\\s+"));
 
-    if(comTokens[0] == "ls") {
+    if (comTokens[0] == "ls") {
 
-        std::string thePath = workingDir;
-        if(comTokens.size() > 1) {
-            thePath = comTokens[1];
+        if (comTokens.size() > 1) {
+            // absolute
+            if (*comTokens[1].begin() == '/') {
+                com_ls(theBfs, comTokens[1]);
+                return;
+            }
+            // or relative
+            com_ls(theBfs, std::string(workingDir.append(comTokens[1])));
         }
-        com_ls(theBfs, thePath);
+        com_ls(theBfs, workingDir);
 
-    } else if(comTokens[0] == "pwd") {
+    } else if (comTokens[0] == "pwd") {
 
         std::cout<<workingDir<<std::endl;
 
-    } else if(comTokens[0] == "rm") {
+    } else if (comTokens[0] == "rm") {
 
-        if(comTokens.size() < 2) {
+        if (comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
-            com_rm(theBfs, comTokens[1]);
+            // absolute
+            if (*comTokens[1].begin() == '/') {
+                com_rm(theBfs, comTokens[1]);
+                return;
+            }
+            // or relative
+            com_rm(theBfs, std::string(workingDir.append(comTokens[1])));
+
         }
 
-    } else if(comTokens[0] == "mkdir") {
+    } else if (comTokens[0] == "mkdir") {
 
-        if(comTokens.size() < 2) {
+        if (comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
+            // absolute
+            if (*comTokens[1].begin() == '/') {
+                com_mkdir(theBfs, comTokens[1]);
+                return;
+            }
+            // or relative
             com_mkdir(theBfs, std::string(workingDir.append(comTokens[1])));
         }
-    } else if(comTokens[0] == "add") {
+    } else if (comTokens[0] == "add") {
 
-        if(comTokens.size() < 2) {
+        if (comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
             com_add(theBfs, workingDir, comTokens[1]);
         }
-    } else if(comTokens[0] == "push") {
+    } else if (comTokens[0] == "push") {
 
-        if(comTokens.size() < 2) {
+        if (comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
             com_push(theBfs, workingDir, comTokens[1]);
         }
-    }  else if(comTokens[0] == "pop") {
+    } else if (comTokens[0] == "pop") {
 
         com_pop(theBfs, workingDir);
 
@@ -200,10 +218,10 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
 int loop(teasafe::TeaSafe &theBfs)
 {
     std::string currentPath("/");
-    while(1) {
+    while (1) {
         std::string commandStr;
         std::cout<<"ts$> ";
-        getline (std::cin, commandStr);
+        getline(std::cin, commandStr);
         try {
             parse(theBfs, commandStr, currentPath);
         } catch (...) {
