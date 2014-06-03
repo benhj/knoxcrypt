@@ -70,7 +70,6 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
 /// the 'rm' command for removing a folder or file
 void com_rm(teasafe::TeaSafe &theBfs, std::string const &path)
 {
-    theBfs.resetFileCache();
     std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
     teasafe::EntryInfo info = theBfs.getInfo(thePath);
@@ -84,7 +83,6 @@ void com_rm(teasafe::TeaSafe &theBfs, std::string const &path)
 /// the 'mkdir' command for adding a folder to the current working dir
 void com_mkdir(teasafe::TeaSafe &theBfs, std::string const &path)
 {
-    theBfs.resetFileCache();
     std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
     theBfs.addFolder(thePath);
@@ -96,7 +94,6 @@ void com_mkdir(teasafe::TeaSafe &theBfs, std::string const &path)
 /// add file://path/to/file.txt
 void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string const &fileResource)
 {
-    theBfs.resetFileCache();
     // add the file to the container
     // this removed the first several chars assumes to be "file://"
     std::string resPath(fileResource.begin() + 7, fileResource.end());
@@ -117,7 +114,6 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
 /// extract file.txt file:///some/parent/path/
 void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string const &dst)
 {
-    theBfs.resetFileCache();
     // resolve the destination by removing first 7 chars assumed to be 'file://'
     std::string dstPath(dst.begin() + 7, dst.end());
 
@@ -144,7 +140,6 @@ void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string 
 /// result: /hello/there
 void com_push(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string &fragment)
 {
-    theBfs.resetFileCache();
     std::string thePath(workingDir);
     if (*thePath.rbegin() != '/') {
         (void)thePath.append("/");
@@ -161,7 +156,7 @@ void com_push(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string &fr
 /// result: /hello
 void com_pop(teasafe::TeaSafe &theBfs, std::string &workingDir)
 {
-    theBfs.resetFileCache();
+
     boost::filesystem::path p(workingDir);
 
     if (!p.has_parent_path()) {
@@ -177,7 +172,6 @@ void com_pop(teasafe::TeaSafe &theBfs, std::string &workingDir)
 /// for changing to a new folder. Path should be absolute.
 void com_cd(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string const &path)
 {
-    theBfs.resetFileCache();
     if (theBfs.folderExists(path)) {
         workingDir = path;
     }

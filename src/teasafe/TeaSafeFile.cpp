@@ -155,18 +155,21 @@ namespace teasafe
     }
 
     std::streamsize
-    TeaSafeFile::readWorkingBlockBytes()
+    TeaSafeFile::readWorkingBlockBytes(uint32_t const thisMany)
     {
 
         // need to take into account the currently seeked-to position and
         // subtract that because we then only want to read from the told position
         uint32_t size =  m_workingBlock->getDataBytesWritten() - m_workingBlock->tell();
 
-        std::vector<uint8_t>().swap(m_buffer);
-        m_buffer.resize(size);
-        (void)m_workingBlock->read((char*)&m_buffer.front(), size);
+        // try to read thisMany bytes
+        uint32_t bytesToRead = std::min(size, thisMany);
 
-        if (m_blockIndex + 1 < m_blockCount) {
+        std::vector<uint8_t>().swap(m_buffer);
+        m_buffer.resize(bytesToRead);
+        (void)m_workingBlock->read((char*)&m_buffer.front(), bytesToRead);
+
+        if (m_blockIndex + 1 < m_blockCount && bytesToRead == size) {
             ++m_blockIndex;
             m_workingBlock = boost::make_shared<FileBlock>(m_io,
                                                            m_workingBlock->getNextIndex(),
@@ -174,7 +177,7 @@ namespace teasafe
                                                            m_stream);
         }
 
-        return size;
+        return bytesToRead;
     }
 
     void TeaSafeFile::newWritableFileBlock() const
@@ -312,14 +315,8 @@ namespace teasafe
         uint64_t offset(0);
         while (read < n) {
 
-            uint32_t count = readWorkingBlockBytes();
-
-            /*
-            // check that we don't read too much!
-            if (read + count >= n) {
-                count -= (read + count - n);
-            }*/
-
+            // there are n-read bytes left to read so try and read that many!
+            uint32_t count = readWorkingBlockBytes(n - read);
             read += count;
 
             // optimization; use this rather than for loop

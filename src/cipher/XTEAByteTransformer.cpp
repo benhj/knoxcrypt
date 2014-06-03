@@ -129,6 +129,7 @@ namespace teasafe { namespace cipher
             buildBigCipherBuffer();
             g_init = true;
         }
+
     }
 
     XTEAByteTransformer::~XTEAByteTransformer()

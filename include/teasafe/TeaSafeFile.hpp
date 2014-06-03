@@ -246,7 +246,7 @@ namespace teasafe
          * @brief  reads bytes from the working block in to buffer
          * @return the number of bytes read
          */
-        std::streamsize readWorkingBlockBytes();
+        std::streamsize readWorkingBlockBytes(uint32_t const bytes);
 
 
         /**
