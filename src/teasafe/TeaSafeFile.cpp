@@ -157,6 +157,7 @@ namespace teasafe
     std::streamsize
     TeaSafeFile::readWorkingBlockBytes()
     {
+
         // need to take into account the currently seeked-to position and
         // subtract that because we then only want to read from the told position
         uint32_t size =  m_workingBlock->getDataBytesWritten() - m_workingBlock->tell();
@@ -313,10 +314,11 @@ namespace teasafe
 
             uint32_t count = readWorkingBlockBytes();
 
+            /*
             // check that we don't read too much!
             if (read + count >= n) {
                 count -= (read + count - n);
-            }
+            }*/
 
             read += count;
 
@@ -327,13 +329,13 @@ namespace teasafe
             offset += count;
 
             // edge case bug fix
-            if (count == 0) { break; }
+            if (count == 0) { break;}
         }
 
         // update stream position
-        m_pos += n;
+        m_pos += read;
 
-        return n;
+        return read;
     }
 
     uint32_t

@@ -50,6 +50,8 @@ namespace teasafe
         std::streamsize read(char* s, std::streamsize n);
         std::streamsize write(const char* s, std::streamsize n);
         std::streampos seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
+        std::streampos tellg() const;
+        std::streampos tellp() const;
 
       private:
         TeaSafeFileDevice();

@@ -329,6 +329,12 @@ namespace teasafe
         fe->truncate(offset);
     }
 
+    void
+    TeaSafe::resetFileCache()
+    {
+        FileCache().swap(m_fileCache);
+    }
+
     SharedTeaSafeFile
     TeaSafe::setAndGetCachedFile(std::string const &path,
                                  SharedTeaSafeFolder const &parentEntry,

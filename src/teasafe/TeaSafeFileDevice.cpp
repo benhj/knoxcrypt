@@ -39,7 +39,11 @@ namespace teasafe
     std::streamsize
     TeaSafeFileDevice::read(char* s, std::streamsize n)
     {
-        return m_entry->read(s, n);
+        std::streamsize read = m_entry->read(s, n);
+        if(read == 0) {
+            return -1;
+        }
+        return read;
     }
 
     std::streamsize

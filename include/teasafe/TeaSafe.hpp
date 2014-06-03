@@ -149,6 +149,8 @@ namespace teasafe
          */
         void statvfs(struct statvfs *buf);
 
+        void resetFileCache();
+
       private:
 
         // the core teasafe io (path, blocks, password)
