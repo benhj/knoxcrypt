@@ -35,6 +35,7 @@
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/TeaSafeException.hpp"
+#include "teasafe/FileStreamPtr.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
 
 #include <boost/iostreams/copy.hpp>
@@ -108,6 +109,30 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
     std::ifstream in(resPath.c_str(), std::ios_base::binary);
     teasafe::TeaSafeFileDevice device = theBfs.openFile(addPath, teasafe::OpenDisposition::buildWriteOnlyDisposition());
     boost::iostreams::copy(in, device);
+}
+
+/// for extracting a teasafe file to somewhere on a physical disk location
+/// example usage:
+/// extract file.txt file:///some/parent/path/
+void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string const &dst)
+{
+    // resolve the destination by removing first 7 chars assumed to be 'file://'
+    std::string dstPath(dst.begin() + 7, dst.end());
+
+    // make sure destination parent has a trailing slash on the end
+    if(*dstPath.rbegin() != '/') {
+        dstPath.append("/");
+    }
+
+    // append filename on to dst path
+    boost::filesystem::path p(path);
+    dstPath.append(p.filename().string());
+
+    // create source and sink
+    teasafe::EntryInfo info = theBfs.getInfo(path);
+    teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
+    std::ofstream out(dstPath.c_str(), std::ios_base::binary);
+    boost::iostreams::copy(device, out);
 }
 
 /// takes a path and pushes a new path bit to it, going into that path
@@ -207,6 +232,12 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
             com_cd(theBfs, workingDir, formattedPath(workingDir, comTokens[1]));
+        }
+    } else if (comTokens[0] == "extract") {
+        if (comTokens.size() < 3) {
+            std::cout<<"Error: please specify src and dst paths"<<std::endl;
+        } else {
+            com_extract(theBfs, formattedPath(workingDir, comTokens[1]), comTokens[2]);
         }
     }
 }
