@@ -49,6 +49,8 @@
 #include <stdint.h>
 #include <vector>
 
+
+
 /// the 'ls' command for listing dir contents
 void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
 {
@@ -142,6 +144,17 @@ void com_pop(teasafe::TeaSafe &theBfs, std::string &workingDir)
     }
 }
 
+std::string formattedPath(std::string const &workingDir, std::string const &path)
+{
+    std::string wd(workingDir);
+    // absolute
+    if (*path.begin() == '/') {
+        return path;
+    }
+    // or relative
+    return std::string(wd.append(path));
+}
+
 /// parses the command string
 void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string &workingDir)
 {
@@ -151,13 +164,7 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
     if (comTokens[0] == "ls") {
 
         if (comTokens.size() > 1) {
-            // absolute
-            if (*comTokens[1].begin() == '/') {
-                com_ls(theBfs, comTokens[1]);
-                return;
-            }
-            // or relative
-            com_ls(theBfs, std::string(workingDir.append(comTokens[1])));
+            com_ls(theBfs, formattedPath(workingDir, comTokens[1]));
         }
         com_ls(theBfs, workingDir);
 
@@ -170,14 +177,7 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
         if (comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
-            // absolute
-            if (*comTokens[1].begin() == '/') {
-                com_rm(theBfs, comTokens[1]);
-                return;
-            }
-            // or relative
-            com_rm(theBfs, std::string(workingDir.append(comTokens[1])));
-
+            com_rm(theBfs, formattedPath(workingDir, comTokens[1]));
         }
 
     } else if (comTokens[0] == "mkdir") {
@@ -185,13 +185,7 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
         if (comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
-            // absolute
-            if (*comTokens[1].begin() == '/') {
-                com_mkdir(theBfs, comTokens[1]);
-                return;
-            }
-            // or relative
-            com_mkdir(theBfs, std::string(workingDir.append(comTokens[1])));
+            com_mkdir(theBfs, formattedPath(workingDir, comTokens[1]));
         }
     } else if (comTokens[0] == "add") {
 
