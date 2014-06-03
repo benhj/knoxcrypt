@@ -55,4 +55,16 @@ namespace teasafe
     {
         return m_entry->seek(off, way);
     }
+
+    std::streampos
+    TeaSafeFileDevice::tellg() const
+    {
+        return m_entry->tell();
+    }
+
+    std::streampos
+    TeaSafeFileDevice::tellp() const
+    {
+        return m_entry->tell();
+    }
 }
