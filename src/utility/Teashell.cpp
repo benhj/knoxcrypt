@@ -144,6 +144,14 @@ void com_pop(teasafe::TeaSafe &theBfs, std::string &workingDir)
     }
 }
 
+/// for changing to a new folder. Path should be absolute.
+void com_cd(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string const &path)
+{
+    if (theBfs.folderExists(path)) {
+        workingDir = path;
+    }
+}
+
 std::string formattedPath(std::string const &workingDir, std::string const &path)
 {
     std::string wd(workingDir);
@@ -162,49 +170,44 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
     boost::algorithm::split_regex(comTokens, commandStr, boost::regex("\\s+"));
 
     if (comTokens[0] == "ls") {
-
         if (comTokens.size() > 1) {
             com_ls(theBfs, formattedPath(workingDir, comTokens[1]));
         }
         com_ls(theBfs, workingDir);
-
     } else if (comTokens[0] == "pwd") {
-
         std::cout<<workingDir<<std::endl;
-
     } else if (comTokens[0] == "rm") {
-
         if (comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
             com_rm(theBfs, formattedPath(workingDir, comTokens[1]));
         }
-
     } else if (comTokens[0] == "mkdir") {
-
         if (comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
             com_mkdir(theBfs, formattedPath(workingDir, comTokens[1]));
         }
     } else if (comTokens[0] == "add") {
-
         if (comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
             com_add(theBfs, workingDir, comTokens[1]);
         }
     } else if (comTokens[0] == "push") {
-
         if (comTokens.size() < 2) {
             std::cout<<"Error: please specify path"<<std::endl;
         } else {
             com_push(theBfs, workingDir, comTokens[1]);
         }
     } else if (comTokens[0] == "pop") {
-
         com_pop(theBfs, workingDir);
-
+    } else if (comTokens[0] == "cd") {
+        if (comTokens.size() < 2) {
+            std::cout<<"Error: please specify path"<<std::endl;
+        } else {
+            com_cd(theBfs, workingDir, formattedPath(workingDir, comTokens[1]));
+        }
     }
 }
 
