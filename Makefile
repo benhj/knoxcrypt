@@ -62,16 +62,16 @@ OBJECTS_CIPHER := $(addprefix obj-cipher/,$(notdir $(CIPHER_SRC:.cpp=.o)))
 OBJECTS_UTILITY := $(addprefix obj-utility/,$(notdir $(UTILITY_SRC:.cpp=.o)))
 
 # the executable used for running the test harness
-TEST_EXECUTABLE=test
+TEST_EXECUTABLE=test_$(UNAME)
 
 # the executable used for creating a teasafe image
-MAKETeaSafe_EXECUTABLE=maketeasafe
+MAKETeaSafe_EXECUTABLE=maketeasafe_$(UNAME)
 
 # the fuse-layered executable
-FUSE_LAYER=teasafe
+FUSE_LAYER=teasafe_$(UNAME)
 
 # simple utility programs
-SHELL_BIN=teashell
+SHELL_BIN=teashell_$(UNAME)
 
 # build the different object files
 obj/%.o: src/teasafe/%.cpp
@@ -112,7 +112,7 @@ $(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE)
 	$(CXX) $(LDFLAGS) -l$(FUSE) $(OBJECTS_FUSE) ./libteasafe.a -l$(FUSE) $(BOOST_LD) -o $@
 	
 clean:
-	/bin/rm -fr obj obj-maketeasafe obj-test obj-fuse test maketeasafe teasafe teashell obj-cipher obj-utility libteasafe.a
+	/bin/rm -fr obj obj-maketeasafe obj-test obj-fuse test_$(UNAME) maketeasafe_$(UNAME) teasafe_$(UNAME) teashell_$(UNAME) obj-cipher obj-utility libteasafe.a
 	
 directoryObj: 
 	/bin/mkdir -p obj
