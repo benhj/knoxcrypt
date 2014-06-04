@@ -185,6 +185,9 @@ std::string formattedPath(std::string const &workingDir, std::string const &path
         return path;
     }
     // or relative
+    if(*wd.rbegin() != '/') {
+        (void)wd.append("/");
+    }
     return std::string(wd.append(path));
 }
 
