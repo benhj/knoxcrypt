@@ -245,6 +245,65 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
     }
 }
 
+/// gets a user-inputted string until return is entered
+/// will use getChar to process characters one by one so that individual
+/// key handlers can be created
+std::string getInputString()
+{
+    std::string toReturn("");
+
+    static struct termios oldt, newt;
+
+    /// See http://stackoverflow.com/questions/1798511/how-to-avoid-press-enter-with-any-getchar
+
+    /*tcgetattr gets the parameters of the current terminal
+    STDIN_FILENO will tell tcgetattr that it should write the settings
+    of stdin to oldt*/
+    tcgetattr( STDIN_FILENO, &oldt);
+    /*now the settings will be copied*/
+    newt = oldt;
+
+    /*ICANON normally takes care that one line at a time will be processed
+    that means it will return if it sees a "\n" or an EOF or an EOL*/
+    newt.c_lflag &= ~(ICANON);
+
+    // also disable standard output -- Ben
+    newt.c_lflag &= ~ECHO;
+    newt.c_lflag |= ECHONL;
+
+    /*Those new settings will be set to STDIN
+    TCSANOW tells tcsetattr to change attributes immediately. */
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+
+    int cursorPos(0);
+    while(1) {
+        char c = getchar();
+        if((int)c == 10) { // enter
+            break;
+        }
+        if((int)c == 127) { // delete
+
+            // check that the cursor position is > 0 to prevent accidental
+            // deletion of prompt!
+            if(cursorPos > 0) {
+                // backspace which only moves cursor, so need to write a blank
+                // space over the original char immediately afterwards
+                // to emulate having removed it
+                std::cout<<"\b ";
+                // now move cursor back again
+                std::cout<<"\b";
+                --cursorPos;
+            }
+
+        } else {
+            std::cout<<c;
+            ++cursorPos;
+            toReturn.push_back(c);
+        }
+    }
+    return toReturn;
+}
+
 /// indefinitely loops over user input expecting commands
 int loop(teasafe::TeaSafe &theBfs)
 {
@@ -252,7 +311,7 @@ int loop(teasafe::TeaSafe &theBfs)
     while (1) {
         std::string commandStr;
         std::cout<<"ts$> ";
-        getline(std::cin, commandStr);
+        commandStr = getInputString();
         try {
             parse(theBfs, commandStr, currentPath);
         } catch (...) {
