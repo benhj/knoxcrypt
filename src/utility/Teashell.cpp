@@ -75,6 +75,7 @@ std::string tabComplete(teasafe::TeaSafe &theBfs, std::string const &path)
     thePath.append(path);
     boost::filesystem::path bp(path);
     std::string parentPath(bp.parent_path().string());
+    com_ls(theBfs, parentPath);
     teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(parentPath);
     std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
     std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
@@ -167,6 +168,8 @@ void com_push(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string &fr
     (void)thePath.append(fragment);
     if (theBfs.folderExists(thePath)) {
         workingDir = thePath;
+    } else {
+        std::cout<<"Not a folder or not found"<<std::endl;
     }
 }
 
@@ -194,6 +197,8 @@ void com_cd(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string const
 {
     if (theBfs.folderExists(path)) {
         workingDir = path;
+    } else {
+        std::cout<<"Not a folder or not found"<<std::endl;
     }
 }
 
@@ -321,7 +326,6 @@ std::string getInputString(teasafe::TeaSafe &theBfs, std::string const &workingP
 
             // for eventual tab-completion
             std::cout<<"\n";
-            com_ls(theBfs, workingPath);
             std::string wd(workingPath);
             std::vector<std::string> comTokens;
             boost::algorithm::split_regex(comTokens, toReturn, boost::regex("\\s+"));
