@@ -79,8 +79,9 @@ std::string tabComplete(teasafe::TeaSafe &theBfs, std::string const &path)
     std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
     std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
     for (; it != entries.end(); ++it) {
-        if(it->filename().find(bp.filename().string()) != std::string::npos) {
-            return it->filename();//std::string(it->filename().begin() + bp.filename().string().length(), it->filename().end());
+        std::string extracted(it->filename().substr(0, bp.filename().string().length()));
+        if(extracted == bp.filename()) {
+            return it->filename();
         }
     }
     return std::string("");
