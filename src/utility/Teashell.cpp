@@ -67,6 +67,25 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
     }
 }
 
+/// attempts to implement tab complete by matching the provided string
+/// with an entry at the given parent path
+std::string tabComplete(teasafe::TeaSafe &theBfs, std::string const &path)
+{
+    std::string thePath(*path.begin() != '/' ? "/" : "");
+    thePath.append(path);
+    boost::filesystem::path bp(path);
+    std::string parentPath(bp.parent_path().string());
+    teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(parentPath);
+    std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
+    std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
+    for (; it != entries.end(); ++it) {
+        if(it->filename().find(bp.filename().string()) != std::string::npos) {
+            return it->filename();//std::string(it->filename().begin() + bp.filename().string().length(), it->filename().end());
+        }
+    }
+    return std::string("");
+}
+
 /// the 'rm' command for removing a folder or file
 void com_rm(teasafe::TeaSafe &theBfs, std::string const &path)
 {
@@ -298,9 +317,46 @@ std::string getInputString(teasafe::TeaSafe &theBfs, std::string const &workingP
             }
 
         } else if((int)c == 9) { // tab
+
             // for eventual tab-completion
             std::cout<<"\n";
             com_ls(theBfs, workingPath);
+            std::string wd(workingPath);
+            std::vector<std::string> comTokens;
+            boost::algorithm::split_regex(comTokens, toReturn, boost::regex("\\s+"));
+            std::string toBeCompleted(comTokens[comTokens.size()-1]);
+
+            // if relative then append to working path
+            if(*toBeCompleted.begin() != '/') {
+
+                // only append path seperator if wd isn't already root
+                // which by definition, is '/'
+                if(wd != "/") {
+                    wd.append("/");
+                }
+
+                // append the bit that we want to tab-complete
+                (void)wd.append(toBeCompleted);
+            } else { // absolute
+                // path begins with a '/' so must be absolute
+                wd = toBeCompleted;
+            }
+
+            // run the tabl completion algorithm and get the string back
+            // that it thinks we're looking for
+            std::string tabCompleted = tabComplete(theBfs, wd);
+
+            // how long is orig fname length? Subtract from original this many chars
+            size_t len = (boost::filesystem::path(toBeCompleted).filename()).string().length();
+            std::string copy(toReturn.begin(), toReturn.end() - len);
+            copy.swap(toReturn);
+            cursorPos -= len;
+
+            // now append tab completed bit
+            toReturn.append(tabCompleted);
+
+            // updated cursor position based on returned string
+            cursorPos += tabCompleted.length();
 
             // after effect of pressing tab, need to print out prompt
             // and where we were with toReturn again
