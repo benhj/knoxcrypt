@@ -248,7 +248,7 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
 /// gets a user-inputted string until return is entered
 /// will use getChar to process characters one by one so that individual
 /// key handlers can be created
-std::string getInputString()
+std::string getInputString(teasafe::TeaSafe &theBfs, std::string const &workingPath)
 {
     std::string toReturn("");
 
@@ -281,7 +281,7 @@ std::string getInputString()
         if((int)c == 10) { // enter
             break;
         }
-        if((int)c == 127) { // delete
+        if((int)c == 127 || (int)c == 8) { // delete / backspace
 
             // check that the cursor position is > 0 to prevent accidental
             // deletion of prompt!
@@ -293,9 +293,20 @@ std::string getInputString()
                 // now move cursor back again
                 std::cout<<"\b";
                 --cursorPos;
+                std::string copy(toReturn.begin(), toReturn.end() - 1);
+                copy.swap(toReturn);
             }
 
-        } else {
+        } else if((int)c == 9) { // tab
+            // for eventual tab-completion
+            std::cout<<"\n";
+            com_ls(theBfs, workingPath);
+
+            // after effect of pressing tab, need to print out prompt
+            // and where we were with toReturn again
+            std::cout<<"ts$> "<<toReturn;
+
+        } else { // print out char to screen and push into string vector
             std::cout<<c;
             ++cursorPos;
             toReturn.push_back(c);
@@ -311,7 +322,7 @@ int loop(teasafe::TeaSafe &theBfs)
     while (1) {
         std::string commandStr;
         std::cout<<"ts$> ";
-        commandStr = getInputString();
+        commandStr = getInputString(theBfs, currentPath);
         try {
             parse(theBfs, commandStr, currentPath);
         } catch (...) {
