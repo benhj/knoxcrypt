@@ -28,6 +28,9 @@
 
 /**
  * @brief a *very hacky* wrapper for accessing / modifying teasafe containers
+ *
+ * Attempts to provide basic 'shell-like' access to give a real fs feel
+ * (has 'ls', 'cd', 'pwd', 'rm', 'mkdir' commands)
  */
 
 #include "teasafe/CoreTeaSafeIO.hpp"
@@ -53,8 +56,11 @@
 /// the 'ls' command for listing dir contents
 void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
 {
+    // make sure path begins with a slash
     std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
+
+    // iterate over entries in folder and print filenames of each
     teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(thePath);
     std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
     std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
@@ -71,21 +77,33 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
 /// with an entry at the given parent path
 std::string tabComplete(teasafe::TeaSafe &theBfs, std::string const &path)
 {
+    // make sure path begins with a slash
     std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
+
+    // find out the parent of the thing we're trying to tab complete
+    // the item we're trying to tab-complete should be a child of this parent
     boost::filesystem::path bp(path);
     std::string parentPath(bp.parent_path().string());
+
+    // print every item out (usability)
     com_ls(theBfs, parentPath);
+
+    // get the parent folder
     teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(parentPath);
+
+    // iterate over entries in folder
     std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
     std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
     for (; it != entries.end(); ++it) {
+
+        // try to match the entry with the thing that we want to tab-complete
         std::string extracted(it->filename().substr(0, bp.filename().string().length()));
         if(extracted == bp.filename()) {
-            return it->filename();
+            return it->filename(); // match, return name of entry
         }
     }
-    return std::string("");
+    return bp.filename().string(); // no match, return non tab-completed token
 }
 
 /// the 'rm' command for removing a folder or file
@@ -231,25 +249,25 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
         std::cout<<workingDir<<std::endl;
     } else if (comTokens[0] == "rm") {
         if (comTokens.size() < 2) {
-            std::cout<<"Error: please specify path"<<std::endl;
+            std::cout<<"Error: please specify /path"<<std::endl;
         } else {
             com_rm(theBfs, formattedPath(workingDir, comTokens[1]));
         }
     } else if (comTokens[0] == "mkdir") {
         if (comTokens.size() < 2) {
-            std::cout<<"Error: please specify path"<<std::endl;
+            std::cout<<"Error: please specify /path"<<std::endl;
         } else {
             com_mkdir(theBfs, formattedPath(workingDir, comTokens[1]));
         }
     } else if (comTokens[0] == "add") {
         if (comTokens.size() < 2) {
-            std::cout<<"Error: please specify path"<<std::endl;
+            std::cout<<"Error: please specify file:///path"<<std::endl;
         } else {
             com_add(theBfs, workingDir, comTokens[1]);
         }
     } else if (comTokens[0] == "push") {
         if (comTokens.size() < 2) {
-            std::cout<<"Error: please specify path"<<std::endl;
+            std::cout<<"Error: please specify /path"<<std::endl;
         } else {
             com_push(theBfs, workingDir, comTokens[1]);
         }
@@ -263,20 +281,17 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
         }
     } else if (comTokens[0] == "extract") {
         if (comTokens.size() < 3) {
-            std::cout<<"Error: please specify src and dst paths"<<std::endl;
+            std::cout<<"Error: please specify /src/path and file:///dst/parent/path/"<<std::endl;
         } else {
             com_extract(theBfs, formattedPath(workingDir, comTokens[1]), comTokens[2]);
         }
     }
 }
 
-/// gets a user-inputted string until return is entered
-/// will use getChar to process characters one by one so that individual
-/// key handlers can be created
-std::string getInputString(teasafe::TeaSafe &theBfs, std::string const &workingPath)
+/// removes need to press enter / return when using getchar
+/// prevents 'double echo' of characters when using getchar by disabling echo
+void setupTerminal()
 {
-    std::string toReturn("");
-
     static struct termios oldt, newt;
 
     /// See http://stackoverflow.com/questions/1798511/how-to-avoid-press-enter-with-any-getchar
@@ -299,6 +314,88 @@ std::string getInputString(teasafe::TeaSafe &theBfs, std::string const &workingP
     /*Those new settings will be set to STDIN
     TCSANOW tells tcsetattr to change attributes immediately. */
     tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+}
+
+/// handles the eventuality of a backspace or delete key having been pressed
+void handleBackspace(int &cursorPos, std::string &toReturn)
+{
+    // check that the cursor position is > 0 to prevent accidental
+    // deletion of prompt!
+    if(cursorPos > 0) {
+        // backspace which only moves cursor, so need to write a blank
+        // space over the original char immediately afterwards
+        // to emulate having removed it
+        std::cout<<"\b ";
+        // now move cursor back again
+        std::cout<<"\b";
+        --cursorPos;
+        std::string copy(toReturn.begin(), toReturn.end() - 1);
+        copy.swap(toReturn);
+    }
+}
+
+/// handles tab-key; attempts to provide rudimentary tab-completion
+void handleTabKey(teasafe::TeaSafe &theBfs,
+                  std::string const &workingPath,
+                  int &cursorPos,
+                  std::string &toReturn)
+{
+    // get the token from the string that we're tring to tab-complete
+    std::cout<<"\n";
+    std::vector<std::string> comTokens;
+    boost::algorithm::split_regex(comTokens, toReturn, boost::regex("\\s+"));
+    std::string toBeCompleted(comTokens[comTokens.size()-1]);
+
+    // make sure the working path is correctly formatted
+    std::string wd(workingPath);
+
+    // if relative then append a slash to working path
+    if(*toBeCompleted.begin() != '/') {
+
+        // only append path seperator if wd isn't already root
+        // which by definition, is '/'
+        if(wd != "/") {
+            wd.append("/");
+        }
+
+        // append the bit that we want to tab-complete
+        (void)wd.append(toBeCompleted);
+    } else { // absolute
+        // path begins with a '/' so must be absolute, thus
+        // make workng path the actual token
+        wd = toBeCompleted;
+    }
+
+    // run the tab-completion algorithm and get the tab-completed string back
+    std::string tabCompleted = tabComplete(theBfs, wd);
+
+    // how long is the original fname length prior to tab-completion?
+    // Subtract from the original string this many characyers
+    size_t len = (boost::filesystem::path(toBeCompleted).filename()).string().length();
+    std::string copy(toReturn.begin(), toReturn.end() - len);
+    copy.swap(toReturn);
+    cursorPos -= len;
+
+    // now append tab completed bit
+    toReturn.append(tabCompleted);
+
+    // updated cursor position based on returned string
+    cursorPos += tabCompleted.length();
+
+    // after effect of pressing tab, need to print out prompt
+    // and where we were with toReturn again
+    std::cout<<"ts$> "<<toReturn;
+}
+
+/// gets a user-inputted string until return is entered
+/// will use getChar to process characters one by one so that individual
+/// key handlers can be created
+std::string getInputString(teasafe::TeaSafe &theBfs, std::string const &workingPath)
+{
+    std::string toReturn("");
+
+    // disable echo and prevent need to press enter for getchar flush
+    setupTerminal();
 
     int cursorPos(0);
     while(1) {
@@ -308,64 +405,11 @@ std::string getInputString(teasafe::TeaSafe &theBfs, std::string const &workingP
         }
         if((int)c == 127 || (int)c == 8) { // delete / backspace
 
-            // check that the cursor position is > 0 to prevent accidental
-            // deletion of prompt!
-            if(cursorPos > 0) {
-                // backspace which only moves cursor, so need to write a blank
-                // space over the original char immediately afterwards
-                // to emulate having removed it
-                std::cout<<"\b ";
-                // now move cursor back again
-                std::cout<<"\b";
-                --cursorPos;
-                std::string copy(toReturn.begin(), toReturn.end() - 1);
-                copy.swap(toReturn);
-            }
+            handleBackspace(cursorPos, toReturn);
 
         } else if((int)c == 9) { // tab
 
-            // for eventual tab-completion
-            std::cout<<"\n";
-            std::string wd(workingPath);
-            std::vector<std::string> comTokens;
-            boost::algorithm::split_regex(comTokens, toReturn, boost::regex("\\s+"));
-            std::string toBeCompleted(comTokens[comTokens.size()-1]);
-
-            // if relative then append to working path
-            if(*toBeCompleted.begin() != '/') {
-
-                // only append path seperator if wd isn't already root
-                // which by definition, is '/'
-                if(wd != "/") {
-                    wd.append("/");
-                }
-
-                // append the bit that we want to tab-complete
-                (void)wd.append(toBeCompleted);
-            } else { // absolute
-                // path begins with a '/' so must be absolute
-                wd = toBeCompleted;
-            }
-
-            // run the tabl completion algorithm and get the string back
-            // that it thinks we're looking for
-            std::string tabCompleted = tabComplete(theBfs, wd);
-
-            // how long is orig fname length? Subtract from original this many chars
-            size_t len = (boost::filesystem::path(toBeCompleted).filename()).string().length();
-            std::string copy(toReturn.begin(), toReturn.end() - len);
-            copy.swap(toReturn);
-            cursorPos -= len;
-
-            // now append tab completed bit
-            toReturn.append(tabCompleted);
-
-            // updated cursor position based on returned string
-            cursorPos += tabCompleted.length();
-
-            // after effect of pressing tab, need to print out prompt
-            // and where we were with toReturn again
-            std::cout<<"ts$> "<<toReturn;
+            handleTabKey(theBfs, workingPath, cursorPos, toReturn);
 
         } else { // print out char to screen and push into string vector
             std::cout<<c;
