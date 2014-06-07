@@ -62,16 +62,25 @@ namespace teasafe
 
             std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
             for (; it != entries.end(); ++it) {
+
+                // where to we write to?
                 boost::filesystem::path whereToWrite(fsPath);
                 whereToWrite /= it->filename();
+
+                // what is the current tea safe path that we
+                // need to get from the ts image?
                 boost::filesystem::path teaLoc(teaPath);
                 teaLoc /= it->filename();
 
+                // If folder, create a folder at whereToWrite and recurse
+                // in to recurseExtract
                 if(it->type() == EntryType::FolderType) {
                     std::cout<<"Creating folder "<<whereToWrite<<"..."<<std::endl;
                     boost::filesystem::create_directory(whereToWrite);
                     recursiveExtract(theBfs, teaLoc.string(), whereToWrite.string());
                 } else {
+
+                    // Else copy file using a TeaSafeFileDevice and boost::iostreams::copy
                     std::cout<<"Writing file "<<whereToWrite<<"..."<<std::endl;
                     teasafe::TeaSafeFileDevice device = theBfs.openFile(teaLoc.string(), teasafe::OpenDisposition::buildReadOnlyDisposition());
                     device.seek(0, std::ios_base::beg);
