@@ -40,6 +40,7 @@
 #include "teasafe/TeaSafeException.hpp"
 #include "teasafe/FileStreamPtr.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
+#include "utility/RecursiveFolderExtractor.hpp"
 
 #include <boost/iostreams/copy.hpp>
 #include <boost/filesystem/path.hpp>
@@ -166,10 +167,14 @@ void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string 
     dstPath.append(p.filename().string());
 
     // create source and sink
-    teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
-    device.seek(0, std::ios_base::beg);
-    std::ofstream out(dstPath.c_str(), std::ios_base::binary);
-    boost::iostreams::copy(device, out);
+    if(theBfs.fileExists(path)) {
+        teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
+        device.seek(0, std::ios_base::beg);
+        std::ofstream out(dstPath.c_str(), std::ios_base::binary);
+        boost::iostreams::copy(device, out);
+    } else if(theBfs.folderExists(path)) {
+        teasafe::utility::recursiveExtract(theBfs, path, dstPath);
+    }
 
 }
 
