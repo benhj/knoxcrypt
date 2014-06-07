@@ -139,6 +139,11 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
     std::string resPath(fileResource.begin() + 7, fileResource.end());
     boost::filesystem::path p(resPath);
     std::string addPath(parent);
+
+    if(*addPath.rbegin() != '/') {
+        addPath.append("/");
+    }
+
     (void)addPath.append(p.filename().string());
 
     theBfs.addFile(addPath);
@@ -164,10 +169,11 @@ void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string 
 
     // append filename on to dst path
     boost::filesystem::path p(path);
-    dstPath.append(p.filename().string());
+
 
     // create source and sink
     if(theBfs.fileExists(path)) {
+        dstPath.append(p.filename().string());
         teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
         device.seek(0, std::ios_base::beg);
         std::ofstream out(dstPath.c_str(), std::ios_base::binary);

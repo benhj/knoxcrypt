@@ -53,11 +53,9 @@ namespace teasafe
                               std::string const &teaPath,
                               std::string const &fsPath)
         {
-            boost::filesystem::path bp(teaPath);
-            std::string parentTeaPath(bp.parent_path().string());
 
             // get the parent folder
-            teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(parentTeaPath);
+            teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(teaPath);
 
             // iterate over entries in folder
             std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
@@ -66,12 +64,16 @@ namespace teasafe
             for (; it != entries.end(); ++it) {
                 boost::filesystem::path whereToWrite(fsPath);
                 whereToWrite /= it->filename();
-                bp /= it->filename();
+                boost::filesystem::path teaLoc(teaPath);
+                teaLoc /= it->filename();
+
                 if(it->type() == EntryType::FolderType) {
+                    std::cout<<"Creating folder "<<whereToWrite<<"..."<<std::endl;
                     boost::filesystem::create_directory(whereToWrite);
-                    recursiveExtract(theBfs, bp.string(), whereToWrite.string());
+                    recursiveExtract(theBfs, teaLoc.string(), whereToWrite.string());
                 } else {
-                    teasafe::TeaSafeFileDevice device = theBfs.openFile(bp.string(), teasafe::OpenDisposition::buildReadOnlyDisposition());
+                    std::cout<<"Writing file "<<whereToWrite<<"..."<<std::endl;
+                    teasafe::TeaSafeFileDevice device = theBfs.openFile(teaLoc.string(), teasafe::OpenDisposition::buildReadOnlyDisposition());
                     device.seek(0, std::ios_base::beg);
                     std::ofstream out(whereToWrite.string().c_str(), std::ios_base::binary);
                     boost::iostreams::copy(device, out);
