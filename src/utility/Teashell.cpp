@@ -40,6 +40,7 @@
 #include "teasafe/TeaSafeException.hpp"
 #include "teasafe/FileStreamPtr.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
+#include "utility/RecursiveFolderExtractor.hpp"
 
 #include <boost/iostreams/copy.hpp>
 #include <boost/filesystem/path.hpp>
@@ -138,6 +139,11 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
     std::string resPath(fileResource.begin() + 7, fileResource.end());
     boost::filesystem::path p(resPath);
     std::string addPath(parent);
+
+    if(*addPath.rbegin() != '/') {
+        addPath.append("/");
+    }
+
     (void)addPath.append(p.filename().string());
 
     theBfs.addFile(addPath);
@@ -153,6 +159,9 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
 /// extract file.txt file:///some/parent/path/
 void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string const &dst)
 {
+
+    std::cout<<"Extracting "<<path<<" to "<<dst<<"..."<<std::endl;
+
     // resolve the destination by removing first 7 chars assumed to be 'file://'
     std::string dstPath(dst.begin() + 7, dst.end());
 
@@ -166,10 +175,18 @@ void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string 
     dstPath.append(p.filename().string());
 
     // create source and sink
-    teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
-    device.seek(0, std::ios_base::beg);
-    std::ofstream out(dstPath.c_str(), std::ios_base::binary);
-    boost::iostreams::copy(device, out);
+    if(theBfs.fileExists(path)) {
+        std::cout<<"Copying teasafe file..."<<std::endl;
+        teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
+        device.seek(0, std::ios_base::beg);
+        std::ofstream out(dstPath.c_str(), std::ios_base::binary);
+        boost::iostreams::copy(device, out);
+    } else if(theBfs.folderExists(path)) {
+        std::cout<<"Copying teasafe folder..."<<std::endl;
+        std::cout<<"Creating folder "<<dstPath<<"..."<<std::endl;
+        boost::filesystem::create_directory(dstPath);
+        teasafe::utility::recursiveExtract(theBfs, path, dstPath);
+    }
 
 }
 

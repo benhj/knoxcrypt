@@ -1,5 +1,5 @@
-TeaSafe: A user-space encrypted filesystem
-------------------------------------------
+TeaSafe: A container-based encrypted filesystem
+-----------------------------------------------
 
 ##### What is it?
 
