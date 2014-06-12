@@ -75,13 +75,13 @@ namespace teasafe
                 // If folder, create a folder at whereToWrite and recurse
                 // in to recurseExtract
                 if(it->type() == EntryType::FolderType) {
-                    std::cout<<"Creating folder "<<whereToWrite<<"..."<<std::endl;
+                    std::cout<<"Extracting folder "<<whereToWrite<<"..."<<std::endl;
                     boost::filesystem::create_directory(whereToWrite);
                     recursiveExtract(theBfs, teaLoc.string(), whereToWrite.string());
                 } else {
 
                     // Else copy file using a TeaSafeFileDevice and boost::iostreams::copy
-                    std::cout<<"Writing file "<<whereToWrite<<"..."<<std::endl;
+                    std::cout<<"Extracting file "<<whereToWrite<<"..."<<std::endl;
                     teasafe::TeaSafeFileDevice device = theBfs.openFile(teaLoc.string(), teasafe::OpenDisposition::buildReadOnlyDisposition());
                     device.seek(0, std::ios_base::beg);
                     std::ofstream out(whereToWrite.string().c_str(), std::ios_base::binary);

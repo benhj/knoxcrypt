@@ -40,6 +40,7 @@
 #include "teasafe/TeaSafeException.hpp"
 #include "teasafe/FileStreamPtr.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
+#include "utility/RecursiveFolderAdder.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
 
 #include <boost/iostreams/copy.hpp>
@@ -146,12 +147,18 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
 
     (void)addPath.append(p.filename().string());
 
-    theBfs.addFile(addPath);
+    if ( boost::filesystem::is_directory(p)) {
+        std::cout<<"Creating "<<addPath<<"..."<<std::endl;
+        theBfs.addFolder(addPath);
+        teasafe::utility::recursiveAdd(theBfs, addPath, p.string());
+    } else {
+        theBfs.addFile(addPath);
 
-    // create a stream to read resource from and a device to write to
-    std::ifstream in(resPath.c_str(), std::ios_base::binary);
-    teasafe::TeaSafeFileDevice device = theBfs.openFile(addPath, teasafe::OpenDisposition::buildWriteOnlyDisposition());
-    boost::iostreams::copy(in, device);
+        // create a stream to read resource from and a device to write to
+        std::ifstream in(resPath.c_str(), std::ios_base::binary);
+        teasafe::TeaSafeFileDevice device = theBfs.openFile(addPath, teasafe::OpenDisposition::buildWriteOnlyDisposition());
+        boost::iostreams::copy(in, device);
+    }
 }
 
 /// for extracting a teasafe file to somewhere on a physical disk location
