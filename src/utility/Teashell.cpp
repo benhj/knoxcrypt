@@ -359,6 +359,10 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
         }
     } else if (comTokens[0] == "help") {
         com_help();
+    } else if (comTokens[0] == "quit") {
+        exit(0);
+    } else if (comTokens[0] == "exit") {
+        exit(0);
     }
 }
 
@@ -384,6 +388,7 @@ void setupTerminal()
     // also disable standard output -- Ben
     newt.c_lflag &= ~ECHO;
     newt.c_lflag |= ECHONL;
+    newt.c_lflag &= ICRNL;
 
     /*Those new settings will be set to STDIN
     TCSANOW tells tcsetattr to change attributes immediately. */
@@ -493,6 +498,7 @@ std::string getInputString(teasafe::TeaSafe &theBfs, std::string const &workingP
     while(1) {
         char c = getchar();
         if((int)c == 10) { // enter
+            std::cout<<std::endl;
             break;
         }
         if((int)c == 127 || (int)c == 8) { // delete / backspace
@@ -565,6 +571,18 @@ void populateCommands()
     }
     {
         CommandDescriptor command("extract","extract a file or folder","extract <entryName> <file:///place/to/extract>");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("help","list available commands","help");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("quit","exit the shell","quit");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("exit","exit the shell","exit");
         g_availableCommands.push_back(command);
     }
 }
