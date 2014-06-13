@@ -123,9 +123,6 @@ std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const 
     boost::filesystem::path bp(path);
     std::string parentPath(bp.parent_path().string());
 
-    // print every item out (usability)
-    com_ls(theBfs, parentPath);
-
     // get the parent folder
     teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(parentPath);
 
@@ -141,6 +138,22 @@ std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const 
         }
     }
     return bp.filename().string(); // no match, return non tab-completed token
+}
+
+/// attempts to tab-complete a command
+std::string tabCompleteCommand(std::string const &command)
+{
+    // iterate over entries in folder
+    Commands::iterator it = g_availableCommands.begin();
+    for (; it != g_availableCommands.end(); ++it) {
+
+        // try to match the entry with the thing that we want to tab-complete
+        std::string extracted(it->command.substr(0, command.length()));
+        if(extracted == command) {
+            return it->command; // match, return name of command
+        }
+    }
+    return command; // no match, return un tab-completed version
 }
 
 /// the 'rm' command for removing a folder or file
@@ -405,34 +418,52 @@ void handleTabKey(teasafe::TeaSafe &theBfs,
     std::cout<<"\n";
     std::vector<std::string> comTokens;
     boost::algorithm::split_regex(comTokens, toReturn, boost::regex("\\s+"));
-    std::string toBeCompleted(comTokens[comTokens.size()-1]);
 
-    // make sure the working path is correctly formatted
-    std::string wd(workingPath);
-
-    // if relative then append a slash to working path
-    if(*toBeCompleted.begin() != '/') {
-
-        // only append path seperator if wd isn't already root
-        // which by definition, is '/'
-        if(wd != "/") {
-            wd.append("/");
-        }
-
-        // append the bit that we want to tab-complete
-        (void)wd.append(toBeCompleted);
-    } else { // absolute
-        // path begins with a '/' so must be absolute, thus
-        // make workng path the actual token
-        wd = toBeCompleted;
+    // if the user hasn't entered anything, simply list the available commands
+    if(toReturn.empty()) {
+        com_help();
+        std::cout<<"ts$> "<<toReturn;
+        return;
     }
 
-    // run the tab-completion algorithm and get the tab-completed string back
-    std::string tabCompleted = tabCompleteTeaSafeEntry(theBfs, wd);
+    // else process which bit to tab-complete
+    std::string tabCompleted;
+    size_t len;
+
+    if(comTokens.size() > 1) {
+        std::string toBeCompleted(comTokens[comTokens.size()-1]);
+
+        // make sure the working path is correctly formatted
+        std::string wd(workingPath);
+
+        // if relative then append a slash to working path
+        if(*toBeCompleted.begin() != '/') {
+
+            // only append path seperator if wd isn't already root
+            // which by definition, is '/'
+            if(wd != "/") {
+                wd.append("/");
+            }
+
+            // append the bit that we want to tab-complete
+            (void)wd.append(toBeCompleted);
+        } else { // absolute
+            // path begins with a '/' so must be absolute, thus
+            // make workng path the actual token
+            wd = toBeCompleted;
+        }
+
+        // run the tab-completion algorithm and get the tab-completed string back
+        tabCompleted = tabCompleteTeaSafeEntry(theBfs, wd);
+        len = (boost::filesystem::path(toBeCompleted).filename()).string().length();
+
+    } else {
+        tabCompleted = tabCompleteCommand(comTokens[0]);
+        len = comTokens[0].length();
+    }
 
     // how long is the original fname length prior to tab-completion?
     // Subtract from the original string this many characyers
-    size_t len = (boost::filesystem::path(toBeCompleted).filename()).string().length();
     std::string copy(toReturn.begin(), toReturn.end() - len);
     copy.swap(toReturn);
     cursorPos -= len;
