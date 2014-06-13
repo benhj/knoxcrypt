@@ -1,3 +1,8 @@
+# options
+#
+# uncomment to compile boost in statically
+# STATIC_BUILD=YES
+
 # discover the liklihood of what version of FUSE we're using
 # also set the compiler type; clang if on mac, gcc if on linux
 UNAME := $(shell uname)
@@ -26,12 +31,20 @@ else
     BOOST_HEADERS= /usr/include/boost
 endif
 
-# prefer to use static boost libraries for better portability
+# prefer dynamic libs for security
+ifdef STATIC_BUILD
 BOOST_LD= $(BOOST_PATH)/libboost_filesystem.a \
-          $(BOOST_PATH)/libboost_system.a \
-          $(BOOST_PATH)/libboost_program_options.a \
-          $(BOOST_PATH)/libboost_random.a \
-          $(BOOST_PATH)/libboost_regex.a
+		  $(BOOST_PATH)/libboost_system.a \
+		  $(BOOST_PATH)/libboost_program_options.a \
+		  $(BOOST_PATH)/libboost_random.a \
+		  $(BOOST_PATH)/libboost_regex.a
+else
+BOOST_LD= $(BOOST_PATH)/libboost_filesystem.so \
+          $(BOOST_PATH)/libboost_system.so \
+          $(BOOST_PATH)/libboost_program_options.so \
+          $(BOOST_PATH)/libboost_random.so \
+          $(BOOST_PATH)/libboost_regex.so
+endif
 
 # compilation flags
 CXXFLAGS_FUSE= -I/usr/local/include/$(FUSE)  -DFUSE_USE_VERSION=26
