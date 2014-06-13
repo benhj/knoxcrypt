@@ -48,14 +48,14 @@ endif
 
 # compilation flags
 CXXFLAGS_FUSE= -I/usr/local/include/$(FUSE)  -DFUSE_USE_VERSION=26
-CXXFLAGS= -ggdb \
-          -std=c++11 \
+CXXFLAGS ?= -ggdb \
           -Os \
           -ffast-math \
           -funroll-loops \
-          -Wno-ctor-dtor-privacy \
-          -I$(BOOST_HEADERS) \
-          -Iinclude -D_FILE_OFFSET_BITS=64
+          -Wno-ctor-dtor-privacy
+CXXFLAGS += -std=c++11 \
+			-I$(BOOST_HEADERS) \
+			-Iinclude -D_FILE_OFFSET_BITS=64
 
 # specify locations of all source files
 SOURCES := $(wildcard src/teasafe/*.cpp)
