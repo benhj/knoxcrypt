@@ -285,6 +285,7 @@ void com_pop(teasafe::TeaSafe &theBfs, std::string &workingDir)
 /// for changing to a new folder. Path should be absolute.
 void com_cd(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string const &path)
 {
+    // try to directly resolve
     if (theBfs.folderExists(path)) {
         workingDir = path;
     } else {
@@ -292,6 +293,31 @@ void com_cd(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string const
     }
 }
 
+/// removes '.' and '..' bits
+/// from http://stackoverflow.com/questions/1746136/how-do-i-normalize-a-pathname-using-boostfilesystem
+boost::filesystem::path normalize(const boost::filesystem::path &path)
+{
+    boost::filesystem::path absPath = boost::filesystem::absolute(path);
+    boost::filesystem::path::iterator it = absPath.begin();
+    boost::filesystem::path result = *it++;
+
+    // For the rest remove ".." and "." in a path with no symlinks
+    for (; it != absPath.end(); ++it) {
+        // Just move back on ../
+        if (*it == "..") {
+            result = result.parent_path();
+        }
+        // Ignore "."
+        else if (*it != ".") {
+            // Just cat other path entries
+            result /= *it;
+        }
+    }
+
+    return result;
+}
+
+/// gets the correct path to cd in to
 std::string formattedPath(std::string const &workingDir, std::string const &path)
 {
     std::string wd(workingDir);
@@ -303,7 +329,11 @@ std::string formattedPath(std::string const &workingDir, std::string const &path
     if(*wd.rbegin() != '/') {
         (void)wd.append("/");
     }
-    return std::string(wd.append(path));
+
+    // resolve '.' and '..' bits before returning
+    boost::filesystem::path p(wd.append(path));
+    boost::filesystem::path normalized(normalize(p));
+    return std::string(normalized.string());
 }
 
 /// parses the command string
