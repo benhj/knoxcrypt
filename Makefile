@@ -15,7 +15,7 @@ else
 endif
 
 # standard library search paths
-LDFLAGS=  -L/usr/local/lib -L/usr/lib
+LDFLAGS +=  -L/usr/local/lib -L/usr/lib
 
 # try to find path of where boost is probably installed
 ifeq ($(wildcard /usr/local/lib/libboost*),)
