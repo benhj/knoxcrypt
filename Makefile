@@ -110,22 +110,22 @@ obj-cipher/%.o: src/cipher/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_FUSE) -c -o $@ $<
 
 all: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
-     $(OBJECTS) $(OBJECTS_CIPHER) libBuilder \
+     $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a \
      $(TEST_SRC) $(TEST_EXECUTABLE) $(FUSE_LAYER) $(MAKETeaSafe_EXECUTABLE) \
      $(SHELL_BIN)
 
-lib: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher $(OBJECTS) $(OBJECTS_CIPHER) libBuilder
+lib: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a
 
-$(TEST_EXECUTABLE): directoryObjTest $(OBJECTS_TEST)
+$(TEST_EXECUTABLE): directoryObjTest $(OBJECTS_TEST) libteasafe.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_TEST) ./libteasafe.a $(BOOST_LD) -o $@
 
-$(MAKETeaSafe_EXECUTABLE): directoryObjMakeBfs $(OBJECTS_MAKEBIN)
+$(MAKETeaSafe_EXECUTABLE): directoryObjMakeBfs $(OBJECTS_MAKEBIN) libteasafe.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_MAKEBIN) ./libteasafe.a $(BOOST_LD) -o $@
 
-$(SHELL_BIN): directoryObjUtility $(OBJECTS_UTILITY)
+$(SHELL_BIN): directoryObjUtility $(OBJECTS_UTILITY) libteasafe.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_UTILITY) ./libteasafe.a $(BOOST_LD) -o $@
 
-$(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE)
+$(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE) libteasafe.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a $(FUSE_LIBS) $(BOOST_LD) -o $@
 
 clean:
@@ -149,5 +149,5 @@ directoryObjCipher:
 directoryObjUtility:
 	/bin/mkdir -p obj-utility
 
-libBuilder:
+libteasafe.a: $(OBJECTS) $(OBJECTS_CIPHER)
 	/usr/bin/ar rcs libteasafe.a obj/* obj-cipher/*
