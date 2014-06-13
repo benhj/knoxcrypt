@@ -151,3 +151,6 @@ directoryObjUtility:
 
 libteasafe.a: $(OBJECTS) $(OBJECTS_CIPHER)
 	/usr/bin/ar rcs libteasafe.a obj/* obj-cipher/*
+
+check: $(TEST_EXECUTABLE)
+	./$(TEST_EXECUTABLE)
