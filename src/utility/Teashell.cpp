@@ -55,6 +55,41 @@
 #include <stdint.h>
 #include <vector>
 
+/// describes a particular command
+struct CommandDescriptor
+{
+    CommandDescriptor(std::string const &command_,
+                      std::string const &desc_,
+                      std::string const &usage_)
+      : command(command_)
+      , desc(desc_)
+      , usage(usage_)
+    {
+
+    }
+    std::string command;
+    std::string desc;
+    std::string usage;
+};
+
+/// stores all available commands
+typedef std::vector<CommandDescriptor> Commands;
+Commands g_availableCommands;
+
+/// lists all available commands
+void com_help()
+{
+    Commands::iterator it = g_availableCommands.begin();
+    std::cout<<std::endl;
+    std::cout<<boost::format("%1% %|20t|%2% %|80t|%3%\n") % "Command" % "Description" % "Usage";
+    std::cout<<boost::format("%1% %|20t|%2% %|80t|%3%\n") % "-------" % "-----------" % "-----";
+    std::cout<<std::endl;
+    for(; it != g_availableCommands.end(); ++it) {
+        std::cout<<boost::format("%1% %|20t|%2% %|80t|%3%\n") % it->command % it->desc % it->usage;
+    }
+    std::cout<<std::endl;
+}
+
 /// the 'ls' command for listing dir contents
 void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
 {
@@ -77,7 +112,7 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
 
 /// attempts to implement tab complete by matching the provided string
 /// with an entry at the given parent path
-std::string tabComplete(teasafe::TeaSafe &theBfs, std::string const &path)
+std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const &path)
 {
     // make sure path begins with a slash
     std::string thePath(*path.begin() != '/' ? "/" : "");
@@ -309,6 +344,8 @@ void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string 
         } else {
             com_extract(theBfs, formattedPath(workingDir, comTokens[1]), comTokens[2]);
         }
+    } else if (comTokens[0] == "help") {
+        com_help();
     }
 }
 
@@ -391,7 +428,7 @@ void handleTabKey(teasafe::TeaSafe &theBfs,
     }
 
     // run the tab-completion algorithm and get the tab-completed string back
-    std::string tabCompleted = tabComplete(theBfs, wd);
+    std::string tabCompleted = tabCompleteTeaSafeEntry(theBfs, wd);
 
     // how long is the original fname length prior to tab-completion?
     // Subtract from the original string this many characyers
@@ -461,6 +498,46 @@ int loop(teasafe::TeaSafe &theBfs)
     return 0;
 }
 
+void populateCommands()
+{
+    {
+        CommandDescriptor command("ls","list entries in current folder","ls");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("pwd","display current working dir","pwd");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("mkdir","create folder","mkdir <folderName>");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("push","change to folder","push <folderName>");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("pop","change to previous folder","pop");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("cd","change to folder","cd <folderName>");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("rm","remove entry","rm <entryName>");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("add","add a file or folder to current working dir","add <file:///path/to/thing>");
+        g_availableCommands.push_back(command);
+    }
+    {
+        CommandDescriptor command("extract","extract a file or folder","extract <entryName> <file:///place/to/extract>");
+        g_availableCommands.push_back(command);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     // parse the program options
@@ -502,6 +579,8 @@ int main(int argc, char *argv[])
         std::cout<<desc<<std::endl;
         return 1;
     }
+
+    populateCommands();
 
     // Setup a core teasafe io object which stores highlevel info about accessing
     // the TeaSafe image
