@@ -154,3 +154,6 @@ libteasafe.a: $(OBJECTS) $(OBJECTS_CIPHER)
 
 check: $(TEST_EXECUTABLE)
 	./$(TEST_EXECUTABLE)
+
+
+.PHONY: all check clean lib
