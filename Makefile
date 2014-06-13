@@ -4,7 +4,7 @@
 # STATIC_BUILD=YES
 
 
-PKG_CONFIG = pkg-config
+PKG_CONFIG ?= pkg-config
 
 # discover the liklihood of what version of FUSE we're using
 # also set the compiler type; clang if on mac, gcc if on linux
