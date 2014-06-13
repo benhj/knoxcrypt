@@ -3,6 +3,9 @@
 # uncomment to compile boost in statically
 # STATIC_BUILD=YES
 
+
+PKG_CONFIG = pkg-config
+
 # discover the liklihood of what version of FUSE we're using
 # also set the compiler type; clang if on mac, gcc if on linux
 UNAME := $(shell uname)
@@ -13,6 +16,7 @@ else
     CXX=clang++
     FUSE=osxfuse
 endif
+FUSE_LIBS = $(shell $(PKG_CONFIG) --libs fuse 2>/dev/null || echo "-l$(FUSE)")
 
 # standard library search paths
 LDFLAGS +=  -L/usr/local/lib -L/usr/lib
@@ -47,7 +51,7 @@ BOOST_LD= $(BOOST_PATH)/libboost_filesystem.so \
 endif
 
 # compilation flags
-CXXFLAGS_FUSE= -I/usr/local/include/$(FUSE)  -DFUSE_USE_VERSION=26
+CXXFLAGS_FUSE= $(shell $(PKG_CONFIG) --cflags fuse 2>/dev/null || echo "-I/usr/local/include/$(FUSE)")  -DFUSE_USE_VERSION=26
 CXXFLAGS ?= -ggdb \
           -Os \
           -ffast-math \
@@ -122,7 +126,7 @@ $(SHELL_BIN): directoryObjUtility $(OBJECTS_UTILITY)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_UTILITY) ./libteasafe.a $(BOOST_LD) -o $@
 
 $(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -l$(FUSE) $(OBJECTS_FUSE) ./libteasafe.a -l$(FUSE) $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a $(FUSE_LIBS) $(BOOST_LD) -o $@
 
 clean:
 	/bin/rm -fr obj obj-maketeasafe obj-test obj-fuse test_$(UNAME) maketeasafe_$(UNAME) teasafe_$(UNAME) teashell_$(UNAME) obj-cipher obj-utility libteasafe.a
