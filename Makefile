@@ -1,3 +1,11 @@
+# options
+#
+# uncomment to compile boost in statically
+# STATIC_BUILD=YES
+
+
+PKG_CONFIG ?= pkg-config
+
 # discover the liklihood of what version of FUSE we're using
 # also set the compiler type; clang if on mac, gcc if on linux
 UNAME := $(shell uname)
@@ -8,14 +16,15 @@ else
     CXX=clang++
     FUSE=osxfuse
 endif
+FUSE_LIBS = $(shell $(PKG_CONFIG) --libs fuse 2>/dev/null || echo "-l$(FUSE)")
 
 # standard library search paths
-LDFLAGS=  -L/usr/local/lib -L/usr/lib
+LDFLAGS +=  -L/usr/local/lib -L/usr/lib
 
 # try to find path of where boost is probably installed
-ifeq ($(wildcard /usr/local/lib/libboost*),) 
+ifeq ($(wildcard /usr/local/lib/libboost*),)
     BOOST_PATH= /usr/lib
-else 
+else
     BOOST_PATH= /usr/local/lib
 endif
 
@@ -26,25 +35,33 @@ else
     BOOST_HEADERS= /usr/include/boost
 endif
 
-# prefer to use static boost libraries for better portability
+# prefer dynamic libs for security
+ifdef STATIC_BUILD
 BOOST_LD= $(BOOST_PATH)/libboost_filesystem.a \
-          $(BOOST_PATH)/libboost_system.a \
-          $(BOOST_PATH)/libboost_program_options.a \
-          $(BOOST_PATH)/libboost_random.a \
-          $(BOOST_PATH)/libboost_regex.a
-          
-# compilation flags 
-CXXFLAGS_FUSE= -I/usr/local/include/$(FUSE)  -DFUSE_USE_VERSION=26
-CXXFLAGS= -ggdb \
-          -std=c++11 \
+		  $(BOOST_PATH)/libboost_system.a \
+		  $(BOOST_PATH)/libboost_program_options.a \
+		  $(BOOST_PATH)/libboost_random.a \
+		  $(BOOST_PATH)/libboost_regex.a
+else
+BOOST_LD= $(BOOST_PATH)/libboost_filesystem.so \
+          $(BOOST_PATH)/libboost_system.so \
+          $(BOOST_PATH)/libboost_program_options.so \
+          $(BOOST_PATH)/libboost_random.so \
+          $(BOOST_PATH)/libboost_regex.so
+endif
+
+# compilation flags
+CXXFLAGS_FUSE= $(shell $(PKG_CONFIG) --cflags fuse 2>/dev/null || echo "-I/usr/local/include/$(FUSE)")  -DFUSE_USE_VERSION=26
+CXXFLAGS ?= -ggdb \
           -Os \
           -ffast-math \
           -funroll-loops \
-          -Wno-ctor-dtor-privacy \
-          -I$(BOOST_HEADERS) \
-          -Iinclude -D_FILE_OFFSET_BITS=64
+          -Wno-ctor-dtor-privacy
+CXXFLAGS += -std=c++11 \
+			-I$(BOOST_HEADERS) \
+			-Iinclude -D_FILE_OFFSET_BITS=64
 
-# specify locations of all source files          
+# specify locations of all source files
 SOURCES := $(wildcard src/teasafe/*.cpp)
 MAKE_TeaSafe_SRC := $(wildcard src/maketeasafe/*.cpp)
 TEST_SRC := $(wildcard src/test/*.cpp)
@@ -76,61 +93,67 @@ SHELL_BIN=teashell_$(UNAME)
 # build the different object files
 obj/%.o: src/teasafe/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-	
+
 obj-test/%.o: src/test/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-	
+
 obj-maketeasafe/%.o: src/maketeasafe/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-	
+
 obj-utility/%.o: src/utility/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-	
+
 obj-fuse/%.o: src/fuse/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_FUSE) -c -o $@ $<
-	
+
 obj-cipher/%.o: src/cipher/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_FUSE) -c -o $@ $<
 
 all: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
-     $(OBJECTS) $(OBJECTS_CIPHER) libBuilder \
+     $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a \
      $(TEST_SRC) $(TEST_EXECUTABLE) $(FUSE_LAYER) $(MAKETeaSafe_EXECUTABLE) \
      $(SHELL_BIN)
 
-lib: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher $(OBJECTS) $(OBJECTS_CIPHER) libBuilder 
+lib: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a
 
-$(TEST_EXECUTABLE): directoryObjTest $(OBJECTS_TEST)
-	$(CXX) $(LDFLAGS) $(OBJECTS_TEST) ./libteasafe.a $(BOOST_LD) -o $@ 
-	
-$(MAKETeaSafe_EXECUTABLE): directoryObjMakeBfs $(OBJECTS_MAKEBIN)
-	$(CXX) $(LDFLAGS) $(OBJECTS_MAKEBIN) ./libteasafe.a $(BOOST_LD) -o $@
-	
-$(SHELL_BIN): directoryObjUtility $(OBJECTS_UTILITY)
-	$(CXX) $(LDFLAGS) $(OBJECTS_UTILITY) ./libteasafe.a $(BOOST_LD) -o $@
+$(TEST_EXECUTABLE): directoryObjTest $(OBJECTS_TEST) libteasafe.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_TEST) ./libteasafe.a $(BOOST_LD) -o $@
 
-$(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE) 
-	$(CXX) $(LDFLAGS) -l$(FUSE) $(OBJECTS_FUSE) ./libteasafe.a -l$(FUSE) $(BOOST_LD) -o $@
-	
+$(MAKETeaSafe_EXECUTABLE): directoryObjMakeBfs $(OBJECTS_MAKEBIN) libteasafe.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_MAKEBIN) ./libteasafe.a $(BOOST_LD) -o $@
+
+$(SHELL_BIN): directoryObjUtility $(OBJECTS_UTILITY) libteasafe.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_UTILITY) ./libteasafe.a $(BOOST_LD) -o $@
+
+$(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE) libteasafe.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a $(FUSE_LIBS) $(BOOST_LD) -o $@
+
 clean:
 	/bin/rm -fr obj obj-maketeasafe obj-test obj-fuse test_$(UNAME) maketeasafe_$(UNAME) teasafe_$(UNAME) teashell_$(UNAME) obj-cipher obj-utility libteasafe.a
-	
-directoryObj: 
+
+directoryObj:
 	/bin/mkdir -p obj
-	
-directoryObjTest: 
+
+directoryObjTest:
 	/bin/mkdir -p obj-test
-	
-directoryObjMakeBfs: 
+
+directoryObjMakeBfs:
 	/bin/mkdir -p obj-maketeasafe
-	
+
 directoryObjFuse:
 	/bin/mkdir -p obj-fuse
-	
+
 directoryObjCipher:
 	/bin/mkdir -p obj-cipher
-	
+
 directoryObjUtility:
 	/bin/mkdir -p obj-utility
 
-libBuilder:
+libteasafe.a: $(OBJECTS) $(OBJECTS_CIPHER)
 	/usr/bin/ar rcs libteasafe.a obj/* obj-cipher/*
+
+check: $(TEST_EXECUTABLE)
+	./$(TEST_EXECUTABLE)
+
+
+.PHONY: all check clean lib
