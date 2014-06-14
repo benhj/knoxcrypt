@@ -12,9 +12,11 @@ UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
     CXX=g++
     FUSE=fuse
+    LIB_EXT=so
 else
     CXX=clang++
     FUSE=osxfuse
+    LIB_EXT=dylib
 endif
 FUSE_LIBS = $(shell $(PKG_CONFIG) --libs fuse 2>/dev/null || echo "-l$(FUSE)")
 
@@ -38,28 +40,28 @@ endif
 # prefer dynamic libs for security
 ifdef STATIC_BUILD
 BOOST_LD= $(BOOST_PATH)/libboost_filesystem.a \
-		  $(BOOST_PATH)/libboost_system.a \
-		  $(BOOST_PATH)/libboost_program_options.a \
-		  $(BOOST_PATH)/libboost_random.a \
-		  $(BOOST_PATH)/libboost_regex.a
+          $(BOOST_PATH)/libboost_system.a \
+          $(BOOST_PATH)/libboost_program_options.a \
+          $(BOOST_PATH)/libboost_random.a \
+          $(BOOST_PATH)/libboost_regex.a
 else
-BOOST_LD= $(BOOST_PATH)/libboost_filesystem.so \
-          $(BOOST_PATH)/libboost_system.so \
-          $(BOOST_PATH)/libboost_program_options.so \
-          $(BOOST_PATH)/libboost_random.so \
-          $(BOOST_PATH)/libboost_regex.so
+BOOST_LD= $(BOOST_PATH)/libboost_filesystem.$(LIB_EXT) \
+          $(BOOST_PATH)/libboost_system.$(LIB_EXT) \
+          $(BOOST_PATH)/libboost_program_options.$(LIB_EXT) \
+          $(BOOST_PATH)/libboost_random.$(LIB_EXT) \
+          $(BOOST_PATH)/libboost_regex.$(LIB_EXT)
 endif
 
 # compilation flags
 CXXFLAGS_FUSE= $(shell $(PKG_CONFIG) --cflags fuse 2>/dev/null || echo "-I/usr/local/include/$(FUSE)")  -DFUSE_USE_VERSION=26
 CXXFLAGS ?= -ggdb \
-          -Os \
-          -ffast-math \
-          -funroll-loops \
-          -Wno-ctor-dtor-privacy
+            -Os \
+            -ffast-math \
+            -funroll-loops \
+            -Wno-ctor-dtor-privacy
 CXXFLAGS += -std=c++11 \
-			-I$(BOOST_HEADERS) \
-			-Iinclude -D_FILE_OFFSET_BITS=64
+            -I$(BOOST_HEADERS) \
+            -Iinclude -D_FILE_OFFSET_BITS=64
 
 # specify locations of all source files
 SOURCES := $(wildcard src/teasafe/*.cpp)
