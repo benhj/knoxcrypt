@@ -1,12 +1,18 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <boost/shared_ptr.hpp>
 #include <QMainWindow>
-
 
 namespace Ui {
     class MainWindow;
 }
+
+namespace teasafe {
+    class TeaSafe;
+}
+
+typedef boost::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
 
 class MainWindow : public QMainWindow
 {
@@ -31,6 +37,7 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
+    SharedTeaSafe m_teaSafe;
 };
 
 #endif // MAINWINDOW_H

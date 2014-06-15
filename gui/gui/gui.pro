@@ -11,6 +11,17 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = gui
 TEMPLATE = app
 
+CONFIG += MAC_CONFIG
+MAC_CONFIG {
+    QMAKE_CXXFLAGS = -std=c++11 -mmacosx-version-min=10.7
+    QMAKE_LFLAGS = -std=c++11 -mmacosx-version-min=10.7
+}
+
+LIBS += -L"/usr/local/lib" -lboost_system -lboost_filesystem
+LIBS += ../../libteasafe.a
+
+INCLUDEPATH += ../../include \
+               /usr/local/include
 
 SOURCES += main.cpp\
         MainWindow.cpp
