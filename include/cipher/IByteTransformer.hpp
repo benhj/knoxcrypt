@@ -29,6 +29,16 @@
 #ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
 #define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
 
+// Crappy clang shipped with mac -- at least the version I have -- doesn't support
+// std::move and std::forward
+#if __APPLE__ && (__GNUC_LIBSTD__ <= 4) && (__GNUC_LIBSTD_MINOR__ <= 2)
+#  define BOOST_NO_CXX11_RVALUE_REFERENCES
+#endif
+
+#include "utility/EventType.hpp"
+#include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/signals2.hpp>
 #include <iostream>
 #include <string>
 
@@ -38,10 +48,27 @@ namespace teasafe { namespace cipher
     {
       public:
         IByteTransformer();
+
+        /// must be implemented and called before anything else!!
+        virtual void init() = 0;
+
         void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length);
+
+        /// to notify when different parts of the cipher have been initialized
+        /// also see EventType for different event types
+        virtual void registerSignalHandler(boost::function<void(EventType)> const &f);
+
         virtual ~IByteTransformer();
       private:
         virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
+
+      protected:
+        // for emitting when something is done (e.g.
+        // start of key generation)
+        typedef boost::signals2::signal<void(EventType)> CipherSignal;
+        typedef boost::shared_ptr<CipherSignal> SharedSignal;
+        SharedSignal m_cipherSignal;
+
     };
 }
 }

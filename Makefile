@@ -21,7 +21,7 @@ endif
 FUSE_LIBS = $(shell $(PKG_CONFIG) --libs fuse 2>/dev/null || echo "-l$(FUSE)")
 
 # standard library search paths
-LDFLAGS +=  -L/usr/local/lib -L/usr/lib
+LDFLAGS +=  -L/usr/local/lib -L/usr/lib 
 
 # try to find path of where boost is probably installed
 ifeq ($(wildcard /usr/local/lib/libboost*),)

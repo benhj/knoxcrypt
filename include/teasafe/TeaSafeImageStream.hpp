@@ -30,8 +30,10 @@
 #define TeaSafe_TeaSafe_IMAGE_STREAM_HPP__
 
 #include "teasafe/CoreTeaSafeIO.hpp"
+#include "utility/EventType.hpp"
 #include "cipher/IByteTransformer.hpp"
 
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <fstream>

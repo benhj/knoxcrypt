@@ -28,15 +28,24 @@
 
 #include "cipher/IByteTransformer.hpp"
 
+#include <boost/make_shared.hpp>
+
 namespace teasafe { namespace cipher
 {
     IByteTransformer::IByteTransformer()
+      : m_cipherSignal(boost::make_shared<CipherSignal>())
     {
     }
 
     IByteTransformer::~IByteTransformer()
     {
 
+    }
+
+    void
+    IByteTransformer::registerSignalHandler(boost::function<void(EventType)> const &f)
+    {
+        m_cipherSignal->connect(f);
     }
 
     void

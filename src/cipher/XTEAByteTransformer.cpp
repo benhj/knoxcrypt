@@ -33,7 +33,7 @@
 #include "cipher/scrypt/crypto_scrypt.hpp"
 #include "cipher/XTEAByteTransformer.hpp"
 
-#include <boost/progress.hpp>
+#include <boost/make_shared.hpp>
 
 #include <vector>
 
@@ -90,17 +90,21 @@ namespace teasafe { namespace cipher
     // the first 256MB of cipher stream
     static std::vector<char> g_bigCipherBuffer;
 
-    // the size of the cipher buffer (prefer a #define rather than a const
-    // for minimal memory footprint and minimal time required to instantiate).
+    // the size of the cipher buffer
 #define CIPHER_BUFFER_SIZE 270000000
-
 
     XTEAByteTransformer::XTEAByteTransformer(std::string const &password,
                                              uint64_t const iv,
                                              unsigned int const rounds)
         : IByteTransformer()
+        , m_password(password)
         , m_iv(iv)
         , m_rounds(rounds) // note, the suggested xtea rounds is 64 in the literature
+    {
+    }
+
+    void
+    XTEAByteTransformer::init()
     {
         //
         // The following key generation algorithm uses scrypt, with N = 2^20; r = 8; p = 1
@@ -108,12 +112,18 @@ namespace teasafe { namespace cipher
         if (!g_init) {
             unsigned char temp[16];
 
-            std::cout<<"Generating key...\n"<<std::endl;
+            {
+                EventType event = EventType::KeyGenBegin;
+                (*m_cipherSignal)(event);
+            }
             uint8_t salt[8];
-            teasafe::detail::convertUInt64ToInt8Array(iv, salt);
-            ::crypto_scrypt((uint8_t*)password.c_str(), password.size(), salt, 8,
+            teasafe::detail::convertUInt64ToInt8Array(m_iv, salt);
+            ::crypto_scrypt((uint8_t*)m_password.c_str(), m_password.size(), salt, 8,
                             1048576, 8, 1, temp, 16);
-            std::cout<<"Key generated.\n"<<std::endl;
+            {
+                EventType event = EventType::KeyGenEnd;
+                (*m_cipherSignal)(event);
+            }
 
             int c = 0;
 
@@ -129,7 +139,6 @@ namespace teasafe { namespace cipher
             buildBigCipherBuffer();
             g_init = true;
         }
-
     }
 
     XTEAByteTransformer::~XTEAByteTransformer()
@@ -139,17 +148,27 @@ namespace teasafe { namespace cipher
     void
     XTEAByteTransformer::buildBigCipherBuffer()
     {
-        std::cout<<"Building big xtea cipher stream buffer. Please wait..."<<std::endl;
+
+        {
+            EventType event = EventType::BigCipherBuildBegin;
+            (*m_cipherSignal)(event);
+        }
         std::vector<char> in;
         in.resize(CIPHER_BUFFER_SIZE);
         g_bigCipherBuffer.resize(CIPHER_BUFFER_SIZE);
         uint64_t div = CIPHER_BUFFER_SIZE / 100000;
-        boost::progress_display pd(div);
         for(uint64_t i = 0;i<div;++i) {
             doTransform((&in.front()) + (i * 100000), (&g_bigCipherBuffer.front()) + (i*100000), 0, 100000);
-            ++pd;
+            {
+                EventType event = EventType::CipherBuildUpdate;
+                (*m_cipherSignal)(event);
+            }
         }
-        std::cout<<"\nBuilt big xtea cipher stream buffer.\n"<<std::endl;
+
+        {
+            EventType event = EventType::BigCipherBuildEnd;
+            (*m_cipherSignal)(event);
+        }
     }
 
     void

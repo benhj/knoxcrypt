@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2014>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,18 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_CORE_TeaSafe_IO_HPP__
-#define TeaSafe_CORE_TeaSafe_IO_HPP__
-
-#include "utility/EventType.hpp"
-
-#include <string>
-
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
+#ifndef TeaSafe_EVENT_TYPE_HPP__
+#define TeaSafe_EVENT_TYPE_HPP__
 
 namespace teasafe
 {
-
-    class FileBlockBuilder;
-    typedef boost::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
-
-    struct CoreTeaSafeIO
-    {
-        std::string path;                // path of the tea safe image
-        uint64_t blocks;                 // total number of blocks
-        uint64_t freeBlocks;             // number of free blocks
-        std::string password;            // password used to generate encryption key
-        uint64_t iv;                     // IV used to initialize the cipher stream
-        unsigned int rounds;             // number of rounds used by enc. process
-        uint64_t rootBlock;              // the start block of the root folder
-        SharedBlockBuilder blockBuilder; // a block factory / resource manage
-        boost::function<void(teasafe::EventType)> ccb; // call back for cipher
+    enum class EventType { KeyGenBegin,            // before key gen is started
+                           KeyGenEnd,              // when key gen is finished
+                           BigCipherBuildBegin,    // before building big cipher
+                           BigCipherBuildEnd,      // when building finished
+                           CipherBuildUpdate       // building progress notification
     };
-
-    typedef boost::shared_ptr<CoreTeaSafeIO> SharedCoreIO;
-
 }
 
 
-#endif //TeaSafe_CORE_TeaSafe_IO_HPP__
+#endif // TeaSafe_EVENT_TYPE_HPP__

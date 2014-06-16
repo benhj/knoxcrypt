@@ -39,10 +39,12 @@
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/TeaSafeException.hpp"
 #include "teasafe/FileStreamPtr.hpp"
+#include "utility/CipherCallback.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
 #include "utility/RecursiveFolderAdder.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/format.hpp>
@@ -684,6 +686,9 @@ int main(int argc, char *argv[])
     }
 
     // Obtain the number of blocks in the image by reading the image's block count
+    boost::progress_display pd((270000000 / 100000)); // hack until I can figure this out better
+    boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, boost::ref(pd)));
+    io->ccb = f;
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
     io->blocks = teasafe::detail::getBlockCount(stream);
 

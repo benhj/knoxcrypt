@@ -45,6 +45,11 @@ namespace teasafe
         , m_gpos(0)
         , m_ppos(0)
     {
+        // attach callback
+        m_byteTransformer->registerSignalHandler(io->ccb);
+
+        // setup cipher
+        m_byteTransformer->init();
     }
 
     TeaSafeImageStream&
