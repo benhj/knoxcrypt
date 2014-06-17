@@ -43,10 +43,15 @@
 #include <iostream>
 #include <string>
 
-void imagerCallback(teasafe::EventType eventType, boost::progress_display &pd)
+void imagerCallback(teasafe::EventType eventType, long const amount)
 {
+    static boost::shared_ptr<boost::progress_display> pd;
+    if(eventType == teasafe::EventType::ImageBuildStart) {
+        std::cout<<"Building main fs image.."<<std::endl;
+        pd = boost::make_shared<boost::progress_display>(amount);
+    }
     if(eventType == teasafe::EventType::ImageBuildUpdate) {
-        ++pd;
+        ++(*pd);
     }
 }
 
@@ -132,15 +137,14 @@ int main(int argc, char *argv[])
     }
 
     // register progress call back for cipher
-    boost::progress_display pd(teasafe::detail::CIPHER_BUFFER_SIZE / 100000);
-    boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, boost::ref(pd)));
+    long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
+    boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, amount));
     io->ccb = f;
 
     teasafe::MakeTeaSafe imager(io, omp);
 
     // register progress callback for imager
-    boost::progress_display pdb(io->blocks); // hack until I can figure this out better
-    boost::function<void(teasafe::EventType)> fb(boost::bind(&imagerCallback, _1, boost::ref(pdb)));
+    boost::function<void(teasafe::EventType)> fb(boost::bind(&imagerCallback, _1, io->blocks));
     imager.registerSignalHandler(fb);
 
     imager.buidImage();

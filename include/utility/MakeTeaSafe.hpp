@@ -100,7 +100,7 @@ namespace teasafe
         {
 
             {
-                EventType event = EventType::ImageBuildEnd;
+                EventType event = EventType::ImageBuildStart;
                 (*m_writeSignal)(event);
             }
             for (uint64_t i(0); i < io->blocks ; ++i) {
@@ -188,11 +188,13 @@ namespace teasafe
             // as-of-yet, undecided info
             //
             {
+                std::cout<<"Writing out IV.."<<std::endl;
                 uint8_t ivBytes[8];
                 detail::convertUInt64ToInt8Array(io->iv, ivBytes);
                 std::ofstream ivout(io->path.c_str(), std::ios::out | std::ios::binary);
                 (void)ivout.write((char*)ivBytes, 8);
 
+                std::cout<<"Writing out numnber of rounds.."<<std::endl;
                 for(int i = 0; i < 8; ++i) {
                     // note although char is smaller that io->rounds, which
                     // is an unsigned int, io->rounds should always be less than

@@ -497,8 +497,8 @@ int main(int argc, char *argv[])
     }
 
     // Obtain the number of blocks in the image by reading the image's block count
-    boost::progress_display pd(teasafe::detail::CIPHER_BUFFER_SIZE / 100000);
-    boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, boost::ref(pd)));
+    long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
+    boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, amount));
     io->ccb = f;
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
     io->blocks = teasafe::detail::getBlockCount(stream);
