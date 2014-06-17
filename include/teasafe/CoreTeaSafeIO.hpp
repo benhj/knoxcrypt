@@ -34,6 +34,7 @@
 #include <string>
 
 #include <boost/function.hpp>
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace teasafe
@@ -52,7 +53,9 @@ namespace teasafe
         unsigned int rounds;             // number of rounds used by enc. process
         uint64_t rootBlock;              // the start block of the root folder
         SharedBlockBuilder blockBuilder; // a block factory / resource manage
-        boost::function<void(teasafe::EventType)> ccb; // call back for cipher
+        typedef boost::function<void(teasafe::EventType)> Callback;
+        typedef boost::optional<Callback> OptionalCallback;
+        OptionalCallback ccb;            // call back for cipher
     };
 
     typedef boost::shared_ptr<CoreTeaSafeIO> SharedCoreIO;

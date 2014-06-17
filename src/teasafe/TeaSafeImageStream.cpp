@@ -46,7 +46,9 @@ namespace teasafe
         , m_ppos(0)
     {
         // attach callback
-        m_byteTransformer->registerSignalHandler(io->ccb);
+        if(io->ccb) {
+            m_byteTransformer->registerSignalHandler(*io->ccb);
+        }
 
         // setup cipher
         m_byteTransformer->init();
