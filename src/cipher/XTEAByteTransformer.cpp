@@ -90,9 +90,6 @@ namespace teasafe { namespace cipher
     // the first 256MB of cipher stream
     static std::vector<char> g_bigCipherBuffer;
 
-    // the size of the cipher buffer
-#define CIPHER_BUFFER_SIZE 270000000
-
     XTEAByteTransformer::XTEAByteTransformer(std::string const &password,
                                              uint64_t const iv,
                                              unsigned int const rounds)
@@ -154,9 +151,9 @@ namespace teasafe { namespace cipher
             (*m_cipherSignal)(event);
         }
         std::vector<char> in;
-        in.resize(CIPHER_BUFFER_SIZE);
-        g_bigCipherBuffer.resize(CIPHER_BUFFER_SIZE);
-        uint64_t div = CIPHER_BUFFER_SIZE / 100000;
+        in.resize(teasafe::detail::CIPHER_BUFFER_SIZE);
+        g_bigCipherBuffer.resize(teasafe::detail::CIPHER_BUFFER_SIZE);
+        uint64_t div = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
         for(uint64_t i = 0;i<div;++i) {
             doTransform((&in.front()) + (i * 100000), (&g_bigCipherBuffer.front()) + (i*100000), 0, 100000);
             {
@@ -177,7 +174,7 @@ namespace teasafe { namespace cipher
         // big cipher buffer has been initialized
         if (g_init) {
             // prefer to use cipher buffer
-            if ((startPosition + length) < CIPHER_BUFFER_SIZE) {
+            if ((startPosition + length) < teasafe::detail::CIPHER_BUFFER_SIZE) {
                 for (long j = 0; j < length; ++j) {
                     out[j] = in[j] ^ g_bigCipherBuffer[j + startPosition];
                 }
