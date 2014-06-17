@@ -29,6 +29,8 @@
 #ifndef TeaSafe_EVENT_TYPE_HPP__
 #define TeaSafe_EVENT_TYPE_HPP__
 
+/// used to notifying when certain things happen
+
 namespace teasafe
 {
     enum class EventType { KeyGenBegin,            // before key gen is started
@@ -38,7 +40,9 @@ namespace teasafe
                            CipherBuildUpdate,      // building progress notification
                            ImageBuildStart,        // start of image building process
                            ImageBuildEnd,          // end of image building process
-                           ImageBuildUpdate        // image building process
+                           ImageBuildUpdate,       // image building process
+                           IVWriteEvent,           // IV is about to be written
+                           RoundsWriteEvent        // enc. rounds about to be written
     };
 }
 

@@ -109,18 +109,12 @@ namespace teasafe { namespace cipher
         if (!g_init) {
             unsigned char temp[16];
 
-            {
-                EventType event = EventType::KeyGenBegin;
-                (*m_cipherSignal)(event);
-            }
+            broadcastEvent(EventType::KeyGenBegin);
             uint8_t salt[8];
             teasafe::detail::convertUInt64ToInt8Array(m_iv, salt);
             ::crypto_scrypt((uint8_t*)m_password.c_str(), m_password.size(), salt, 8,
                             1048576, 8, 1, temp, 16);
-            {
-                EventType event = EventType::KeyGenEnd;
-                (*m_cipherSignal)(event);
-            }
+            broadcastEvent(EventType::KeyGenEnd);
 
             int c = 0;
 
@@ -146,26 +140,17 @@ namespace teasafe { namespace cipher
     XTEAByteTransformer::buildBigCipherBuffer()
     {
 
-        {
-            EventType event = EventType::BigCipherBuildBegin;
-            (*m_cipherSignal)(event);
-        }
+        broadcastEvent(EventType::BigCipherBuildBegin);
         std::vector<char> in;
         in.resize(teasafe::detail::CIPHER_BUFFER_SIZE);
         g_bigCipherBuffer.resize(teasafe::detail::CIPHER_BUFFER_SIZE);
         uint64_t div = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
         for(uint64_t i = 0;i<div;++i) {
             doTransform((&in.front()) + (i * 100000), (&g_bigCipherBuffer.front()) + (i*100000), 0, 100000);
-            {
-                EventType event = EventType::CipherBuildUpdate;
-                (*m_cipherSignal)(event);
-            }
+            broadcastEvent(EventType::CipherBuildUpdate);
         }
 
-        {
-            EventType event = EventType::BigCipherBuildEnd;
-            (*m_cipherSignal)(event);
-        }
+        broadcastEvent(EventType::BigCipherBuildEnd);
     }
 
     void

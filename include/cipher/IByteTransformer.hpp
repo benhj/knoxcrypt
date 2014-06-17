@@ -57,7 +57,6 @@ namespace teasafe { namespace cipher
         /// to notify when different parts of the cipher have been initialized
         /// also see EventType for different event types
         virtual void registerSignalHandler(boost::function<void(EventType)> const &f);
-
         virtual ~IByteTransformer();
       private:
         virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
@@ -68,6 +67,8 @@ namespace teasafe { namespace cipher
         typedef boost::signals2::signal<void(EventType)> CipherSignal;
         typedef boost::shared_ptr<CipherSignal> SharedSignal;
         SharedSignal m_cipherSignal;
+
+        void broadcastEvent(EventType const &event);
 
     };
 }

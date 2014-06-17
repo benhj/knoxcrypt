@@ -53,6 +53,12 @@ void imagerCallback(teasafe::EventType eventType, long const amount)
     if(eventType == teasafe::EventType::ImageBuildUpdate) {
         ++(*pd);
     }
+    if(eventType == teasafe::EventType::IVWriteEvent) {
+        std::cout<<"Writing out IV.."<<std::endl;
+    }
+    if(eventType == teasafe::EventType::RoundsWriteEvent) {
+        std::cout<<"Writing out number of encryption rounds.."<<std::endl;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -146,7 +152,6 @@ int main(int argc, char *argv[])
     // register progress callback for imager
     boost::function<void(teasafe::EventType)> fb(boost::bind(&imagerCallback, _1, io->blocks));
     imager.registerSignalHandler(fb);
-
     imager.buidImage();
 
     return 0;

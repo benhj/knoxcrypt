@@ -96,13 +96,15 @@ namespace teasafe
             detail::convertUInt64ToInt8Array(fileCount, sizeBytes);
         }
 
+        void broadcastEvent(EventType const &event)
+        {
+            (*m_writeSignal)(event);
+        }
+
         void writeOutFileSpaceBytes(SharedCoreIO const &io, TeaSafeImageStream &out)
         {
 
-            {
-                EventType event = EventType::ImageBuildStart;
-                (*m_writeSignal)(event);
-            }
+            broadcastEvent(EventType::ImageBuildStart);
             for (uint64_t i(0); i < io->blocks ; ++i) {
                 std::vector<uint8_t> ints;
                 ints.assign(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META, 0);
@@ -124,15 +126,9 @@ namespace teasafe
 
                 // write data bytes
                 (void)out.write((char*)&ints.front(), detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
-                {
-                    EventType event = EventType::ImageBuildUpdate;
-                    (*m_writeSignal)(event);
-                }
+                broadcastEvent(EventType::ImageBuildUpdate);
             }
-            {
-                EventType event = EventType::ImageBuildEnd;
-                (*m_writeSignal)(event);
-            }
+            broadcastEvent(EventType::ImageBuildEnd);
         }
 
         void zeroOutBits(std::vector<uint8_t> &bitMapData)
@@ -188,13 +184,13 @@ namespace teasafe
             // as-of-yet, undecided info
             //
             {
-                std::cout<<"Writing out IV.."<<std::endl;
+                broadcastEvent(EventType::IVWriteEvent);
                 uint8_t ivBytes[8];
                 detail::convertUInt64ToInt8Array(io->iv, ivBytes);
                 std::ofstream ivout(io->path.c_str(), std::ios::out | std::ios::binary);
                 (void)ivout.write((char*)ivBytes, 8);
 
-                std::cout<<"Writing out numnber of rounds.."<<std::endl;
+                broadcastEvent(EventType::RoundsWriteEvent);
                 for(int i = 0; i < 8; ++i) {
                     // note although char is smaller that io->rounds, which
                     // is an unsigned int, io->rounds should always be less than

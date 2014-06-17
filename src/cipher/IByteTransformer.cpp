@@ -49,6 +49,12 @@ namespace teasafe { namespace cipher
     }
 
     void
+    IByteTransformer::broadcastEvent(EventType const &event)
+    {
+        (*m_cipherSignal)(event);
+    }
+
+    void
     IByteTransformer::transform(char *in, char *out, std::ios_base::streamoff startPosition, long length)
     {
         this->doTransform(in, out, startPosition, length);
