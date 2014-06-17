@@ -27,11 +27,14 @@
 */
 
 #include "teasafe/CoreTeaSafeIO.hpp"
+#include "utility/CipherCallback.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
+#include "utility/EventType.hpp"
 #include "utility/MakeTeaSafe.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/progress.hpp>
 #include <boost/program_options.hpp>
 #include <boost/random.hpp>
 #include <boost/nondet_random.hpp>
@@ -39,6 +42,13 @@
 #include <ctime>
 #include <iostream>
 #include <string>
+
+void imagerCallback(teasafe::EventType eventType, boost::progress_display &pd)
+{
+    if(eventType == teasafe::EventType::ImageBuildUpdate) {
+        ++pd;
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -121,7 +131,19 @@ int main(int argc, char *argv[])
         omp = teasafe::OptionalMagicPart(partBlock);
     }
 
-    teasafe::MakeTeaSafe teasafe(io, omp);
+    // register progress call back for cipher
+    boost::progress_display pd((270000000 / 100000)); // hack until I can figure this out better
+    boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, boost::ref(pd)));
+    io->ccb = f;
+
+    teasafe::MakeTeaSafe imager(io, omp);
+
+    // register progress callback for imager
+    boost::progress_display pdb(io->blocks); // hack until I can figure this out better
+    boost::function<void(teasafe::EventType)> fb(boost::bind(&imagerCallback, _1, boost::ref(pdb)));
+    imager.registerSignalHandler(fb);
+
+    imager.buidImage();
 
     return 0;
 }

@@ -35,7 +35,10 @@ namespace teasafe
                            KeyGenEnd,              // when key gen is finished
                            BigCipherBuildBegin,    // before building big cipher
                            BigCipherBuildEnd,      // when building finished
-                           CipherBuildUpdate       // building progress notification
+                           CipherBuildUpdate,      // building progress notification
+                           ImageBuildStart,        // start of image building process
+                           ImageBuildEnd,          // end of image building process
+                           ImageBuildUpdate        // image building process
     };
 }
 
