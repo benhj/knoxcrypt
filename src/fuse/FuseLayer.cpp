@@ -37,10 +37,15 @@
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/TeaSafeException.hpp"
+#include "utility/CipherCallback.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
+#include "utility/EventType.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
+#include <boost/progress.hpp>
 
 #include <fuse.h>
 #include <stdint.h>
@@ -492,6 +497,9 @@ int main(int argc, char *argv[])
     }
 
     // Obtain the number of blocks in the image by reading the image's block count
+    long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
+    boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, amount));
+    io->ccb = f;
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
     io->blocks = teasafe::detail::getBlockCount(stream);
 

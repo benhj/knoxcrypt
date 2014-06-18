@@ -36,10 +36,13 @@
 #include "teasafe/TeaSafeFolder.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
+#include "utility/EventType.hpp"
 
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
-#include <boost/progress.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/signals2.hpp>
 
 #include <string>
 #include <fstream>
@@ -56,13 +59,30 @@ namespace teasafe
       public:
 
         MakeTeaSafe(SharedCoreIO const &io, OptionalMagicPart const &omp = OptionalMagicPart())
-            : m_omp(omp)
+            : m_io(io)
+            , m_omp(omp)
+            , m_writeSignal(boost::make_shared<WriteSignal>())
         {
-            buildImage(io);
+        }
+
+        void buidImage()
+        {
+            this->doBuildImage(m_io);
+        }
+
+        virtual void registerSignalHandler(boost::function<void(EventType)> const &f)
+        {
+            m_writeSignal->connect(f);
         }
 
       private:
+        SharedCoreIO m_io;       // io
         OptionalMagicPart m_omp; // for creating a magic partition
+
+        /// to notify image-writing process
+        typedef boost::signals2::signal<void(EventType)> WriteSignal;
+        typedef boost::shared_ptr<WriteSignal> SharedWriteSignal;
+        SharedWriteSignal m_writeSignal;
 
         MakeTeaSafe(); // not required
 
@@ -76,10 +96,15 @@ namespace teasafe
             detail::convertUInt64ToInt8Array(fileCount, sizeBytes);
         }
 
+        void broadcastEvent(EventType const &event)
+        {
+            (*m_writeSignal)(event);
+        }
+
         void writeOutFileSpaceBytes(SharedCoreIO const &io, TeaSafeImageStream &out)
         {
-            std::cout<<"Writing out file space bytes..."<<std::endl;
-            boost::progress_display progDisplay(io->blocks);
+
+            broadcastEvent(EventType::ImageBuildStart);
             for (uint64_t i(0); i < io->blocks ; ++i) {
                 std::vector<uint8_t> ints;
                 ints.assign(detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META, 0);
@@ -101,9 +126,9 @@ namespace teasafe
 
                 // write data bytes
                 (void)out.write((char*)&ints.front(), detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META);
-                ++progDisplay;
+                broadcastEvent(EventType::ImageBuildUpdate);
             }
-            std::cout<<"\nFile space bytes written."<<std::endl;
+            broadcastEvent(EventType::ImageBuildEnd);
         }
 
         void zeroOutBits(std::vector<uint8_t> &bitMapData)
@@ -135,8 +160,6 @@ namespace teasafe
                 zeroOutBits(bitMapData);
             }
             (void)out.write((char*)&bitMapData.front(), bytesRequired);
-
-            std::cout<<"Created volume bit map.\n"<<std::endl;
         }
 
         /**
@@ -152,7 +175,7 @@ namespace teasafe
          * @param imageName the name of the image
          * @param blocks the number of blocks in the file system
          */
-        void buildImage(SharedCoreIO const &io)
+        void doBuildImage(SharedCoreIO const &io)
         {
             //
             // write out initial IV and header.
@@ -161,19 +184,19 @@ namespace teasafe
             // as-of-yet, undecided info
             //
             {
+                broadcastEvent(EventType::IVWriteEvent);
                 uint8_t ivBytes[8];
                 detail::convertUInt64ToInt8Array(io->iv, ivBytes);
                 std::ofstream ivout(io->path.c_str(), std::ios::out | std::ios::binary);
                 (void)ivout.write((char*)ivBytes, 8);
-                std::cout<<"Wrote out IV...\n"<<std::endl;
 
+                broadcastEvent(EventType::RoundsWriteEvent);
                 for(int i = 0; i < 8; ++i) {
                     // note although char is smaller that io->rounds, which
                     // is an unsigned int, io->rounds should always be less than
                     // size 255 (but > 0). Perhaps a different var type therefore?
                     (void)ivout.write((char*)&io->rounds, 1);
                 }
-                std::cout<<"Wrote out header.\n"<<std::endl;
                 ivout.flush();
                 ivout.close();
             }
@@ -183,7 +206,6 @@ namespace teasafe
             //
             uint8_t sizeBytes[8];
             buildBlockBytes(io->blocks, sizeBytes);
-
             // write out size, and volume bitmap bytes
             TeaSafeImageStream out(io, std::ios::out | std::ios::app | std::ios::binary);
             out.seekp(detail::beginning()); // seek past iv bytes
@@ -221,7 +243,6 @@ namespace teasafe
                 bool const setRoot = true;
                 TeaSafeFolder magicDir(magicIo, "root", setRoot);
             }
-            std::cout<<"\nCreated root entry.\n"<<std::endl;
         }
     };
 }

@@ -47,6 +47,7 @@ namespace teasafe { namespace detail
     uint64_t const FILE_BLOCK_META = 12;
     uint64_t const IV_BYTES = 8;
     uint64_t const HEADER_BYTES = 8;
+    uint64_t const CIPHER_BUFFER_SIZE = 270000000;
 
     inline void convertUInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
     {

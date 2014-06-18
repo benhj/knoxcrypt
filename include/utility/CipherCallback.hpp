@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2014>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,41 +26,39 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_CORE_TeaSafe_IO_HPP__
-#define TeaSafe_CORE_TeaSafe_IO_HPP__
+
+#ifndef TeaSafe_UTILITY_CIPHER_CALLBACK_HPP__
+#define TeaSafe_UTILITY_CIPHER_CALLBACK_HPP__
 
 #include "utility/EventType.hpp"
-
-#include <string>
-
-#include <boost/function.hpp>
-#include <boost/optional.hpp>
+#include <boost/progress.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace teasafe
 {
 
-    class FileBlockBuilder;
-    typedef boost::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
-
-    struct CoreTeaSafeIO
+    void cipherCallback(EventType eventType, long const amount)
     {
-        std::string path;                // path of the tea safe image
-        uint64_t blocks;                 // total number of blocks
-        uint64_t freeBlocks;             // number of free blocks
-        std::string password;            // password used to generate encryption key
-        uint64_t iv;                     // IV used to initialize the cipher stream
-        unsigned int rounds;             // number of rounds used by enc. process
-        uint64_t rootBlock;              // the start block of the root folder
-        SharedBlockBuilder blockBuilder; // a block factory / resource manage
-        typedef boost::function<void(teasafe::EventType)> Callback;
-        typedef boost::optional<Callback> OptionalCallback;
-        OptionalCallback ccb;            // call back for cipher
-    };
-
-    typedef boost::shared_ptr<CoreTeaSafeIO> SharedCoreIO;
+        static boost::shared_ptr<boost::progress_display> pd;
+        if(eventType == EventType::KeyGenBegin) {
+            std::cout<<"Generating key...\n"<<std::endl;
+        }
+        if(eventType == EventType::KeyGenEnd) {
+            std::cout<<"Key generated.\n"<<std::endl;
+        }
+        if(eventType == EventType::BigCipherBuildBegin) {
+            std::cout<<"Building big xtea cipher stream buffer. Please wait..."<<std::endl;
+            pd = boost::make_shared<boost::progress_display>(amount);
+        }
+        if(eventType == EventType::BigCipherBuildEnd) {
+            std::cout<<"\nBuilt big xtea cipher stream buffer.\n"<<std::endl;
+        }
+        if(eventType == EventType::CipherBuildUpdate) {
+            ++(*pd);
+        }
+    }
 
 }
 
-
-#endif //TeaSafe_CORE_TeaSafe_IO_HPP__
+#endif // TeaSafe_UTILITY_CIPHER_CALLBACK_HPP__

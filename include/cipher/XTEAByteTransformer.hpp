@@ -32,6 +32,9 @@
 #define TeaSafe_CIPHER_XTEA_BYTE_TRANSFORMER_HPP__
 
 #include "cipher/IByteTransformer.hpp"
+#include "utility/EventType.hpp"
+#include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -48,9 +51,14 @@ namespace teasafe { namespace cipher
                             uint64_t const iv,
                             unsigned int const rounds);
 
+        void init();
+
         ~XTEAByteTransformer();
 
       private:
+
+        // the password used to seed the key
+        mutable std::string m_password;
 
         // the iv used to initialize the CTR
         mutable uint64_t m_iv;
