@@ -483,18 +483,7 @@ int main(int argc, char *argv[])
 
     // Obtain the initialization vector from the first 8 bytes
     // and the number of xtea rounds from the ninth byte
-    {
-        std::ifstream in(io->path.c_str(), std::ios::in | std::ios::binary);
-        std::vector<uint8_t> ivBuffer;
-        ivBuffer.resize(8);
-        (void)in.read((char*)&ivBuffer.front(), teasafe::detail::IV_BYTES);
-        char i;
-        (void)in.read((char*)&i, 1);
-        // note, i should always > 0 <= 255
-        io->rounds = (unsigned int)i;
-        in.close();
-        io->iv = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer.front());
-    }
+    teasafe::detail::readImageIVAndRounds(io);
 
     // Obtain the number of blocks in the image by reading the image's block count
     long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;

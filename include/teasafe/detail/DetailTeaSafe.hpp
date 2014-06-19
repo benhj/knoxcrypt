@@ -433,6 +433,25 @@ namespace teasafe { namespace detail
         }
     }
 
+    /**
+     * @brief reads the initialization vector and number of encryption rounds
+     * from a teasafe image and sets the io's iv and rounds fields accordingly
+     * @param io the core io to be populated with the iv and rounds
+     */
+    inline void readImageIVAndRounds(SharedCoreIO &io)
+    {
+        std::ifstream in(io->path.c_str(), std::ios::in | std::ios::binary);
+        std::vector<uint8_t> ivBuffer;
+        ivBuffer.resize(8);
+        (void)in.read((char*)&ivBuffer.front(), teasafe::detail::IV_BYTES);
+        char i;
+        (void)in.read((char*)&i, 1);
+        // note, i should always > 0 <= 255
+        io->rounds = (unsigned int)i;
+        in.close();
+        io->iv = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer.front());
+    }
+
 }
 }
 
