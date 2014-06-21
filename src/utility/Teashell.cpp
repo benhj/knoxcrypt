@@ -41,6 +41,7 @@
 #include "teasafe/FileStreamPtr.hpp"
 #include "utility/CipherCallback.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
+#include "utility/FolderExtractionVisitor.hpp"
 #include "utility/RecursiveFolderAdder.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
 
@@ -242,7 +243,8 @@ void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string 
         std::cout<<"Copying teasafe folder..."<<std::endl;
         std::cout<<"Creating folder "<<dstPath<<"..."<<std::endl;
         boost::filesystem::create_directory(dstPath);
-        teasafe::utility::recursiveExtract(theBfs, path, dstPath);
+        teasafe::utility::FolderExtractionVisitor visitor(theBfs, path, dstPath);
+        teasafe::utility::recursiveExtract(visitor, theBfs, path, dstPath);
     }
 
 }

@@ -34,6 +34,7 @@
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/EntryInfo.hpp"
 #include "teasafe/EntryType.hpp"
+#include "utility/TeaSafeFolderVisitor.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -49,7 +50,8 @@ namespace teasafe
     {
 
         inline
-        void recursiveExtract(TeaSafe &theBfs,
+        void recursiveExtract(TeaSafeFolderVisitor &visitor,
+                              TeaSafe &theBfs,
                               std::string const &teaPath,
                               std::string const &fsPath)
         {
@@ -77,7 +79,7 @@ namespace teasafe
                 if(it->type() == EntryType::FolderType) {
                     std::cout<<"Extracting folder "<<whereToWrite<<"..."<<std::endl;
                     boost::filesystem::create_directory(whereToWrite);
-                    recursiveExtract(theBfs, teaLoc.string(), whereToWrite.string());
+                    recursiveExtract(visitor, theBfs, teaLoc.string(), whereToWrite.string());
                 } else {
 
                     // Else copy file using a TeaSafeFileDevice and boost::iostreams::copy
