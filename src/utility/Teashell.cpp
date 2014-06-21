@@ -244,7 +244,7 @@ void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string 
         std::cout<<"Creating folder "<<dstPath<<"..."<<std::endl;
         boost::filesystem::create_directory(dstPath);
         teasafe::utility::FolderExtractionVisitor visitor(theBfs, path, dstPath);
-        teasafe::utility::recursiveExtract(visitor, theBfs, path, dstPath);
+        teasafe::utility::recursiveExtract(visitor, theBfs, path);
     }
 
 }
