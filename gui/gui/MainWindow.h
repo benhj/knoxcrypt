@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "LoaderThread.h"
+#include "TreeBuilderThread.h"
 #include "utility/EventType.hpp"
 #include <boost/shared_ptr.hpp>
 #include <QMainWindow>
@@ -24,10 +25,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
 
-    /**
-     * @brief testItems for testing how QTreeWidgetItems works
-     */
-    void testItems();
     ~MainWindow();
 
     void cipherCallback(teasafe::EventType eventType, long const amount);
@@ -40,18 +37,21 @@ public slots:
     void loadFileButtonHandler();
 
     void updateProgressSlot();
-    void closeProgressSlot();
+    void cipherGeneratedSlot();
     void setMaximumProgressSlot(long value);
+
+    void finishedTreeBuildingSlot();
 
 signals:
     void updateProgressSignal();
-    void closeProgressSignal();
+    void cipherGeneratedSIgnal();
     void setMaximumProgressSignal(long);
 
 private:
     Ui::MainWindow *ui;
     SharedTeaSafe m_teaSafe;
     LoaderThread m_loaderThread;
+    TreeBuilderThread *m_treeThread;
     typedef boost::shared_ptr<QProgressDialog> SharedDialog;
     SharedDialog m_sd;
 };

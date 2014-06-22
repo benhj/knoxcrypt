@@ -9,7 +9,7 @@
 class TeaSafeQTreeVisitor : public teasafe::utility::TeaSafeFolderVisitor
 {
 public:
-    TeaSafeQTreeVisitor(QTreeWidget *treeWidget,
+    TeaSafeQTreeVisitor(QTreeWidgetItem *parent,
                         std::string const& teaPath);
 
     void enterFolder(teasafe::EntryInfo const&);

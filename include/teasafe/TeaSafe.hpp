@@ -48,6 +48,9 @@
 
 namespace teasafe
 {
+    class TeaSafe;
+    typedef boost::shared_ptr<TeaSafe> SharedTeaSafe;
+
     class TeaSafe
     {
         typedef boost::shared_ptr<TeaSafeFolder> SharedTeaSafeFolder;

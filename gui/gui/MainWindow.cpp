@@ -32,8 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
                          SLOT(finishedLoadingSlot()));
     QObject::connect(this, SIGNAL(updateProgressSignal()), this,
                          SLOT(updateProgressSlot()));
-    QObject::connect(this, SIGNAL(closeProgressSignal()), this,
-                         SLOT(closeProgressSlot()));
+    QObject::connect(this, SIGNAL(cipherGeneratedSIgnal()), this,
+                         SLOT(cipherGeneratedSlot()));
     QObject::connect(this, SIGNAL(setMaximumProgressSignal(long)), this,
                          SLOT(setMaximumProgressSlot(long)));
 }
@@ -57,16 +57,12 @@ void MainWindow::loadFileButtonHandler()
     io->ccb = f;
 
     // create a progress dialog to display progress of cipher generation
-    m_sd = boost::make_shared<QProgressDialog>("Building cipher...", "Cancel", 0, 0, this);
+    m_sd = boost::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
     m_sd->setWindowModality(Qt::WindowModal);
 
     // start loading of TeaSafe image
     m_loaderThread.setSharedIO(io);
     m_loaderThread.start();
-
-    // execute the progress dialog
-    m_sd->setMinimum(0);
-    m_sd->setMaximum(0);
     m_sd->exec();
 }
 
@@ -76,16 +72,36 @@ void MainWindow::updateProgressSlot()
     m_sd->setValue(value++);
 }
 
-void MainWindow::closeProgressSlot()
+void MainWindow::cipherGeneratedSlot()
 {
+
     m_sd->close();
     m_teaSafe = m_loaderThread.getTeaSafe();
-    this->testItems();
+    m_treeThread = new TreeBuilderThread;
+    m_treeThread->setTeaSafe(m_teaSafe);
+    m_treeThread->start();
+    QObject::connect(m_treeThread, SIGNAL(finishedBuildingTreeSignal()),
+                     this, SLOT(finishedTreeBuildingSlot()));
+
+    m_sd = boost::make_shared<QProgressDialog>("Reading image...", "Cancel", 0, 0, this);
+    m_sd->setWindowModality(Qt::WindowModal);
+    m_sd->exec();
 }
 
 void MainWindow::setMaximumProgressSlot(long value)
 {
-    m_sd->setMaximum(value);
+    m_sd->close();
+    m_sd = boost::make_shared<QProgressDialog>("Building cipher...", "Cancel", 0, value, this);
+    m_sd->setWindowModality(Qt::WindowModal);
+    m_sd->exec();
+}
+
+void MainWindow::finishedTreeBuildingSlot()
+{
+    m_sd->close();
+    QTreeWidgetItem *rootItem = m_treeThread->getRootItem();
+    ui->fileTree->setColumnCount(1);
+    ui->fileTree->addTopLevelItem(rootItem);
 }
 
 void MainWindow::cipherCallback(teasafe::EventType eventType, long const amount)
@@ -99,7 +115,7 @@ void MainWindow::cipherCallback(teasafe::EventType eventType, long const amount)
         emit updateProgressSignal();
     }
     if(eventType == teasafe::EventType::BigCipherBuildEnd) {
-        emit closeProgressSignal();
+        emit cipherGeneratedSIgnal();
     }
 }
 
@@ -108,27 +124,3 @@ void MainWindow::finishedLoadingSlot()
     qDebug() << "Finished loading!";
 }
 
-
-void MainWindow::testItems()
-{
-
-    std::string path("/");
-    QTreeWidget *treeWidget = ui->fileTree;
-    treeWidget->setColumnCount(1);
-    TeaSafeQTreeVisitor visitor(treeWidget, path);
-    teasafe::utility::recursiveExtract(visitor, *m_teaSafe, path);
-
-/*
-    teasafe::TeaSafeFolder currentFolder(m_teaSafe->getTeaSafeFolder("/"));
-    typedef std::vector<teasafe::EntryInfo> EntryInfos;
-    EntryInfos entryInfos(currentFolder.listAllEntries());
-    EntryInfos::iterator it = entryInfos.begin();
-    QTreeWidgetItem *parent = new QTreeWidgetItem(treeWidget);
-    parent->setText(0, tr("/"));
-    for (; it != entryInfos.end(); ++it) {
-        QTreeWidgetItem *child = new QTreeWidgetItem(parent);
-        child->setText(0, QString(it->filename().c_str()));
-    }
-    */
-
-}

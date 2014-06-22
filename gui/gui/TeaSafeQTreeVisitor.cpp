@@ -1,9 +1,9 @@
 #include "TeaSafeQTreeVisitor.h"
 
-TeaSafeQTreeVisitor::TeaSafeQTreeVisitor(QTreeWidget *treeWidget,
+TeaSafeQTreeVisitor::TeaSafeQTreeVisitor(QTreeWidgetItem *parent,
                                          std::string const& teaPath)
   : m_teaPath(teaPath)
-  , m_parent(new QTreeWidgetItem(treeWidget))
+  , m_parent(parent)
 {
     m_parent->setText(0, QObject::tr("/"));
 }
