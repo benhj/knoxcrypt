@@ -1,11 +1,13 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+#include "TeaSafeQTreeVisitor.h"
 
 #include "teasafe/EntryInfo.hpp"
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/OpenDisposition.hpp"
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/TeaSafeFolder.hpp"
+#include "utility/RecursiveFolderExtractor.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
@@ -109,8 +111,14 @@ void MainWindow::finishedLoadingSlot()
 
 void MainWindow::testItems()
 {
+
+    std::string path("/");
     QTreeWidget *treeWidget = ui->fileTree;
     treeWidget->setColumnCount(1);
+    TeaSafeQTreeVisitor visitor(treeWidget, path);
+    teasafe::utility::recursiveExtract(visitor, *m_teaSafe, path);
+
+/*
     teasafe::TeaSafeFolder currentFolder(m_teaSafe->getTeaSafeFolder("/"));
     typedef std::vector<teasafe::EntryInfo> EntryInfos;
     EntryInfos entryInfos(currentFolder.listAllEntries());
@@ -121,5 +129,6 @@ void MainWindow::testItems()
         QTreeWidgetItem *child = new QTreeWidgetItem(parent);
         child->setText(0, QString(it->filename().c_str()));
     }
+    */
 
 }

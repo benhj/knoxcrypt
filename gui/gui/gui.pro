@@ -25,9 +25,11 @@ INCLUDEPATH += ../../include \
 
 SOURCES += main.cpp\
         MainWindow.cpp \
-    LoaderThread.cpp
+    LoaderThread.cpp \
+    TeaSafeQTreeVisitor.cpp
 
 HEADERS  += MainWindow.h \
-    LoaderThread.h
+    LoaderThread.h \
+    TeaSafeQTreeVisitor.h
 
 FORMS    += MainWindow.ui
