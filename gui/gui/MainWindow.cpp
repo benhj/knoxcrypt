@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
                          SLOT(cipherGeneratedSlot()));
     QObject::connect(this, SIGNAL(setMaximumProgressSignal(long)), this,
                          SLOT(setMaximumProgressSlot(long)));
+
+    ui->fileTree->setAttribute(Qt::WA_MacShowFocusRect, 0);
 }
 
 MainWindow::~MainWindow()
