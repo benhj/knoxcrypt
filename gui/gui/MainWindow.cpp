@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "TeaSafeQTreeVisitor.h"
+#include "TreeItemPathDeriver.h"
 
 #include "teasafe/EntryInfo.hpp"
 #include "teasafe/FileBlockBuilder.hpp"
@@ -116,6 +117,12 @@ void MainWindow::finishedTreeBuildingSlot()
 void MainWindow::extractClickedSlot()
 {
     qDebug() << "extract clicked!";
+    QList<QTreeWidgetItem*> selectedItems = ui->fileTree->selectedItems();
+    QList<QTreeWidgetItem*>::iterator it = selectedItems.begin();
+    for(; it != selectedItems.end(); ++it) {
+        qDebug() << (*it)->text(0);
+        qDebug() << detail::getPathFromCurrentItem(*it).c_str();
+    }
 }
 
 void MainWindow::cipherCallback(teasafe::EventType eventType, long const amount)

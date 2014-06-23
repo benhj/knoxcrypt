@@ -32,6 +32,7 @@ SOURCES += main.cpp\
 HEADERS  += MainWindow.h \
     LoaderThread.h \
     TeaSafeQTreeVisitor.h \
-    TreeBuilderThread.h
+    TreeBuilderThread.h \
+    TreeItemPathDeriver.h
 
 FORMS    += MainWindow.ui
