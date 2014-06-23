@@ -27,12 +27,14 @@ SOURCES += main.cpp\
         MainWindow.cpp \
     LoaderThread.cpp \
     TeaSafeQTreeVisitor.cpp \
-    TreeBuilderThread.cpp
+    TreeBuilderThread.cpp \
+    ExtractorThread.cpp
 
 HEADERS  += MainWindow.h \
     LoaderThread.h \
     TeaSafeQTreeVisitor.h \
     TreeBuilderThread.h \
-    TreeItemPathDeriver.h
+    TreeItemPathDeriver.h \
+    ExtractorThread.h
 
 FORMS    += MainWindow.ui

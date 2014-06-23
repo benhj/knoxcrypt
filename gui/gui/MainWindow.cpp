@@ -123,8 +123,23 @@ void MainWindow::extractClickedSlot()
     for(; it != selectedItems.end(); ++it) {
         std::string teaPath(detail::getPathFromCurrentItem(*it));
         std::string fsPath = QFileDialog::getExistingDirectory().toStdString();
-        teasafe::utility::ExtractToPhysical().extractToPhysical(*m_teaSafe, teaPath, fsPath);
+        m_extractorThread = boost::make_shared<ExtractorThread>(m_teaSafe, teaPath, fsPath);
+        QObject::connect(m_extractorThread.get(), SIGNAL(startedSignal()), this, SLOT(extractBegin()));
+        QObject::connect(m_extractorThread.get(), SIGNAL(finishedSignal()), this, SLOT(extractEnd()));
+        m_extractorThread->start();
     }
+}
+
+void MainWindow::extractBegin()
+{
+    m_sd = boost::make_shared<QProgressDialog>("Reading image...", "Cancel", 0, 0, this);
+    m_sd->setWindowModality(Qt::WindowModal);
+    m_sd->exec();
+}
+
+void MainWindow::extractEnd()
+{
+    m_sd->close();
 }
 
 void MainWindow::cipherCallback(teasafe::EventType eventType, long const amount)

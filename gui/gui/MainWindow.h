@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "ExtractorThread.h"
 #include "LoaderThread.h"
 #include "TreeBuilderThread.h"
 #include "utility/EventType.hpp"
@@ -43,6 +44,8 @@ public slots:
     void setMaximumProgressSlot(long value);
     void finishedTreeBuildingSlot();
     void extractClickedSlot();
+    void extractBegin();
+    void extractEnd();
 
 signals:
     void updateProgressSignal();
@@ -54,6 +57,7 @@ private:
     SharedTeaSafe m_teaSafe;
     LoaderThread m_loaderThread;
     boost::shared_ptr<TreeBuilderThread> m_treeThread;
+    boost::shared_ptr<ExtractorThread> m_extractorThread;
     boost::shared_ptr<QMenu> m_contextMenu;
     boost::shared_ptr<QAction> m_extractAction;
     typedef boost::shared_ptr<QProgressDialog> SharedDialog;
