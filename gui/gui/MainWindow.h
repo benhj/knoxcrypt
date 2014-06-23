@@ -7,6 +7,8 @@
 #include <boost/shared_ptr.hpp>
 #include <QMainWindow>
 #include <QProgressDialog>
+#include <QMenu>
+#include <QAction>
 
 namespace Ui {
     class MainWindow;
@@ -39,8 +41,8 @@ public slots:
     void updateProgressSlot();
     void cipherGeneratedSlot();
     void setMaximumProgressSlot(long value);
-
     void finishedTreeBuildingSlot();
+    void extractClickedSlot();
 
 signals:
     void updateProgressSignal();
@@ -51,7 +53,9 @@ private:
     Ui::MainWindow *ui;
     SharedTeaSafe m_teaSafe;
     LoaderThread m_loaderThread;
-    TreeBuilderThread *m_treeThread;
+    boost::shared_ptr<TreeBuilderThread> m_treeThread;
+    boost::shared_ptr<QMenu> m_contextMenu;
+    boost::shared_ptr<QAction> m_extractAction;
     typedef boost::shared_ptr<QProgressDialog> SharedDialog;
     SharedDialog m_sd;
 };

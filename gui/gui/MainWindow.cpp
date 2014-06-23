@@ -38,6 +38,13 @@ MainWindow::MainWindow(QWidget *parent) :
                          SLOT(setMaximumProgressSlot(long)));
 
     ui->fileTree->setAttribute(Qt::WA_MacShowFocusRect, 0);
+
+    m_contextMenu = boost::make_shared<QMenu>(ui->fileTree);
+    ui->fileTree->setContextMenuPolicy(Qt::ActionsContextMenu);
+    m_extractAction = boost::make_shared<QAction>("Extract", m_contextMenu.get());
+    ui->fileTree->addAction(m_extractAction.get());
+    QObject::connect(m_extractAction.get(), SIGNAL(triggered()), this, SLOT(extractClickedSlot()));
+
 }
 
 MainWindow::~MainWindow()
@@ -79,10 +86,10 @@ void MainWindow::cipherGeneratedSlot()
 
     m_sd->close();
     m_teaSafe = m_loaderThread.getTeaSafe();
-    m_treeThread = new TreeBuilderThread;
+    m_treeThread = boost::make_shared<TreeBuilderThread>();
     m_treeThread->setTeaSafe(m_teaSafe);
     m_treeThread->start();
-    QObject::connect(m_treeThread, SIGNAL(finishedBuildingTreeSignal()),
+    QObject::connect(m_treeThread.get(), SIGNAL(finishedBuildingTreeSignal()),
                      this, SLOT(finishedTreeBuildingSlot()));
 
     m_sd = boost::make_shared<QProgressDialog>("Reading image...", "Cancel", 0, 0, this);
@@ -104,6 +111,11 @@ void MainWindow::finishedTreeBuildingSlot()
     QTreeWidgetItem *rootItem = m_treeThread->getRootItem();
     ui->fileTree->setColumnCount(1);
     ui->fileTree->addTopLevelItem(rootItem);
+}
+
+void MainWindow::extractClickedSlot()
+{
+    qDebug() << "extract clicked!";
 }
 
 void MainWindow::cipherCallback(teasafe::EventType eventType, long const amount)
