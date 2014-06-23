@@ -8,6 +8,7 @@
 #include "teasafe/OpenDisposition.hpp"
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/TeaSafeFolder.hpp"
+#include "utility/ExtractToPhysical.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
 
 #include <boost/bind.hpp>
@@ -120,8 +121,9 @@ void MainWindow::extractClickedSlot()
     QList<QTreeWidgetItem*> selectedItems = ui->fileTree->selectedItems();
     QList<QTreeWidgetItem*>::iterator it = selectedItems.begin();
     for(; it != selectedItems.end(); ++it) {
-        qDebug() << (*it)->text(0);
-        qDebug() << detail::getPathFromCurrentItem(*it).c_str();
+        std::string teaPath(detail::getPathFromCurrentItem(*it));
+        std::string fsPath = QFileDialog::getExistingDirectory().toStdString();
+        teasafe::utility::extractToPhysical(*m_teaSafe, teaPath, fsPath);
     }
 }
 

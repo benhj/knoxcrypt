@@ -53,7 +53,8 @@ namespace teasafe
         {
 
             // resolve the destination by removing first 7 chars assumed to be 'file://'
-            std::string dstPath(dst.begin() + 7, dst.end());
+            //std::string dstPath(dst.begin() + 7, dst.end());
+            std::string dstPath(dst);
 
             // make sure destination parent has a trailing slash on the end
             if(*dstPath.rbegin() != '/') {
