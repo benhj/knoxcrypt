@@ -41,9 +41,8 @@
 #include "teasafe/FileStreamPtr.hpp"
 #include "utility/CipherCallback.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
-#include "utility/FolderExtractionVisitor.hpp"
+#include "utility/ExtractToPhysical.hpp"
 #include "utility/RecursiveFolderAdder.hpp"
-#include "utility/RecursiveFolderExtractor.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/iostreams/copy.hpp>
@@ -217,36 +216,7 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
 /// extract file.txt file:///some/parent/path/
 void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string const &dst)
 {
-
-    std::cout<<"Extracting "<<path<<" to "<<dst<<"..."<<std::endl;
-
-    // resolve the destination by removing first 7 chars assumed to be 'file://'
-    std::string dstPath(dst.begin() + 7, dst.end());
-
-    // make sure destination parent has a trailing slash on the end
-    if(*dstPath.rbegin() != '/') {
-        dstPath.append("/");
-    }
-
-    // append filename on to dst path
-    boost::filesystem::path p(path);
-    dstPath.append(p.filename().string());
-
-    // create source and sink
-    if(theBfs.fileExists(path)) {
-        std::cout<<"Copying teasafe file..."<<std::endl;
-        teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
-        device.seek(0, std::ios_base::beg);
-        std::ofstream out(dstPath.c_str(), std::ios_base::binary);
-        boost::iostreams::copy(device, out);
-    } else if(theBfs.folderExists(path)) {
-        std::cout<<"Copying teasafe folder..."<<std::endl;
-        std::cout<<"Creating folder "<<dstPath<<"..."<<std::endl;
-        boost::filesystem::create_directory(dstPath);
-        teasafe::utility::FolderExtractionVisitor visitor(theBfs, path, dstPath);
-        teasafe::utility::recursiveExtract(visitor, theBfs, path);
-    }
-
+    teasafe::utility::extractToPhysical(theBfs, path, dst);
 }
 
 /// takes a path and pushes a new path bit to it, going into that path
