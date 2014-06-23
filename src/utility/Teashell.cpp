@@ -217,7 +217,7 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
 void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string const &dst)
 {
     std::string dstPath(dst.begin() + 7, dst.end());
-    teasafe::utility::extractToPhysical(theBfs, path, dstPath);
+    teasafe::utility::ExtractToPhysical().extractToPhysical(theBfs, path, dstPath);
 }
 
 /// takes a path and pushes a new path bit to it, going into that path

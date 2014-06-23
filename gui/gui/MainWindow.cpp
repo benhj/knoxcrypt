@@ -123,7 +123,7 @@ void MainWindow::extractClickedSlot()
     for(; it != selectedItems.end(); ++it) {
         std::string teaPath(detail::getPathFromCurrentItem(*it));
         std::string fsPath = QFileDialog::getExistingDirectory().toStdString();
-        teasafe::utility::extractToPhysical(*m_teaSafe, teaPath, fsPath);
+        teasafe::utility::ExtractToPhysical().extractToPhysical(*m_teaSafe, teaPath, fsPath);
     }
 }
 

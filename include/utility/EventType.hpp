@@ -42,7 +42,9 @@ namespace teasafe
                            ImageBuildEnd,          // end of image building process
                            ImageBuildUpdate,       // image building process
                            IVWriteEvent,           // IV is about to be written
-                           RoundsWriteEvent        // enc. rounds about to be written
+                           RoundsWriteEvent,       // enc. rounds about to be written
+                           PhysicalExtractBegin,   // physical extract utility start
+                           PhysicalExtractEnd      // physical extract utility end
     };
 }
 
