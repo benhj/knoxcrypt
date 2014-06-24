@@ -142,7 +142,7 @@ void MainWindow::removedClickedSlot()
 
 void MainWindow::newFolderClickedSlot()
 {
-
+    this->doWork(WorkType::CreateFolder);
 }
 
 void MainWindow::extractBegin()
@@ -165,26 +165,35 @@ void MainWindow::doWork(WorkType workType)
     QList<QTreeWidgetItem*>::iterator it = selectedItems.begin();
     for (; it != selectedItems.end(); ++it) {
         std::string teaPath(detail::getPathFromCurrentItem(*it));
-        std::string fsPath = QFileDialog::getExistingDirectory().toStdString();
+        qDebug() << teaPath.c_str();
         boost::function<void()> f;
         if(       workType == WorkType::RemoveItem) {
+            qDebug() << "RemoveItem";
             f = boost::bind(teasafe::utility::removeEntry, boost::ref(*m_teaSafe),
                             teaPath);
 
             delete *it;
         } else if(workType == WorkType::ExtractItem) {
+            std::string fsPath = QFileDialog::getExistingDirectory().toStdString();
+            qDebug() << "ExtractItem";
             f = boost::bind(teasafe::utility::extractToPhysical, boost::ref(*m_teaSafe),
                             teaPath, fsPath);
 
 
         } else if(workType == WorkType::CreateFolder) {
+            qDebug() << "CreateFolder";
             if(m_teaSafe->folderExists(teaPath)) {
                 std::string folderName = QInputDialog::getText(this, tr("New folder name dialog"),
                                                                tr("Folder name:"), QLineEdit::Normal).toStdString();
-                std::string path(teaPath.append("/").append(folderName));
+
+                std::string path((*it)->text(0).toStdString() == "/" ?
+                                 teaPath.append(folderName) :
+                                 teaPath.append("/").append(folderName));
+
                 f = boost::bind(&teasafe::TeaSafe::addFolder, m_teaSafe, path);
                 QTreeWidgetItem *item = new QTreeWidgetItem(*it);
-                item->setText(0, QString(path.c_str()));
+                item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
+                item->setText(0, QString(folderName.c_str()));
             }
         }
         m_workThread.addWorkFunction(f);

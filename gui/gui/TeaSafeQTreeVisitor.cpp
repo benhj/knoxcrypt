@@ -11,6 +11,7 @@ TeaSafeQTreeVisitor::TeaSafeQTreeVisitor(QTreeWidgetItem *parent,
 void TeaSafeQTreeVisitor::enterFolder(teasafe::EntryInfo const &entryInfo)
 {
     m_parent = new QTreeWidgetItem(m_parent);
+    m_parent->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
     m_parent->setText(0, QString(entryInfo.filename().c_str()));
 }
 

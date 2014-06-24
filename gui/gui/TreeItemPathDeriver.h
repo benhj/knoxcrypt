@@ -28,7 +28,7 @@ namespace detail
         if (!fullPath.empty()) {
             return std::string(fullPath.begin(), fullPath.end() - 1);
         }
-
+        fullPath.append("/");
         return fullPath;
     }
 
