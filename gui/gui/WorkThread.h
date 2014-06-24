@@ -8,15 +8,15 @@
 
 #include <boost/function.hpp>
 
-class ExtractorThread : public QThread
+class WorkThread : public QThread
 {
     Q_OBJECT
-        public:
+  public:
 
     typedef boost::function<void()> WorkFunction;
     typedef teasafe::utility::ConcurrentQueue<WorkFunction> WorkQueue;
 
-    explicit ExtractorThread(QObject *parent = 0);
+    explicit WorkThread(QObject *parent = 0);
 
     void addWorkFunction(WorkFunction const&);
 
@@ -24,12 +24,13 @@ class ExtractorThread : public QThread
     void startedSignal();
     void finishedSignal();
 
-    public slots:
+  public slots:
 
-    protected:
+  protected:
     void run();
 
   private:
+    WorkThread();
     mutable WorkQueue m_workQueue;
 
 };

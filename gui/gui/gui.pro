@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -23,18 +23,18 @@ LIBS += ../../libteasafe.a
 INCLUDEPATH += ../../include \
                /usr/local/include
 
-SOURCES += main.cpp\
-        MainWindow.cpp \
-    LoaderThread.cpp \
-    TeaSafeQTreeVisitor.cpp \
-    TreeBuilderThread.cpp \
-    ExtractorThread.cpp
+SOURCES += main.cpp \
+           MainWindow.cpp \
+           LoaderThread.cpp \
+           TeaSafeQTreeVisitor.cpp \
+           TreeBuilderThread.cpp \
+           WorkThread.cpp
 
 HEADERS  += MainWindow.h \
-    LoaderThread.h \
-    TeaSafeQTreeVisitor.h \
-    TreeBuilderThread.h \
-    TreeItemPathDeriver.h \
-    ExtractorThread.h
+            LoaderThread.h \
+            TeaSafeQTreeVisitor.h \
+            TreeBuilderThread.h \
+            TreeItemPathDeriver.h \
+            WorkThread.h
 
-FORMS    += MainWindow.ui
+FORMS += MainWindow.ui

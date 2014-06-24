@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "ExtractorThread.h"
+#include "WorkThread.h"
 #include "LoaderThread.h"
 #include "TreeBuilderThread.h"
 #include "utility/EventType.hpp"
@@ -58,7 +58,7 @@ class MainWindow : public QMainWindow
     Ui::MainWindow *ui;
     SharedTeaSafe m_teaSafe;
     LoaderThread m_loaderThread;
-    ExtractorThread m_extractorThread;
+    WorkThread m_workThread;
     boost::shared_ptr<TreeBuilderThread> m_treeThread;
     boost::shared_ptr<QMenu> m_contextMenu;
     boost::shared_ptr<QAction> m_extractAction;

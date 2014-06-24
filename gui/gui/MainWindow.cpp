@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_loaderThread(this),
-    m_extractorThread(this)
+    m_workThread(this)
 {
     ui->setupUi(this);
     QObject::connect(ui->loadButton, SIGNAL(clicked()),
@@ -41,8 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this, SIGNAL(setMaximumProgressSignal(long)), this,
                      SLOT(setMaximumProgressSlot(long)));
 
-    QObject::connect(&m_extractorThread, SIGNAL(startedSignal()), this, SLOT(extractBegin()));
-    QObject::connect(&m_extractorThread, SIGNAL(finishedSignal()), this, SLOT(extractEnd()));
+    QObject::connect(&m_workThread, SIGNAL(startedSignal()), this, SLOT(extractBegin()));
+    QObject::connect(&m_workThread, SIGNAL(finishedSignal()), this, SLOT(extractEnd()));
 
     ui->fileTree->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
@@ -52,7 +52,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->fileTree->addAction(m_extractAction.get());
     QObject::connect(m_extractAction.get(), SIGNAL(triggered()), this, SLOT(extractClickedSlot()));
 
-    m_extractorThread.start();
+    // will process any 'jobs' (e.g. extractions, adds, removals etc.)
+    m_workThread.start();
 
 }
 
@@ -92,7 +93,6 @@ void MainWindow::updateProgressSlot()
 
 void MainWindow::cipherGeneratedSlot()
 {
-
     m_sd->close();
     m_teaSafe = m_loaderThread.getTeaSafe();
     m_treeThread = boost::make_shared<TreeBuilderThread>();
@@ -135,7 +135,7 @@ void MainWindow::extractClickedSlot()
                                               teaPath,
                                               fsPath));
 
-        m_extractorThread.addWorkFunction(f);
+        m_workThread.addWorkFunction(f);
     }
 }
 

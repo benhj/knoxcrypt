@@ -1,18 +1,17 @@
-#include "ExtractorThread.h"
+#include "WorkThread.h"
 #include "utility/ExtractToPhysical.hpp"
 
-ExtractorThread::ExtractorThread(QObject *parent)
+WorkThread::WorkThread(QObject *parent)
     : QThread(parent)
 {
-
 }
 
-void ExtractorThread::addWorkFunction(ExtractorThread::WorkFunction const &wf)
+void WorkThread::addWorkFunction(WorkFunction const &wf)
 {
     m_workQueue.push(wf);
 }
 
-void ExtractorThread::run()
+void WorkThread::run()
 {
     while(true) {
         WorkFunction f;
