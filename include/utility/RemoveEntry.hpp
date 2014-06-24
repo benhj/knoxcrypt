@@ -26,15 +26,12 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/// Extracts a file or folder to a physical location
+/// Removes an entry, file or folder
 
-#ifndef TeaSafe_UTILITY_EXTRACT_TO_PHYSICAL_HPP__
-#define TeaSafe_UTILITY_EXTRACT_TO_PHYSICAL_HPP__
+#ifndef TeaSafe_UTILITY_REMOVE_ENTRY_HPP__
+#define TeaSafe_UTILITY_REMOVE_ENTRY_HPP__
 
 #include "teasafe/TeaSafe.hpp"
-#include "utility/TeaSafeFolderVisitor.hpp"
-#include "utility/RecursiveFolderExtractor.hpp"
-#include "utility/FolderExtractionVisitor.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -47,35 +44,14 @@ namespace teasafe
 
     namespace utility
     {
-
         inline
-        void extractToPhysical(teasafe::TeaSafe &theBfs,
-                              std::string const &path,
-                              std::string const &dst)
+        void removeEntry(teasafe::TeaSafe &theBfs, std::string const &thePath)
         {
-            // resolve the destination by removing first 7 chars assumed to be 'file://'
-            //std::string dstPath(dst.begin() + 7, dst.end());
-            std::string dstPath(dst);
-
-            // make sure destination parent has a trailing slash on the end
-            if(*dstPath.rbegin() != '/') {
-                dstPath.append("/");
-            }
-
-            // append filename on to dst path
-            boost::filesystem::path p(path);
-            dstPath.append(p.filename().string());
-
-            // create source and sink
-            if(theBfs.fileExists(path)) {
-                teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
-                device.seek(0, std::ios_base::beg);
-                std::ofstream out(dstPath.c_str(), std::ios_base::binary);
-                boost::iostreams::copy(device, out);
-            } else if(theBfs.folderExists(path)) {
-                boost::filesystem::create_directory(dstPath);
-                FolderExtractionVisitor visitor(theBfs, path, dstPath);
-                recursiveExtract(visitor, theBfs, path);
+            teasafe::EntryInfo info = theBfs.getInfo(thePath);
+            if (info.type() == teasafe::EntryType::FileType) {
+                theBfs.removeFile(thePath);
+            } else {
+                theBfs.removeFolder(thePath, teasafe::FolderRemovalType::Recursive);
             }
         }
     }

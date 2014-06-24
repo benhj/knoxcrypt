@@ -43,6 +43,7 @@
 #include "utility/EcholessPasswordPrompt.hpp"
 #include "utility/ExtractToPhysical.hpp"
 #include "utility/RecursiveFolderAdder.hpp"
+#include "utility/RemoveEntry.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/iostreams/copy.hpp>
@@ -163,12 +164,7 @@ void com_rm(teasafe::TeaSafe &theBfs, std::string const &path)
 {
     std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
-    teasafe::EntryInfo info = theBfs.getInfo(thePath);
-    if (info.type() == teasafe::EntryType::FileType) {
-        theBfs.removeFile(thePath);
-    } else {
-        theBfs.removeFolder(thePath, teasafe::FolderRemovalType::Recursive);
-    }
+    teasafe::utility::removeEntry(theBfs, thePath);
 }
 
 /// the 'mkdir' command for adding a folder to the current working dir
@@ -217,7 +213,7 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
 void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string const &dst)
 {
     std::string dstPath(dst.begin() + 7, dst.end());
-    teasafe::utility::ExtractToPhysical().extractToPhysical(theBfs, path, dstPath);
+    teasafe::utility::extractToPhysical(theBfs, path, dstPath);
 }
 
 /// takes a path and pushes a new path bit to it, going into that path

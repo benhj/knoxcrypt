@@ -46,6 +46,8 @@ class MainWindow : public QMainWindow
     void setMaximumProgressSlot(long value);
     void finishedTreeBuildingSlot();
     void extractClickedSlot();
+    void removedClickedSlot();
+    void newFolderClickedSlot();
     void extractBegin();
     void extractEnd();
 
@@ -62,6 +64,8 @@ class MainWindow : public QMainWindow
     boost::shared_ptr<TreeBuilderThread> m_treeThread;
     boost::shared_ptr<QMenu> m_contextMenu;
     boost::shared_ptr<QAction> m_extractAction;
+    boost::shared_ptr<QAction> m_removeAction;
+    boost::shared_ptr<QAction> m_newFolderAction;
     typedef boost::shared_ptr<QProgressDialog> SharedDialog;
     SharedDialog m_sd;
 };

@@ -10,6 +10,7 @@
 #include "teasafe/TeaSafeFolder.hpp"
 #include "utility/ExtractToPhysical.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
+#include "utility/RemoveEntry.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
@@ -49,8 +50,14 @@ MainWindow::MainWindow(QWidget *parent) :
     m_contextMenu = boost::make_shared<QMenu>(ui->fileTree);
     ui->fileTree->setContextMenuPolicy(Qt::ActionsContextMenu);
     m_extractAction = boost::make_shared<QAction>("Extract", m_contextMenu.get());
+    m_removeAction = boost::make_shared<QAction>("Remove", m_contextMenu.get());
+    m_newFolderAction = boost::make_shared<QAction>("Create folder", m_contextMenu.get());
     ui->fileTree->addAction(m_extractAction.get());
+    ui->fileTree->addAction(m_removeAction.get());
+    ui->fileTree->addAction(m_newFolderAction.get());
     QObject::connect(m_extractAction.get(), SIGNAL(triggered()), this, SLOT(extractClickedSlot()));
+    QObject::connect(m_removeAction.get(), SIGNAL(triggered()), this, SLOT(removedClickedSlot()));
+    QObject::connect(m_newFolderAction.get(), SIGNAL(triggered()), this, SLOT(newFolderClickedSlot()));
 
     // will process any 'jobs' (e.g. extractions, adds, removals etc.)
     m_workThread.start();
@@ -130,25 +137,51 @@ void MainWindow::extractClickedSlot()
         std::string teaPath(detail::getPathFromCurrentItem(*it));
         std::string fsPath = QFileDialog::getExistingDirectory().toStdString();
 
-        boost::function<void()> f(boost::bind(&teasafe::utility::ExtractToPhysical::extractToPhysical,
+        boost::function<void()> f(boost::bind(teasafe::utility::extractToPhysical,
                                               boost::ref(*m_teaSafe),
                                               teaPath,
                                               fsPath));
 
         m_workThread.addWorkFunction(f);
+
+
+
     }
+}
+
+void MainWindow::removedClickedSlot()
+{
+    QList<QTreeWidgetItem*> selectedItems = ui->fileTree->selectedItems();
+    QList<QTreeWidgetItem*>::iterator it = selectedItems.begin();
+    for (; it != selectedItems.end(); ++it) {
+        std::string teaPath(detail::getPathFromCurrentItem(*it));
+
+        boost::function<void()> f(boost::bind(teasafe::utility::removeEntry,
+                                              boost::ref(*m_teaSafe),
+                                              teaPath));
+
+        m_workThread.addWorkFunction(f);
+        delete *it;
+    }
+}
+
+void MainWindow::newFolderClickedSlot()
+{
+
 }
 
 void MainWindow::extractBegin()
 {
+    /*
     m_sd = boost::make_shared<QProgressDialog>("Extracting...", "Cancel", 0, 0, this);
     m_sd->setWindowModality(Qt::WindowModal);
     m_sd->exec();
+    */
 }
 
 void MainWindow::extractEnd()
 {
-    m_sd->close();
+    //m_sd->close();
 }
 
 void MainWindow::cipherCallback(teasafe::EventType eventType, long const amount)
