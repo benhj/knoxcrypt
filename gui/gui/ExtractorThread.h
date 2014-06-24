@@ -16,10 +16,7 @@ class ExtractorThread : public QThread
     typedef boost::function<void()> WorkFunction;
     typedef teasafe::utility::ConcurrentQueue<WorkFunction> WorkQueue;
 
-    ExtractorThread(teasafe::SharedTeaSafe const &teaSafe,
-                    std::string const &teaPath,
-                    std::string const &fsPath,
-                    QObject *parent = 0);
+    explicit ExtractorThread(QObject *parent = 0);
 
     void addWorkFunction(WorkFunction const&);
 
@@ -33,9 +30,6 @@ class ExtractorThread : public QThread
     void run();
 
   private:
-    teasafe::SharedTeaSafe m_teaSafe;
-    std::string m_teaPath;
-    std::string m_fsPath;
     mutable WorkQueue m_workQueue;
 
 };

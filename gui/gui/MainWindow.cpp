@@ -19,13 +19,15 @@
 #include <QFileDialog>
 #include <QInputDialog>
 
+#include <string>
 #include <fstream>
 #include <vector>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_loaderThread(this)
+    m_loaderThread(this),
+    m_extractorThread(this)
 {
     ui->setupUi(this);
     QObject::connect(ui->loadButton, SIGNAL(clicked()),
@@ -39,6 +41,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this, SIGNAL(setMaximumProgressSignal(long)), this,
                      SLOT(setMaximumProgressSlot(long)));
 
+    QObject::connect(&m_extractorThread, SIGNAL(startedSignal()), this, SLOT(extractBegin()));
+    QObject::connect(&m_extractorThread, SIGNAL(finishedSignal()), this, SLOT(extractEnd()));
+
     ui->fileTree->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
     m_contextMenu = boost::make_shared<QMenu>(ui->fileTree);
@@ -46,6 +51,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_extractAction = boost::make_shared<QAction>("Extract", m_contextMenu.get());
     ui->fileTree->addAction(m_extractAction.get());
     QObject::connect(m_extractAction.get(), SIGNAL(triggered()), this, SLOT(extractClickedSlot()));
+
+    m_extractorThread.start();
 
 }
 
@@ -117,22 +124,24 @@ void MainWindow::finishedTreeBuildingSlot()
 
 void MainWindow::extractClickedSlot()
 {
-    qDebug() << "extract clicked!";
     QList<QTreeWidgetItem*> selectedItems = ui->fileTree->selectedItems();
     QList<QTreeWidgetItem*>::iterator it = selectedItems.begin();
     for (; it != selectedItems.end(); ++it) {
         std::string teaPath(detail::getPathFromCurrentItem(*it));
         std::string fsPath = QFileDialog::getExistingDirectory().toStdString();
-        m_extractorThread = boost::make_shared<ExtractorThread>(m_teaSafe, teaPath, fsPath);
-        QObject::connect(m_extractorThread.get(), SIGNAL(startedSignal()), this, SLOT(extractBegin()));
-        QObject::connect(m_extractorThread.get(), SIGNAL(finishedSignal()), this, SLOT(extractEnd()));
-        m_extractorThread->start();
+
+        boost::function<void()> f(boost::bind(&teasafe::utility::ExtractToPhysical::extractToPhysical,
+                                              boost::ref(*m_teaSafe),
+                                              teaPath,
+                                              fsPath));
+
+        m_extractorThread.addWorkFunction(f);
     }
 }
 
 void MainWindow::extractBegin()
 {
-    m_sd = boost::make_shared<QProgressDialog>("Reading image...", "Cancel", 0, 0, this);
+    m_sd = boost::make_shared<QProgressDialog>("Extracting...", "Cancel", 0, 0, this);
     m_sd->setWindowModality(Qt::WindowModal);
     m_sd->exec();
 }

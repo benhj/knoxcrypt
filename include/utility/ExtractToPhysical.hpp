@@ -39,10 +39,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/function.hpp>
 #include <boost/iostreams/copy.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/signals2/signal.hpp>
 
 #include <fstream>
 
@@ -55,16 +52,11 @@ namespace teasafe
         class ExtractToPhysical
         {
           public:
-            ExtractToPhysical()
-              : m_signal(boost::make_shared<Signal>())
-            {
-            }
 
-            void extractToPhysical(teasafe::TeaSafe &theBfs,
-                                           std::string const &path,
-                                           std::string const &dst)
+            static void extractToPhysical(teasafe::TeaSafe &theBfs,
+                                          std::string const &path,
+                                          std::string const &dst)
             {
-                (*m_signal)(EventType::PhysicalExtractBegin);
                 // resolve the destination by removing first 7 chars assumed to be 'file://'
                 //std::string dstPath(dst.begin() + 7, dst.end());
                 std::string dstPath(dst);
@@ -89,18 +81,8 @@ namespace teasafe
                     FolderExtractionVisitor visitor(theBfs, path, dstPath);
                     recursiveExtract(visitor, theBfs, path);
                 }
-                (*m_signal)(EventType::PhysicalExtractEnd);
             }
 
-            void registerSignalHandler(boost::function<void(EventType)> const &f)
-            {
-                m_signal->connect(f);
-            }
-
-        private:
-            typedef boost::signals2::signal<void(EventType)> Signal;
-            typedef boost::shared_ptr<Signal> SharedSignal;
-            SharedSignal m_signal;
         };
 
 

@@ -1,14 +1,8 @@
 #include "ExtractorThread.h"
 #include "utility/ExtractToPhysical.hpp"
 
-ExtractorThread::ExtractorThread(const teasafe::SharedTeaSafe &teaSafe,
-                                 const std::string &teaPath,
-                                 const std::string &fsPath,
-                                 QObject *parent)
-    : m_teaSafe(teaSafe)
-    , m_teaPath(teaPath)
-    , m_fsPath(fsPath)
-    , QThread(parent)
+ExtractorThread::ExtractorThread(QObject *parent)
+    : QThread(parent)
 {
 
 }
@@ -20,7 +14,11 @@ void ExtractorThread::addWorkFunction(ExtractorThread::WorkFunction const &wf)
 
 void ExtractorThread::run()
 {
-    emit startedSignal();
-    teasafe::utility::ExtractToPhysical().extractToPhysical(*m_teaSafe, m_teaPath, m_fsPath);
-    emit finishedSignal();
+    while(true) {
+        WorkFunction f;
+        m_workQueue.wait_and_pop(f);
+        emit startedSignal();
+        f();
+        emit finishedSignal();
+    }
 }

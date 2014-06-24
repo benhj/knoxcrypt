@@ -58,8 +58,8 @@ class MainWindow : public QMainWindow
     Ui::MainWindow *ui;
     SharedTeaSafe m_teaSafe;
     LoaderThread m_loaderThread;
+    ExtractorThread m_extractorThread;
     boost::shared_ptr<TreeBuilderThread> m_treeThread;
-    boost::shared_ptr<ExtractorThread> m_extractorThread;
     boost::shared_ptr<QMenu> m_contextMenu;
     boost::shared_ptr<QAction> m_extractAction;
     typedef boost::shared_ptr<QProgressDialog> SharedDialog;

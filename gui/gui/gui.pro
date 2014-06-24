@@ -17,7 +17,7 @@ MAC_CONFIG {
     QMAKE_LFLAGS = -std=c++11 -mmacosx-version-min=10.7
 }
 
-LIBS += -L"/usr/local/lib" -lboost_system -lboost_filesystem
+LIBS += -L"/usr/local/lib" -lboost_system -lboost_filesystem -lboost_thread-mt
 LIBS += ../../libteasafe.a
 
 INCLUDEPATH += ../../include \
