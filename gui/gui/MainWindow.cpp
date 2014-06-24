@@ -31,13 +31,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->loadButton, SIGNAL(clicked()),
                      this, SLOT(loadFileButtonHandler()));
     QObject::connect(&m_loaderThread, SIGNAL(finishedLoadingSignal()), this,
-                         SLOT(finishedLoadingSlot()));
+                     SLOT(finishedLoadingSlot()));
     QObject::connect(this, SIGNAL(updateProgressSignal()), this,
-                         SLOT(updateProgressSlot()));
+                     SLOT(updateProgressSlot()));
     QObject::connect(this, SIGNAL(cipherGeneratedSIgnal()), this,
-                         SLOT(cipherGeneratedSlot()));
+                     SLOT(cipherGeneratedSlot()));
     QObject::connect(this, SIGNAL(setMaximumProgressSignal(long)), this,
-                         SLOT(setMaximumProgressSlot(long)));
+                     SLOT(setMaximumProgressSlot(long)));
 
     ui->fileTree->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
@@ -120,7 +120,7 @@ void MainWindow::extractClickedSlot()
     qDebug() << "extract clicked!";
     QList<QTreeWidgetItem*> selectedItems = ui->fileTree->selectedItems();
     QList<QTreeWidgetItem*>::iterator it = selectedItems.begin();
-    for(; it != selectedItems.end(); ++it) {
+    for (; it != selectedItems.end(); ++it) {
         std::string teaPath(detail::getPathFromCurrentItem(*it));
         std::string fsPath = QFileDialog::getExistingDirectory().toStdString();
         m_extractorThread = boost::make_shared<ExtractorThread>(m_teaSafe, teaPath, fsPath);
@@ -144,15 +144,15 @@ void MainWindow::extractEnd()
 
 void MainWindow::cipherCallback(teasafe::EventType eventType, long const amount)
 {
-    if(eventType == teasafe::EventType::BigCipherBuildBegin) {
+    if (eventType == teasafe::EventType::BigCipherBuildBegin) {
         qDebug() << "Got event";
         emit setMaximumProgressSignal(amount);
     }
-    if(eventType == teasafe::EventType::CipherBuildUpdate) {
+    if (eventType == teasafe::EventType::CipherBuildUpdate) {
         //m_sd->setValue(value++);
         emit updateProgressSignal();
     }
-    if(eventType == teasafe::EventType::BigCipherBuildEnd) {
+    if (eventType == teasafe::EventType::BigCipherBuildEnd) {
         emit cipherGeneratedSIgnal();
     }
 }
@@ -161,4 +161,3 @@ void MainWindow::finishedLoadingSlot()
 {
     qDebug() << "Finished loading!";
 }
-

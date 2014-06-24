@@ -11,11 +11,13 @@
 #include <QMenu>
 #include <QAction>
 
-namespace Ui {
+namespace Ui
+{
     class MainWindow;
 }
 
-namespace teasafe {
+namespace teasafe
+{
     class TeaSafe;
 }
 
@@ -25,14 +27,14 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-public:
+        public:
     explicit MainWindow(QWidget *parent = 0);
 
     ~MainWindow();
 
     void cipherCallback(teasafe::EventType eventType, long const amount);
 
-public slots:
+    public slots:
     void finishedLoadingSlot();
     /**
      * @brief loadFileButtonHandler for loading a TeaSafe image
@@ -47,12 +49,12 @@ public slots:
     void extractBegin();
     void extractEnd();
 
-signals:
+  signals:
     void updateProgressSignal();
     void cipherGeneratedSIgnal();
     void setMaximumProgressSignal(long);
 
-private:
+  private:
     Ui::MainWindow *ui;
     SharedTeaSafe m_teaSafe;
     LoaderThread m_loaderThread;

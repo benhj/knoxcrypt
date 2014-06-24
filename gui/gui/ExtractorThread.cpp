@@ -5,12 +5,17 @@ ExtractorThread::ExtractorThread(const teasafe::SharedTeaSafe &teaSafe,
                                  const std::string &teaPath,
                                  const std::string &fsPath,
                                  QObject *parent)
-  : m_teaSafe(teaSafe)
-  , m_teaPath(teaPath)
-  , m_fsPath(fsPath)
-  , QThread(parent)
+    : m_teaSafe(teaSafe)
+    , m_teaPath(teaPath)
+    , m_fsPath(fsPath)
+    , QThread(parent)
 {
 
+}
+
+void ExtractorThread::addWorkFunction(ExtractorThread::WorkFunction const &wf)
+{
+    m_workQueue.push(wf);
 }
 
 void ExtractorThread::run()

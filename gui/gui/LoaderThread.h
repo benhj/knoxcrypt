@@ -1,4 +1,4 @@
- #ifndef LOADERTHREAD_H
+#ifndef LOADERTHREAD_H
 #define LOADERTHREAD_H
 
 #include "teasafe/CoreTeaSafeIO.hpp"
@@ -9,7 +9,8 @@
 
 #include <QThread>
 
-namespace teasafe {
+namespace teasafe
+{
     class TeaSafe;
 }
 
@@ -18,21 +19,21 @@ typedef boost::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
 class LoaderThread : public QThread
 {
     Q_OBJECT
-public:
+        public:
     explicit LoaderThread(QObject *parent = 0);
 
     void setSharedIO(teasafe::SharedCoreIO const &io);
 
     SharedTeaSafe getTeaSafe();
 
-protected:
+  protected:
     void run();
 
-signals:
+  signals:
 
     void finishedLoadingSignal();
 
-private:
+  private:
     teasafe::SharedCoreIO m_io;
     SharedTeaSafe m_teaSafe;
 

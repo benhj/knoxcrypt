@@ -8,22 +8,22 @@
 class TreeBuilderThread : public QThread
 {
     Q_OBJECT
-public:
+        public:
     explicit TreeBuilderThread(QObject *parent = 0);
 
     void setTeaSafe(teasafe::SharedTeaSafe const &teaSafe);
 
     QTreeWidgetItem *getRootItem();
 
-signals:
+  signals:
     void finishedBuildingTreeSignal();
 
-protected:
+  protected:
     void run();
 
-public slots:
+    public slots:
 
-private:
+    private:
     QTreeWidgetItem *m_root;
     teasafe::SharedTeaSafe m_teaSafe;
 

@@ -5,13 +5,14 @@
 
 #include <vector>
 
-namespace detail {
+namespace detail
+{
 
     inline
-    std::string getPathFromCurrentItem_(QTreeWidgetItem *item)
+        std::string getPathFromCurrentItem_(QTreeWidgetItem *item)
     {
         std::string str("");
-        if(item->parent()) {
+        if (item->parent()) {
             str.append(getPathFromCurrentItem_(item->parent()));
             str.append(item->text(0).toStdString());
             str.append("/");
@@ -21,10 +22,10 @@ namespace detail {
     }
 
     inline
-    std::string getPathFromCurrentItem(QTreeWidgetItem *item)
+        std::string getPathFromCurrentItem(QTreeWidgetItem *item)
     {
         std::string fullPath = getPathFromCurrentItem_(item);
-        if(!fullPath.empty()) {
+        if (!fullPath.empty()) {
             return std::string(fullPath.begin(), fullPath.end() - 1);
         }
 
