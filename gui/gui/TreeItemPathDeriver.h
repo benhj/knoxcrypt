@@ -24,6 +24,10 @@ namespace detail
     inline
         std::string getPathFromCurrentItem(QTreeWidgetItem *item)
     {
+        // check if we're root
+        if(item->text(0).toStdString() == "/") {
+            return std::string("/");
+        }
         std::string fullPath = getPathFromCurrentItem_(item);
         if (!fullPath.empty()) {
             return std::string(fullPath.begin(), fullPath.end() - 1);

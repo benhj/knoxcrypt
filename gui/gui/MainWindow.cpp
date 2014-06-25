@@ -47,6 +47,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->fileTree->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
+    QObject::connect(ui->fileTree, SIGNAL(itemExpanded(QTreeWidgetItem*)),
+                     this, SLOT(itemExpanded(QTreeWidgetItem*)));
+
     m_contextMenu = boost::make_shared<QMenu>(ui->fileTree);
     ui->fileTree->setContextMenuPolicy(Qt::ActionsContextMenu);
     m_extractAction = boost::make_shared<QAction>("Extract", m_contextMenu.get());
@@ -102,15 +105,24 @@ void MainWindow::cipherGeneratedSlot()
 {
     m_sd->close();
     m_teaSafe = m_loaderThread.getTeaSafe();
+
+    // set root '/' tree item
+    QTreeWidgetItem *parent = new QTreeWidgetItem(ui->fileTree);
+    parent->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
+    parent->setText(0, QString("/"));
+
+    /*
     m_treeThread = boost::make_shared<TreeBuilderThread>();
     m_treeThread->setTeaSafe(m_teaSafe);
     m_treeThread->start();
     QObject::connect(m_treeThread.get(), SIGNAL(finishedBuildingTreeSignal()),
                      this, SLOT(finishedTreeBuildingSlot()));
 
+
     m_sd = boost::make_shared<QProgressDialog>("Reading image...", "Cancel", 0, 0, this);
     m_sd->setWindowModality(Qt::WindowModal);
     m_sd->exec();
+    */
 }
 
 void MainWindow::setMaximumProgressSlot(long value)
@@ -157,6 +169,23 @@ void MainWindow::extractBegin()
 void MainWindow::extractEnd()
 {
     //m_sd->close();
+}
+
+void MainWindow::itemExpanded(QTreeWidgetItem *parent)
+{
+    std::string pathOfExpanded(detail::getPathFromCurrentItem(parent));
+    qDebug() << pathOfExpanded.c_str();
+    teasafe::TeaSafeFolder f = m_teaSafe->getTeaSafeFolder(pathOfExpanded);
+    std::vector<teasafe::EntryInfo> entryInfos = f.listAllEntries();
+    std::vector<teasafe::EntryInfo>::iterator it = entryInfos.begin();
+    for(; it != entryInfos.end(); ++it) {
+        QTreeWidgetItem *item = new QTreeWidgetItem(parent);
+        if(it->type() == teasafe::EntryType::FolderType) {
+            item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
+        }
+        item->setText(0, QString(it->filename().c_str()));
+    }
+
 }
 
 void MainWindow::doWork(WorkType workType)

@@ -30,14 +30,14 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-        public:
+  public:
     explicit MainWindow(QWidget *parent = 0);
 
     ~MainWindow();
 
     void cipherCallback(teasafe::EventType eventType, long const amount);
 
-    public slots:
+  public slots:
     void finishedLoadingSlot();
     /**
      * @brief loadFileButtonHandler for loading a TeaSafe image
@@ -53,6 +53,8 @@ class MainWindow : public QMainWindow
     void newFolderClickedSlot();
     void extractBegin();
     void extractEnd();
+
+    void itemExpanded(QTreeWidgetItem *);
 
   signals:
     void updateProgressSignal();
