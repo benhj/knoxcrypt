@@ -27,6 +27,7 @@ typedef boost::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
 enum class WorkType { RemoveItem, CreateFolder, ExtractItem };
 
 class QTreeWidgetItem;
+class ItemAdder;
 
 class MainWindow : public QMainWindow
 {
@@ -52,8 +53,8 @@ class MainWindow : public QMainWindow
     void extractClickedSlot();
     void removedClickedSlot();
     void newFolderClickedSlot();
-
     void itemExpanded(QTreeWidgetItem *);
+    void itemFinishedExpanding();
 
   signals:
     void updateProgressSignal();
@@ -72,6 +73,7 @@ class MainWindow : public QMainWindow
     typedef boost::shared_ptr<QProgressDialog> SharedDialog;
     SharedDialog m_sd;
     std::set<std::string> m_populatedSet;
+    boost::shared_ptr<ItemAdder> m_itemAdder;
     void doWork(WorkType workType);
 };
 

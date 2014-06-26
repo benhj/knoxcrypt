@@ -29,7 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     m_loaderThread(this),
     m_workThread(this),
-    m_populatedSet()
+    m_populatedSet(),
+    m_itemAdder(boost::make_shared<ItemAdder>())
 {
     ui->setupUi(this);
     QObject::connect(ui->loadButton, SIGNAL(clicked()),
@@ -59,6 +60,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(m_extractAction.get(), SIGNAL(triggered()), this, SLOT(extractClickedSlot()));
     QObject::connect(m_removeAction.get(), SIGNAL(triggered()), this, SLOT(removedClickedSlot()));
     QObject::connect(m_newFolderAction.get(), SIGNAL(triggered()), this, SLOT(newFolderClickedSlot()));
+    QObject::connect(m_itemAdder.get(), SIGNAL(finished()), this, SLOT(itemFinishedExpanding()));
+
+    ui->fileTree->setDragEnabled(true);
+    ui->fileTree->viewport()->setAcceptDrops(true);
+    ui->fileTree->setDragDropMode(QAbstractItemView::DropOnly);
+    ui->fileTree->setDropIndicatorShown(true);
 
     // not sure why I need this, but it prevents errors of the type
     // QObject::connect: Cannot queue arguments of type 'QVector<int>'
@@ -143,11 +150,16 @@ void MainWindow::itemExpanded(QTreeWidgetItem *parent)
     std::string pathOfExpanded(detail::getPathFromCurrentItem(parent));
 
     if(m_populatedSet.find(pathOfExpanded) == m_populatedSet.end()) {
-        boost::function<void()> f(boost::bind(&ItemAdder::populate, parent,
+        boost::function<void()> f(boost::bind(&ItemAdder::populate, m_itemAdder, parent,
                                               m_teaSafe, pathOfExpanded));
         m_workThread.addWorkFunction(f);
         m_populatedSet.insert(pathOfExpanded);
     }
+}
+
+void MainWindow::itemFinishedExpanding()
+{
+    ui->fileTree->repaint();
 }
 
 void MainWindow::doWork(WorkType workType)

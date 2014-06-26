@@ -11,11 +11,13 @@ class ItemAdder : public QObject
 public:
     explicit ItemAdder(QObject *parent = 0);
 
-    static void populate(QTreeWidgetItem *parent,
-                         teasafe::SharedTeaSafe const &teaSafe,
-                         std::string const &path);
+    void populate(QTreeWidgetItem *parent,
+                  teasafe::SharedTeaSafe const &teaSafe,
+                  std::string const &path);
 
 signals:
+
+    void finished();
 
 public slots:
 

@@ -21,4 +21,6 @@ void ItemAdder::populate(QTreeWidgetItem *parent,
         }
         item->setText(0, QString(it->filename().c_str()));
     }
+
+    emit finished();
 }
