@@ -20,12 +20,6 @@ padding: 0px;
 border:hidden;
 }
 
-#MainWindow QMainWindow{
-border-radius: 0px;
-padding: 0px;
-border:hidden;
-}
-
 #MainWindow QTreeWidget {
 border: none;
 background: black;
