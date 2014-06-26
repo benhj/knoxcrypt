@@ -6,23 +6,37 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>443</width>
-    <height>353</height>
+    <width>340</width>
+    <height>509</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>TeaSafe GUI</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#MainWindow QTreeWidget {
+   <string notr="true">#MainWindow QWidget {
+border-radius: 0px;
+padding: 0px;
+border:hidden;
+}
+
+#MainWindow QMainWindow{
+border-radius: 0px;
+padding: 0px;
+border:hidden;
+}
+
+#MainWindow QTreeWidget {
 border: none;
+background: black;
+color: white;
 }
 
 
 #MainWindow QPushButton {
 color: #333;
 border: 2px solid #555;
-border-radius: 11px;
+border-radius: 2px;
 padding: 5px;
 background: qradialgradient(cx: 0.3, cy: -0.4,
 fx: 0.3, fy: -0.4,
@@ -46,11 +60,32 @@ radius: 1.35, stop: 0 #fff, stop: 1 #ddd);
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="0">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <property name="horizontalSpacing">
+     <number>-1</number>
+    </property>
+    <property name="verticalSpacing">
+     <number>0</number>
+    </property>
     <item row="0" column="0">
      <widget class="QTreeWidget" name="fileTree">
       <property name="styleSheet">
-       <string notr="true"/>
+       <string notr="true">left:5px;</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
@@ -60,6 +95,9 @@ radius: 1.35, stop: 0 #fff, stop: 1 #ddd);
       </property>
       <property name="lineWidth">
        <number>0</number>
+      </property>
+      <property name="autoExpandDelay">
+       <number>-1</number>
       </property>
       <property name="indentation">
        <number>20</number>
@@ -76,6 +114,12 @@ radius: 1.35, stop: 0 #fff, stop: 1 #ddd);
     </item>
     <item row="1" column="0">
      <widget class="QPushButton" name="loadButton">
+      <property name="minimumSize">
+       <size>
+        <width>94</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="text">
        <string>Load</string>
       </property>
