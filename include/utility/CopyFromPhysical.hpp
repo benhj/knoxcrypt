@@ -26,21 +26,17 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/// Extracts a file or folder to a physical location
+/// Copies a file or folder from a physical location to a parent teasafe location
 
-#ifndef TeaSafe_UTILITY_EXTRACT_TO_PHYSICAL_HPP__
-#define TeaSafe_UTILITY_EXTRACT_TO_PHYSICAL_HPP__
+#ifndef TeaSafe_UTILITY_COPY_FROM_PHYSICAL_HPP__
+#define TeaSafe_UTILITY_COPY_FROM_PHYSICAL_HPP__
 
 #include "teasafe/TeaSafe.hpp"
-#include "utility/TeaSafeFolderVisitor.hpp"
-#include "utility/RecursiveFolderExtractor.hpp"
-#include "utility/FolderExtractionVisitor.hpp"
+#include "utility/RecursiveFolderAdder.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/iostreams/copy.hpp>
-
-#include <fstream>
 
 namespace teasafe
 {
@@ -49,35 +45,33 @@ namespace teasafe
     {
 
         inline
-        void extractToPhysical(teasafe::TeaSafe &theBfs,
-                              std::string const &path,
-                              std::string const &dst)
+        void copyFromPhysical(teasafe::TeaSafe &theBfs,
+                              std::string const &teaPath,
+                              std::string const &fsPath)
         {
-            std::string dstPath(dst);
 
-            // make sure destination parent has a trailing slash on the end
-            if(*dstPath.rbegin() != '/') {
-                dstPath.append("/");
+            boost::filesystem::path p(fsPath);
+            std::string addPath(teaPath);
+
+            if(*addPath.rbegin() != '/') {
+                addPath.append("/");
             }
 
-            // append filename on to dst path
-            boost::filesystem::path p(path);
-            dstPath.append(p.filename().string());
+            (void)addPath.append(p.filename().string());
 
-            // create source and sink
-            if(theBfs.fileExists(path)) {
-                teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
-                device.seek(0, std::ios_base::beg);
-                std::ofstream out(dstPath.c_str(), std::ios_base::binary);
-                boost::iostreams::copy(device, out);
-            } else if(theBfs.folderExists(path)) {
-                boost::filesystem::create_directory(dstPath);
-                FolderExtractionVisitor visitor(theBfs, path, dstPath);
-                recursiveExtract(visitor, theBfs, path);
+            if ( boost::filesystem::is_directory(p)) {
+                theBfs.addFolder(addPath);
+                recursiveAdd(theBfs, addPath, p.string());
+            } else {
+                theBfs.addFile(addPath);
+                // create a stream to read resource from and a device to write to
+                std::ifstream in(fsPath.c_str(), std::ios_base::binary);
+                teasafe::TeaSafeFileDevice device = theBfs.openFile(addPath, teasafe::OpenDisposition::buildWriteOnlyDisposition());
+                boost::iostreams::copy(in, device);
             }
         }
     }
 }
 
-#endif // TeaSafe_UTILITY_EXTRACT_TO_PHYSICAL_HPP__
+#endif // TeaSafe_UTILITY_COPY_FROM_PHYSICAL_HPP__
 
