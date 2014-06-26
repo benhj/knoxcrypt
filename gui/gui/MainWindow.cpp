@@ -54,18 +54,25 @@ MainWindow::MainWindow(QWidget *parent) :
     m_extractAction = boost::make_shared<QAction>("Extract", m_contextMenu.get());
     m_removeAction = boost::make_shared<QAction>("Remove", m_contextMenu.get());
     m_newFolderAction = boost::make_shared<QAction>("Create folder", m_contextMenu.get());
+    m_addFileAction = boost::make_shared<QAction>("Add file", m_contextMenu.get());
+    m_addFolderAction = boost::make_shared<QAction>("Add folder", m_contextMenu.get());
     ui->fileTree->addAction(m_extractAction.get());
     ui->fileTree->addAction(m_removeAction.get());
     ui->fileTree->addAction(m_newFolderAction.get());
+    ui->fileTree->addAction(m_addFileAction.get());
+    ui->fileTree->addAction(m_addFolderAction.get());
     QObject::connect(m_extractAction.get(), SIGNAL(triggered()), this, SLOT(extractClickedSlot()));
     QObject::connect(m_removeAction.get(), SIGNAL(triggered()), this, SLOT(removedClickedSlot()));
     QObject::connect(m_newFolderAction.get(), SIGNAL(triggered()), this, SLOT(newFolderClickedSlot()));
+    QObject::connect(m_addFileAction.get(), SIGNAL(triggered()), this, SLOT(addFileClickedSlot()));
+    QObject::connect(m_addFolderAction.get(), SIGNAL(triggered()), this, SLOT(addFolderClickedSlot()));
     QObject::connect(m_itemAdder.get(), SIGNAL(finished()), this, SLOT(itemFinishedExpanding()));
 
     ui->fileTree->setDragEnabled(true);
-    ui->fileTree->viewport()->setAcceptDrops(true);
-    ui->fileTree->setDragDropMode(QAbstractItemView::DropOnly);
     ui->fileTree->setDropIndicatorShown(true);
+    ui->fileTree->setAcceptDrops(true);
+    ui->fileTree->setDragDropMode(QAbstractItemView::DropOnly);
+    ui->fileTree->viewport()->installEventFilter( this ); // that's what you need
 
     // not sure why I need this, but it prevents errors of the type
     // QObject::connect: Cannot queue arguments of type 'QVector<int>'
@@ -145,6 +152,16 @@ void MainWindow::newFolderClickedSlot()
     this->doWork(WorkType::CreateFolder);
 }
 
+void MainWindow::addFileClickedSlot()
+{
+    this->doWork(WorkType::AddFile);
+}
+
+void MainWindow::addFolderClickedSlot()
+{
+    this->doWork(WorkType::AddFolder);
+}
+
 void MainWindow::itemExpanded(QTreeWidgetItem *parent)
 {
     std::string pathOfExpanded(detail::getPathFromCurrentItem(parent));
@@ -160,6 +177,17 @@ void MainWindow::itemExpanded(QTreeWidgetItem *parent)
 void MainWindow::itemFinishedExpanding()
 {
     ui->fileTree->repaint();
+}
+
+bool MainWindow::eventFilter( QObject* o, QEvent* e )
+{
+    if( o == ui->fileTree->viewport() && e->type() == QEvent::Drop )
+    {
+        // do what you would do in the slot
+        qDebug() << "drop!";
+    }
+
+    return false;
 }
 
 void MainWindow::doWork(WorkType workType)
