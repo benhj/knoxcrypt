@@ -8,6 +8,7 @@
 #include "teasafe/OpenDisposition.hpp"
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/TeaSafeFolder.hpp"
+#include "utility/CopyFromPhysical.hpp"
 #include "utility/ExtractToPhysical.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
 #include "utility/RemoveEntry.hpp"
@@ -226,8 +227,29 @@ void MainWindow::doWork(WorkType workType)
                 item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
                 item->setText(0, QString(folderName.c_str()));
             }
+        } else if(workType == WorkType::AddFolder) {
+
+            if(m_teaSafe->folderExists(teaPath)) {
+                std::string fsPath = QFileDialog::getExistingDirectory().toStdString();
+                f = boost::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
+                                teaPath, fsPath);
+                QTreeWidgetItem *item = new QTreeWidgetItem(*it);
+                item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
+                item->setText(0, QString(boost::filesystem::path(fsPath).filename().c_str()));
+            }
+        }  else if(workType == WorkType::AddFile) {
+
+            if(m_teaSafe->folderExists(teaPath)) {
+                std::string fsPath = QFileDialog::getOpenFileName().toStdString();
+                f = boost::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
+                                teaPath, fsPath);
+                QTreeWidgetItem *item = new QTreeWidgetItem(*it);
+                item->setText(0, QString(boost::filesystem::path(fsPath).filename().c_str()));
+            }
         }
-        m_workThread.addWorkFunction(f);
+        if(f) {
+            m_workThread.addWorkFunction(f);
+        }
     }
 }
 
