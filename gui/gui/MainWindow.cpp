@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "TeaSafeQTreeVisitor.h"
+#include "ItemAdder.h"
 #include "TreeItemPathDeriver.h"
 
 #include "teasafe/EntryInfo.hpp"
@@ -28,7 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_loaderThread(this),
-    m_workThread(this)
+    m_workThread(this),
+    m_populatedSet()
 {
     ui->setupUi(this);
     QObject::connect(ui->loadButton, SIGNAL(clicked()),
@@ -41,9 +42,6 @@ MainWindow::MainWindow(QWidget *parent) :
                      SLOT(cipherGeneratedSlot()));
     QObject::connect(this, SIGNAL(setMaximumProgressSignal(long)), this,
                      SLOT(setMaximumProgressSlot(long)));
-
-    QObject::connect(&m_workThread, SIGNAL(startedSignal()), this, SLOT(extractBegin()));
-    QObject::connect(&m_workThread, SIGNAL(finishedSignal()), this, SLOT(extractEnd()));
 
     ui->fileTree->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
@@ -61,6 +59,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(m_extractAction.get(), SIGNAL(triggered()), this, SLOT(extractClickedSlot()));
     QObject::connect(m_removeAction.get(), SIGNAL(triggered()), this, SLOT(removedClickedSlot()));
     QObject::connect(m_newFolderAction.get(), SIGNAL(triggered()), this, SLOT(newFolderClickedSlot()));
+
+    // not sure why I need this, but it prevents errors of the type
+    // QObject::connect: Cannot queue arguments of type 'QVector<int>'
+    // (Make sure 'QVector<int>' is registered using qRegisterMetaType().)
+    qRegisterMetaType<QVector<int> >("QVector<int>");
 
     // will process any 'jobs' (e.g. extractions, adds, removals etc.)
     m_workThread.start();
@@ -110,19 +113,6 @@ void MainWindow::cipherGeneratedSlot()
     QTreeWidgetItem *parent = new QTreeWidgetItem(ui->fileTree);
     parent->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
     parent->setText(0, QString("/"));
-
-    /*
-    m_treeThread = boost::make_shared<TreeBuilderThread>();
-    m_treeThread->setTeaSafe(m_teaSafe);
-    m_treeThread->start();
-    QObject::connect(m_treeThread.get(), SIGNAL(finishedBuildingTreeSignal()),
-                     this, SLOT(finishedTreeBuildingSlot()));
-
-
-    m_sd = boost::make_shared<QProgressDialog>("Reading image...", "Cancel", 0, 0, this);
-    m_sd->setWindowModality(Qt::WindowModal);
-    m_sd->exec();
-    */
 }
 
 void MainWindow::setMaximumProgressSlot(long value)
@@ -132,15 +122,6 @@ void MainWindow::setMaximumProgressSlot(long value)
     m_sd->setWindowModality(Qt::WindowModal);
     m_sd->exec();
 }
-
-void MainWindow::finishedTreeBuildingSlot()
-{
-    m_sd->close();
-    QTreeWidgetItem *rootItem = m_treeThread->getRootItem();
-    ui->fileTree->setColumnCount(1);
-    ui->fileTree->addTopLevelItem(rootItem);
-}
-
 
 void MainWindow::extractClickedSlot()
 {
@@ -157,35 +138,16 @@ void MainWindow::newFolderClickedSlot()
     this->doWork(WorkType::CreateFolder);
 }
 
-void MainWindow::extractBegin()
-{
-    /*
-    m_sd = boost::make_shared<QProgressDialog>("Extracting...", "Cancel", 0, 0, this);
-    m_sd->setWindowModality(Qt::WindowModal);
-    m_sd->exec();
-    */
-}
-
-void MainWindow::extractEnd()
-{
-    //m_sd->close();
-}
-
 void MainWindow::itemExpanded(QTreeWidgetItem *parent)
 {
     std::string pathOfExpanded(detail::getPathFromCurrentItem(parent));
-    qDebug() << pathOfExpanded.c_str();
-    teasafe::TeaSafeFolder f = m_teaSafe->getTeaSafeFolder(pathOfExpanded);
-    std::vector<teasafe::EntryInfo> entryInfos = f.listAllEntries();
-    std::vector<teasafe::EntryInfo>::iterator it = entryInfos.begin();
-    for(; it != entryInfos.end(); ++it) {
-        QTreeWidgetItem *item = new QTreeWidgetItem(parent);
-        if(it->type() == teasafe::EntryType::FolderType) {
-            item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
-        }
-        item->setText(0, QString(it->filename().c_str()));
-    }
 
+    if(m_populatedSet.find(pathOfExpanded) == m_populatedSet.end()) {
+        boost::function<void()> f(boost::bind(&ItemAdder::populate, parent,
+                                              m_teaSafe, pathOfExpanded));
+        m_workThread.addWorkFunction(f);
+        m_populatedSet.insert(pathOfExpanded);
+    }
 }
 
 void MainWindow::doWork(WorkType workType)

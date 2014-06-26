@@ -3,7 +3,6 @@
 
 #include "WorkThread.h"
 #include "LoaderThread.h"
-#include "TreeBuilderThread.h"
 #include "utility/EventType.hpp"
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
@@ -11,6 +10,7 @@
 #include <QProgressDialog>
 #include <QMenu>
 #include <QAction>
+#include <set>
 
 namespace Ui
 {
@@ -25,6 +25,8 @@ namespace teasafe
 typedef boost::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
 
 enum class WorkType { RemoveItem, CreateFolder, ExtractItem };
+
+class QTreeWidgetItem;
 
 class MainWindow : public QMainWindow
 {
@@ -47,12 +49,9 @@ class MainWindow : public QMainWindow
     void updateProgressSlot();
     void cipherGeneratedSlot();
     void setMaximumProgressSlot(long value);
-    void finishedTreeBuildingSlot();
     void extractClickedSlot();
     void removedClickedSlot();
     void newFolderClickedSlot();
-    void extractBegin();
-    void extractEnd();
 
     void itemExpanded(QTreeWidgetItem *);
 
@@ -66,13 +65,13 @@ class MainWindow : public QMainWindow
     SharedTeaSafe m_teaSafe;
     LoaderThread m_loaderThread;
     WorkThread m_workThread;
-    boost::shared_ptr<TreeBuilderThread> m_treeThread;
     boost::shared_ptr<QMenu> m_contextMenu;
     boost::shared_ptr<QAction> m_extractAction;
     boost::shared_ptr<QAction> m_removeAction;
     boost::shared_ptr<QAction> m_newFolderAction;
     typedef boost::shared_ptr<QProgressDialog> SharedDialog;
     SharedDialog m_sd;
+    std::set<std::string> m_populatedSet;
     void doWork(WorkType workType);
 };
 
