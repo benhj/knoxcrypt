@@ -6,19 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>340</width>
-    <height>509</height>
+    <width>358</width>
+    <height>479</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>TeaSafe GUI</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#MainWindow QWidget {
+   <string notr="true">QWidget#centralWidget {
 border-radius: 0px;
 padding: 0px;
-border:hidden;
+background:black;
+border: 2px solid #555;
 }
+
 
 #MainWindow QTreeWidget {
 border: none;
