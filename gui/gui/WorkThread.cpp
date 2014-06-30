@@ -44,7 +44,10 @@ WorkThread::~WorkThread()
 {
     m_stop = true;
     m_workQueue.stopWaiting(kill);
-    this->terminate();
+    if(!this->wait(5000)) {
+        this->terminate();
+        this->wait();
+    }
 }
 
 void WorkThread::addWorkFunction(WorkFunction const &wf)

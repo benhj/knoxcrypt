@@ -55,7 +55,7 @@ namespace teasafe {
             bool try_pop(Data& popped_value)
             {
                 boost::mutex::scoped_lock lock(the_mutex);
-                if(the_queue.empty() && m_wait)
+                if(the_queue.empty())
                 {
                     return false;
                 }
@@ -68,7 +68,7 @@ namespace teasafe {
             void wait_and_pop(Data& popped_value)
             {
                 boost::mutex::scoped_lock lock(the_mutex);
-                while(the_queue.empty())
+                while(the_queue.empty() && m_wait)
                 {
                     the_condition_variable.wait(lock);
                 }
