@@ -11,10 +11,20 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = gui
 TEMPLATE = app
 
-CONFIG += MAC_CONFIG
-MAC_CONFIG {
-    QMAKE_CXXFLAGS = -std=c++11 -mmacosx-version-min=10.7
-    QMAKE_LFLAGS = -std=c++11 -mmacosx-version-min=10.7
+macx {
+    CONFIG += MAC_CONFIG
+    MAC_CONFIG {
+        QMAKE_CXXFLAGS = -std=c++11 -mmacosx-version-min=10.7
+        QMAKE_LFLAGS = -std=c++11 -mmacosx-version-min=10.7
+    }
+}
+
+unix {
+    CONFIG += UNIX_CONFIG
+    UNIX_CONFIG {
+        QMAKE_CXXFLAGS = -std=c++11
+        QMAKE_LFLAGS = -std=c++11
+    }
 }
 
 LIBS += -L"/usr/local/lib" -lboost_system -lboost_filesystem -lboost_thread-mt
