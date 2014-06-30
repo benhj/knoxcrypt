@@ -176,10 +176,8 @@ void MainWindow::cipherGeneratedSlot()
 
 void MainWindow::setMaximumProgressSlot(long value)
 {
-    m_sd->close();
-    m_sd = boost::make_shared<QProgressDialog>("Building cipher...", "Cancel", 0, value, this);
-    m_sd->setWindowModality(Qt::WindowModal);
-    m_sd->exec();
+    m_sd->setLabelText("Building cipher...");
+    m_sd->setMaximum(value);
 }
 
 void MainWindow::extractClickedSlot()
