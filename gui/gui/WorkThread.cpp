@@ -31,7 +31,20 @@
 
 WorkThread::WorkThread(QObject *parent)
     : QThread(parent)
+    , m_stop(false)
 {
+}
+
+void kill()
+{
+    // nothing to do
+}
+
+WorkThread::~WorkThread()
+{
+    m_stop = true;
+    m_workQueue.stopWaiting(kill);
+    this->terminate();
 }
 
 void WorkThread::addWorkFunction(WorkFunction const &wf)
@@ -41,7 +54,7 @@ void WorkThread::addWorkFunction(WorkFunction const &wf)
 
 void WorkThread::run()
 {
-    while(true) {
+    while(!m_stop) {
         WorkFunction f;
         m_workQueue.wait_and_pop(f);
         emit startedSignal();

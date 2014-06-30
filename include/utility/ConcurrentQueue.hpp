@@ -22,7 +22,22 @@ namespace teasafe {
             std::queue<Data> the_queue;
             mutable boost::mutex the_mutex;
             boost::condition_variable the_condition_variable;
+            mutable bool m_wait;
         public:
+            ConcurrentQueue()
+              : m_wait(true)
+            {
+            }
+
+            void stopWaiting(Data const& killSignal)
+            {
+                boost::mutex::scoped_lock lock(the_mutex);
+                the_queue.push(killSignal);
+                m_wait = false;
+                lock.unlock();
+                the_condition_variable.notify_one();
+            }
+
             void push(Data const& data)
             {
                 boost::mutex::scoped_lock lock(the_mutex);
@@ -40,7 +55,7 @@ namespace teasafe {
             bool try_pop(Data& popped_value)
             {
                 boost::mutex::scoped_lock lock(the_mutex);
-                if(the_queue.empty())
+                if(the_queue.empty() && m_wait)
                 {
                     return false;
                 }

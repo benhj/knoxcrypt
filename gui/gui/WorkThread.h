@@ -45,6 +45,7 @@ class WorkThread : public QThread
     typedef teasafe::utility::ConcurrentQueue<WorkFunction> WorkQueue;
 
     explicit WorkThread(QObject *parent = 0);
+    ~WorkThread();
 
     void addWorkFunction(WorkFunction const&);
 
@@ -60,6 +61,7 @@ class WorkThread : public QThread
   private:
     WorkThread();
     mutable WorkQueue m_workQueue;
+    bool m_stop;
 
 };
 
