@@ -36,6 +36,8 @@
 #include "utility/EventType.hpp"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <QThread>
 
@@ -66,6 +68,9 @@ class LoaderThread : public QThread
   private:
     teasafe::SharedCoreIO m_io;
     SharedTeaSafe m_teaSafe;
+    typedef boost::mutex TeaMutex;
+    typedef boost::lock_guard<TeaMutex> TeaLock;
+    mutable TeaMutex m_teaMutex;
 
     void loadTSImage();
 

@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/new/prefix1">
+        <file>graphix/stylesheet-branch-closed.png</file>
+        <file>graphix/stylesheet-branch-end.png</file>
+        <file>graphix/stylesheet-branch-more.png</file>
+        <file>graphix/stylesheet-branch-open.png</file>
+        <file>graphix/stylesheet-vline.png</file>
+    </qresource>
+</RCC>

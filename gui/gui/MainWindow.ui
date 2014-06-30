@@ -28,6 +28,30 @@ background: black;
 color: white;
 }
 
+ QTreeView::branch:has-siblings:!adjoins-item {
+     border-image: url(:/new/prefix1/graphix/stylesheet-vline.png) 0;
+ }
+
+ QTreeView::branch:has-siblings:adjoins-item {
+     border-image: url(:/new/prefix1/graphix/stylesheet-branch-more.png) 0;
+ }
+
+ QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+     border-image: url(:/new/prefix1/graphix/stylesheet-branch-end.png) 0;
+ }
+
+ QTreeView::branch:has-children:!has-siblings:closed,
+ QTreeView::branch:closed:has-children:has-siblings {
+         border-image: none;
+         image: url(:/new/prefix1/graphix/stylesheet-branch-closed.png);
+ }
+
+ QTreeView::branch:open:has-children:!has-siblings,
+ QTreeView::branch:open:has-children:has-siblings  {
+         border-image: none;
+         image: url(:/new/prefix1/graphix/stylesheet-branch-open.png);
+ }
+
 
 #MainWindow QPushButton {
 color: #333;
@@ -73,7 +97,7 @@ radius: 1.35, stop: 0 #fff, stop: 1 #ddd);
      <number>0</number>
     </property>
     <property name="horizontalSpacing">
-     <number>-1</number>
+     <number>6</number>
     </property>
     <property name="verticalSpacing">
      <number>0</number>

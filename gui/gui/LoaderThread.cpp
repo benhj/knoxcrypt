@@ -36,23 +36,28 @@
 
 LoaderThread::LoaderThread(QObject *parent) :
     QThread(parent),
-    m_io()
+    m_io(),
+    m_teaMutex()
 {
 
 }
 
 void LoaderThread::setSharedIO(teasafe::SharedCoreIO const &io)
 {
+    TeaLock lock(m_teaMutex);
     m_io = io;
 }
 
 SharedTeaSafe LoaderThread::getTeaSafe()
 {
+    TeaLock lock(m_teaMutex);
+    assert(m_teaSafe);
     return m_teaSafe;
 }
 
 void LoaderThread::loadTSImage()
 {
+    TeaLock lock(m_teaMutex);
     // Obtain the initialization vector from the first 8 bytes
     // and the number of xtea rounds from the ninth byte
     teasafe::detail::readImageIVAndRounds(m_io);

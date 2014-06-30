@@ -46,3 +46,6 @@ HEADERS  += MainWindow.h \
     ItemAdder.h
 
 FORMS += MainWindow.ui
+
+RESOURCES += \
+    resources.qrc
