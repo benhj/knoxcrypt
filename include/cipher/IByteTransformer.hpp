@@ -68,6 +68,8 @@ namespace teasafe { namespace cipher
         typedef boost::shared_ptr<CipherSignal> SharedSignal;
         SharedSignal m_cipherSignal;
 
+        static bool m_init;
+
         void broadcastEvent(EventType const &event);
 
     };

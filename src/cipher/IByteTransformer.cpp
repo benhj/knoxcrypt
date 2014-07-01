@@ -32,6 +32,9 @@
 
 namespace teasafe { namespace cipher
 {
+
+    bool IByteTransformer::m_init = false;
+
     IByteTransformer::IByteTransformer()
       : m_cipherSignal(boost::make_shared<CipherSignal>())
     {

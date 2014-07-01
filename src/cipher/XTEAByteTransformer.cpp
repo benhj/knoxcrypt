@@ -79,10 +79,6 @@ namespace teasafe { namespace cipher
         }
     }
 
-
-    // prob a bad idea all these static vars; still for the sake of optimizing.. :-)
-    static bool g_init = false;
-
     // used for holding the hash-generated key
     static uint32_t g_key[4];
 
@@ -106,7 +102,8 @@ namespace teasafe { namespace cipher
         //
         // The following key generation algorithm uses scrypt, with N = 2^20; r = 8; p = 1
         //
-        if (!g_init) {
+        if (!IByteTransformer::m_init) {
+
             unsigned char temp[16];
 
             broadcastEvent(EventType::KeyGenBegin);
@@ -128,7 +125,7 @@ namespace teasafe { namespace cipher
                 ++c;
             }
             buildBigCipherBuffer();
-            g_init = true;
+            IByteTransformer::m_init = true;
         }
     }
 
@@ -157,7 +154,7 @@ namespace teasafe { namespace cipher
     XTEAByteTransformer::doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {
         // big cipher buffer has been initialized
-        if (g_init) {
+        if (IByteTransformer::m_init) {
             // prefer to use cipher buffer
             if ((startPosition + length) < teasafe::detail::CIPHER_BUFFER_SIZE) {
                 for (long j = 0; j < length; ++j) {

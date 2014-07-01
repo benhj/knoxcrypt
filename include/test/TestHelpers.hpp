@@ -71,6 +71,7 @@ inline boost::filesystem::path buildImage(boost::filesystem::path const &path, l
     boost::filesystem::path testPath = path / testImage;
     teasafe::SharedCoreIO io(createTestIO(testPath));
     teasafe::MakeTeaSafe teasafe(io);
+    teasafe.buidImage();
     return testPath;
 }
 

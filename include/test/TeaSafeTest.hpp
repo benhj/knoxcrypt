@@ -110,9 +110,11 @@ class TeaSafeTest
     {
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+
         {
             (void)createTestFolder(testPath, blocks);
         }
+
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
 
