@@ -33,6 +33,7 @@
 #include "ItemAdder.h"
 #include "TreeItemPathDeriver.h"
 
+#include "cipher/IByteTransformer.hpp"
 #include "teasafe/EntryInfo.hpp"
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/OpenDisposition.hpp"
@@ -68,9 +69,9 @@ MainWindow::MainWindow(QWidget *parent) :
                      this, SLOT(loadFileButtonHandler()));
     QObject::connect(&m_loaderThread, SIGNAL(finishedLoadingSignal()), this,
                      SLOT(finishedLoadingSlot()));
-    QObject::connect(this, SIGNAL(updateProgressSignal()), this,
-                     SLOT(updateProgressSlot()));
-    QObject::connect(this, SIGNAL(cipherGeneratedSIgnal()), this,
+    QObject::connect(this, SIGNAL(updateProgressSignal(long)), this,
+                     SLOT(updateProgressSlot(long)));
+    QObject::connect(this, SIGNAL(cipherGeneratedSignal()), this,
                      SLOT(cipherGeneratedSlot()));
     QObject::connect(this, SIGNAL(setMaximumProgressSignal(long)), this,
                      SLOT(setMaximumProgressSlot(long)));
@@ -129,6 +130,7 @@ void MainWindow::loadFileButtonHandler()
     if (dlg.exec()) {
 
         ui->fileTree->clear();
+        teasafe::cipher::IByteTransformer::m_init = false;
 
         teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
         io->path = dlg.selectedFiles().at(0).toStdString();
@@ -157,10 +159,9 @@ void MainWindow::loadFileButtonHandler()
     }
 }
 
-void MainWindow::updateProgressSlot()
+void MainWindow::updateProgressSlot(long const value)
 {
-    static long value(0);
-    m_sd->setValue(value++);
+    m_sd->setValue(value);
 }
 
 void MainWindow::cipherGeneratedSlot()
@@ -315,16 +316,17 @@ void MainWindow::doWork(WorkType workType)
 
 void MainWindow::cipherCallback(teasafe::EventType eventType, long const amount)
 {
+    static long value(0);
     if (eventType == teasafe::EventType::BigCipherBuildBegin) {
         qDebug() << "Got event";
         emit setMaximumProgressSignal(amount);
     }
     if (eventType == teasafe::EventType::CipherBuildUpdate) {
-        //m_sd->setValue(value++);
-        emit updateProgressSignal();
+        emit updateProgressSignal(value++);
     }
     if (eventType == teasafe::EventType::BigCipherBuildEnd) {
-        emit cipherGeneratedSIgnal();
+        value = 0;
+        emit cipherGeneratedSignal();
     }
 }
 

@@ -58,6 +58,10 @@ namespace teasafe { namespace cipher
         /// also see EventType for different event types
         virtual void registerSignalHandler(boost::function<void(EventType)> const &f);
         virtual ~IByteTransformer();
+
+        /// cipher-specific initialization flag (see use in XTEA cipher)
+        static bool m_init;
+
       private:
         virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
 
@@ -68,7 +72,7 @@ namespace teasafe { namespace cipher
         typedef boost::shared_ptr<CipherSignal> SharedSignal;
         SharedSignal m_cipherSignal;
 
-        static bool m_init;
+
 
         void broadcastEvent(EventType const &event);
 

@@ -75,7 +75,7 @@ class MainWindow : public QMainWindow
      */
     void loadFileButtonHandler();
 
-    void updateProgressSlot();
+    void updateProgressSlot(long);
     void cipherGeneratedSlot();
     void setMaximumProgressSlot(long value);
     void extractClickedSlot();
@@ -88,8 +88,8 @@ class MainWindow : public QMainWindow
     bool eventFilter(QObject* o, QEvent* e);
 
   signals:
-    void updateProgressSignal();
-    void cipherGeneratedSIgnal();
+    void updateProgressSignal(long);
+    void cipherGeneratedSignal();
     void setMaximumProgressSignal(long);
 
   private:

@@ -138,6 +138,7 @@ namespace teasafe { namespace cipher
     {
 
         broadcastEvent(EventType::BigCipherBuildBegin);
+        std::vector<char>().swap(g_bigCipherBuffer);
         std::vector<char> in;
         in.resize(teasafe::detail::CIPHER_BUFFER_SIZE);
         g_bigCipherBuffer.resize(teasafe::detail::CIPHER_BUFFER_SIZE);
