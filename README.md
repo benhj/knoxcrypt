@@ -1,5 +1,5 @@
-TeaSafe: A container-based encrypted filesystem
------------------------------------------------
+TeaSafe: An encrypted container format
+--------------------------------------
 
 ##### What is it?
 
