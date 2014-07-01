@@ -3,32 +3,22 @@ TeaSafe: A container-based encrypted filesystem
 
 ##### What is it?
 
-- an encrypted filesystem
-- uses the FUSE headers and libraries 
-- more like Truecrypt than EncFS
-- uses the XTEA cipher in CTR mode for encryption
-- employs the scrypt key derivation function
-- employs a very simple and custom developed filesystem 
-- can create and utilize a 'hidden' sub-volume
-- might not be secure*
-- probably buggy*
-- in need of testers*
-
-*That's where I need you to contribute! Please see below!
+- an encrypted container format
+- employs a very simple and custom developed filesystem (see wiki!)
+- TeaSafe containers can be browsed using either of the provided shell or gui interfaces
+- alternatively, you can implement your own. The API is rather straight-forward.
+- can also use the provided FUSE-layer for more realistic filesystem interoperability
+- utilizes XTEA, a publicly documented and easily understood cipher
+- further utilizes the scrypt algorithm for key derivation
 
 ##### Slightly more wordy spiel..
 
 The ongoing aim of TeaSafe is to learn about 
-filesystem implementation -- the whole thing is based on ideas gleaned from various wiki 
+filesystems and their implementation -- the whole thing is based on ideas gleaned from various wiki 
 articles about previously implemented filesystems (most prevalently HFS).
 The filesystem is block-based, existing as a single 'disk image'
 that can be mounted to a user-specified mount-point. In addition, the disk image 
 is transformed using a variant of the XTEA algorithm to provide a measure of security.
-TeaSafe also incorporates an experimental
-'coffee mode' in which a 'sub-volume' can be specified at the time
-of image creation. At the time of mounting, the user can choose to mount this
-rather than the default root folder. This latter feature is inspired by truecrypt's 
-'hidden partition' functionality and provides a small measure of obscurity.
 
 ### Security
 
