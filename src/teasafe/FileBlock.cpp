@@ -149,6 +149,11 @@ namespace teasafe
 
         // open the image stream for writing
         this->initImageStream();
+
+
+        // TODO: image could be 'sparse' in which case block doesn't actually
+        // exist yet. In this case, should write out the data to the container
+
         detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos);
         (void)m_stream->write((char*)buf, n);
 

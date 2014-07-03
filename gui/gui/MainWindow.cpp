@@ -59,6 +59,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    m_teaSafe(),
     m_loaderThread(this),
     m_workThread(this),
     m_populatedSet(),
@@ -129,9 +130,13 @@ void MainWindow::loadFileButtonHandler()
 
     if (dlg.exec()) {
 
+        // reset state
         ui->fileTree->clear();
         teasafe::cipher::IByteTransformer::m_init = false;
+        m_teaSafe.reset();
+        std::set<std::string>().swap(m_populatedSet);
 
+        // build new state
         teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
         io->path = dlg.selectedFiles().at(0).toStdString();
 

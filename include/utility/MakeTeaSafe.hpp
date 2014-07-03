@@ -61,6 +61,7 @@ namespace teasafe
         MakeTeaSafe(SharedCoreIO const &io, OptionalMagicPart const &omp = OptionalMagicPart())
             : m_io(io)
             , m_omp(omp)
+            , m_sparse(false)
             , m_writeSignal(boost::make_shared<WriteSignal>())
         {
         }
@@ -78,6 +79,7 @@ namespace teasafe
       private:
         SharedCoreIO m_io;       // io
         OptionalMagicPart m_omp; // for creating a magic partition
+        bool m_sparse;           // should a sparse image be created
 
         /// to notify image-writing process
         typedef boost::signals2::signal<void(EventType)> WriteSignal;
@@ -221,7 +223,9 @@ namespace teasafe
             out.write((char*)countBytes, 8);
 
             // write out the file space bytes
-            writeOutFileSpaceBytes(io, out);
+            if(!m_sparse) {
+                writeOutFileSpaceBytes(io, out);
+            }
 
             out.flush();
             out.close();
