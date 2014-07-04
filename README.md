@@ -52,6 +52,10 @@ For more info, please post up on `https://groups.google.com/forum/#!forum/teasaf
 The GUI uses Qt. Please download and install the latest version (Qt 5.3 at the time
 of writing) and open gui.pro in QtCreator. Build and run by clicking on the build icon.
 
+The GUI provides a simple interface to browsing and manipulating TeaSafe containers.
+
+![TeaSafe GUI](screenshots/gui.png?raw=true)
+
 Licensing
 ---------
 
