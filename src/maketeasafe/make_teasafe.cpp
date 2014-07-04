@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     desc.add_options()
         ("help", "produce help message")
         ("imageName", po::value<std::string>(), "teasafe image path")
-        ("blockCount", po::value<uint64_t>(), "size of filesystem in blocks")
+        ("blockCount", po::value<uint64_t>(), "size of filesystem in 4096 blocks (12800 = 50MB)")
         ("coffee", po::value<bool>(&magicPartition)->default_value(false), "create alternative sub-volume")
         ("rounds", po::value<unsigned int>(&rounds)->default_value(64), "number of encryption rounds");
 
