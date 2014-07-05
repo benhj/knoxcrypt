@@ -16,6 +16,8 @@ TeaSafe: An encrypted container format
 Note, only tested on Linux and Mac. With a bit of work, will probably build (sans fuse-bits) on windows
 too.
 
+Also note, requires some of the boost headers and libraries to build (see makefile).
+
 `make` or `make all` will compile the following command-line binaries:
 
 <pre>
@@ -55,6 +57,8 @@ of writing) and open gui.pro in QtCreator. Build and run by clicking on the buil
 The GUI provides a simple interface to browsing and manipulating TeaSafe containers.
 
 ![TeaSafe GUI](screenshots/gui.png?raw=true)
+
+Note, building the gui requires building libtesafe.la first by doing a make in the top level folder.
 
 Licensing
 ---------
