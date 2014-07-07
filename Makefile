@@ -109,7 +109,7 @@ obj-fuse/%.o: src/fuse/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_FUSE) -c -o $@ $<
 
 obj-cipher/%.o: src/cipher/%.cpp
-	$(CXX) $(CXXFLAGS) $(CXXFLAGS_FUSE) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 all: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
      $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a \
@@ -130,6 +130,14 @@ $(SHELL_BIN): directoryObjUtility $(OBJECTS_UTILITY) libteasafe.a
 $(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE) libteasafe.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a $(FUSE_LIBS) $(BOOST_LD) -o $@
 
+shell:  $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
+        $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a \
+        $(SHELL_BIN)
+        
+maketeasafe: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
+             $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a \
+             $(MAKETeaSafe_EXECUTABLE)
+        
 clean:
 	/bin/rm -fr obj obj-maketeasafe obj-test obj-fuse test_$(UNAME) maketeasafe_$(UNAME) teasafe_$(UNAME) teashell_$(UNAME) obj-cipher obj-utility libteasafe.a
 

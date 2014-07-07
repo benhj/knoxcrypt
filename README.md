@@ -16,9 +16,22 @@ TeaSafe: An encrypted container format
 Note, only tested on Linux and Mac. With a bit of work, will probably build (sans fuse-bits) on windows
 too.
 
-Also note, requires some of the boost headers and libraries to build (see makefile).
+Note, 
+*requires some of the boost headers and libraries to build (see makefile).
+*requires fuse for the main fuse layer binary (the binary 'teasafe')
 
-`make` or `make all` will compile the following command-line binaries:
+If you don't have fuse installed, you'll probably want to only build the main 
+teasafe library (libteasafe.a), the shell (teashell) and maketeasafe, the binrary
+used to make teasafe containers. To build these, respectively:
+<pre>
+make lib
+make shell
+make maketeasafe
+</pre>
+Note that building the shell, or maketeasafe, will automatically build the 
+library first.
+
+`make` or `make all` will compile everything except the GUI, i.e., the following binaries:
 
 <pre>
 test         : unit tests various parts of the main api
@@ -51,6 +64,9 @@ For more info, please post up on `https://groups.google.com/forum/#!forum/teasaf
 
 ### Building the GUI
 
+To build the GUI, first make sure that `libteasafe.a` has been built by issuing the
+command `make lib` in the top-level build-folder. 
+
 The GUI uses Qt. Please download and install the latest version (Qt 5.3 at the time
 of writing) and open gui.pro in QtCreator. Build and run by clicking on the build icon.
 
@@ -58,7 +74,7 @@ The GUI provides a simple interface to browsing and manipulating TeaSafe contain
 
 ![TeaSafe GUI](screenshots/gui.png?raw=true)
 
-Note, building the gui requires building libtesafe.la first by doing a make in the top level folder.
+
 
 Licensing
 ---------
