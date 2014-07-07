@@ -18,11 +18,11 @@ too.
 
 Note:
  
-* requires some of the boost headers and libraries to build (see makefile).
-* requires fuse for the main fuse layer binary (the binary 'teasafe')
+- requires some of the boost headers and libraries to build (see makefile).
+- requires fuse for the main fuse layer binary (the binary 'teasafe')
 
 If you don't have fuse installed, you'll probably want to only build the main 
-teasafe library (libteasafe.a), the shell (teashell) and maketeasafe, the binrary
+teasafe library (libteasafe.a), the shell (teashell) and maketeasafe, the binary
 used to make teasafe containers. To build these, respectively:
 <pre>
 make lib
