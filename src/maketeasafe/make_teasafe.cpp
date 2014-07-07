@@ -31,6 +31,7 @@
 #include "utility/EcholessPasswordPrompt.hpp"
 #include "utility/EventType.hpp"
 #include "utility/MakeTeaSafe.hpp"
+#include "utility/RandomNumberGenerator.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
@@ -83,10 +84,7 @@ int main(int argc, char *argv[])
 
     // use a non-deterministic random device to generate the iv. This
     // allegedly pulls data from /dev/urandom
-    boost::random_device rd;
-    boost::random::uniform_int_distribution<uint64_t> dis;
-    boost::function<uint64_t()> gen = boost::bind(dis, boost::ref(rd));
-    io->iv = gen();
+    io->iv = teasafe::utility::random();
 
     po::variables_map vm;
     try {

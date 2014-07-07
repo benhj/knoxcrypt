@@ -68,6 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QObject::connect(ui->loadButton, SIGNAL(clicked()),
                      this, SLOT(loadFileButtonHandler()));
+    QObject::connect(ui->newButton, SIGNAL(clicked()),
+                     this, SLOT(newButtonHandler()));
     QObject::connect(&m_loaderThread, SIGNAL(finishedLoadingSignal()), this,
                      SLOT(finishedLoadingSlot()));
     QObject::connect(this, SIGNAL(updateProgressSignal(long)), this,
@@ -161,6 +163,17 @@ void MainWindow::loadFileButtonHandler()
             m_loaderThread.start();
             m_sd->exec();
         }
+    }
+}
+
+void MainWindow::newButtonHandler()
+{
+    qDebug() << "New button placeholder!";
+
+    QFileDialog dlg( NULL, tr("Container save name"));
+    dlg.setAcceptMode( QFileDialog::AcceptSave );
+    if (dlg.exec()) {
+
     }
 }
 

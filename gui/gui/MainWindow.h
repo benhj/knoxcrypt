@@ -74,6 +74,7 @@ class MainWindow : public QMainWindow
      * @brief loadFileButtonHandler for loading a TeaSafe image
      */
     void loadFileButtonHandler();
+    void newButtonHandler();
 
     void updateProgressSlot(long);
     void cipherGeneratedSlot();
