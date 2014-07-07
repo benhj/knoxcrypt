@@ -16,9 +16,10 @@ TeaSafe: An encrypted container format
 Note, only tested on Linux and Mac. With a bit of work, will probably build (sans fuse-bits) on windows
 too.
 
-Note, 
-*requires some of the boost headers and libraries to build (see makefile).
-*requires fuse for the main fuse layer binary (the binary 'teasafe')
+Note:
+ 
+* requires some of the boost headers and libraries to build (see makefile).
+* requires fuse for the main fuse layer binary (the binary 'teasafe')
 
 If you don't have fuse installed, you'll probably want to only build the main 
 teasafe library (libteasafe.a), the shell (teashell) and maketeasafe, the binrary
@@ -28,8 +29,8 @@ make lib
 make shell
 make maketeasafe
 </pre>
-Note that building the shell, or maketeasafe, will automatically build the 
-library first.
+Note that building either of the binaries `teashell` or `maketeasafe` will automatically build 
+libteasafe.a first.
 
 `make` or `make all` will compile everything except the GUI, i.e., the following binaries:
 
@@ -40,7 +41,7 @@ teasafe      : fuse layer used for mounting teasafe containers
 teashell     : shell utility used for accessing and modifying teasafe containers
 </pre>
 
-Examples:
+Example usage:
 
 <pre>
 ./maketeasafe ./test.bfs 128000
