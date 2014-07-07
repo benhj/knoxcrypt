@@ -59,15 +59,19 @@ namespace teasafe { namespace cipher
 
         // helper code found here:
         // http://codereview.stackexchange.com/questions/2050/codereview-tiny-encryption-algorithm-for-arbitrary-sized-data
+        // Question posted by Alan Davis on Sep 6 `08.
         void convertBytesAndEncipher(unsigned int num_rounds, unsigned char * buffer, uint32_t const key[4])
         {
-            uint32_t datablock[2];
 
+            // convert the input buffer to 2 64bit integers
+            uint32_t datablock[2];
             datablock[0] = (buffer[0] << 24) | (buffer[1] << 16)  | (buffer[2] << 8) | (buffer[3]);
             datablock[1] = (buffer[4] << 24) | (buffer[5] << 16)  | (buffer[6] << 8) | (buffer[7]);
 
+            // encrypt the 128 bit number
             encipher(num_rounds, datablock, key);
 
+            // convert the two 64 bit numbers, now encrypted, to an 8-byte buffer again
             buffer[0] = static_cast<unsigned char>((datablock[0] >> 24) & 0xFF);
             buffer[1] = static_cast<unsigned char>((datablock[0] >> 16) & 0xFF);
             buffer[2] = static_cast<unsigned char>((datablock[0] >> 8) & 0xFF);
