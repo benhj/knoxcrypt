@@ -27,7 +27,7 @@ unix {
     }
 }
 
-LIBS += -L"/usr/local/lib" -lboost_system -lboost_filesystem -lboost_thread-mt
+LIBS += -L"/usr/local/lib" -lboost_system -lboost_filesystem -lboost_thread-mt -lboost_random
 LIBS += ../../libteasafe.a
 
 INCLUDEPATH += ../../include \
