@@ -31,6 +31,7 @@
 
 #include "WorkThread.h"
 #include "LoaderThread.h"
+#include "ContainerBuilderThread.h"
 #include "utility/EventType.hpp"
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
@@ -97,6 +98,7 @@ class MainWindow : public QMainWindow
     Ui::MainWindow *ui;
     SharedTeaSafe m_teaSafe;
     LoaderThread m_loaderThread;
+    ContainerBuilderThread m_builderThread;
     WorkThread m_workThread;
     boost::shared_ptr<QMenu> m_contextMenu;
     boost::shared_ptr<QAction> m_extractAction;

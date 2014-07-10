@@ -62,6 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     m_teaSafe(),
     m_loaderThread(this),
+    m_builderThread(this),
     m_workThread(this),
     m_populatedSet(),
     m_itemAdder(boost::make_shared<ItemAdder>())
@@ -179,8 +180,10 @@ void MainWindow::newButtonHandler()
         io->path = dlg.selectedFiles().at(0).toStdString();
 
         bool ok;
-        io->password = QInputDialog::getText(this, tr("Password dialog"),
-                                             tr("Password:"), QLineEdit::NoEcho, "", &ok).toStdString();
+        QInputDialog input;
+        input.setWindowModality(Qt::WindowModal);
+        io->password = input.getText(this, tr("Password dialog"),
+                                     tr("Password:"), QLineEdit::NoEcho, "", &ok).toStdString();
 
         if((!io->password.empty() && ok)) {
             io->rootBlock = 0;
@@ -188,9 +191,20 @@ void MainWindow::newButtonHandler()
             io->iv = teasafe::utility::random();
 
             // note, getInt arguably too constraining
-            io->blocks = QInputDialog::getInt(this, tr("#4096 byte blocks"),
-                                              tr("Blocks:"), QLineEdit::Normal, 12800);
+            io->blocks = input.getInt(this, tr("#4096 byte blocks"),
+                                      tr("Blocks:"), QLineEdit::Normal, 12800);
             io->freeBlocks = io->blocks;
+
+            // give the cipher generation process a gui callback
+            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
+            boost::function<void(teasafe::EventType)> f(boost::bind(&MainWindow::cipherCallback, this, _1, amount));
+            io->ccb = f;
+
+            // create a progress dialog to display progress of cipher generation
+            m_sd = boost::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
+            m_sd->setWindowModality(Qt::WindowModal);
+
+            m_builderThread.setSharedIO(io);
 
         }
     }

@@ -37,13 +37,15 @@ SOURCES += main.cpp \
            MainWindow.cpp \
            LoaderThread.cpp \
            WorkThread.cpp \
-    ItemAdder.cpp
+    ItemAdder.cpp \
+    ContainerBuilderThread.cpp
 
 HEADERS  += MainWindow.h \
             LoaderThread.h \
             TreeItemPathDeriver.h \
             WorkThread.h \
-    ItemAdder.h
+    ItemAdder.h \
+    ContainerBuilderThread.h
 
 FORMS += MainWindow.ui
 
