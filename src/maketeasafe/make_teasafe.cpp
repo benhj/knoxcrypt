@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
     // register progress callback for imager
     boost::function<void(teasafe::EventType)> fb(boost::bind(&imagerCallback, _1, io->blocks));
     imager.registerSignalHandler(fb);
-    imager.buidImage();
+    imager.buildImage();
 
     return 0;
 }

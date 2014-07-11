@@ -66,7 +66,7 @@ namespace teasafe
         {
         }
 
-        void buidImage()
+        void buildImage()
         {
             this->doBuildImage(m_io);
         }
