@@ -32,6 +32,7 @@
 #include "WorkThread.h"
 #include "LoaderThread.h"
 #include "ContainerBuilderThread.h"
+#include "GUICipherCallback.h"
 #include "utility/EventType.hpp"
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
@@ -67,10 +68,7 @@ class MainWindow : public QMainWindow
 
     ~MainWindow();
 
-    void cipherCallback(teasafe::EventType eventType, long const amount);
-
   public slots:
-    void finishedLoadingSlot();
     /**
      * @brief loadFileButtonHandler for loading a TeaSafe image
      */
@@ -78,8 +76,8 @@ class MainWindow : public QMainWindow
     void newButtonHandler();
 
     void updateProgressSlot(long);
-    void cipherGeneratedSlot();
     void setMaximumProgressSlot(long value);
+    void setProgressLabel(QString const &str);
     void extractClickedSlot();
     void removedClickedSlot();
     void newFolderClickedSlot();
@@ -89,10 +87,16 @@ class MainWindow : public QMainWindow
     void itemFinishedExpanding();
     bool eventFilter(QObject* o, QEvent* e);
 
+    void closeProgressSlot();
+
+    void getTeaSafeFromLoader();
+    void getTeaSafeFromBuilder();
+
   signals:
     void updateProgressSignal(long);
-    void cipherGeneratedSignal();
     void setMaximumProgressSignal(long);
+    void setProgressLabelSignal(QString);
+    void closeProgressSignal();
 
   private:
     Ui::MainWindow *ui;
@@ -100,6 +104,7 @@ class MainWindow : public QMainWindow
     LoaderThread m_loaderThread;
     ContainerBuilderThread m_builderThread;
     WorkThread m_workThread;
+    GUICipherCallback m_cipherCallback;
     boost::shared_ptr<QMenu> m_contextMenu;
     boost::shared_ptr<QAction> m_extractAction;
     boost::shared_ptr<QAction> m_removeAction;
@@ -111,6 +116,7 @@ class MainWindow : public QMainWindow
     std::set<std::string> m_populatedSet;
     boost::shared_ptr<ItemAdder> m_itemAdder;
     void doWork(WorkType workType);
+    void createRootFolderInTree();
 };
 
 #endif // MAINWINDOW_H

@@ -36,7 +36,9 @@ signals:
 
   void finishedBuildingSignal();
   void blockCountSignal(long);
-  void blockWrittenSignal();
+  void blockWrittenSignal(long);
+  void setProgressLabelSignal(QString);
+  void closeProgressSignal();
 
 private:
   teasafe::SharedCoreIO m_io;

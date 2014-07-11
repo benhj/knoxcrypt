@@ -38,14 +38,16 @@ SOURCES += main.cpp \
            LoaderThread.cpp \
            WorkThread.cpp \
     ItemAdder.cpp \
-    ContainerBuilderThread.cpp
+    ContainerBuilderThread.cpp \
+    GUICipherCallback.cpp
 
 HEADERS  += MainWindow.h \
             LoaderThread.h \
             TreeItemPathDeriver.h \
             WorkThread.h \
     ItemAdder.h \
-    ContainerBuilderThread.h
+    ContainerBuilderThread.h \
+    GUICipherCallback.h
 
 FORMS += MainWindow.ui
 

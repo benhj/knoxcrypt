@@ -20,6 +20,12 @@ void ContainerBuilderThread::setSharedIO(teasafe::SharedCoreIO const &io)
 
 }
 
+SharedTeaSafe ContainerBuilderThread::getTeaSafe()
+{
+    TeaLock lock(m_teaMutex);
+    return boost::make_shared<teasafe::TeaSafe>(m_io);
+}
+
 void ContainerBuilderThread::run()
 {
     this->buildTSImage();
@@ -27,16 +33,24 @@ void ContainerBuilderThread::run()
 
 void ContainerBuilderThread::buildTSImage()
 {
-
+    TeaLock lock(m_teaMutex);
+    m_imageBuilder->buildImage();
 }
 
 void ContainerBuilderThread::imagerCallback(teasafe::EventType eventType, long const amount)
 {
+    static long val(0);
     if(eventType == teasafe::EventType::ImageBuildStart) {
         emit blockCountSignal(amount);
+        emit setProgressLabelSignal("Building image...");
     }
     if(eventType == teasafe::EventType::ImageBuildUpdate) {
-        emit blockWrittenSignal();
+        emit blockWrittenSignal(++val);
+    }
+    if(eventType == teasafe::EventType::ImageBuildEnd) {
+        val = 0;
+        emit finishedBuildingSignal();
+        emit closeProgressSignal();
     }
     if(eventType == teasafe::EventType::IVWriteEvent) {
 

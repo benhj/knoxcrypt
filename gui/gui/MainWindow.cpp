@@ -64,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_loaderThread(this),
     m_builderThread(this),
     m_workThread(this),
+    m_cipherCallback(this),
     m_populatedSet(),
     m_itemAdder(boost::make_shared<ItemAdder>())
 {
@@ -73,18 +74,35 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->newButton, SIGNAL(clicked()),
                      this, SLOT(newButtonHandler()));
     QObject::connect(&m_loaderThread, SIGNAL(finishedLoadingSignal()), this,
-                     SLOT(finishedLoadingSlot()));
-    QObject::connect(this, SIGNAL(updateProgressSignal(long)), this,
+                     SLOT(getTeaSafeFromLoader()));
+    QObject::connect(&m_builderThread, SIGNAL(finishedBuildingSignal()), this,
+                     SLOT(getTeaSafeFromBuilder()));
+    QObject::connect(&m_cipherCallback, SIGNAL(updateProgressSignal(long)), this,
                      SLOT(updateProgressSlot(long)));
-    QObject::connect(this, SIGNAL(cipherGeneratedSignal()), this,
-                     SLOT(cipherGeneratedSlot()));
-    QObject::connect(this, SIGNAL(setMaximumProgressSignal(long)), this,
+    QObject::connect(&m_cipherCallback, SIGNAL(setMaximumProgressSignal(long)), this,
                      SLOT(setMaximumProgressSlot(long)));
+
+    QObject::connect(&m_builderThread, SIGNAL(blockCountSignal(long)), this,
+                     SLOT(setMaximumProgressSlot(long)));
+    QObject::connect(&m_builderThread, SIGNAL(blockWrittenSignal(long)), this,
+                     SLOT(updateProgressSlot(long)));
 
     ui->fileTree->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
     QObject::connect(ui->fileTree, SIGNAL(itemExpanded(QTreeWidgetItem*)),
                      this, SLOT(itemExpanded(QTreeWidgetItem*)));
+
+    QObject::connect(&m_cipherCallback, SIGNAL(setProgressLabelSignal(QString)),
+                     this, SLOT(setProgressLabel(QString)));
+
+    QObject::connect(&m_builderThread, SIGNAL(setProgressLabelSignal(QString)),
+                     this, SLOT(setProgressLabel(QString)));
+
+    QObject::connect(&m_builderThread, SIGNAL(closeProgressSignal()),
+                     this, SLOT(closeProgressSlot()));
+
+    QObject::connect(&m_cipherCallback, SIGNAL(closeProgressSignal()),
+                     this, SLOT(closeProgressSlot()));
 
     m_contextMenu = boost::make_shared<QMenu>(ui->fileTree);
     ui->fileTree->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -153,7 +171,7 @@ void MainWindow::loadFileButtonHandler()
 
             // give the cipher generation process a gui callback
             long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-            boost::function<void(teasafe::EventType)> f(boost::bind(&MainWindow::cipherCallback, this, _1, amount));
+            boost::function<void(teasafe::EventType)> f(boost::bind(&GUICipherCallback::cipherCallback, &m_cipherCallback, _1, amount));
             io->ccb = f;
 
             // create a progress dialog to display progress of cipher generation
@@ -175,6 +193,13 @@ void MainWindow::newButtonHandler()
     QFileDialog dlg( NULL, tr("Container save name"));
     dlg.setAcceptMode( QFileDialog::AcceptSave );
     if (dlg.exec()) {
+
+        // reset state
+        ui->fileTree->clear();
+        teasafe::cipher::IByteTransformer::m_init = false;
+        m_teaSafe.reset();
+        std::set<std::string>().swap(m_populatedSet);
+
         // build new state
         teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
         io->path = dlg.selectedFiles().at(0).toStdString();
@@ -197,7 +222,7 @@ void MainWindow::newButtonHandler()
 
             // give the cipher generation process a gui callback
             long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-            boost::function<void(teasafe::EventType)> f(boost::bind(&MainWindow::cipherCallback, this, _1, amount));
+            boost::function<void(teasafe::EventType)> f(boost::bind(&GUICipherCallback::cipherCallback, &m_cipherCallback, _1, amount));
             io->ccb = f;
 
             // create a progress dialog to display progress of cipher generation
@@ -205,6 +230,9 @@ void MainWindow::newButtonHandler()
             m_sd->setWindowModality(Qt::WindowModal);
 
             m_builderThread.setSharedIO(io);
+
+            m_builderThread.start();
+            m_sd->exec();
 
         }
     }
@@ -215,21 +243,15 @@ void MainWindow::updateProgressSlot(long const value)
     m_sd->setValue(value);
 }
 
-void MainWindow::cipherGeneratedSlot()
-{
-    m_sd->close();
-    m_teaSafe = m_loaderThread.getTeaSafe();
-
-    // set root '/' tree item
-    QTreeWidgetItem *parent = new QTreeWidgetItem(ui->fileTree);
-    parent->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
-    parent->setText(0, QString("/"));
-}
-
 void MainWindow::setMaximumProgressSlot(long value)
 {
-    m_sd->setLabelText("Building cipher...");
     m_sd->setMaximum(value);
+}
+
+void MainWindow::setProgressLabel(QString const &str)
+{
+    m_sd->show(); // in case is closed
+    m_sd->setLabelText(str);
 }
 
 void MainWindow::extractClickedSlot()
@@ -283,6 +305,23 @@ bool MainWindow::eventFilter( QObject* o, QEvent* e )
     }
 
     return false;
+}
+
+void MainWindow::closeProgressSlot()
+{
+    m_sd->close();
+}
+
+void MainWindow::getTeaSafeFromLoader()
+{
+    m_teaSafe = m_loaderThread.getTeaSafe();
+    this->createRootFolderInTree();
+}
+
+void MainWindow::getTeaSafeFromBuilder()
+{
+    m_teaSafe = m_builderThread.getTeaSafe();
+    this->createRootFolderInTree();
 }
 
 void MainWindow::doWork(WorkType workType)
@@ -365,23 +404,10 @@ void MainWindow::doWork(WorkType workType)
     }
 }
 
-void MainWindow::cipherCallback(teasafe::EventType eventType, long const amount)
+void MainWindow::createRootFolderInTree()
 {
-    static long value(0);
-    if (eventType == teasafe::EventType::BigCipherBuildBegin) {
-        qDebug() << "Got event";
-        emit setMaximumProgressSignal(amount);
-    }
-    if (eventType == teasafe::EventType::CipherBuildUpdate) {
-        emit updateProgressSignal(value++);
-    }
-    if (eventType == teasafe::EventType::BigCipherBuildEnd) {
-        value = 0;
-        emit cipherGeneratedSignal();
-    }
-}
-
-void MainWindow::finishedLoadingSlot()
-{
-    qDebug() << "Finished loading!";
+    // set root '/' tree item
+    QTreeWidgetItem *parent = new QTreeWidgetItem(ui->fileTree);
+    parent->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
+    parent->setText(0, QString("/"));
 }
