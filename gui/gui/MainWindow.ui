@@ -148,8 +148,8 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
          </property>
          <property name="iconSize">
           <size>
-           <width>48</width>
-           <height>48</height>
+           <width>36</width>
+           <height>36</height>
           </size>
          </property>
         </widget>
@@ -165,8 +165,8 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
          </property>
          <property name="iconSize">
           <size>
-           <width>48</width>
-           <height>48</height>
+           <width>36</width>
+           <height>36</height>
           </size>
          </property>
         </widget>
