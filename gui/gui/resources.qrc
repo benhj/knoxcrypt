@@ -5,5 +5,7 @@
         <file>graphix/stylesheet-branch-more.png</file>
         <file>graphix/stylesheet-branch-open.png</file>
         <file>graphix/stylesheet-vline.png</file>
+        <file>graphix/folder-lock-512.png</file>
+        <file>graphix/plus-512.png</file>
     </qresource>
 </RCC>
