@@ -182,6 +182,8 @@ void MainWindow::loadFileButtonHandler()
             m_loaderThread.setSharedIO(io);
             m_loaderThread.start();
             m_sd->exec();
+
+            ui->nameLabel->setText(io->path.c_str());
         }
     }
 }
@@ -233,6 +235,8 @@ void MainWindow::newButtonHandler()
 
             m_builderThread.start();
             m_sd->exec();
+
+            ui->nameLabel->setText(io->path.c_str());
 
         }
     }
@@ -316,6 +320,7 @@ void MainWindow::getTeaSafeFromLoader()
 {
     m_teaSafe = m_loaderThread.getTeaSafe();
     this->createRootFolderInTree();
+    //
 }
 
 void MainWindow::getTeaSafeFromBuilder()

@@ -21,6 +21,10 @@ background:black;
 border: 2px solid #555;
 }
 
+QLabel#label {
+background: gray;
+}
+
 
 #MainWindow QTreeWidget {
 border: none;
@@ -31,6 +35,10 @@ color: white;
 QFrame#buttonFrame{
 border: none;
 background: #555;
+}
+
+QFrame#statusFrame{
+background:gray;
 }
 
  QTreeView::branch:has-siblings:!adjoins-item {
@@ -85,7 +93,7 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="0">
+   <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0" columnstretch="0">
     <property name="sizeConstraint">
      <enum>QLayout::SetDefaultConstraint</enum>
     </property>
@@ -93,7 +101,7 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
      <number>0</number>
     </property>
     <property name="topMargin">
-     <number>10</number>
+     <number>0</number>
     </property>
     <property name="rightMargin">
      <number>0</number>
@@ -107,7 +115,7 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
     <property name="verticalSpacing">
      <number>0</number>
     </property>
-    <item row="1" column="0">
+    <item row="2" column="0">
      <widget class="QFrame" name="buttonFrame">
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -176,7 +184,7 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
       <zorder>loadButton</zorder>
      </widget>
     </item>
-    <item row="0" column="0">
+    <item row="1" column="0">
      <widget class="QTreeWidget" name="fileTree">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -210,6 +218,37 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
         <string notr="true">1</string>
        </property>
       </column>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QFrame" name="statusFrame">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="nameLabel">
+         <property name="text">
+          <string>No container opened</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
