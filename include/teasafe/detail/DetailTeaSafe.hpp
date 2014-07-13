@@ -47,7 +47,7 @@ namespace teasafe { namespace detail
     uint64_t const FILE_BLOCK_META = 12;
     uint64_t const IV_BYTES = 8;
     uint64_t const HEADER_BYTES = 8;
-    uint64_t const CIPHER_BUFFER_SIZE = 270000000;
+    long     const CIPHER_BUFFER_SIZE = 270000000;
 
     inline void convertUInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
     {
@@ -179,7 +179,7 @@ namespace teasafe { namespace detail
      * @param in the image stream
      */
     inline void setBlockToInUse(uint64_t const block,
-                                uint64_t const blocks,
+                                uint64_t const,// blocks,
                                 teasafe::TeaSafeImageStream &in,
                                 bool const set = true)
     {
@@ -385,8 +385,6 @@ namespace teasafe { namespace detail
                                    std::vector<uint64_t> const &blocksUsed,
                                    uint64_t const totalBlocks)
     {
-        // how many bytes does this value fit in to?
-        uint64_t bytes = totalBlocks / uint64_t(8);
         std::vector<uint64_t>::const_iterator it = blocksUsed.begin();
         for (; it != blocksUsed.end(); ++it) {
             setBlockToInUse(*it, totalBlocks, in);
@@ -404,8 +402,6 @@ namespace teasafe { namespace detail
                                           uint64_t const totalBlocks,
                                           bool const set = true)
     {
-        // how many bytes does this value fit in to?
-        uint64_t bytes = totalBlocks / uint64_t(8);
         setBlockToInUse(blockUsed, totalBlocks, in, set);
     }
 
@@ -414,7 +410,7 @@ namespace teasafe { namespace detail
      * @param stream the stream to update
      * @param offset the position to seek to
      */
-    inline void checkAndSeekG(TeaSafeImageStream &stream, uint64_t offset)
+    inline void checkAndSeekG(TeaSafeImageStream &stream, std::streamoff offset)
     {
         if(stream.tellg() != offset) {
             (void)stream.seekg(offset);
@@ -426,7 +422,7 @@ namespace teasafe { namespace detail
      * @param stream the stream to update
      * @param offset the position to seek to
      */
-    inline void checkAndSeekP(TeaSafeImageStream &stream, uint64_t offset)
+    inline void checkAndSeekP(TeaSafeImageStream &stream, std::streamoff offset)
     {
         if(stream.tellp() != offset) {
             (void)stream.seekp(offset);

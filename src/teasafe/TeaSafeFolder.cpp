@@ -95,7 +95,7 @@ namespace teasafe
         {
             std::vector<uint8_t> filename;
             filename.assign(MAX_FILENAME_LENGTH, 0);
-            int i = 0;
+            std::vector<uint8_t>::size_type i = 0;
             for (; i < name.length(); ++i) {
                 filename[i] = name[i];
             }
@@ -473,7 +473,7 @@ namespace teasafe
         return info;
     }
 
-    uint64_t
+    long
     TeaSafeFolder::doGetNumberOfEntries() const
     {
         teasafe::SharedImageStream out(m_folderData.getStream());
@@ -481,7 +481,10 @@ namespace teasafe
         (void)out->seekg(offset + detail::FILE_BLOCK_META);
         uint8_t buf[8];
         (void)out->read((char*)buf, 8);
-        return detail::convertInt8ArrayToInt64(buf);
+
+        // there will never be a number of entries that is greater than
+        // the max capacity of a long variable
+        return static_cast<long>(detail::convertInt8ArrayToInt64(buf));
     }
 
     bool
@@ -518,7 +521,7 @@ namespace teasafe
         return returnString;
     }
 
-    uint64_t
+    long
     TeaSafeFolder::doGetMetaDataIndexForEntry(std::string const &name) const
     {
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {

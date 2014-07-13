@@ -97,9 +97,10 @@ namespace teasafe
             }
 
           private:
+            FolderExtractionVisitor(); // not required
+            TeaSafe &m_theBfs;
             std::string m_teaPath;
             std::string m_fsPath;
-            TeaSafe &m_theBfs;
         };
 
     }

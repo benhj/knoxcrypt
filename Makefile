@@ -55,6 +55,8 @@ endif
 # compilation flags
 CXXFLAGS_FUSE= $(shell $(PKG_CONFIG) --cflags fuse 2>/dev/null || echo "-I/usr/local/include/$(FUSE)")  -DFUSE_USE_VERSION=26
 CXXFLAGS ?= -ggdb \
+            -Wall \
+            -W \
             -Os \
             -ffast-math \
             -funroll-loops \

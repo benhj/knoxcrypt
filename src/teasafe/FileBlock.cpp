@@ -38,17 +38,17 @@ namespace teasafe
 
     FileBlock::FileBlock(SharedCoreIO const &io,
                          uint64_t const index,
-                         uint64_t const next,
+                         uint64_t const,// next,
                          OpenDisposition const &openDisposition,
                          SharedImageStream const &stream)
         : m_io(io)
         , m_index(index)
         , m_bytesWritten(0)
+        , m_initialBytesWritten(0)
         , m_next(index)
         , m_offset(0)
         , m_seekPos(0)
         , m_positionBeforeWrite(0)
-        , m_initialBytesWritten(0)
         , m_openDisposition(openDisposition)
         , m_bytesToWriteOnFlush(0)
         , m_stream(stream)
@@ -113,7 +113,7 @@ namespace teasafe
 
     boost::iostreams::stream_offset
     FileBlock::seek(boost::iostreams::stream_offset off,
-                    std::ios_base::seekdir way)
+                    std::ios_base::seekdir)
     {
         m_seekPos = off;
         return m_seekPos;

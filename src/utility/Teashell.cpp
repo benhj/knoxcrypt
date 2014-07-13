@@ -572,7 +572,6 @@ void populateCommands()
 int main(int argc, char *argv[])
 {
     // parse the program options
-    uint64_t rootBlock;
     bool magic = false;
     namespace po = boost::program_options;
     po::options_description desc("Allowed options");

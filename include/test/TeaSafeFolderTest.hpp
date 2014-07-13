@@ -115,7 +115,6 @@ class TeaSafeFolderTest
         teasafe::TeaSafeFolder folder = createTestFolder(testPath, blocks);
         std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 6, "testListAllEntries: number of entries");
-        std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
         ASSERT_EQUAL(entries[0].filename(), "test.txt", "testListAllEntries: filename A");
         ASSERT_EQUAL(entries[1].filename(), "some.log", "testListAllEntries: filename B");
         ASSERT_EQUAL(entries[2].filename(), "folderA", "testListAllEntries: filename C");
@@ -141,7 +140,6 @@ class TeaSafeFolderTest
         teasafe::TeaSafeFolder folder = createTestFolder(testPath, blocks);
         std::vector<teasafe::EntryInfo> entries = folder.listFileEntries();
         ASSERT_EQUAL(entries.size(), 4, "testListFileEntries: number of entries");
-        std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
         ASSERT_EQUAL(entries[0].filename(), "test.txt", "testListFileEntries: filename A");
         ASSERT_EQUAL(entries[1].filename(), "some.log", "testListFileEntries: filename B");
         ASSERT_EQUAL(entries[2].filename(), "picture.jpg", "testListFileEntries: filename D");
@@ -155,7 +153,6 @@ class TeaSafeFolderTest
         teasafe::TeaSafeFolder folder = createTestFolder(testPath, blocks);
         std::vector<teasafe::EntryInfo> entries = folder.listFolderEntries();
         ASSERT_EQUAL(entries.size(), 2, "testListFolderEntries: number of entries");
-        std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
         ASSERT_EQUAL(entries[0].filename(), "folderA", "testListFolderEntries: filename C");
         ASSERT_EQUAL(entries[1].filename(), "folderB", "testListFolderEntries: filename F");
     }
@@ -349,7 +346,6 @@ class TeaSafeFolderTest
         {
             std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
             ASSERT_EQUAL(entries.size(), 6, "testTeaSafeFolderRetrievalAddEntries: root number of entries");
-            std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
             ASSERT_EQUAL(entries[0].filename(), "test.txt", "testTeaSafeFolderRetrievalAddEntries: root filename A");
             ASSERT_EQUAL(entries[1].filename(), "some.log", "testTeaSafeFolderRetrievalAddEntries: root filename B");
             ASSERT_EQUAL(entries[2].filename(), "folderA", "testTeaSafeFolderRetrievalAddEntries: root filename C");
@@ -361,7 +357,6 @@ class TeaSafeFolderTest
         {
             std::vector<teasafe::EntryInfo> entries = subFolder.listAllEntries();
             ASSERT_EQUAL(entries.size(), 4, "testTeaSafeFolderRetrievalAddEntries: subfolder number of entries");
-            std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
             ASSERT_EQUAL(entries[0].filename(), "subFileA", "testTeaSafeFolderRetrievalAddEntries: subFolder filename A");
             ASSERT_EQUAL(entries[1].filename(), "subFileB", "testTeaSafeFolderRetrievalAddEntries: subFolder filename B");
             ASSERT_EQUAL(entries[2].filename(), "subFileC", "testTeaSafeFolderRetrievalAddEntries: subFolder filename C");

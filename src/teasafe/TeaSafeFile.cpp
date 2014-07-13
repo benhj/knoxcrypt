@@ -169,7 +169,7 @@ namespace teasafe
         m_buffer.resize(bytesToRead);
         (void)m_workingBlock->read((char*)&m_buffer.front(), bytesToRead);
 
-        if (m_blockIndex + 1 < m_blockCount && bytesToRead == size) {
+        if (static_cast<uint64_t>(m_blockIndex + 1) < m_blockCount && bytesToRead == size) {
             ++m_blockIndex;
             m_workingBlock = boost::make_shared<FileBlock>(m_io,
                                                            m_workingBlock->getNextIndex(),
@@ -257,7 +257,7 @@ namespace teasafe
 
             // EDGE case: if overwrite causes us to go over end, need to
             // switch to append mode
-            if (this->tell() >= m_fileSize) {
+            if (static_cast<uint64_t>(this->tell()) >= m_fileSize) {
                 m_openDisposition = OpenDisposition::buildAppendDisposition();
             }
 
@@ -564,7 +564,7 @@ namespace teasafe
         }
 
         // check bounds and error if too big
-        if (seekPair.first >= m_blockCount || seekPair.first < 0) {
+        if (static_cast<uint64_t>(seekPair.first) >= m_blockCount || seekPair.first < 0) {
             return -1; // fail
         } else {
 

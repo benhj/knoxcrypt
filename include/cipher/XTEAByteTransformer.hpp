@@ -91,7 +91,6 @@ namespace teasafe { namespace cipher
 
         void doSubTransformations(char *in,
                                   char *out,
-                                  std::ios_base::streamoff const startPosition,
                                   std::ios_base::streamoff const startPositionOffset,
                                   long const blocksOfSize8BeingTransformed,
                                   long &c,

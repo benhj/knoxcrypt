@@ -227,7 +227,7 @@ namespace teasafe
          * @brief retrieves the number of entries in folder entry
          * @return the number of folder entries
          */
-        uint64_t doGetNumberOfEntries() const;
+        long doGetNumberOfEntries() const;
 
         /**
          * @brief retrieves the name of an entry with given index
@@ -240,7 +240,7 @@ namespace teasafe
          * @param name the name of the entry
          * @return the index
          */
-        uint64_t doGetMetaDataIndexForEntry(std::string const &name) const;
+        long doGetMetaDataIndexForEntry(std::string const &name) const;
 
         /**
          * @brief write metadata to this folder entry
@@ -333,7 +333,7 @@ namespace teasafe
 
         // as an optimization, store the number of entries so that we
         // don't have to read each time (read once during construction)
-        uint64_t m_entryCount;
+        long m_entryCount;
 
         // An experimental optimization: a map will store entry infos as they
         // are generated so that in future, they don't have to be regenerated.

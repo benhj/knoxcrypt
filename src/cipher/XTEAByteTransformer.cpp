@@ -197,8 +197,7 @@ namespace teasafe { namespace cipher
 
             // encrypt blocksRequired times 8 byte blocks of data
             doSubTransformations(in,                         // input buffer
-                                 out,                        // output buffer
-                                 startPosition,              // seeked-to position
+                                 out,                        // output
                                  startPositionOffset,        // 8-byte block offset
                                  blocksRequired,             // number of iterations
                                  c,                          // stream position
@@ -207,14 +206,14 @@ namespace teasafe { namespace cipher
 
             // encrypt the final block which is of length remainder bytes
             if (remainder > 0) {
-                doSubTransformations(in, out, startPosition, startPositionOffset, 1, c, ctr, buf, remainder);
+                doSubTransformations(in, out, startPositionOffset, 1, c, ctr, buf, remainder);
             }
 
             return;
         }
 
         // else the length < 8 so just encrypt length bytes
-        doSubTransformations(in, out, startPosition, startPositionOffset, 1, c, ctr, buf, length);
+        doSubTransformations(in, out, startPositionOffset, 1, c, ctr, buf, length);
 
     }
 
@@ -254,7 +253,6 @@ namespace teasafe { namespace cipher
     void
     XTEAByteTransformer::doSubTransformations(char *in,
                                               char *out,
-                                              std::ios_base::streamoff const startPosition,
                                               std::ios_base::streamoff const startPositionOffset,
                                               long const blocksOfSize8BeingTransformed,
                                               long &c,

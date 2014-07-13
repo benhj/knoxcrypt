@@ -429,7 +429,6 @@ int main(int argc, char *argv[])
 {
 
     // parse the program options
-    uint64_t rootBlock;
     bool debug = true;
     bool magic = false;
     namespace po = boost::program_options;
