@@ -68,7 +68,7 @@ class FileBlockTest
     void blockWriteAndReadTest()
     {
         long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
 
@@ -95,15 +95,14 @@ class FileBlockTest
         dat.resize(size);
         block.seek(0);
         std::streamsize bytesRead = block.read((char*)&dat.front(), size);
-        ASSERT_EQUAL(bytesRead, size, "FileBlockTest::blockWriteAndReadTest(): data read bytes read check");
+        ASSERT_EQUAL(static_cast<size_t>(bytesRead), size, "FileBlockTest::blockWriteAndReadTest(): data read bytes read check");
         std::string str(dat.begin(), dat.end());
         ASSERT_EQUAL(str, testData, "FileBlockTest::blockWriteAndReadTest(): data read content check");
     }
 
     void testWritingToNonWritableThrows()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
@@ -126,8 +125,7 @@ class FileBlockTest
 
     void testReadingFromNonReadableThrows()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));

@@ -54,8 +54,7 @@ class FileBlockIteratorTest
 
     void test()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // build some blocks to iterate over
         teasafe::SharedCoreIO io(createTestIO(testPath));

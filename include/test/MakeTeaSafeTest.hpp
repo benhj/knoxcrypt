@@ -58,8 +58,8 @@ class MakeTeaSafeTest
   private:
     void correctBlockCountIsReported()
     {
-        int blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        uint64_t blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
 
@@ -71,8 +71,7 @@ class MakeTeaSafeTest
 
     void firstBlockIsReportedAsBeingFree()
     {
-        int blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
 
@@ -85,7 +84,7 @@ class MakeTeaSafeTest
     void blocksCanBeSetAndCleared()
     {
         int blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
 
@@ -99,7 +98,7 @@ class MakeTeaSafeTest
         for (int i = 2; i < blocks - 1; ++i) {
             teasafe::detail::setBlockToInUse(i, blocks, is);
             p = teasafe::detail::getNextAvailableBlock(is);
-            if (*p != i + 1) {
+            if (*p != (uint64_t)(i + 1)) {
                 broken = true;
                 break;
             }
@@ -126,9 +125,8 @@ class MakeTeaSafeTest
 
     void testThatRootFolderContainsZeroEntries()
     {
-        int blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
+        uint64_t blocks(2048);
         uint64_t offset = teasafe::detail::getOffsetOfFileBlock(0, blocks);
         // open a stream and read the first byte which signifies number of entries
         teasafe::SharedCoreIO io(createTestIO(testPath));

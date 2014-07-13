@@ -127,7 +127,7 @@ namespace fuselayer
         // Create a directory
         static
         int
-        teasafe_mkdir(const char *path, mode_t mode)
+        teasafe_mkdir(const char *path, mode_t)
         {
             try {
                 TeaSafe_DATA->addFolder(path);
@@ -183,7 +183,7 @@ namespace fuselayer
         // is deferred to the respective functions
         static
         int
-        teasafe_open(const char *path, struct fuse_file_info *fi)
+        teasafe_open(const char *path, struct fuse_file_info *)
         {
             if (!TeaSafe_DATA->fileExists(path)) {
                 try {
@@ -204,7 +204,7 @@ namespace fuselayer
 
         static
         int
-        teasafe_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
+        teasafe_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *)
         {
             teasafe::TeaSafeFileDevice device = TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
             device.seek(offset, std::ios_base::beg);
@@ -245,7 +245,7 @@ namespace fuselayer
 
         static
         void
-        *teasafe_init(struct fuse_conn_info *conn)
+        *teasafe_init(struct fuse_conn_info *)
         {
             return TeaSafe_DATA;
         }
@@ -253,7 +253,7 @@ namespace fuselayer
         // create file; comment for git test
         static
         int
-        teasafe_create(const char *path, mode_t mode, struct fuse_file_info *fi)
+        teasafe_create(const char *path, mode_t, struct fuse_file_info *)
         {
             try {
                 TeaSafe_DATA->addFile(path);
@@ -265,7 +265,7 @@ namespace fuselayer
 
         static
         int
-        teasafe_ftruncate(const char *path, off_t offset, struct fuse_file_info *fi)
+        teasafe_ftruncate(const char *path, off_t offset, struct fuse_file_info *)
         {
             try {
                 TeaSafe_DATA->truncateFile(path, offset);
@@ -279,7 +279,7 @@ namespace fuselayer
         // but I think its called a bunch of times
         static
         int
-        teasafe_opendir(const char *path, struct fuse_file_info *fi)
+        teasafe_opendir(const char *, struct fuse_file_info *)
         {
             return 0;
         }
@@ -289,7 +289,7 @@ namespace fuselayer
         static
         int
         teasafe_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-                        off_t offset, struct fuse_file_info *fi)
+                        off_t, struct fuse_file_info *)
         {
             try {
                 teasafe::TeaSafeFolder folder = TeaSafe_DATA->getTeaSafeFolder(path);
@@ -326,7 +326,7 @@ namespace fuselayer
         // the number of inodes corresponds to the number of blocks
         static
         int
-        teasafe_statfs(const char *path, struct statvfs *statv)
+        teasafe_statfs(const char *, struct statvfs *statv)
         {
             TeaSafe_DATA->statvfs(statv);
             return 0;
@@ -336,20 +336,20 @@ namespace fuselayer
 #ifndef __linux__
         static
         int
-        teasafe_setxattr(const char *path,
-                         const char *name,
-                         const char *value,
-                         size_t size,
-                         int flags,
+        teasafe_setxattr(const char *,
+                         const char *,
+                         const char *,
+                         size_t,
+                         int,
                          uint32_t)
 #else
             static
             int
-            teasafe_setxattr(const char *path,
-                             const char *name,
-                             const char *value,
-                             size_t size,
-                             int flags)
+            teasafe_setxattr(const char *,
+                             const char *,
+                             const char *,
+                             size_t,
+                             int)
 #endif
         {
             return 0;
@@ -384,7 +384,7 @@ namespace fuselayer
 
         static
         int
-        teasafe_utimens(const char *, const struct timespec tv[2])
+        teasafe_utimens(const char *, const struct timespec *)
         {
             return 0;
         }

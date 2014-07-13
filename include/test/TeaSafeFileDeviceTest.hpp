@@ -61,8 +61,7 @@ class TeaSafeFileDeviceTest
 
     void testWriteReportsCorrectFileSize()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write get file size from same entry
         {
@@ -82,8 +81,7 @@ class TeaSafeFileDeviceTest
 
     void testWriteFollowedByRead()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write get file size from same entry
         std::string testData(createLargeStringToWrite());

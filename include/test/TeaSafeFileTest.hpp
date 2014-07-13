@@ -80,8 +80,7 @@ class TeaSafeFileTest
 
     void testFileSizeReportedCorrectly()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write get file size from same entry
         {
@@ -106,7 +105,7 @@ class TeaSafeFileTest
     void testBlocksAllocated()
     {
         long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write get file size from same entry
         {
@@ -136,7 +135,7 @@ class TeaSafeFileTest
     void testFileUnlink()
     {
         long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // for storing block indices to make sure they've been deallocated after unlink
         std::vector<uint64_t> blockIndices;
@@ -190,8 +189,7 @@ class TeaSafeFileTest
 
     void testReadingFromNonReadableThrows()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write get file size from same entry
         {
@@ -224,8 +222,7 @@ class TeaSafeFileTest
 
     void testWritingToNonWritableThrows()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write get file size from same entry
         {
@@ -260,8 +257,7 @@ class TeaSafeFileTest
 
     void testBigWriteFollowedByRead()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write
         {
@@ -290,8 +286,7 @@ class TeaSafeFileTest
 
     void testBigWriteFollowedBySmallAppend()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // initial big write
         {
@@ -330,8 +325,7 @@ class TeaSafeFileTest
 
     void testBigWriteFollowedBySmallOverwriteAtStart()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // initial big write
         {
@@ -369,8 +363,7 @@ class TeaSafeFileTest
 
     void testBigWriteFollowedBySmallOverwriteAtEnd()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // initial big write
         {
@@ -410,8 +403,7 @@ class TeaSafeFileTest
 
     void testBigWriteFollowedBySmallOverwriteAtEndThatGoesOverOriginalLength()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // initial big write
         {
@@ -456,8 +448,7 @@ class TeaSafeFileTest
 
     void testBigWriteFollowedByBigOverwriteAtEndThatGoesOverOriginalLength()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // initial big write
         {
@@ -498,8 +489,7 @@ class TeaSafeFileTest
 
     void testSmallWriteFollowedByBigAppend()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // initial small write
         std::string testData("small string");
@@ -537,8 +527,7 @@ class TeaSafeFileTest
 
     void testSeekAndReadSmallFile()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write
         {
@@ -568,8 +557,7 @@ class TeaSafeFileTest
 
     void testWriteBigDataAppendSmallStringSeekToAndReadAppendedString()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write
         {
@@ -607,8 +595,7 @@ class TeaSafeFileTest
 
     void testSeekingFromEnd()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write
         {
@@ -645,8 +632,7 @@ class TeaSafeFileTest
 
     void testSeekingFromCurrentNegative()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write
         {
@@ -687,8 +673,7 @@ class TeaSafeFileTest
 
     void testSeekingFromCurrentPositive()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write
         {
@@ -729,8 +714,7 @@ class TeaSafeFileTest
 
     void testEdgeCaseEndOfBlockOverWrite()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write
         {
@@ -768,8 +752,7 @@ class TeaSafeFileTest
 
     void testEdgeCaseEndOfBlockAppend()
     {
-        long const blocks = 2048;
-        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // test write
         {
