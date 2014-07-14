@@ -66,7 +66,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_workThread(this),
     m_cipherCallback(this),
     m_populatedSet(),
-    m_itemAdder(boost::make_shared<ItemAdder>())
+    m_itemAdder(boost::make_shared<ItemAdder>()),
+    m_spinner()
 {
     ui->setupUi(this);
     QObject::connect(ui->loadButton, SIGNAL(clicked()),
@@ -142,7 +143,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // will process any 'jobs' (e.g. extractions, adds, removals etc.)
     m_workThread.start();
-
 }
 
 MainWindow::~MainWindow()
@@ -187,9 +187,7 @@ void MainWindow::loadFileButtonHandler()
             // start loading of TeaSafe image
             m_loaderThread.setSharedIO(io);
             m_loaderThread.start();
-            this->setBusyIndicator();
             m_sd->exec();
-            this->setReadyIndicator();
             ui->nameLabel->setText(io->path.c_str());
         }
     }
@@ -241,9 +239,7 @@ void MainWindow::newButtonHandler()
             m_builderThread.setSharedIO(io);
 
             m_builderThread.start();
-            this->setBusyIndicator();
             m_sd->exec();
-            this->setReadyIndicator();
             ui->nameLabel->setText(io->path.c_str());
 
         }
@@ -339,12 +335,16 @@ void MainWindow::getTeaSafeFromBuilder()
 
 void MainWindow::setBusyIndicator()
 {
-    ui->blinkerFrame->setStyleSheet("background-color:red;");
+    m_spinner = boost::make_shared<QMovie>(":/new/prefix1/graphix/spinner.gif");
+    m_spinner->setScaledSize(QSize(16,16));
+    ui->blinkerLabel->setMovie(m_spinner.get());
+    m_spinner->start();
 }
 
 void MainWindow::setReadyIndicator()
 {
-    ui->blinkerFrame->setStyleSheet("background-color:green;");
+    m_spinner->stop();
+    ui->blinkerLabel->clear();
 }
 
 void MainWindow::doWork(WorkType workType)

@@ -40,6 +40,7 @@
 #include <QProgressDialog>
 #include <QMenu>
 #include <QAction>
+#include <QMovie>
 #include <set>
 
 namespace Ui
@@ -118,6 +119,7 @@ class MainWindow : public QMainWindow
     SharedDialog m_sd;
     std::set<std::string> m_populatedSet;
     boost::shared_ptr<ItemAdder> m_itemAdder;
+    boost::shared_ptr<QMovie> m_spinner;
     void doWork(WorkType workType);
     void createRootFolderInTree();
 };

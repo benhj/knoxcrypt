@@ -49,12 +49,12 @@ background-color: green;
  border-color: black;
  max-width:16px;
  max-height:16px;
- min-width:16px;
+ min-width:16px;s
  min-height:16px;
 }
 
  QTreeView::branch:has-siblings:!adjoins-item {
-     border-image: url(:/new/prefix1/graphix/stylesheet-vline.png) 0;
+     border-image: url(:/new/prefix1/graphix/stylesheets-vline.png) 0;
  }
 
  QTreeView::branch:has-siblings:adjoins-item {
@@ -261,18 +261,15 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="blinkerFrame">
+        <widget class="QLabel" name="blinkerLabel">
          <property name="maximumSize">
           <size>
-           <width>18</width>
-           <height>18</height>
+           <width>20</width>
+           <height>16777215</height>
           </size>
          </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>
