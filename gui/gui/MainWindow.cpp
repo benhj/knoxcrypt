@@ -104,6 +104,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(&m_cipherCallback, SIGNAL(closeProgressSignal()),
                      this, SLOT(closeProgressSlot()));
 
+    QObject::connect(&m_workThread, SIGNAL(startedSignal()),
+                     this, SLOT(setBusyIndicator()));
+
+    QObject::connect(&m_workThread, SIGNAL(finishedSignal()),
+                     this, SLOT(setReadyIndicator()));
+
     m_contextMenu = boost::make_shared<QMenu>(ui->fileTree);
     ui->fileTree->setContextMenuPolicy(Qt::ActionsContextMenu);
     m_extractAction = boost::make_shared<QAction>("Extract", m_contextMenu.get());
@@ -181,8 +187,9 @@ void MainWindow::loadFileButtonHandler()
             // start loading of TeaSafe image
             m_loaderThread.setSharedIO(io);
             m_loaderThread.start();
+            this->setBusyIndicator();
             m_sd->exec();
-
+            this->setReadyIndicator();
             ui->nameLabel->setText(io->path.c_str());
         }
     }
@@ -234,8 +241,9 @@ void MainWindow::newButtonHandler()
             m_builderThread.setSharedIO(io);
 
             m_builderThread.start();
+            this->setBusyIndicator();
             m_sd->exec();
-
+            this->setReadyIndicator();
             ui->nameLabel->setText(io->path.c_str());
 
         }
@@ -327,6 +335,16 @@ void MainWindow::getTeaSafeFromBuilder()
 {
     m_teaSafe = m_builderThread.getTeaSafe();
     this->createRootFolderInTree();
+}
+
+void MainWindow::setBusyIndicator()
+{
+    ui->blinkerFrame->setStyleSheet("background-color:red;");
+}
+
+void MainWindow::setReadyIndicator()
+{
+    ui->blinkerFrame->setStyleSheet("background-color:green;");
 }
 
 void MainWindow::doWork(WorkType workType)

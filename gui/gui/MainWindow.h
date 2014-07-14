@@ -92,6 +92,9 @@ class MainWindow : public QMainWindow
     void getTeaSafeFromLoader();
     void getTeaSafeFromBuilder();
 
+    void setBusyIndicator();
+    void setReadyIndicator();
+
   signals:
     void updateProgressSignal(long);
     void setMaximumProgressSignal(long);
