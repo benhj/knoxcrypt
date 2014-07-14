@@ -162,7 +162,7 @@ namespace teasafe { namespace cipher
         if (IByteTransformer::m_init) {
             // prefer to use cipher buffer
             if ((startPosition + length) < teasafe::detail::CIPHER_BUFFER_SIZE) {
-                for (long j = 0; j < length; ++j) {
+                for (std::ios_base::streamoff j = 0; j < length; ++j) {
                     out[j] = in[j] ^ g_bigCipherBuffer[j + startPosition];
                 }
                 return;
@@ -176,8 +176,8 @@ namespace teasafe { namespace cipher
         std::ios_base::streamoff const startPositionOffset = startPosition % 8;
 
         // the counter used to determine where we start in the cipher stream
-        uint64_t startRD = (startPosition - startPositionOffset);
-        uint64_t ctr = (startRD / 8) + m_iv;
+        std::ios_base::streamoff startRD = (startPosition - startPositionOffset);
+        long long ctr = (startRD / 8) + (std::ios_base::streamoff)m_iv; // safe cast
 
         // encipher the initial 64 bit counter.
         UIntVector buf;
@@ -222,13 +222,13 @@ namespace teasafe { namespace cipher
                                char *out,
                                std::ios_base::streamoff const startPositionOffset,
                                long &c,
-                               uint64_t &ctr,
-                               int const bytesToEncrypt,
+                               long long &ctr,
+                               long const bytesToEncrypt,
                                UIntVector &buf) const
     {
         // now xor plain with key stream
         int k = 0;
-        for (int j = startPositionOffset; j < bytesToEncrypt + startPositionOffset; ++j) {
+        for (std::ios_base::streamoff j = startPositionOffset; j < bytesToEncrypt + startPositionOffset; ++j) {
             if (j >= 8) {
 
                 // iterate cipher counter and update cipher buffer
@@ -243,9 +243,9 @@ namespace teasafe { namespace cipher
     }
 
     void
-    XTEAByteTransformer::cypherBytes(uint64_t &ctr, UIntVector &buf) const
+    XTEAByteTransformer::cypherBytes(long long &ctr, UIntVector &buf) const
     {
-        teasafe::detail::convertUInt64ToInt8Array(ctr, &buf.front());
+        teasafe::detail::convertUInt64ToInt8Array(static_cast<uint64_t>(ctr), &buf.front());
         detail::convertBytesAndEncipher(m_rounds, &buf.front(), g_key);
         ++ctr;
     }
@@ -256,9 +256,9 @@ namespace teasafe { namespace cipher
                                               std::ios_base::streamoff const startPositionOffset,
                                               long const blocksOfSize8BeingTransformed,
                                               long &c,
-                                              uint64_t &ctr,
+                                              long long &ctr,
                                               UIntVector &buf,
-                                              int const bytesToEncrypt) const
+                                              long const bytesToEncrypt) const
     {
         // transform  blocks
         for (long i = 0; i < blocksOfSize8BeingTransformed; ++i) {
