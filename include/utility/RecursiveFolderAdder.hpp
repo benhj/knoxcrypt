@@ -39,6 +39,7 @@
 #include <boost/iostreams/copy.hpp>
 
 #include <fstream>
+#include <sstream>
 #include <vector>
 
 namespace teasafe
@@ -50,7 +51,8 @@ namespace teasafe
         inline
         void recursiveAdd(TeaSafe &theBfs,
                           std::string const &teaPath,
-                          std::string const &fsPath)
+                          std::string const &fsPath,
+                          boost::function<void(std::string)> const &callback)
         {
             boost::filesystem::path p(fsPath);
             boost::filesystem::directory_iterator itr(p);
@@ -61,11 +63,15 @@ namespace teasafe
                 fs /= itr->path().filename();
                 tp /= itr->path().filename();
                 if ( boost::filesystem::is_directory(itr->status()) ) {
-                    std::cout<<"Adding "<<tp<<"..."<<std::endl;
+                    std::stringstream ss;
+                    ss << "Adding "<<tp<<"...";
+                    callback(ss.str());
                     theBfs.addFolder(tp.string());
-                    recursiveAdd(theBfs, tp.string(), fs.string());
+                    recursiveAdd(theBfs, tp.string(), fs.string(), callback);
                 } else {
-                    std::cout<<"Adding "<<tp<<"..."<<std::endl;
+                    std::stringstream ss;
+                    ss << "Adding "<<tp<<"...";
+                    callback(ss.str());
                     theBfs.addFile(tp.string());
                     teasafe::TeaSafeFileDevice device = theBfs.openFile(tp.string(), teasafe::OpenDisposition::buildWriteOnlyDisposition());
                     std::ifstream in(fs.string().c_str(), std::ios_base::binary);

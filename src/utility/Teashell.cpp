@@ -59,6 +59,12 @@
 #include <stdint.h>
 #include <vector>
 
+/// called back from RecursiveFolderAdder
+void operationCallback(std::string const &str)
+{
+    std::cout<<str<<std::endl;
+}
+
 /// describes a particular command
 struct CommandDescriptor
 {
@@ -185,7 +191,7 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
     // add the file to the container
     // this removed the first several chars assumes to be "file://"
     std::string resPath(fileResource.begin() + 7, fileResource.end());
-    teasafe::utility::copyFromPhysical(theBfs, parent, resPath);
+    teasafe::utility::copyFromPhysical(theBfs, parent, resPath, boost::bind(operationCallback,_1));
 }
 
 /// for extracting a teasafe file to somewhere on a physical disk location
@@ -194,7 +200,7 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
 void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string const &dst)
 {
     std::string dstPath(dst.begin() + 7, dst.end());
-    teasafe::utility::extractToPhysical(theBfs, path, dstPath);
+    teasafe::utility::extractToPhysical(theBfs, path, dstPath, boost::bind(operationCallback,_1));
 }
 
 /// takes a path and pushes a new path bit to it, going into that path

@@ -37,6 +37,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/iostreams/copy.hpp>
+#include <boost/function.hpp>
 
 namespace teasafe
 {
@@ -47,7 +48,8 @@ namespace teasafe
         inline
         void copyFromPhysical(teasafe::TeaSafe &theBfs,
                               std::string const &teaPath,
-                              std::string const &fsPath)
+                              std::string const &fsPath,
+                              boost::function<void(std::string)> const &callback)
         {
 
             boost::filesystem::path p(fsPath);
@@ -61,7 +63,7 @@ namespace teasafe
 
             if ( boost::filesystem::is_directory(p)) {
                 theBfs.addFolder(addPath);
-                recursiveAdd(theBfs, addPath, p.string());
+                recursiveAdd(theBfs, addPath, p.string(), callback);
             } else {
                 theBfs.addFile(addPath);
                 // create a stream to read resource from and a device to write to

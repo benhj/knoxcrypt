@@ -39,6 +39,9 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/iostreams/copy.hpp>
+#include <boost/function.hpp>
+
+#include <sstream>
 
 namespace teasafe
 {
@@ -51,10 +54,12 @@ namespace teasafe
           public:
             FolderExtractionVisitor(TeaSafe &theBfs,
                                     std::string teaPath,
-                                    std::string fsPath)
+                                    std::string fsPath,
+                                    boost::function<void(std::string)> const &callback)
             : m_theBfs(theBfs)
             , m_teaPath(teaPath)
             , m_fsPath(fsPath)
+            , m_callback(callback)
             {
             }
 
@@ -66,7 +71,11 @@ namespace teasafe
                 fsLoc /= it.filename();
                 boost::filesystem::path teaLoc(m_teaPath);
                 teaLoc /= it.filename();
-                std::cout<<"Extracting folder "<<fsLoc<<"..."<<std::endl;
+
+                std::stringstream ss;
+                ss << "Extracting folder "<<fsLoc<<"...";
+                m_callback(ss.str());
+
                 boost::filesystem::create_directory(fsLoc);
                 m_fsPath = fsLoc.string();
                 m_teaPath = teaLoc.string();
@@ -78,8 +87,9 @@ namespace teasafe
                 fsLoc /= it.filename();
                 boost::filesystem::path teaLoc(m_teaPath);
                 teaLoc /= it.filename();
-
-                std::cout<<"Extracting file "<<fsLoc<<"..."<<std::endl;
+                std::stringstream ss;
+                ss << "Extracting file "<<fsLoc<<"...";
+                m_callback(ss.str());
                 teasafe::TeaSafeFileDevice device = m_theBfs.openFile(teaLoc.string(), teasafe::OpenDisposition::buildReadOnlyDisposition());
                 device.seek(0, std::ios_base::beg);
                 std::ofstream out(fsLoc.string().c_str(), std::ios_base::binary);
@@ -101,6 +111,7 @@ namespace teasafe
             TeaSafe &m_theBfs;
             std::string m_teaPath;
             std::string m_fsPath;
+            boost::function<void(std::string)> m_callback;
         };
 
     }

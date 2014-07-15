@@ -51,7 +51,8 @@ namespace teasafe
         inline
         void extractToPhysical(teasafe::TeaSafe &theBfs,
                               std::string const &path,
-                              std::string const &dst)
+                              std::string const &dst,
+                              boost::function<void(std::string)> callback)
         {
             std::string dstPath(dst);
 
@@ -72,7 +73,7 @@ namespace teasafe
                 boost::iostreams::copy(device, out);
             } else if(theBfs.folderExists(path)) {
                 boost::filesystem::create_directory(dstPath);
-                FolderExtractionVisitor visitor(theBfs, path, dstPath);
+                FolderExtractionVisitor visitor(theBfs, path, dstPath, callback);
                 recursiveExtract(visitor, theBfs, path);
             }
         }
