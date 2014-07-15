@@ -347,6 +347,11 @@ void MainWindow::setReadyIndicator()
     ui->blinkerLabel->clear();
 }
 
+void MainWindow::loggerCallback(std::string const &str)
+{
+
+}
+
 void MainWindow::doWork(WorkType workType)
 {
     QList<QTreeWidgetItem*> selectedItems = ui->fileTree->selectedItems();
@@ -369,8 +374,9 @@ void MainWindow::doWork(WorkType workType)
                 std::string fsPath = dlg.selectedFiles().at(0).toStdString();
 
                 qDebug() << "ExtractItem";
+                boost::function<void(std::string)> cb(boost::bind(&MainWindow::loggerCallback, this, _1));
                 f = boost::bind(teasafe::utility::extractToPhysical, boost::ref(*m_teaSafe),
-                                teaPath, fsPath);
+                                teaPath, fsPath, cb);
             }
 
         } else if(workType == WorkType::CreateFolder) {
@@ -398,9 +404,11 @@ void MainWindow::doWork(WorkType workType)
                 dlg.setAcceptMode( QFileDialog::AcceptOpen );
                 dlg.setFileMode(QFileDialog::DirectoryOnly);
                 if(dlg.exec()) {
+
                     std::string fsPath = dlg.selectedFiles().at(0).toStdString();
+                    boost::function<void(std::string)> cb(boost::bind(&MainWindow::loggerCallback, this, _1));
                     f = boost::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
-                                    teaPath, fsPath);
+                                    teaPath, fsPath, cb);
                     QTreeWidgetItem *item = new QTreeWidgetItem(*it);
                     item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
                     item->setText(0, QString(boost::filesystem::path(fsPath).filename().c_str()));
@@ -414,8 +422,9 @@ void MainWindow::doWork(WorkType workType)
                 dlg.setFileMode(QFileDialog::AnyFile);
                 if(dlg.exec()) {
                     std::string fsPath = dlg.selectedFiles().at(0).toStdString();
+                    boost::function<void(std::string)> cb(boost::bind(&MainWindow::loggerCallback, this, _1));
                     f = boost::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
-                                    teaPath, fsPath);
+                                    teaPath, fsPath, cb);
                     QTreeWidgetItem *item = new QTreeWidgetItem(*it);
                     item->setText(0, QString(boost::filesystem::path(fsPath).filename().c_str()));
                 }

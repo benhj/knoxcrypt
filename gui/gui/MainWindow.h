@@ -96,6 +96,8 @@ class MainWindow : public QMainWindow
     void setBusyIndicator();
     void setReadyIndicator();
 
+    void loggerCallback(std::string const &str);
+
   signals:
     void updateProgressSignal(long);
     void setMaximumProgressSignal(long);
