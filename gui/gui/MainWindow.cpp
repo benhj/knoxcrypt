@@ -69,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_itemAdder(boost::make_shared<ItemAdder>()),
     m_spinner()
 {
+    //this->setWindowFlags(Qt::FramelessWindowHint);
     ui->setupUi(this);
     QObject::connect(ui->loadButton, SIGNAL(clicked()),
                      this, SLOT(loadFileButtonHandler()));
@@ -110,6 +111,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(&m_workThread, SIGNAL(finishedSignal()),
                      this, SLOT(setReadyIndicator()));
+
+    QObject::connect(this, SIGNAL(updateStatusTextSignal(QString)),
+                     this, SLOT(updateStatusTextSlot(QString)));
 
     m_contextMenu = boost::make_shared<QMenu>(ui->fileTree);
     ui->fileTree->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -349,7 +353,12 @@ void MainWindow::setReadyIndicator()
 
 void MainWindow::loggerCallback(std::string const &str)
 {
+    emit updateStatusTextSignal(QString(str.c_str()));
+}
 
+void MainWindow::updateStatusTextSlot(QString const &str)
+{
+    ui->statusText->appendPlainText(str);
 }
 
 void MainWindow::doWork(WorkType workType)

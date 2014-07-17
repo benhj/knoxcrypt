@@ -98,11 +98,14 @@ class MainWindow : public QMainWindow
 
     void loggerCallback(std::string const &str);
 
+    void updateStatusTextSlot(QString const &str);
+
   signals:
     void updateProgressSignal(long);
     void setMaximumProgressSignal(long);
     void setProgressLabelSignal(QString);
     void closeProgressSignal();
+    void updateStatusTextSignal(QString);
 
   private:
     Ui::MainWindow *ui;
