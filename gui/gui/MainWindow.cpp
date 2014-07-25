@@ -228,7 +228,7 @@ void MainWindow::newButtonHandler()
 
             // note, getInt arguably too constraining
             io->blocks = input.getInt(this, tr("#4096 byte blocks"),
-                                      tr("Blocks:"), QLineEdit::Normal, 12800);
+                                      tr("Blocks:"), QLineEdit::Normal, 1280);
             io->freeBlocks = io->blocks;
 
             // give the cipher generation process a gui callback
