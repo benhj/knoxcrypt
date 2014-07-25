@@ -41,6 +41,7 @@
 #include <boost/iostreams/copy.hpp>
 
 #include <fstream>
+#include <sstream>
 
 namespace teasafe
 {
@@ -67,6 +68,9 @@ namespace teasafe
 
             // create source and sink
             if(theBfs.fileExists(path)) {
+                std::stringstream ss;
+                ss << "Extracting file "<<dstPath<<"...";
+                callback(dstPath);
                 teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
                 device.seek(0, std::ios_base::beg);
                 std::ofstream out(dstPath.c_str(), std::ios_base::binary);

@@ -65,6 +65,11 @@ namespace teasafe
                 theBfs.addFolder(addPath);
                 recursiveAdd(theBfs, addPath, p.string(), callback);
             } else {
+
+                std::stringstream ss;
+                ss << "Adding "<<addPath<<"...";
+                callback(addPath);
+
                 theBfs.addFile(addPath);
                 // create a stream to read resource from and a device to write to
                 std::ifstream in(fsPath.c_str(), std::ios_base::binary);
