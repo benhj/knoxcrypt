@@ -60,7 +60,10 @@ namespace teasafe
         std::ios_base::streamoff start = m_gpos;
         std::vector<char> in;
         in.resize(n);
-        (void)m_stream.read(&in.front(), n);
+        if(m_stream.read(&in.front(), n).bad()) {
+            m_gpos = -1;
+            return *this;
+        }
         m_gpos += n;
         m_byteTransformer->transform(&in.front(), buf, start, n);
         return *this;
@@ -73,7 +76,10 @@ namespace teasafe
         out.resize(n);
         std::ios_base::streamoff start = m_ppos;
         m_byteTransformer->transform((char*)buf, &out.front(), start, n);
-        (void)m_stream.write(&out.front(), n);
+        if(m_stream.write(&out.front(), n).bad()) {
+            m_ppos = -1;
+            return *this;
+        }
         m_ppos += n;
         return *this;
     }
@@ -81,30 +87,42 @@ namespace teasafe
     TeaSafeImageStream&
     TeaSafeImageStream::seekg(std::streampos pos)
     {
-        (void)m_stream.seekg(pos);
-        m_gpos = pos;
+        if(m_stream.seekg(pos).bad()) {
+            m_gpos = -1;
+        } else {
+            m_gpos = pos;
+        }
         return *this;
     }
     TeaSafeImageStream&
     TeaSafeImageStream::seekg(std::streamoff off, std::ios_base::seekdir way)
     {
-        (void)m_stream.seekg(off, way);
-        m_gpos = m_stream.tellg();
+        if(m_stream.seekg(off, way).bad()) {
+            m_gpos = -1;
+        } else {
+            m_gpos = m_stream.tellg();
+        }
         return *this;
     }
 
     TeaSafeImageStream&
     TeaSafeImageStream::seekp(std::streampos pos)
     {
-        (void)m_stream.seekp(pos);
-        m_ppos = pos;
+        if(m_stream.seekp(pos).bad()) {
+            m_ppos = -1;
+        } else {
+            m_ppos = pos;
+        }
         return *this;
     }
     TeaSafeImageStream&
     TeaSafeImageStream::seekp(std::streamoff off, std::ios_base::seekdir way)
     {
-        (void)m_stream.seekp(off, way);
-        m_ppos = m_stream.tellp();
+        if(m_stream.seekp(off, way).bad()) {
+            m_ppos = -1;
+        } else {
+            m_ppos = m_stream.tellp();
+        }
         return *this;
     }
 
@@ -144,6 +162,12 @@ namespace teasafe
         m_stream.open(io->path.c_str(), mode);
         m_ppos = 0;
         m_gpos = 0;
+    }
+
+    bool
+    TeaSafeImageStream::bad() const
+    {
+        return m_stream.bad();
     }
 
 }

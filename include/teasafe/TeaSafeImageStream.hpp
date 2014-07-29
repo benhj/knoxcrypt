@@ -63,6 +63,7 @@ namespace teasafe
         TeaSafeImageStream& seekp(std::streamoff off, std::ios_base::seekdir way);
         std::streampos tellg();
         std::streampos tellp();
+        bool bad() const;
 
         void flush();
 
