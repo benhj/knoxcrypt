@@ -154,7 +154,10 @@ namespace teasafe
         // TODO: image could be 'sparse' in which case block doesn't actually
         // exist yet. In this case, should write out the data to the container
 
-        detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos);
+        if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
+            // TODO: image probably sparse since couldn't seek past end; therefore
+            // need to write out block data here
+        }
         (void)m_stream->write((char*)buf, n);
 
         // do updates to file block metadata only if in append mode

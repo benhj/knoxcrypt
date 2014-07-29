@@ -29,6 +29,7 @@
 #ifndef TeaSafe_TeaSafe_DETAIL_FILE_BLOCK_HPP__
 #define TeaSafe_TeaSafe_DETAIL_FILE_BLOCK_HPP__
 
+#include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 
@@ -89,6 +90,36 @@ namespace teasafe { namespace detail
         uint8_t dat[4];
         (void)in.read((char*)dat, 4);
         return convertInt4ArrayToInt32(dat);
+    }
+
+    /**
+     * @brief write a given file block to disk
+     * @param io the core io data structure
+     * @param out the image stream to write to
+     * @param block the block to write out
+     */
+    inline void writeBlock(SharedCoreIO const &io, TeaSafeImageStream &out, uint64_t const block)
+    {
+        std::vector<uint8_t> ints;
+        ints.assign(FILE_BLOCK_SIZE - FILE_BLOCK_META, 0);
+
+        // write out block metadata
+        uint64_t offset = getOffsetOfFileBlock(block, io->blocks);
+        (void)out.seekp(offset);
+
+        // write m_bytesWritten; 0 to begin with
+        uint8_t sizeDat[4];
+        uint32_t size = 0;
+        convertInt32ToInt4Array(size, sizeDat);
+        (void)out.write((char*)sizeDat, 4);
+
+        // write m_next; begins as same as index
+        uint8_t nextDat[8];
+        convertUInt64ToInt8Array(block, nextDat);
+        (void)out.write((char*)nextDat, 8);
+
+        // write data bytes
+        (void)out.write((char*)&ints.front(), FILE_BLOCK_SIZE - FILE_BLOCK_META);
     }
 }
 }

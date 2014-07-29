@@ -406,36 +406,31 @@ namespace teasafe { namespace detail
     }
 
     /**
-     * @brief checks the g position of the stream and updates if necessary
-     * @param stream the stream to update
-     * @param offset the position to seek to
+     * @brief  checks the g position of the stream and updates if necessary
+     * @param  stream the stream to update
+     * @param  offset the position to seek to
+     * @return true seeking was successful, false otherwise
      */
-    inline void checkAndSeekG(TeaSafeImageStream &stream, std::streamoff offset)
+    inline bool checkAndSeekG(TeaSafeImageStream &stream, std::streamoff offset)
     {
         if(stream.tellg() != offset) {
-            if(stream.seekg(offset).bad()) {
-                // TODO: what do we do? Throw?
-            }
+            return stream.seekg(offset).bad();
         }
+        return true;
     }
 
     /**
      * @brief checks the p position of the stream and updates if necessary
      * @param stream the stream to update
      * @param offset the position to seek to
+     * @return true seeking was successful, false otherwise
      */
-    inline void checkAndSeekP(TeaSafeImageStream &stream, std::streamoff offset)
+    inline bool checkAndSeekP(TeaSafeImageStream &stream, std::streamoff offset)
     {
         if(stream.tellp() != offset) {
-            if(stream.seekp(offset).bad()) {
-                // assume that we tried to seek past the end in which case
-                // file block doesn't actually exist so we need to create a
-                // new block, writing from offset
-                std::streamoff newoff = offset - FILE_BLOCK_META;
-
-                // write block
-            }
+            return stream.seekp(offset).bad();
         }
+        return true;
     }
 
     /**
