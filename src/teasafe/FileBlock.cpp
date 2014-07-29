@@ -157,6 +157,12 @@ namespace teasafe
         if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
             // TODO: image probably sparse since couldn't seek past end; therefore
             // need to write out block data here
+            detail::writeBlock(m_io, *m_stream, m_index);
+
+            // try and seek to correct position again
+            if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
+                throw std::runtime_error("seek in write function broke");
+            }
         }
         (void)m_stream->write((char*)buf, n);
 
