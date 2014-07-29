@@ -197,6 +197,7 @@ namespace teasafe
         ++m_blockCount;
         m_blockIndex = m_blockCount - 1;
         m_workingBlock = boost::make_shared<FileBlock>(block);
+
     }
 
     void TeaSafeFile::enumerateBlockStats()

@@ -170,4 +170,10 @@ namespace teasafe
         return m_stream.bad();
     }
 
+    void
+    TeaSafeImageStream::clear()
+    {
+        m_stream.clear();
+    }
+
 }

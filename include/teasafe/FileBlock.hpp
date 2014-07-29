@@ -192,7 +192,7 @@ namespace teasafe
          * @brief check if the image stream pointer is initialized,
          * initializing it if not
          */
-        void initImageStream() const;
+        void initImageStream(bool const withAppend = false) const;
 
         SharedCoreIO m_io;
         uint64_t m_index;

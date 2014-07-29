@@ -88,13 +88,19 @@ namespace teasafe
     }
 
     void
-    FileBlock::initImageStream() const
+    FileBlock::initImageStream(bool const withAppend) const
     {
+        std::ios::openmode mode = std::ios::in;
+        mode |= std::ios::out;
+        mode |= std::ios::binary;
+        if(withAppend) {
+            mode |= std::ios::app;
+        }
         if(!m_stream) {
-            m_stream = boost::make_shared<TeaSafeImageStream>(m_io, std::ios::in | std::ios::out | std::ios::binary);
+            m_stream = boost::make_shared<TeaSafeImageStream>(m_io, mode);
         } else {
             if(!m_stream->is_open()) {
-                m_stream->open(m_io, std::ios::in | std::ios::out | std::ios::binary);
+                m_stream->open(m_io, mode);
             }
         }
     }
@@ -154,16 +160,24 @@ namespace teasafe
         // TODO: image could be 'sparse' in which case block doesn't actually
         // exist yet. In this case, should write out the data to the container
 
-        if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
-            // TODO: image probably sparse since couldn't seek past end; therefore
-            // need to write out block data here
-            detail::writeBlock(m_io, *m_stream, m_index);
-
-            // try and seek to correct position again
-            if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
-                throw std::runtime_error("seek in write function broke");
-            }
-        }
+        (void)detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos);
+//        if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
+//
+//            // re-open stream in append mode
+//            m_stream->close();
+//            this->initImageStream(true);
+//
+//            m_stream->clear(); // makes good again
+//
+//            // TODO: image probably sparse since couldn't seek past end; therefore
+//            // need to write out block data here
+//            detail::writeBlock(m_io, *m_stream, m_index);
+//
+//            // try and seek to correct position again
+//            if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
+//                throw std::runtime_error("seek in write function broke");
+//            }
+//        }
         (void)m_stream->write((char*)buf, n);
 
         // do updates to file block metadata only if in append mode

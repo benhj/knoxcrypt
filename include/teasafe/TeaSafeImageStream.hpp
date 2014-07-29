@@ -64,6 +64,7 @@ namespace teasafe
         std::streampos tellg();
         std::streampos tellp();
         bool bad() const;
+        void clear();
 
         void flush();
 
