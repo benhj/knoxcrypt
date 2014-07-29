@@ -159,25 +159,19 @@ namespace teasafe
 
         // TODO: image could be 'sparse' in which case block doesn't actually
         // exist yet. In this case, should write out the data to the container
+        if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
 
-        (void)detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos);
-//        if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
-//
-//            // re-open stream in append mode
-//            m_stream->close();
-//            this->initImageStream(true);
-//
-//            m_stream->clear(); // makes good again
-//
-//            // TODO: image probably sparse since couldn't seek past end; therefore
-//            // need to write out block data here
-//            detail::writeBlock(m_io, *m_stream, m_index);
-//
-//            // try and seek to correct position again
-//            if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
-//                throw std::runtime_error("seek in write function broke");
-//            }
-//        }
+            m_stream->clear(); // makes good again
+
+            // TODO: image probably sparse since couldn't seek past end; therefore
+            // need to write out block data here
+            detail::writeBlock(m_io, *m_stream, m_index);
+
+            // try and seek to correct position again
+            if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
+                throw std::runtime_error("seek in write function broke");
+            }
+        }
         (void)m_stream->write((char*)buf, n);
 
         // do updates to file block metadata only if in append mode
