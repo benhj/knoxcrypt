@@ -413,7 +413,9 @@ namespace teasafe { namespace detail
     inline void checkAndSeekG(TeaSafeImageStream &stream, std::streamoff offset)
     {
         if(stream.tellg() != offset) {
-            (void)stream.seekg(offset);
+            if(stream.seekg(offset).bad()) {
+                // TODO: what do we do? Throw?
+            }
         }
     }
 
@@ -425,7 +427,14 @@ namespace teasafe { namespace detail
     inline void checkAndSeekP(TeaSafeImageStream &stream, std::streamoff offset)
     {
         if(stream.tellp() != offset) {
-            (void)stream.seekp(offset);
+            if(stream.seekp(offset).bad()) {
+                // assume that we tried to seek past the end in which case
+                // file block doesn't actually exist so we need to create a
+                // new block, writing from offset
+                std::streamoff newoff = offset - FILE_BLOCK_META;
+
+                // write block
+            }
         }
     }
 
