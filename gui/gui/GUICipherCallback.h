@@ -18,6 +18,7 @@ signals:
     void setProgressLabelSignal(QString);
     void updateProgressSignal(long);
     void closeProgressSignal();
+    void openProgressSignal();
 
 public slots:
 

@@ -70,7 +70,8 @@ inline boost::filesystem::path buildImage(boost::filesystem::path const &path)
     std::string testImage(boost::filesystem::unique_path().string());
     boost::filesystem::path testPath = path / testImage;
     teasafe::SharedCoreIO io(createTestIO(testPath));
-    teasafe::MakeTeaSafe teasafe(io);
+    bool const sparse = true; // quicker testing with sparse images
+    teasafe::MakeTeaSafe teasafe(io, sparse);
     teasafe.buildImage();
     return testPath;
 }

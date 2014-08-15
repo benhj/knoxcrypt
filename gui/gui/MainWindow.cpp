@@ -324,6 +324,11 @@ void MainWindow::closeProgressSlot()
     m_sd->close();
 }
 
+void MainWindow::openProgressSlot()
+{
+    m_sd->show();
+}
+
 void MainWindow::getTeaSafeFromLoader()
 {
     m_teaSafe = m_loaderThread.getTeaSafe();

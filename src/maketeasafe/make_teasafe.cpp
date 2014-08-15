@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
 
     namespace po = boost::program_options;
     bool magicPartition;
+    bool sparse;
     unsigned int rounds;
     po::options_description desc("Allowed options");
     desc.add_options()
@@ -74,7 +75,8 @@ int main(int argc, char *argv[])
         ("imageName", po::value<std::string>(), "teasafe image path")
         ("blockCount", po::value<uint64_t>(), "size of filesystem in 4096 blocks (12800 = 50MB)")
         ("coffee", po::value<bool>(&magicPartition)->default_value(false), "create alternative sub-volume")
-        ("rounds", po::value<unsigned int>(&rounds)->default_value(64), "number of encryption rounds");
+        ("rounds", po::value<unsigned int>(&rounds)->default_value(64), "number of encryption rounds")
+        ("sparse", po::value<bool>(&sparse)->default_value(false), "create a sparse image");
 
     po::positional_options_description positionalOptions;
     (void)positionalOptions.add("imageName", 1);
@@ -145,7 +147,7 @@ int main(int argc, char *argv[])
     boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, amount));
     io->ccb = f;
 
-    teasafe::MakeTeaSafe imager(io, omp);
+    teasafe::MakeTeaSafe imager(io, sparse, omp);
 
     // register progress callback for imager
     boost::function<void(teasafe::EventType)> fb(boost::bind(&imagerCallback, _1, io->blocks));

@@ -89,6 +89,7 @@ class MainWindow : public QMainWindow
     bool eventFilter(QObject* o, QEvent* e);
 
     void closeProgressSlot();
+    void openProgressSlot();
 
     void getTeaSafeFromLoader();
     void getTeaSafeFromBuilder();
