@@ -414,7 +414,8 @@ namespace teasafe { namespace detail
     inline bool checkAndSeekG(TeaSafeImageStream &stream, std::streamoff offset)
     {
         if(stream.tellg() != offset) {
-            return (!stream.seekg(offset).bad());
+            bool bad = stream.seekg(offset).bad();
+            return (!bad);
         }
         return true;
     }
@@ -428,7 +429,8 @@ namespace teasafe { namespace detail
     inline bool checkAndSeekP(TeaSafeImageStream &stream, std::streamoff offset)
     {
         if(stream.tellp() != offset) {
-            return (!stream.seekp(offset).bad());
+            bool bad = stream.seekp(offset).bad();
+            return (!bad);
         }
         return true;
     }

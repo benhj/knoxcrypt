@@ -479,12 +479,15 @@ namespace teasafe
         teasafe::SharedImageStream out(m_folderData.getStream());
         uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartVolumeBlockIndex(), m_io->blocks);
         (void)out->seekg(offset + detail::FILE_BLOCK_META);
-        uint8_t buf[8];
-        (void)out->read((char*)buf, 8);
+        if(!out->bad()) { // bad when not initialized, i.e., when sparse image
+            uint8_t buf[8];
+            (void)out->read((char*)buf, 8);
 
-        // there will never be a number of entries that is greater than
-        // the max capacity of a long variable
-        return static_cast<long>(detail::convertInt8ArrayToInt64(buf));
+            // there will never be a number of entries that is greater than
+            // the max capacity of a long variable
+            return static_cast<long>(detail::convertInt8ArrayToInt64(buf));
+        }
+        return 0; // block not yet initialized (in case of sparse image)
     }
 
     bool

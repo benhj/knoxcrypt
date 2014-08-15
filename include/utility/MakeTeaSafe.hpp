@@ -61,7 +61,7 @@ namespace teasafe
         MakeTeaSafe(SharedCoreIO const &io, OptionalMagicPart const &omp = OptionalMagicPart())
             : m_io(io)
             , m_omp(omp)
-            , m_sparse(false) // sparse image creation not yet supported
+            , m_sparse(true) // sparse image creation not yet supported
             , m_writeSignal(boost::make_shared<WriteSignal>())
         {
         }

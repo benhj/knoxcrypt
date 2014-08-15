@@ -30,6 +30,8 @@
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 
+#include <boost/make_shared.hpp>
+
 namespace teasafe
 {
 
@@ -47,16 +49,45 @@ namespace teasafe
             return deque;
         }
 
+        void checkAndInitStream(SharedCoreIO const & io, SharedImageStream &stream)
+        {
+            if(!stream) {
+                std::ios::openmode mode = std::ios::in;
+                mode |= std::ios::out;
+                mode |= std::ios::binary;
+                stream = boost::make_shared<TeaSafeImageStream>(io, mode);
+            }
+        }
+
+
+        /// a very hacky means to attain the number of blocks written in the image
+        uint64_t getInitialBlocksWritten(SharedCoreIO const & io, SharedImageStream &stream)
+        {
+            checkAndInitStream(io, stream);
+
+            (void)stream->seekp(0, std::ios::end);
+            std::streamsize toReturn = stream->tellp();
+            stream->seekp(0);
+            uint64_t const volumeBitMapBytes = io->blocks / uint64_t(8);
+            toReturn -= (detail::beginning() + 8 /* block count */ + volumeBitMapBytes + 8 /* count */);
+            if(toReturn == 0) { // no block written yet
+                return 0;
+            }
+
+            return (toReturn / (detail::FILE_BLOCK_META + detail::FILE_BLOCK_SIZE));
+        }
     }
 
 
     FileBlockBuilder::FileBlockBuilder()
+      : m_blocksWritten(0)
     {
 
     }
 
     FileBlockBuilder::FileBlockBuilder(SharedCoreIO const &io)
         : m_blockDeque(populateBlockDeque(io))
+        , m_blocksWritten(0)
     {
 
     }
@@ -77,6 +108,20 @@ namespace teasafe
             id = m_blockDeque.front(); //*(detail::getNextAvailableBlock(stream, io->blocks));
             m_blockDeque.pop_front();
         }
+
+        // check if block data is actually written into iomage structure (might not have been
+        // if image is sparse).
+        if(m_blocksWritten == 0) {
+            m_blocksWritten = getInitialBlocksWritten(io, stream);
+        }
+        if(id >= m_blocksWritten) {
+            checkAndInitStream(io, stream);
+            detail::writeBlock(io, *stream, id);
+            stream->flush();
+            stream->close();
+            ++m_blocksWritten;
+        }
+
         return FileBlock(io, id, id, openDisposition, stream);
     }
 
@@ -86,6 +131,9 @@ namespace teasafe
                                      OpenDisposition const &openDisposition,
                                      SharedImageStream &stream)
     {
+        if(m_blocksWritten == 0) {
+            m_blocksWritten = getInitialBlocksWritten(io, stream);
+        }
         return FileBlock(io, index, openDisposition, stream);
     }
 

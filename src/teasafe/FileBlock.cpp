@@ -85,6 +85,8 @@ namespace teasafe
         uint8_t nextDat[8];
         (void)m_stream->read((char*)nextDat, 8);
         m_next = detail::convertInt8ArrayToInt64(nextDat);
+
+        assert(!m_stream->bad());
     }
 
     void
@@ -156,22 +158,10 @@ namespace teasafe
         // open the image stream for writing
         this->initImageStream();
 
-
-        // TODO: image could be 'sparse' in which case block doesn't actually
-        // exist yet. In this case, should write out the data to the container
         if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
-
-            m_stream->clear(); // makes good again
-
-            // TODO: image probably sparse since couldn't seek past end; therefore
-            // need to write out block data here
-            detail::writeBlock(m_io, *m_stream, m_index);
-
-            // try and seek to correct position again
-            if(!detail::checkAndSeekP(*m_stream, m_offset + detail::FILE_BLOCK_META + m_seekPos)) {
-                throw std::runtime_error("seek in write function broke");
-            }
+            throw std::runtime_error("seek in write function broke");
         }
+        assert(!m_stream->bad());
         (void)m_stream->write((char*)buf, n);
 
         // do updates to file block metadata only if in append mode

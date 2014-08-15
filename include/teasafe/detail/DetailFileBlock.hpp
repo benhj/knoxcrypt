@@ -120,6 +120,8 @@ namespace teasafe { namespace detail
 
         // write data bytes
         (void)out.write((char*)&ints.front(), FILE_BLOCK_SIZE - FILE_BLOCK_META);
+
+        assert(!out.bad());
     }
 }
 }

@@ -108,6 +108,7 @@ namespace teasafe
     TeaSafeImageStream&
     TeaSafeImageStream::seekp(std::streampos pos)
     {
+        // do not allow seeking past end of stream!!
         if(m_stream.seekp(pos).bad()) {
             m_ppos = -1;
         } else {
@@ -115,6 +116,7 @@ namespace teasafe
         }
         return *this;
     }
+
     TeaSafeImageStream&
     TeaSafeImageStream::seekp(std::streamoff off, std::ios_base::seekdir way)
     {

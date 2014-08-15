@@ -74,7 +74,6 @@ namespace teasafe
 
         void open(SharedCoreIO const &io,
                   std::ios::openmode mode = std::ios::out | std::ios::binary);
-
       private:
         TeaSafeImageStream();
         std::fstream m_stream;

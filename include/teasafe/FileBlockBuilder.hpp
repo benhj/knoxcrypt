@@ -66,6 +66,12 @@ namespace teasafe
 
         BlockDeque m_blockDeque;
 
+        /// store how many blocks have actually been written
+        /// when we get a block to use if it is greater than the number
+        /// of blocks written then image is probably sparse in which case
+        /// the block needs to be written
+        uint64_t m_blocksWritten;
+
     };
 
 }
