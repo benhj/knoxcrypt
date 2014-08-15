@@ -4,6 +4,7 @@ TeaSafe: An encrypted container format
 ##### What is it?
 
 - an encrypted container format
+- containers can be created as sparse for better space manageability 
 - employs a very simple and custom developed filesystem (see wiki!)
 - TeaSafe containers can be browsed using either of the provided shell or gui interfaces
 - alternatively, you can implement your own. 
@@ -41,25 +42,31 @@ teasafe      : fuse layer used for mounting teasafe containers
 teashell     : shell utility used for accessing and modifying teasafe containers
 </pre>
 
-Example usage:
+To build a teasafe container, use the `maketeasafe` binary:
 
 <pre>
 ./maketeasafe ./test.bfs 128000
 </pre>
 
-Builds a 500MB (128000 x 4096 byte) container called `test.bfs` in the current folder
+Sparse containers can be created too. These are far smaller than
+non-sparse versions; such a container will dynamically grow as more data is written to it.
+Just use the `--sparse` flag during creation, i.e.:
+
+<pre>
+./maketeasafe ./test.bfs 128000 --sparse 1
+</pre>
+
+Now to mount it to `/testMount` via fuse, use the `teasafe` binary:
 
 <pre>
 ./teasafe ./test.bfs /testMount
 </pre>
 
-Mount the container `./test.bfs` to `/testMount`
+Runs the interactive shell on it using the `teashell` binary:
 
 <pre>
 ./teashell ./test.bfs
 </pre>
-
-Runs the interactive shell on `test.bfs`
 
 For more info, please post up on `https://groups.google.com/forum/#!forum/teasafe`.
 
