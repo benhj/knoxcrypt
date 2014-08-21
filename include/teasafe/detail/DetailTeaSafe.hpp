@@ -448,8 +448,11 @@ namespace teasafe { namespace detail
         (void)in.read((char*)&ivBuffer.front(), teasafe::detail::IV_BYTES);
         char i;
         (void)in.read((char*)&i, 1);
+        char j;
+        (void)in.read((char*)&j, 1);
         // note, i should always > 0 <= 255
         io->rounds = (unsigned int)i;
+        io->cipher = (unsigned int)j;
         in.close();
         io->iv = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer.front());
     }

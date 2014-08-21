@@ -69,14 +69,16 @@ int main(int argc, char *argv[])
     bool magicPartition;
     bool sparse;
     unsigned int rounds;
+    std::string cipher;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
         ("imageName", po::value<std::string>(), "teasafe image path")
         ("blockCount", po::value<uint64_t>(), "size of filesystem in 4096 blocks (12800 = 50MB)")
         ("coffee", po::value<bool>(&magicPartition)->default_value(false), "create alternative sub-volume")
-        ("rounds", po::value<unsigned int>(&rounds)->default_value(64), "number of encryption rounds")
-        ("sparse", po::value<bool>(&sparse)->default_value(false), "create a sparse image");
+        ("rounds", po::value<unsigned int>(&rounds)->default_value(64), "number of encryption rounds used by XTEA")
+        ("sparse", po::value<bool>(&sparse)->default_value(false), "create a sparse image")
+        ("cipher", po::value<std::string>(&cipher)->default_value("aes"), "the cipher type used");
 
     po::positional_options_description positionalOptions;
     (void)positionalOptions.add("imageName", 1);
@@ -129,6 +131,11 @@ int main(int argc, char *argv[])
     io->freeBlocks = blocks;
     io->password.append(teasafe::utility::getPassword("teasafe password: "));
     io->rounds = rounds;
+    io->cipher = 1; // AES
+
+    if(cipher == "aes") {
+        io->cipher = 1; // AES
+    }
 
     // magic partition?
     teasafe::OptionalMagicPart omp;

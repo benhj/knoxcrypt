@@ -176,12 +176,17 @@ namespace teasafe
                 (void)ivout.write((char*)ivBytes, 8);
 
                 broadcastEvent(EventType::RoundsWriteEvent);
-                for(int i = 0; i < 8; ++i) {
-                    // note although char is smaller that io->rounds, which
-                    // is an unsigned int, io->rounds should always be less than
-                    // size 255 (but > 0). Perhaps a different var type therefore?
-                    (void)ivout.write((char*)&io->rounds, 1);
+                // for small bits of info like rounds and cipher type, only
+                // need 1 byte representations since we'll never have over 255
+                // ciphers (for example)
+                (void)ivout.write((char*)&io->rounds, 1);
+                for(int i = 0; i < 7; ++i) {
+                    (void)ivout.write((char*)&io->cipher, 1);
                 }
+
+
+
+
                 ivout.flush();
                 ivout.close();
             }

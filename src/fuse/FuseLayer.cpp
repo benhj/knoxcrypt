@@ -482,6 +482,7 @@ int main(int argc, char *argv[])
 
     // Obtain the initialization vector from the first 8 bytes
     // and the number of xtea rounds from the ninth byte
+    // and the cipher type from the tenth byte
     teasafe::detail::readImageIVAndRounds(io);
 
     // Obtain the number of blocks in the image by reading the image's block count

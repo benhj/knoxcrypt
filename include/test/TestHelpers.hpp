@@ -60,6 +60,7 @@ teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
     io->password = "abcd1234";
     io->iv = uint64_t(3081342484970028645);
     io->rounds = 64;
+    io->cipher = 1; // AES (should prob use an enum instead?)
     io->rootBlock = 0;
     io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
     return io;
