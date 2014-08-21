@@ -88,6 +88,16 @@ namespace teasafe { namespace cipher
 
         BasicByteTransformer(); // not required
 
+        void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+        {
+          this->doTransform(in, out, startPosition, length);
+        }
+
+        void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+        {
+          this->doTransform(in, out, startPosition, length);
+        }
+
         void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
         {
             long j = 0;

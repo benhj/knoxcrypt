@@ -58,9 +58,15 @@ namespace teasafe { namespace cipher
     }
 
     void
-    IByteTransformer::transform(char *in, char *out, std::ios_base::streamoff startPosition, long length)
+    IByteTransformer::encrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length)
     {
-        this->doTransform(in, out, startPosition, length);
+        this->doEncrypt(in, out, startPosition, length);
+    }
+
+        void
+    IByteTransformer::decrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length)
+    {
+        this->doDecrypt(in, out, startPosition, length);
     }
 }
 }

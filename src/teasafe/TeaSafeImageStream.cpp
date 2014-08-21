@@ -65,7 +65,7 @@ namespace teasafe
             return *this;
         }
         m_gpos += n;
-        m_byteTransformer->transform(&in.front(), buf, start, n);
+        m_byteTransformer->encrypt(&in.front(), buf, start, n);
         return *this;
     }
 
@@ -75,7 +75,7 @@ namespace teasafe
         std::vector<char> out;
         out.resize(n);
         std::ios_base::streamoff start = m_ppos;
-        m_byteTransformer->transform((char*)buf, &out.front(), start, n);
+        m_byteTransformer->decrypt((char*)buf, &out.front(), start, n);
         if(m_stream.write(&out.front(), n).bad()) {
             m_ppos = -1;
             return *this;

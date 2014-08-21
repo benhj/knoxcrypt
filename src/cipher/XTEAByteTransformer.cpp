@@ -163,6 +163,18 @@ namespace teasafe { namespace cipher
         broadcastEvent(EventType::BigCipherBuildEnd);
     }
 
+    void 
+    XTEAByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    {
+        this->doTransform(in, out, startPosition, length);
+    }
+
+    void 
+    XTEAByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    {
+        this->doTransform(in, out, startPosition, length);
+    }
+
     void
     XTEAByteTransformer::doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {

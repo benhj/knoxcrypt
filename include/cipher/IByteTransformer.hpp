@@ -52,7 +52,8 @@ namespace teasafe { namespace cipher
         /// must be implemented and called before anything else!!
         virtual void init() = 0;
 
-        void transform(char *in, char *out, std::ios_base::streamoff startPosition, long length);
+        void encrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length);
+        void decrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length);
 
         /// to notify when different parts of the cipher have been initialized
         /// also see EventType for different event types
@@ -63,7 +64,8 @@ namespace teasafe { namespace cipher
         static bool m_init;
 
       private:
-        virtual void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
+        virtual void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
+        virtual void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
 
       protected:
         // for emitting when something is done (e.g.

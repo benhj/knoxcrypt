@@ -71,6 +71,8 @@ namespace teasafe { namespace cipher
         void buildBigCipherBuffer();
 
         void doTransform(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
+        void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
+        void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
 
         void doXOR(char *in,
                    char *out,
