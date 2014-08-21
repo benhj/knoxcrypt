@@ -28,7 +28,7 @@
 
 
 #include "teasafe/TeaSafeImageStream.hpp"
-#include "cipher/XTEAByteTransformer.hpp"
+#include "cipher/AESByteTransformer.hpp"
 
 #include <boost/make_shared.hpp>
 
@@ -39,9 +39,8 @@ namespace teasafe
 
     TeaSafeImageStream::TeaSafeImageStream(SharedCoreIO const &io, std::ios::openmode mode)
         : m_stream(io->path.c_str(), mode)
-        , m_byteTransformer(boost::make_shared<cipher::XTEAByteTransformer>(io->password,
-                                                                            io->iv,
-                                                                            io->rounds))
+        , m_byteTransformer(boost::make_shared<cipher::AESByteTransformer>(io->password,
+                                                                           io->iv))
         , m_gpos(0)
         , m_ppos(0)
     {
@@ -65,7 +64,7 @@ namespace teasafe
             return *this;
         }
         m_gpos += n;
-        m_byteTransformer->encrypt(&in.front(), buf, start, n);
+        m_byteTransformer->decrypt(&in.front(), buf, start, n);
         return *this;
     }
 
@@ -75,7 +74,7 @@ namespace teasafe
         std::vector<char> out;
         out.resize(n);
         std::ios_base::streamoff start = m_ppos;
-        m_byteTransformer->decrypt((char*)buf, &out.front(), start, n);
+        m_byteTransformer->encrypt((char*)buf, &out.front(), start, n);
         if(m_stream.write(&out.front(), n).bad()) {
             m_ppos = -1;
             return *this;
