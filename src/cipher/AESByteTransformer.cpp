@@ -57,9 +57,6 @@ namespace teasafe { namespace cipher
         // The following key generation algorithm uses scrypt, with N = 2^20; r = 8; p = 1
         //
         if (!IByteTransformer::m_init) {
-
-            std::cout<<"HERE!!!"<<std::endl;
-
             broadcastEvent(EventType::KeyGenBegin);
             uint8_t salt[8];
             teasafe::detail::convertUInt64ToInt8Array(m_iv, salt);
@@ -74,7 +71,7 @@ namespace teasafe { namespace cipher
               bigSalt[c] = salt[c];
             }
             for(; c < 16; ++c) {
-              bigSalt[c] = salt[c];
+              bigSalt[c] = salt[c-8];
             }
         }
     }
