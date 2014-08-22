@@ -89,6 +89,9 @@ int main(int argc, char *argv[])
     // use a non-deterministic random device to generate the iv. This
     // allegedly pulls data from /dev/urandom
     io->iv = teasafe::utility::random();
+    io->iv2 = teasafe::utility::random();
+    io->iv3 = teasafe::utility::random();
+    io->iv4 = teasafe::utility::random();
 
     po::variables_map vm;
     try {
@@ -116,7 +119,11 @@ int main(int argc, char *argv[])
             std::cout<<"image path: "<<vm["imageName"].as<std::string>()<<std::endl;
             std::cout<<"file system size in blocks: "<<vm["blockCount"].as<uint64_t>()<<std::endl;
             std::cout<<"number of encryption rounds: "<<vm["rounds"].as<unsigned int>()<<std::endl;
-            std::cout<<"initialization vector: "<<io->iv<<std::endl;
+            std::cout<<"initialization vector A: "<<io->iv<<std::endl;
+            std::cout<<"initialization vector B: "<<io->iv2<<std::endl;
+            std::cout<<"initialization vector C: "<<io->iv3<<std::endl;
+            std::cout<<"initialization vector D: "<<io->iv4<<std::endl;
+            std::cout<<"Encryption algorithm: "<<cipher<<std::endl;
         }
     } catch (...) {
         std::cout<<"Problem parsing options"<<std::endl;
@@ -135,6 +142,8 @@ int main(int argc, char *argv[])
 
     if(cipher == "aes") {
         io->cipher = 1; // AES
+    } else if(cipher == "twofish") {
+        io->cipher = 2;
     }
 
     // magic partition?

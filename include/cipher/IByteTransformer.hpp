@@ -47,7 +47,11 @@ namespace teasafe { namespace cipher
     class IByteTransformer
     {
       public:
-        IByteTransformer();
+        IByteTransformer(std::string const &password,
+                         uint64_t const iv,
+                         uint64_t const iv2,
+                         uint64_t const iv3,
+                         uint64_t const iv4);
 
         /// must be implemented and called before anything else!!
         virtual void init() = 0;
@@ -60,23 +64,40 @@ namespace teasafe { namespace cipher
         virtual void registerSignalHandler(boost::function<void(EventType)> const &f);
         virtual ~IByteTransformer();
 
-        /// cipher-specific initialization flag (see use in XTEA cipher)
-        static bool m_init;
+        /// has key and IV been initialized yet?
+        static bool m_init; 
+
+        /// 256 bit encryption / decryption key
+        static uint8_t g_bigKey[32]; 
+
+        /// 256 bit IV
+        static uint8_t g_bigIV[32];  
 
       private:
         virtual void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
         virtual void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
 
       protected:
+
+        // password used to build the 256 bit key
+        mutable std::string m_password;
+
+        // multiple 64 bit iv blocks used to build 256 bit IV
+        mutable uint64_t m_iv;
+        mutable uint64_t m_iv2;
+        mutable uint64_t m_iv3;
+        mutable uint64_t m_iv4;
+
+        /// build the key using scrypt and big IV
+        void generateKeyAndIV();
+
         // for emitting when something is done (e.g.
         // start of key generation)
         typedef boost::signals2::signal<void(EventType)> CipherSignal;
         typedef boost::shared_ptr<CipherSignal> SharedSignal;
         SharedSignal m_cipherSignal;
-
-
-
         void broadcastEvent(EventType const &event);
+        
 
     };
 }

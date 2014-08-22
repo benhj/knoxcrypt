@@ -29,6 +29,7 @@
 
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "cipher/AESByteTransformer.hpp"
+#include "cipher/TwofishByteTransformer.hpp"
 
 #include <boost/make_shared.hpp>
 
@@ -37,10 +38,27 @@
 namespace teasafe
 {
 
+    boost::shared_ptr<cipher::IByteTransformer> buildCipherType(SharedCoreIO const &io)
+    {
+        if(io->cipher == 2) {
+            return boost::make_shared<cipher::TwofishByteTransformer>(io->password,
+                                                                      io->iv,
+                                                                      io->iv2,
+                                                                      io->iv3,
+                                                                      io->iv3);
+        } else {
+            return boost::make_shared<cipher::AESByteTransformer>(io->password,
+                                                                  io->iv,
+                                                                  io->iv2,
+                                                                  io->iv3,
+                                                                  io->iv3);
+        }
+    }
+
+
     TeaSafeImageStream::TeaSafeImageStream(SharedCoreIO const &io, std::ios::openmode mode)
         : m_stream(io->path.c_str(), mode)
-        , m_byteTransformer(boost::make_shared<cipher::AESByteTransformer>(io->password,
-                                                                           io->iv))
+        , m_byteTransformer(buildCipherType(io))
         , m_gpos(0)
         , m_ppos(0)
     {

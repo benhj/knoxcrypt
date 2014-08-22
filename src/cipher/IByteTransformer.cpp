@@ -27,6 +27,8 @@
 */
 
 #include "cipher/IByteTransformer.hpp"
+#include "teasafe/detail/DetailTeaSafe.hpp"
+#include "cipher/scrypt/crypto_scrypt.hpp"
 
 #include <boost/make_shared.hpp>
 
@@ -35,14 +37,70 @@ namespace teasafe { namespace cipher
 
     bool IByteTransformer::m_init = false;
 
-    IByteTransformer::IByteTransformer()
-      : m_cipherSignal(boost::make_shared<CipherSignal>())
+    uint8_t IByteTransformer::g_bigKey[32]; // the 256 bit key to be used
+    uint8_t IByteTransformer::g_bigIV[32];  // for storing a 256 bit IV
+
+    IByteTransformer::IByteTransformer(std::string const &password,
+                                       uint64_t const iv,
+                                       uint64_t const iv2,
+                                       uint64_t const iv3,
+                                       uint64_t const iv4)
+      : m_password(password)
+      , m_iv(iv)
+      , m_iv2(iv2)
+      , m_iv3(iv3)
+      , m_iv4(iv4)
+      , m_cipherSignal(boost::make_shared<CipherSignal>())
     {
     }
 
     IByteTransformer::~IByteTransformer()
     {
 
+    }
+
+    void 
+    IByteTransformer::generateKeyAndIV()
+    {
+        //
+        // The following g_bigKey generation algorithm uses scrypt, with N = 2^20; r = 8; p = 1
+        //
+        if (!m_init) {
+            broadcastEvent(EventType::KeyGenBegin);
+
+            // create a 256 bit IV out of 4 individual 64 bit IVs
+            uint8_t salt[8];
+            uint8_t saltB[8];
+            uint8_t saltC[8];
+            uint8_t saltD[8];
+            teasafe::detail::convertUInt64ToInt8Array(m_iv, salt);
+            teasafe::detail::convertUInt64ToInt8Array(m_iv2, saltB);
+            teasafe::detail::convertUInt64ToInt8Array(m_iv3, saltC);
+            teasafe::detail::convertUInt64ToInt8Array(m_iv4, saltD);
+
+            // initialize the 256 bit g_bigKey from IV1 salt
+            ::crypto_scrypt((uint8_t*)m_password.c_str(), m_password.size(), salt, 8,
+                            1048576, 8, 1, g_bigKey, 32);
+
+            broadcastEvent(EventType::KeyGenEnd);
+            IByteTransformer::m_init = true;
+
+            // construct the big IV
+            int c =0;
+            for(; c < 8; ++c) {
+              g_bigIV[c] = salt[c];
+            }
+            for(; c < 16; ++c) {
+              g_bigIV[c] = saltB[c-8];
+            }
+            for(; c < 24; ++c) {
+              g_bigIV[c] = saltC[c-16];
+            }
+            for(; c < 32; ++c) {
+              g_bigIV[c] = saltD[c-24];
+            }
+            m_init = true;
+        }
     }
 
     void

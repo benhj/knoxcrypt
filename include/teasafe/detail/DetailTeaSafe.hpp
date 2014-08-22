@@ -90,7 +90,7 @@ namespace teasafe { namespace detail
      */
     inline uint64_t beginning()
     {
-        return IV_BYTES + HEADER_BYTES;
+        return (IV_BYTES * 4) + HEADER_BYTES;
     }
 
     /**
@@ -445,7 +445,16 @@ namespace teasafe { namespace detail
         std::ifstream in(io->path.c_str(), std::ios::in | std::ios::binary);
         std::vector<uint8_t> ivBuffer;
         ivBuffer.resize(8);
+        std::vector<uint8_t> ivBuffer2;
+        ivBuffer2.resize(8);
+        std::vector<uint8_t> ivBuffer3;
+        ivBuffer3.resize(8);
+        std::vector<uint8_t> ivBuffer4;
+        ivBuffer4.resize(8);
         (void)in.read((char*)&ivBuffer.front(), teasafe::detail::IV_BYTES);
+        (void)in.read((char*)&ivBuffer2.front(), teasafe::detail::IV_BYTES);
+        (void)in.read((char*)&ivBuffer3.front(), teasafe::detail::IV_BYTES);
+        (void)in.read((char*)&ivBuffer4.front(), teasafe::detail::IV_BYTES);
         char i;
         (void)in.read((char*)&i, 1);
         char j;
@@ -455,6 +464,9 @@ namespace teasafe { namespace detail
         io->cipher = (unsigned int)j;
         in.close();
         io->iv = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer.front());
+        io->iv2 = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer2.front());
+        io->iv3 = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer3.front());
+        io->iv4 = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer4.front());
     }
 
 }

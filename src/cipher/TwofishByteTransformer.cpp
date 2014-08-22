@@ -55,36 +55,38 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "cipher/AESByteTransformer.hpp"
-#include "cryptopp/aes.h"
+#include "cipher/TwofishByteTransformer.hpp"
+#include "cryptopp/twofish.h"
 #include "cryptopp/ccm.h"
 
 namespace teasafe { namespace cipher
 {
-    AESByteTransformer::AESByteTransformer(std::string const &password,
-                                           uint64_t const iv,
-                                           uint64_t const iv2,
-                                           uint64_t const iv3,
-                                           uint64_t const iv4)
+
+    TwofishByteTransformer::TwofishByteTransformer(std::string const &password,
+                                                   uint64_t const iv,
+                                                   uint64_t const iv2,
+                                                   uint64_t const iv3,
+                                                   uint64_t const iv4)
       : IByteTransformer(password, iv, iv2, iv3, iv4)
     {
+
     }
 
     void
-    AESByteTransformer::init()
+    TwofishByteTransformer::init()
     {
         IByteTransformer::generateKeyAndIV();
     }
 
-    AESByteTransformer::~AESByteTransformer()
+    TwofishByteTransformer::~TwofishByteTransformer()
     {
 
     }
 
     void 
-    AESByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    TwofishByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {
-        CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption encryptor;
+        CryptoPP::CTR_Mode<CryptoPP::Twofish>::Encryption encryptor;
         encryptor.SetKeyWithIV(IByteTransformer::g_bigKey, 
                                sizeof(IByteTransformer::g_bigKey), 
                                IByteTransformer::g_bigIV);
@@ -93,9 +95,9 @@ namespace teasafe { namespace cipher
     }
 
     void 
-    AESByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    TwofishByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {
-        CryptoPP::CTR_Mode<CryptoPP::AES>::Decryption decryptor;
+        CryptoPP::CTR_Mode<CryptoPP::Twofish>::Decryption decryptor;
         decryptor.SetKeyWithIV(IByteTransformer::g_bigKey, 
                                   sizeof(IByteTransformer::g_bigKey), 
                                   IByteTransformer::g_bigIV);

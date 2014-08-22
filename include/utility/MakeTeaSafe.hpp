@@ -174,6 +174,12 @@ namespace teasafe
                 detail::convertUInt64ToInt8Array(io->iv, ivBytes);
                 std::ofstream ivout(io->path.c_str(), std::ios::out | std::ios::binary);
                 (void)ivout.write((char*)ivBytes, 8);
+                detail::convertUInt64ToInt8Array(io->iv2, ivBytes);
+                (void)ivout.write((char*)ivBytes, 8);
+                detail::convertUInt64ToInt8Array(io->iv3, ivBytes);
+                (void)ivout.write((char*)ivBytes, 8);
+                detail::convertUInt64ToInt8Array(io->iv4, ivBytes);
+                (void)ivout.write((char*)ivBytes, 8);
 
                 broadcastEvent(EventType::RoundsWriteEvent);
                 // for small bits of info like rounds and cipher type, only
@@ -183,9 +189,6 @@ namespace teasafe
                 for(int i = 0; i < 7; ++i) {
                     (void)ivout.write((char*)&io->cipher, 1);
                 }
-
-
-
 
                 ivout.flush();
                 ivout.close();
