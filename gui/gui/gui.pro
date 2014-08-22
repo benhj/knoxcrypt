@@ -27,7 +27,8 @@ unix {
     }
 }
 
-LIBS += -L"/usr/local/lib" -lboost_system -lboost_filesystem -lboost_thread-mt -lboost_random
+
+LIBS += -L/usr/local/lib -L/usr/lib /usr/lib/libcryptopp.a -lboost_system -lboost_filesystem -lboost_thread-mt -lboost_random
 LIBS += ../../libteasafe.a
 
 INCLUDEPATH += ../../include \
