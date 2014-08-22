@@ -225,6 +225,10 @@ void MainWindow::newButtonHandler()
             io->rootBlock = 0;
             io->rounds = 64;
             io->iv = teasafe::utility::random();
+            io->iv2 = teasafe::utility::random();
+            io->iv3 = teasafe::utility::random();
+            io->iv4 = teasafe::utility::random();
+            io->cipher = 1; // AES for now; TODO: add ability to chose
 
             // note, getInt arguably too constraining
             io->blocks = input.getInt(this, tr("#4096 byte blocks"),
