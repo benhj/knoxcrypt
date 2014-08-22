@@ -31,6 +31,7 @@
 #include "cipher/AESByteTransformer.hpp"
 #include "cipher/TwofishByteTransformer.hpp"
 #include "cipher/SerpentByteTransformer.hpp"
+#include "cipher/RC6ByteTransformer.hpp"
 
 #include <boost/make_shared.hpp>
 
@@ -53,7 +54,13 @@ namespace teasafe
                                                                       io->iv2,
                                                                       io->iv3,
                                                                       io->iv3);
-        } else {
+        } else if(io->cipher == 4) {
+            return boost::make_shared<cipher::RC6ByteTransformer>(io->password,
+                                                                  io->iv,
+                                                                  io->iv2,
+                                                                  io->iv3,
+                                                                  io->iv3);
+        }  else {
             return boost::make_shared<cipher::AESByteTransformer>(io->password,
                                                                   io->iv,
                                                                   io->iv2,
