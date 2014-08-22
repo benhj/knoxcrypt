@@ -238,6 +238,8 @@ namespace teasafe
                 bool const setRoot = true;
                 TeaSafeFolder magicDir(magicIo, "root", setRoot);
             }
+
+            broadcastEvent(EventType::ImageBuildEnd);
         }
     };
 }

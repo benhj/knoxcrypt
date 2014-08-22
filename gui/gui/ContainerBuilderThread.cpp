@@ -2,6 +2,8 @@
 
 #include <boost/make_shared.hpp>
 
+#include <QDebug>
+
 ContainerBuilderThread::ContainerBuilderThread(QObject *parent)
     : QThread(parent)
     , m_imageBuilder()

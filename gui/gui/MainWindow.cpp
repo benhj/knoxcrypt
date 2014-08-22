@@ -177,6 +177,7 @@ void MainWindow::loadFileButtonHandler()
                                              tr("Password:"), QLineEdit::NoEcho, "", &ok).toStdString();
 
         if((!io->password.empty() && ok)) {
+
             io->rootBlock = 0;
 
             // give the cipher generation process a gui callback
@@ -222,6 +223,30 @@ void MainWindow::newButtonHandler()
                                      tr("Password:"), QLineEdit::NoEcho, "", &ok).toStdString();
 
         if((!io->password.empty() && ok)) {
+
+            QStringList items;
+            items.append("aes");
+            items.append("twofish");
+            items.append("rc6");
+            items.append("cast256");
+            items.append("mars");
+            items.append("serpent");
+            QString cipher = QInputDialog::getItem(this, tr("Algorithm choice"),
+                                                    tr("Cipher:"), items, 0, false, &ok);
+            if(cipher == "aes") {
+                io->cipher = 1;
+            } else if(cipher == "twofish") {
+                io->cipher = 2;
+            } else if(cipher == "serpent") {
+                io->cipher = 3;
+            } else if(cipher == "rc6") {
+                io->cipher = 4;
+            } else if(cipher == "mars") {
+                io->cipher = 5;
+            } else if(cipher == "cast256") {
+                io->cipher = 6;
+            }
+
             io->rootBlock = 0;
             io->rounds = 64;
             io->iv = teasafe::utility::random();
