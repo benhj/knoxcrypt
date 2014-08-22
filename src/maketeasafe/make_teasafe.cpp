@@ -141,9 +141,11 @@ int main(int argc, char *argv[])
     io->cipher = 1; // AES
 
     if(cipher == "aes") {
-        io->cipher = 1; // AES
+        io->cipher = 1; 
     } else if(cipher == "twofish") {
         io->cipher = 2;
+    } else if(cipher == "serpent") {
+        io->cipher = 3;
     }
 
     // magic partition?

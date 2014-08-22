@@ -30,6 +30,7 @@
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "cipher/AESByteTransformer.hpp"
 #include "cipher/TwofishByteTransformer.hpp"
+#include "cipher/SerpentByteTransformer.hpp"
 
 #include <boost/make_shared.hpp>
 
@@ -42,6 +43,12 @@ namespace teasafe
     {
         if(io->cipher == 2) {
             return boost::make_shared<cipher::TwofishByteTransformer>(io->password,
+                                                                      io->iv,
+                                                                      io->iv2,
+                                                                      io->iv3,
+                                                                      io->iv3);
+        } else if(io->cipher == 3) {
+            return boost::make_shared<cipher::SerpentByteTransformer>(io->password,
                                                                       io->iv,
                                                                       io->iv2,
                                                                       io->iv3,
