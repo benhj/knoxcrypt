@@ -21,7 +21,7 @@ endif
 FUSE_LIBS = $(shell $(PKG_CONFIG) --libs fuse 2>/dev/null || echo "-l$(FUSE)")
 
 # standard library search paths
-LDFLAGS +=  -L/usr/local/lib -L/usr/lib -lcryptopp
+LDFLAGS +=  -L/usr/local/lib -L/usr/lib 
 
 # try to find path of where boost is probably installed
 ifeq ($(wildcard /usr/local/lib/libboost*),)
@@ -54,16 +54,13 @@ endif
 
 # compilation flags
 CXXFLAGS_FUSE= $(shell $(PKG_CONFIG) --cflags fuse 2>/dev/null || echo "-I/usr/local/include/$(FUSE)")  -DFUSE_USE_VERSION=26
-CXXFLAGS ?= -ggdb \
-            -Wall \
-            -W \
-            -Os \
-            -ffast-math \
+CXXFLAGS ?= -O2 \
             -funroll-loops \
             -Wno-ctor-dtor-privacy
 CXXFLAGS += -std=c++11 \
             -I$(BOOST_HEADERS) \
-            -Iinclude -D_FILE_OFFSET_BITS=64
+            -Iinclude -D_FILE_OFFSET_BITS=64 \
+            -march=native
 
 # specify locations of all source files
 SOURCES := $(wildcard src/teasafe/*.cpp)
@@ -121,16 +118,16 @@ all: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
 lib: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a
 
 $(TEST_EXECUTABLE): directoryObjTest $(OBJECTS_TEST) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_TEST) ./libteasafe.a $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_TEST) ./libteasafe.a /usr/lib/libcryptopp.a $(BOOST_LD) -o $@
 
 $(MAKETeaSafe_EXECUTABLE): directoryObjMakeBfs $(OBJECTS_MAKEBIN) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_MAKEBIN) ./libteasafe.a $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_MAKEBIN) ./libteasafe.a /usr/lib/libcryptopp.a $(BOOST_LD) -o $@
 
 $(SHELL_BIN): directoryObjUtility $(OBJECTS_UTILITY) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_UTILITY) ./libteasafe.a $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_UTILITY) ./libteasafe.a /usr/lib/libcryptopp.a $(BOOST_LD) -o $@
 
 $(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a $(FUSE_LIBS) $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a /usr/lib/libcryptopp.a $(FUSE_LIBS) $(BOOST_LD) -o $@
 
 shell:  $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
         $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a \
