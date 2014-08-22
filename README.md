@@ -4,13 +4,12 @@ TeaSafe: An encrypted container format
 ##### What is it?
 
 - an encrypted container format
-- containers can be created as sparse for better space manageability 
-- employs a very simple and custom developed filesystem (see wiki!)
+- currently supports AES, Serpent, CAST-256, RC6, Twofish and MARS encryption algorithms
+- further utilizes scrypt for key derivation
+- can create sparse containers
+- employs a very simple and custom developed filesystem (see wiki -- NOTE TO SELF: OUTDATED!)
 - TeaSafe containers can be browsed using either of the provided shell or gui interfaces
-- alternatively, you can implement your own. 
 - can also use the provided FUSE-layer for more realistic filesystem interoperability
-- utilizes XTEA, a publicly documented and easily understood cipher
-- further utilizes the scrypt algorithm for key derivation
 
 ### Compiling
 
@@ -21,6 +20,7 @@ Note:
  
 - requires some of the boost headers and libraries to build (see makefile).
 - requires fuse for the main fuse layer binary (the binary 'teasafe')
+- requires crypto++ headers and libraries for building and linking
 
 If you don't have fuse installed, you'll probably want to only build the main 
 teasafe library (libteasafe.a), the shell (teashell) and maketeasafe, the binary
@@ -42,15 +42,22 @@ teasafe      : fuse layer used for mounting teasafe containers
 teashell     : shell utility used for accessing and modifying teasafe containers
 </pre>
 
-To build a teasafe container, use the `maketeasafe` binary:
+To build a teasafe container that uses AES256, with 4096 * 128000 bytes, use the `maketeasafe` binary:
 
 <pre>
 ./maketeasafe ./test.bfs 128000
 </pre>
 
-Sparse containers can be created too. These are far smaller than
-non-sparse versions; such a container will dynamically grow as more data is written to it.
-Just use the `--sparse` flag during creation, i.e.:
+For alternative ciphers, use the `--cipher` flag, e.g.:
+
+<pre>
+./maketeasafe ./test.vfs 128000 --cipher twofish
+</pre>
+
+The available cipher options are `aes`, `serpent`, `cast256`, `rc6`, `twofish` and `mars`.
+
+Sparse containers can be created too meaning that they start off small and dynamically
+grow as more data are written to them. Just use the `--sparse` flag during creation, i.e.:
 
 <pre>
 ./maketeasafe ./test.bfs 128000 --sparse 1
