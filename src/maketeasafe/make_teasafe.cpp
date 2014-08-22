@@ -148,6 +148,10 @@ int main(int argc, char *argv[])
         io->cipher = 3;
     } else if(cipher == "rc6") {
         io->cipher = 4;
+    } else if(cipher == "mars") {
+        io->cipher = 5;
+    } else if(cipher == "cast256") {
+        io->cipher = 6;
     }
 
     // magic partition?
