@@ -4,11 +4,11 @@ TeaSafe: An encrypted container format
 ##### What is it?
 
 - TeaSafe is an independently developed encrypted container format
-- currently supports AES, Serpent, CAST-256, RC6, Twofish and MARS encryption algorithms
+- supports AES, Serpent, CAST-256, RC6, Twofish and MARS encryption algorithms
 - utilizes scrypt for key derivation
 - can create sparse containers
 - can create and use multiple sub-volumes
-- employs a very simple and custom developed filesystem (see wiki -- NOTE TO SELF: NEEDS UPDATING!)
+- employs a very simple and custom developed filesystem (see wiki).
 - TeaSafe containers can be browsed using either of the provided shell or gui interfaces
 - can also use the provided FUSE-layer for more realistic filesystem interoperability
 
