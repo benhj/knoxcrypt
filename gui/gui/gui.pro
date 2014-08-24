@@ -28,8 +28,8 @@ unix {
 }
 
 
-LIBS += -L/usr/local/lib -L/usr/lib /usr/lib/libcryptopp.a -lboost_system -lboost_filesystem -lboost_thread-mt -lboost_random
-LIBS += ../../libteasafe.a
+LIBS += -L/usr/local/lib -L/usr/lib -lboost_system -lboost_filesystem -lboost_thread-mt -lboost_random
+LIBS += ../../libteasafe.a /usr/lib/libcryptopp.a
 
 INCLUDEPATH += ../../include \
                /usr/local/include
