@@ -181,7 +181,7 @@ namespace teasafe
                 detail::convertUInt64ToInt8Array(io->iv4, ivBytes);
                 (void)ivout.write((char*)ivBytes, 8);
 
-                broadcastEvent(EventType::RoundsWriteEvent);
+                // broadcastEvent(EventType::RoundsWriteEvent);
                 // for small bits of info like rounds and cipher type, only
                 // need 1 byte representations since we'll never have over 255
                 // ciphers (for example)
