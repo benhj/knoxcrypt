@@ -48,6 +48,7 @@ namespace teasafe { namespace detail
     uint64_t const IV_BYTES = 8;
     uint64_t const HEADER_BYTES = 8;
     long     const CIPHER_BUFFER_SIZE = 270000000;
+    uint64_t const PASS_HASH_BYTES = 32;
 
     inline void convertUInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
     {
@@ -90,13 +91,24 @@ namespace teasafe { namespace detail
      */
     inline uint64_t beginning()
     {
-        return (IV_BYTES * 4) + HEADER_BYTES;
+        return (IV_BYTES * 4) + HEADER_BYTES + PASS_HASH_BYTES;
     }
 
     /**
      * @brief gets the size of the TeaSafe image
      * @param in the image stream
      * @return image size
+     */
+    inline void getPassHash(teasafe::TeaSafeImageStream &in, uint8_t hash[32])
+    {
+        in.seekg(beginning() - PASS_HASH_BYTES);
+        (void)in.read((char*)hash, 32);
+    }
+
+    /**
+     * @brief gets the password hash from the container
+     * @param in the image stream
+     * @return a string of the hash
      */
     inline uint64_t getImageSize(teasafe::TeaSafeImageStream &in)
     {

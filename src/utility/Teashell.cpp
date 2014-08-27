@@ -45,6 +45,7 @@
 #include "utility/ExtractToPhysical.hpp"
 #include "utility/RecursiveFolderAdder.hpp"
 #include "utility/RemoveEntry.hpp"
+#include "utility/PassHasher.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/iostreams/copy.hpp>
@@ -634,6 +635,17 @@ int main(int argc, char *argv[])
     boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, amount));
     io->ccb = f;
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
+
+    // compare password hashes
+    uint8_t hashRecovered[32];
+    teasafe::detail::getPassHash(stream, hashRecovered);
+    uint8_t hashEntered[32];
+    teasafe::utility::sha256((char*)io->password.c_str(), hashEntered);
+    if(!teasafe::utility::compareTwoHashes(hashEntered, hashRecovered)) {
+        std::cout<<"Incorrect password"<<std::endl;
+        exit(0);
+    }
+
     io->blocks = teasafe::detail::getBlockCount(stream);
 
     printf("Counting allocated blocks. Please wait...\n");

@@ -37,6 +37,7 @@
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
 #include "utility/EventType.hpp"
+#include "utility/PassHasher.hpp"
 
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
@@ -201,7 +202,17 @@ namespace teasafe
             buildBlockBytes(io->blocks, sizeBytes);
             // write out size, and volume bitmap bytes
             TeaSafeImageStream out(io, std::ios::out | std::ios::app | std::ios::binary);
-            out.seekp(detail::beginning()); // seek past iv bytes
+
+            // write out an encrypted hash of the password; will be compared
+            // with that entered when reading back in so we know if an
+            // incorrect password has been entered
+            out.seekp(detail::beginning() - detail::PASS_HASH_BYTES); // seek past iv + header bytes
+            uint8_t passHash[32];
+            utility::sha256((char*)io->password.c_str(), passHash);
+            out.write((char*)passHash, 32);
+
+            // now seek past iv, header and hash bytes before continuing to write
+            out.seekp(detail::beginning()); 
             out.write((char*)sizeBytes, 8);
             createVolumeBitMap(io->blocks, out);
 
