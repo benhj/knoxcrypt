@@ -1,3 +1,4 @@
+
 TeaSafe: An encrypted container format
 --------------------------------------
 
@@ -11,6 +12,10 @@ TeaSafe: An encrypted container format
 - employs a very simple and custom developed filesystem (see wiki).
 - TeaSafe containers can be browsed using either of the provided shell or gui interfaces
 - can also use the provided FUSE-layer for more realistic filesystem interoperability
+
+### Caveats
+
+The motivation for this toy project is to provide an educational testbed. Although relatively sophisticated there are known weaknesses to the underlying cryptosystem which with the correct tools could be exploited. The main exploit concerns the underlying crypto mode being CTR which for filesystem-level encryption is rather crap. A far stronger mode is XTS and is planned for a future release. However, incorporating it hinges on the underlying crypto api supporting it, the current version of which does not. Probably best not to use this tool for anything critical, eh? 
 
 ### Compiling
 
