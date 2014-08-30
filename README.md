@@ -13,9 +13,19 @@ TeaSafe: An encrypted container format
 - TeaSafe containers can be browsed using either of the provided shell or gui interfaces
 - can also use the provided FUSE-layer for more realistic filesystem interoperability
 
-### Caveats
+### Caveat
 
-The motivation for this toy project is to provide an educational testbed. Although relatively sophisticated there are known weaknesses to the underlying cryptosystem which with the correct tools could be exploited. The main exploit concerns the underlying crypto mode being CTR which for filesystem-level encryption is rather crap. A far stronger mode is XTS and is planned for a future release. However, incorporating it hinges on the underlying crypto api supporting it, the current version of which does not. Probably best not to use this tool for anything critical, eh? 
+The motivation for this toy project is to provide an educational testbed. Although relatively sophisticated there are known weaknesses to the underlying cryptosystem which with the correct tools could be exploited. The main exploit concerns the underlying crypto mode being CTR which for filesystem-level encryption is not recommended. 
+
+#### But why?
+
+Basically it's because CTR (counter) mode works by XORing the clear text with a stream of encrypted numbers (the counter at successive increments). Because of this, if chunks of the ciphertext change over time (which is likely in a filesystem), it is rather trivial to derive the original clear-text by combining the different ciphertext versions together. Doing this has the effect of cancelling out the key stream. 
+
+#### What can we do about this?
+
+We could use a far stronger mode of encryption. It seems that XTS is recommended for filesystem encryption. However, incorporating it hinges on the underlying crypto api supporting it and unfortunately the current version doesn't. 
+
+As a result, probably best not to use this tool for anything critical. 
 
 ### Compiling
 
