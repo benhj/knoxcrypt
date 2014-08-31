@@ -209,7 +209,11 @@ namespace fuselayer
         {
             teasafe::TeaSafeFileDevice device = TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
             device.seek(offset, std::ios_base::beg);
-            return device.read(buf, size);
+            std::streamsize read = device.read(buf,size);
+            if(read < 0) { 
+                return 0;
+            }
+            return read;
         }
 
         static
@@ -241,7 +245,11 @@ namespace fuselayer
 
             teasafe::TeaSafeFileDevice device = TeaSafe_DATA->openFile(path, od);
             device.seek(offset, std::ios_base::beg);
-            return device.write(buf, size);
+            std::streamsize written = device.write(buf, size);
+            if(written < 0) {
+                return 0;
+            }
+            return written;
         }
 
         static

@@ -332,6 +332,7 @@ namespace teasafe
     void
     TeaSafe::resetFileCache()
     {
+        StateLock lock(m_stateMutex);
         FileCache().swap(m_fileCache);
     }
 
@@ -373,7 +374,7 @@ namespace teasafe
     void
     TeaSafe::statvfs(struct statvfs *buf)
     {
-        //StateLock lock(m_stateMutex);
+        StateLock lock(m_stateMutex);
         buf->f_bsize   = detail::FILE_BLOCK_SIZE;
         buf->f_blocks  = m_io->blocks;
         buf->f_bfree   = m_io->freeBlocks;
