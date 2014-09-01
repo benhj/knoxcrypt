@@ -56,7 +56,9 @@ endif
 CXXFLAGS_FUSE= $(shell $(PKG_CONFIG) --cflags fuse 2>/dev/null || echo "-I/usr/local/include/$(FUSE)")  -DFUSE_USE_VERSION=26
 CXXFLAGS ?= -O2 \
             -funroll-loops \
-            -Wno-ctor-dtor-privacy
+            -Wno-ctor-dtor-privacy \
+            -Wall \
+            -ggdb
 CXXFLAGS += -std=c++11 \
             -I$(BOOST_HEADERS) \
             -Iinclude -D_FILE_OFFSET_BITS=64 \

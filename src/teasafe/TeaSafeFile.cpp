@@ -463,6 +463,12 @@ namespace teasafe
             // index at 0 and the position for the zero block at offset
             blockPosition = off;
         }
+
+        // edge case
+        if(leftOver == 0 && block > 0) {
+            --block;
+        }
+
         return std::make_pair(block, blockPosition);
     }
 
@@ -638,14 +644,32 @@ namespace teasafe
     FileBlock
     TeaSafeFile::getBlockWithIndex(uint64_t n) const
     {
-        FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition, m_stream);
-        FileBlockIterator end;
-        uint64_t c(0);
-        for (; it != end; ++it) {
-            if (c==n) {
-                return *it;
+        {
+            FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition, m_stream);
+            FileBlockIterator end;
+            uint64_t c(0);
+            for (; it != end; ++it) {
+                if (c==n) {
+                    return *it;
+                }
+                ++c;
             }
-            ++c;
+        }
+
+        // HACK --> sometimes this funtion fails. There is some bound
+        // condition meaning that n should be n-1. Until I can figure out why,
+        // this temporary hack provides a fix.
+        {
+            --n;
+            FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition, m_stream);
+            FileBlockIterator end;
+            uint64_t c(0);
+            for (; it != end; ++it) {
+                if (c==n) {
+                    return *it;
+                }
+                ++c;
+            }
         }
 
         throw std::runtime_error("Whoops! Something went wrong in TeaSafeFile::getBlockWithIndex");
