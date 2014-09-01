@@ -13,17 +13,11 @@ TeaSafe: An encrypted container format
 - TeaSafe containers can be browsed using either of the provided shell or gui interfaces
 - can also use the provided FUSE-layer for more realistic filesystem interoperability
 
-### Caveat
+### Notes and caveats
 
-The motivation for this toy project is to provide an educational testbed. Although relatively sophisticated there are known weaknesses to the underlying cryptosystem which with the correct tools could be exploited. The main exploit concerns the underlying crypto mode being CTR which for filesystem-level encryption is not recommended. 
-
-#### But why?
-
-Basically it's because CTR (counter) mode works by XORing the clear text with a stream of encrypted numbers (the counter at successive increments). Because of this, if chunks of the ciphertext change over time (which is likely in a filesystem), it is rather trivial to derive the original clear-text by combining the different ciphertext versions together. Doing this has the effect of cancelling out the key stream. 
-
-#### What can we do about this?
-
-We could use a far stronger mode of encryption. It seems that XTS is recommended for filesystem encryption. However, incorporating it hinges on the underlying crypto api supporting it and unfortunately the current version doesn't. 
+- The motivation for this toy project is to provide an educational testbed. Although relatively sophisticated there are known weaknesses to the underlying cryptosystem which with the correct tools could be exploited. The main exploit concerns the underlying crypto mode being CTR which for filesystem-level encryption is not recommended. 
+- CTR (counter) mode works by XORing the clear text with a stream of encrypted numbers (the counter at successive increments). Because of this, if chunks of the ciphertext change over time (which is likely in a filesystem), it is rather trivial to derive the original clear-text by combining the different ciphertext versions together. 
+- We could use a far stronger mode of encryption such as XTS. However, incorporating it hinges on the underlying crypto api having implemented it and unfortunately the current version hasn't (as of yet).
 
 As a result, probably best not to use this tool for anything critical. 
 
