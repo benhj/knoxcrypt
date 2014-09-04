@@ -153,6 +153,8 @@ int main(int argc, char *argv[])
         io->cipher = 8;
     } else if(cipher == "shacal2") {
         io->cipher = 9;
+    } else if(cipher == "null") {
+        io->cipher = 0;
     }
 
     // magic partition?

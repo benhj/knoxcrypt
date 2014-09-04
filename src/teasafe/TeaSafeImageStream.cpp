@@ -37,6 +37,7 @@
 #include "cipher/CamelliaByteTransformer.hpp"
 #include "cipher/RC5ByteTransformer.hpp"
 #include "cipher/SHACAL2ByteTransformer.hpp"
+#include "cipher/NullByteTransformer.hpp"
 
 #include <boost/make_shared.hpp>
 
@@ -91,11 +92,17 @@ namespace teasafe
                                                                   io->iv3);
         } else if(io->cipher == 9) {
             return boost::make_shared<cipher::SHACAL2ByteTransformer>(io->password,
-                                                                  io->iv,
-                                                                  io->iv2,
-                                                                  io->iv3,
-                                                                  io->iv3);
-        }  else {
+                                                                      io->iv,
+                                                                      io->iv2,
+                                                                      io->iv3,
+                                                                      io->iv3);
+        } else if(io->cipher == 0) {
+            return boost::make_shared<cipher::NullByteTransformer>(io->password,
+                                                                   io->iv,
+                                                                   io->iv2,
+                                                                   io->iv3,
+                                                                   io->iv3);
+        }    else {
             return boost::make_shared<cipher::AESByteTransformer>(io->password,
                                                                   io->iv,
                                                                   io->iv2,

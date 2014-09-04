@@ -64,7 +64,9 @@ For alternative ciphers, use the `--cipher` flag, e.g.:
 ./maketeasafe ./test.vfs 128000 --cipher twofish
 </pre>
 
-The available cipher options are `aes`, `serpent`, `cast256`, `rc6`, `twofish`, `mars`, `camellia`, `rc5` and `shacal2`.
+The available cipher options are `aes`, `serpent`, `cast256`, `rc6`, `twofish`, `mars`, `camellia`, `rc5`, `shacal2` and `null`.
+
+Note that `null` disables encryption and thus provides no security. The default is aes.
 
 Sparse containers can be created too meaning that they start off small and dynamically
 grow as more data are written to them. Just use the `--sparse` flag during creation, i.e.:
