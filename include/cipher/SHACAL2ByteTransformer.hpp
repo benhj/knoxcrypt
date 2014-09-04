@@ -26,10 +26,10 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// uses the crypto++ libraries for RC5 encryption
+// uses the crypto++ libraries for SHACAL-2 encryption
 
-#ifndef TeaSafe_CIPHER_RC5_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_RC5_BYTE_TRANSFORMER_HPP__
+#ifndef TeaSafe_CIPHER_SHACAL2_BYTE_TRANSFORMER_HPP__
+#define TeaSafe_CIPHER_SHACAL2_BYTE_TRANSFORMER_HPP__
 
 #include "cipher/IByteTransformer.hpp"
 #include "utility/EventType.hpp"
@@ -39,10 +39,10 @@
 namespace teasafe { namespace cipher
 {
 
-    class RC5ByteTransformer : public IByteTransformer
+    class SHACAL2ByteTransformer : public IByteTransformer
     {
       public:
-        RC5ByteTransformer(std::string const &password,
+        SHACAL2ByteTransformer(std::string const &password,
                                 uint64_t const iv,
                                 uint64_t const iv2,
                                 uint64_t const iv3,
@@ -50,11 +50,11 @@ namespace teasafe { namespace cipher
 
         void init();
 
-        ~RC5ByteTransformer();
+        ~SHACAL2ByteTransformer();
 
       private:
 
-        RC5ByteTransformer(); // not required
+        SHACAL2ByteTransformer(); // not required
 
         void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
         void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
@@ -63,4 +63,4 @@ namespace teasafe { namespace cipher
 }
 
 
-#endif // TeaSafe_CIPHER_RC5_BYTE_TRANSFORMER_HPP__
+#endif // TeaSafe_CIPHER_SHACAL2_BYTE_TRANSFORMER_HPP__

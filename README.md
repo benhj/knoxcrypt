@@ -5,7 +5,7 @@ TeaSafe: An encrypted container format
 ##### What is it?
 
 - TeaSafe is an independently developed encrypted container format
-- supports AES, Serpent, CAST-256, RC6, Twofish and MARS encryption algorithms
+- supports AES candidates (AES [Rijndael], Serpent, CAST-256, RC6, Twofish, and MARS) and Camellia, RC5 and SHACAL2 encryption algorithms
 - utilizes scrypt for key derivation
 - can create sparse containers
 - can create and use multiple sub-volumes
@@ -64,7 +64,7 @@ For alternative ciphers, use the `--cipher` flag, e.g.:
 ./maketeasafe ./test.vfs 128000 --cipher twofish
 </pre>
 
-The available cipher options are `aes`, `serpent`, `cast256`, `rc6`, `twofish` and `mars`.
+The available cipher options are `aes`, `serpent`, `cast256`, `rc6`, `twofish`, `mars`, `camellia`, `rc5` and `shacal2`.
 
 Sparse containers can be created too meaning that they start off small and dynamically
 grow as more data are written to them. Just use the `--sparse` flag during creation, i.e.:
