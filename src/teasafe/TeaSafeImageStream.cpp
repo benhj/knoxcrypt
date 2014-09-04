@@ -35,6 +35,7 @@
 #include "cipher/MARSByteTransformer.hpp"
 #include "cipher/CASTByteTransformer.hpp"
 #include "cipher/CamelliaByteTransformer.hpp"
+#include "cipher/RC5ByteTransformer.hpp"
 
 #include <boost/make_shared.hpp>
 
@@ -71,12 +72,18 @@ namespace teasafe
                                                                   io->iv3);
         } else if(io->cipher == 6) {
             return boost::make_shared<cipher::CASTByteTransformer>(io->password,
-                                                                  io->iv,
-                                                                  io->iv2,
-                                                                  io->iv3,
-                                                                  io->iv3);
+                                                                   io->iv,
+                                                                   io->iv2,
+                                                                   io->iv3,
+                                                                   io->iv3);
         } else if(io->cipher == 7) {
             return boost::make_shared<cipher::CamelliaByteTransformer>(io->password,
+                                                                       io->iv,
+                                                                       io->iv2,
+                                                                       io->iv3,
+                                                                       io->iv3);
+        } else if(io->cipher == 8) {
+            return boost::make_shared<cipher::RC5ByteTransformer>(io->password,
                                                                   io->iv,
                                                                   io->iv2,
                                                                   io->iv3,
