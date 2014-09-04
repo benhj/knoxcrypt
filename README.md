@@ -5,7 +5,7 @@ TeaSafe: An encrypted container format
 ##### What is it?
 
 - TeaSafe is an independently developed encrypted container format
-- supports AES candidates (AES [Rijndael], Serpent, CAST-256, RC6, Twofish, and MARS) and Camellia, RC5 and SHACAL2 encryption algorithms
+- supports the following ciphers: AES candidates (AES [Rijndael], Serpent, CAST-256, RC6, Twofish, and MARS) and Camellia, RC5 and SHACAL2 
 - utilizes scrypt for key derivation
 - can create sparse containers
 - can create and use multiple sub-volumes
