@@ -63,7 +63,7 @@ teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
     io->iv3 = uint64_t(3081342484970028645);
     io->iv4 = uint64_t(3081342484970028645);
     io->rounds = 64;
-    io->cipher = 1; // aes
+    io->cipher = 7; // aes
     io->rootBlock = 0;
     io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
     return io;

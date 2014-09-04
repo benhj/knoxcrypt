@@ -147,6 +147,8 @@ int main(int argc, char *argv[])
         io->cipher = 5;
     } else if(cipher == "cast256") {
         io->cipher = 6;
+    } else if(cipher == "camellia") {
+        io->cipher = 7;
     }
 
     // magic partition?
