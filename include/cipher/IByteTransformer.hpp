@@ -36,7 +36,7 @@
 #endif
 
 #include "utility/EventType.hpp"
-#include <boost/function.hpp>
+#include <functional>
 #include <boost/signals2.hpp>
 #include <iostream>
 #include <memory>
@@ -61,7 +61,7 @@ namespace teasafe { namespace cipher
 
         /// to notify when different parts of the cipher have been initialized
         /// also see EventType for different event types
-        virtual void registerSignalHandler(boost::function<void(EventType)> const &f);
+        virtual void registerSignalHandler(std::function<void(EventType)> const &f);
         virtual ~IByteTransformer();
 
         /// has key and IV been initialized yet?

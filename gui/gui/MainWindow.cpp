@@ -45,8 +45,6 @@
 #include "utility/RemoveEntry.hpp"
 #include "utility/RandomNumberGenerator.hpp"
 
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <boost/make_shared.hpp>
 #include <QTreeWidgetItem>
 #include <QDebug>
@@ -55,6 +53,7 @@
 
 #include <string>
 #include <fstream>
+#include <functional>
 #include <vector>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -182,7 +181,7 @@ void MainWindow::loadFileButtonHandler()
 
             // give the cipher generation process a gui callback
             long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-            boost::function<void(teasafe::EventType)> f(boost::bind(&GUICipherCallback::cipherCallback, &m_cipherCallback, _1, amount));
+            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback, &m_cipherCallback, _1, amount));
             io->ccb = f;
 
             // create a progress dialog to display progress of cipher generation
@@ -262,7 +261,7 @@ void MainWindow::newButtonHandler()
 
             // give the cipher generation process a gui callback
             long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-            boost::function<void(teasafe::EventType)> f(boost::bind(&GUICipherCallback::cipherCallback, &m_cipherCallback, _1, amount));
+            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback, &m_cipherCallback, _1, amount));
             io->ccb = f;
 
             // create a progress dialog to display progress of cipher generation
@@ -325,7 +324,7 @@ void MainWindow::itemExpanded(QTreeWidgetItem *parent)
     std::string pathOfExpanded(detail::getPathFromCurrentItem(parent));
 
     if(m_populatedSet.find(pathOfExpanded) == m_populatedSet.end()) {
-        boost::function<void()> f(boost::bind(&ItemAdder::populate, m_itemAdder, parent,
+        std::function<void()> f(std::bind(&ItemAdder::populate, m_itemAdder, parent,
                                               m_teaSafe, pathOfExpanded));
         m_workThread.addWorkFunction(f);
         m_populatedSet.insert(pathOfExpanded);
@@ -402,10 +401,10 @@ void MainWindow::doWork(WorkType workType)
     for (; it != selectedItems.end(); ++it) {
         std::string teaPath(detail::getPathFromCurrentItem(*it));
         qDebug() << teaPath.c_str();
-        boost::function<void()> f;
+        std::function<void()> f;
         if(       workType == WorkType::RemoveItem) {
             qDebug() << "RemoveItem";
-            f = boost::bind(teasafe::utility::removeEntry, boost::ref(*m_teaSafe),
+            f = std::bind(teasafe::utility::removeEntry, boost::ref(*m_teaSafe),
                             teaPath);
 
             delete *it;
@@ -417,8 +416,8 @@ void MainWindow::doWork(WorkType workType)
                 std::string fsPath = dlg.selectedFiles().at(0).toStdString();
 
                 qDebug() << "ExtractItem";
-                boost::function<void(std::string)> cb(boost::bind(&MainWindow::loggerCallback, this, _1));
-                f = boost::bind(teasafe::utility::extractToPhysical, boost::ref(*m_teaSafe),
+                std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback, this, _1));
+                f = std::bind(teasafe::utility::extractToPhysical, boost::ref(*m_teaSafe),
                                 teaPath, fsPath, cb);
             }
 
@@ -434,7 +433,7 @@ void MainWindow::doWork(WorkType workType)
                                      teaPath.append(folderName) :
                                      teaPath.append("/").append(folderName));
 
-                    f = boost::bind(&teasafe::TeaSafe::addFolder, m_teaSafe, path);
+                    f = std::bind(&teasafe::TeaSafe::addFolder, m_teaSafe, path);
                     QTreeWidgetItem *item = new QTreeWidgetItem(*it);
                     item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
                     item->setText(0, QString(folderName.c_str()));
@@ -449,8 +448,8 @@ void MainWindow::doWork(WorkType workType)
                 if(dlg.exec()) {
 
                     std::string fsPath = dlg.selectedFiles().at(0).toStdString();
-                    boost::function<void(std::string)> cb(boost::bind(&MainWindow::loggerCallback, this, _1));
-                    f = boost::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
+                    std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback, this, _1));
+                    f = std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
                                     teaPath, fsPath, cb);
                     QTreeWidgetItem *item = new QTreeWidgetItem(*it);
                     item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
@@ -465,8 +464,8 @@ void MainWindow::doWork(WorkType workType)
                 dlg.setFileMode(QFileDialog::AnyFile);
                 if(dlg.exec()) {
                     std::string fsPath = dlg.selectedFiles().at(0).toStdString();
-                    boost::function<void(std::string)> cb(boost::bind(&MainWindow::loggerCallback, this, _1));
-                    f = boost::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
+                    std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback, this, _1));
+                    f = std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
                                     teaPath, fsPath, cb);
                     QTreeWidgetItem *item = new QTreeWidgetItem(*it);
                     item->setText(0, QString(boost::filesystem::path(fsPath).filename().c_str()));

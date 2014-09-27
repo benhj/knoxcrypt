@@ -72,7 +72,7 @@ namespace teasafe
             this->doBuildImage(m_io);
         }
 
-        virtual void registerSignalHandler(boost::function<void(EventType)> const &f)
+        virtual void registerSignalHandler(std::function<void(EventType)> const &f)
         {
             m_writeSignal->connect(f);
         }

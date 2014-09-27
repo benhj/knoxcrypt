@@ -52,7 +52,7 @@ namespace teasafe
         void recursiveAdd(TeaSafe &theBfs,
                           std::string const &teaPath,
                           std::string const &fsPath,
-                          boost::function<void(std::string)> const &callback)
+                          std::function<void(std::string)> const &callback)
         {
             boost::filesystem::path p(fsPath);
             boost::filesystem::directory_iterator itr(p);

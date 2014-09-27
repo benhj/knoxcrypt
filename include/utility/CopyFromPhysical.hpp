@@ -37,7 +37,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/iostreams/copy.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace teasafe
 {
@@ -49,7 +49,7 @@ namespace teasafe
         void copyFromPhysical(teasafe::TeaSafe &theBfs,
                               std::string const &teaPath,
                               std::string const &fsPath,
-                              boost::function<void(std::string)> const &callback)
+                              std::function<void(std::string)> const &callback)
         {
 
             boost::filesystem::path p(fsPath);

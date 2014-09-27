@@ -42,14 +42,13 @@
 #include "utility/EventType.hpp"
 #include "utility/PassHasher.hpp"
 
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <boost/program_options.hpp>
 #include <boost/progress.hpp>
 
 #include <fuse.h>
 #include <stdint.h>
 #include <vector>
+#include <functional>
 
 #define TeaSafe_DATA ((teasafe::TeaSafe*) fuse_get_context()->private_data)
 
@@ -495,7 +494,7 @@ int main(int argc, char *argv[])
 
     // Obtain the number of blocks in the image by reading the image's block count
     long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-    boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, amount));
+    std::function<void(teasafe::EventType)> f(std::bind(&teasafe::cipherCallback, std::placeholders::_1, amount));
     io->ccb = f;
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
 

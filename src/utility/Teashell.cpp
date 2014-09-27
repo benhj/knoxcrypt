@@ -47,7 +47,6 @@
 #include "utility/RemoveEntry.hpp"
 #include "utility/PassHasher.hpp"
 
-#include <boost/bind.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/format.hpp>
@@ -55,6 +54,7 @@
 #include <boost/algorithm/string/regex.hpp>
 
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <stdint.h>
 #include <vector>
@@ -191,7 +191,8 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
     // add the file to the container
     // this removed the first several chars assumes to be "file://"
     std::string resPath(fileResource.begin() + 7, fileResource.end());
-    teasafe::utility::copyFromPhysical(theBfs, parent, resPath, boost::bind(operationCallback,_1));
+    teasafe::utility::copyFromPhysical(theBfs, parent, resPath, std::bind(operationCallback,
+                                                                          std::placeholders::_1));
 }
 
 /// for extracting a teasafe file to somewhere on a physical disk location
@@ -200,7 +201,8 @@ void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string co
 void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string const &dst)
 {
     std::string dstPath(dst.begin() + 7, dst.end());
-    teasafe::utility::extractToPhysical(theBfs, path, dstPath, boost::bind(operationCallback,_1));
+    teasafe::utility::extractToPhysical(theBfs, path, dstPath, std::bind(operationCallback,
+                                                                         std::placeholders::_1));
 }
 
 /// takes a path and pushes a new path bit to it, going into that path
@@ -631,7 +633,9 @@ int main(int argc, char *argv[])
 
     // Obtain the number of blocks in the image by reading the image's block count
     long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-    boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, amount));
+    std::function<void(teasafe::EventType)> f(std::bind(&teasafe::cipherCallback, 
+                                                        std::placeholders::_1, 
+                                                        amount));
     io->ccb = f;
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
 

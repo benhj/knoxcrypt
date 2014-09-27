@@ -102,7 +102,7 @@ namespace teasafe { namespace cipher
     }
 
     void
-    IByteTransformer::registerSignalHandler(boost::function<void(EventType)> const &f)
+    IByteTransformer::registerSignalHandler(std::function<void(EventType)> const &f)
     {
         m_cipherSignal->connect(f);
     }

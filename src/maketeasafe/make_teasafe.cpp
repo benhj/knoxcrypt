@@ -33,13 +33,13 @@
 #include "utility/MakeTeaSafe.hpp"
 #include "utility/RandomNumberGenerator.hpp"
 
-#include <boost/bind.hpp>
 #include <boost/progress.hpp>
 #include <boost/program_options.hpp>
 #include <boost/random.hpp>
 #include <boost/nondet_random.hpp>
 
 #include <ctime>
+#include <functional>
 #include <iostream>
 #include <string>
 
@@ -171,13 +171,13 @@ int main(int argc, char *argv[])
 
     // register progress call back for cipher
     long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-    boost::function<void(teasafe::EventType)> f(boost::bind(&teasafe::cipherCallback, _1, amount));
+    std::function<void(teasafe::EventType)> f(std::bind(&teasafe::cipherCallback, std::placeholders::_1, amount));
     io->ccb = f;
 
     teasafe::MakeTeaSafe imager(io, sparse, omp);
 
     // register progress callback for imager
-    boost::function<void(teasafe::EventType)> fb(boost::bind(&imagerCallback, _1, io->blocks));
+    std::function<void(teasafe::EventType)> fb(std::bind(&imagerCallback, std::placeholders::_1, io->blocks));
     imager.registerSignalHandler(fb);
     imager.buildImage();
 

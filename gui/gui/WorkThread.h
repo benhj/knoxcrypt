@@ -34,14 +34,14 @@
 
 #include <QThread>
 
-#include <boost/function.hpp>
+#include <functional>
 
 class WorkThread : public QThread
 {
     Q_OBJECT
   public:
 
-    typedef boost::function<void()> WorkFunction;
+    typedef std::function<void()> WorkFunction;
     typedef teasafe::utility::ConcurrentQueue<WorkFunction> WorkQueue;
 
     explicit WorkThread(QObject *parent = 0);

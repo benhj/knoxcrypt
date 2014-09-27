@@ -31,9 +31,9 @@
 #ifndef TeaSafe_UTILITY_RANDOM_NUMBER_GENERATOR_HPP__
 #define TeaSafe_UTILITY_RANDOM_NUMBER_GENERATOR_HPP__
 
-#include <boost/bind.hpp>
-#include <boost/random.hpp>
-#include <boost/nondet_random.hpp>
+#include <random>
+
+#include <functional>
 
 namespace teasafe
 {
@@ -42,14 +42,15 @@ namespace teasafe
     {
 
         /**
-         * @brief  allegedly generates a secure 64 bit random number
+         * @brief  generates a secure 64 bit random number;
+         * will error out if not enough entropy
          * @return a 64 bit random number
          */
         uint64_t random()
         {
-            boost::random_device rd;
-            boost::random::uniform_int_distribution<uint64_t> dis;
-            boost::function<uint64_t()> gen = boost::bind(dis, boost::ref(rd));
+            std::random_device rd;
+            std::uniform_int_distribution<uint64_t> dis;
+            std::function<uint64_t()> gen = std::bind(dis, std::ref(rd));
             return gen();
         }
 

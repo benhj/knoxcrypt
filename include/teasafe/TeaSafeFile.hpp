@@ -34,7 +34,7 @@
 #include "teasafe/OpenDisposition.hpp"
 #include "teasafe/TeaSafeImageStream.hpp"
 
-#include <boost/function.hpp>
+#include <functional>
 #include <boost/optional.hpp>
 
 #include <memory>
@@ -52,7 +52,7 @@ namespace teasafe
     class TeaSafeFile
     {
 
-        typedef boost::function<void(uint64_t)> SetEntryInfoSizeCallback;
+        typedef std::function<void(uint64_t)> SetEntryInfoSizeCallback;
         typedef boost::optional<SetEntryInfoSizeCallback> OptionalSizeCallback;
         typedef std::shared_ptr<FileBlock> SharedFileBlock;
 

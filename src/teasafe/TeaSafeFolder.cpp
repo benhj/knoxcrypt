@@ -31,8 +31,7 @@
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFolder.hpp"
 
-#include <boost/bind.hpp>
-  
+#include <functional>
 #include <stdexcept>
 
 namespace teasafe
@@ -256,7 +255,9 @@ namespace teasafe
         if (info) {
             if (info->type() == EntryType::FileType) {
                 TeaSafeFile file(m_io, name, info->firstFileBlock(), openDisposition);
-                file.setOptionalSizeUpdateCallback(boost::bind(&EntryInfo::updateSize, info, _1));
+                file.setOptionalSizeUpdateCallback(std::bind(&EntryInfo::updateSize, 
+                                                             info, 
+                                                             std::placeholders::_1));
                 return file;
             }
         }

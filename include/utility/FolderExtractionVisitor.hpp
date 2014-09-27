@@ -39,7 +39,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/iostreams/copy.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 #include <sstream>
 
@@ -55,7 +55,7 @@ namespace teasafe
             FolderExtractionVisitor(TeaSafe &theBfs,
                                     std::string teaPath,
                                     std::string fsPath,
-                                    boost::function<void(std::string)> const &callback)
+                                    std::function<void(std::string)> const &callback)
             : m_theBfs(theBfs)
             , m_teaPath(teaPath)
             , m_fsPath(fsPath)
@@ -111,7 +111,7 @@ namespace teasafe
             TeaSafe &m_theBfs;
             std::string m_teaPath;
             std::string m_fsPath;
-            boost::function<void(std::string)> m_callback;
+            std::function<void(std::string)> m_callback;
         };
 
     }

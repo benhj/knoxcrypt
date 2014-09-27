@@ -34,7 +34,7 @@
 #include "ContainerBuilderThread.h"
 #include "GUICipherCallback.h"
 #include "utility/EventType.hpp"
-#include <boost/function.hpp>
+#include <functional>
 #include <QMainWindow>
 #include <QProgressDialog>
 #include <QMenu>

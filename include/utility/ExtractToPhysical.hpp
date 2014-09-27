@@ -53,7 +53,7 @@ namespace teasafe
         void extractToPhysical(teasafe::TeaSafe &theBfs,
                               std::string const &path,
                               std::string const &dst,
-                              boost::function<void(std::string)> callback)
+                              std::function<void(std::string)> callback)
         {
             std::string dstPath(dst);
 

@@ -33,7 +33,7 @@
 
 #include "cipher/IByteTransformer.hpp"
 #include "utility/EventType.hpp"
-#include <boost/function.hpp>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <vector>

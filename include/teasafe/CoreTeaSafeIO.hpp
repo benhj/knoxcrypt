@@ -31,7 +31,7 @@
 
 #include "utility/EventType.hpp"
 
-#include <boost/function.hpp>
+#include <functional>
 #include <boost/optional.hpp>
 #include <string>
 #include <memory>
@@ -56,7 +56,7 @@ namespace teasafe
         unsigned int cipher;             // an ID signifying the cipher type TODO: USE ENUM!!
         uint64_t rootBlock;              // the start block of the root folder
         SharedBlockBuilder blockBuilder; // a block factory / resource manage
-        typedef boost::function<void(teasafe::EventType)> Callback;
+        typedef std::function<void(teasafe::EventType)> Callback;
         typedef boost::optional<Callback> OptionalCallback;
         OptionalCallback ccb;            // call back for cipher
     };
