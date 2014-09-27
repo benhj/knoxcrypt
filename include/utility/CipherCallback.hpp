@@ -32,15 +32,15 @@
 
 #include "utility/EventType.hpp"
 #include <boost/progress.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+
+#include <memory>
 
 namespace teasafe
 {
 
     void cipherCallback(EventType eventType, long const amount)
     {
-        static boost::shared_ptr<boost::progress_display> pd;
+        static std::shared_ptr<boost::progress_display> pd;
         if(eventType == EventType::KeyGenBegin) {
             std::cout<<"Generating key...\n"<<std::endl;
         }
@@ -49,7 +49,7 @@ namespace teasafe
         }
         if(eventType == EventType::BigCipherBuildBegin) {
             std::cout<<"Building big xtea cipher stream buffer. Please wait..."<<std::endl;
-            pd = boost::make_shared<boost::progress_display>(amount);
+            pd = std::make_shared<boost::progress_display>(amount);
         }
         if(eventType == EventType::BigCipherBuildEnd) {
             std::cout<<"\nBuilt big xtea cipher stream buffer.\n"<<std::endl;

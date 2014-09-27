@@ -42,7 +42,7 @@ namespace teasafe
 
     // shared_ptr until I can get c++11 supported properly at
     // which point I'll switch to unique_ptr
-    typedef boost::shared_ptr<FileStream> FileStreamPtr;
+    typedef std::shared_ptr<FileStream> FileStreamPtr;
 
 
 }

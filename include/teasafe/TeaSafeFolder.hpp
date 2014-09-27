@@ -34,15 +34,15 @@
 #include "teasafe/TeaSafeFile.hpp"
 
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
-
+  
+#include <memory>
 #include <map>
 
 namespace teasafe
 {
 
     typedef boost::optional<std::ios_base::streamoff> OptionalOffset;
-    typedef boost::shared_ptr<EntryInfo> SharedEntryInfo;
+    typedef std::shared_ptr<EntryInfo> SharedEntryInfo;
 
     class TeaSafeFolder
     {

@@ -34,8 +34,6 @@
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
 
-#include <boost/make_shared.hpp>
-
 #include <stdexcept>
 
 namespace teasafe
@@ -81,7 +79,7 @@ namespace teasafe
         enumerateBlockStats();
 
         // sets the current working block to the very first file block
-        m_workingBlock = boost::make_shared<FileBlock>(io, startBlock, openDisposition, m_stream);
+        m_workingBlock = std::make_shared<FileBlock>(io, startBlock, openDisposition, m_stream);
 
         m_stream = m_workingBlock->getStream();
 
@@ -171,7 +169,7 @@ namespace teasafe
 
         if (static_cast<uint64_t>(m_blockIndex + 1) < m_blockCount && bytesToRead == size) {
             ++m_blockIndex;
-            m_workingBlock = boost::make_shared<FileBlock>(m_io,
+            m_workingBlock = std::make_shared<FileBlock>(m_io,
                                                            m_workingBlock->getNextIndex(),
                                                            m_openDisposition,
                                                            m_stream);
@@ -196,8 +194,7 @@ namespace teasafe
 
         ++m_blockCount;
         m_blockIndex = m_blockCount - 1;
-        m_workingBlock = boost::make_shared<FileBlock>(block);
-
+        m_workingBlock = std::make_shared<FileBlock>(block);
     }
 
     void TeaSafeFile::enumerateBlockStats()
@@ -276,7 +273,7 @@ namespace teasafe
                 // iterate the block index and return if possible
                 if (m_workingBlock->tell() == detail::blockWriteSpace()) {
                     ++m_blockIndex;
-                    m_workingBlock = boost::make_shared<FileBlock>(m_io,
+                    m_workingBlock = std::make_shared<FileBlock>(m_io,
                                                                    m_workingBlock->getNextIndex(),
                                                                    m_openDisposition,
                                                                    m_stream);
@@ -416,10 +413,10 @@ namespace teasafe
         SharedFileBlock block;
         if (leftOver == 0) {
             --blocksRequired;
-            block = boost::make_shared<FileBlock>(getBlockWithIndex(blocksRequired));
+            block = std::make_shared<FileBlock>(getBlockWithIndex(blocksRequired));
             block->setSize(blockSize);
         } else {
-            block = boost::make_shared<FileBlock>(getBlockWithIndex(blocksRequired));
+            block = std::make_shared<FileBlock>(getBlockWithIndex(blocksRequired));
             block->setSize(leftOver);
         }
 
@@ -577,7 +574,7 @@ namespace teasafe
 
             // update block where we start reading/writing from
             m_blockIndex = seekPair.first;
-            m_workingBlock = boost::make_shared<FileBlock>(this->getBlockWithIndex(m_blockIndex));
+            m_workingBlock = std::make_shared<FileBlock>(this->getBlockWithIndex(m_blockIndex));
 
             // set the position to seek to for given block
             // this will be the point from which we read or write
@@ -644,6 +641,7 @@ namespace teasafe
     FileBlock
     TeaSafeFile::getBlockWithIndex(uint64_t n) const
     {
+
         {
             FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition, m_stream);
             FileBlockIterator end;

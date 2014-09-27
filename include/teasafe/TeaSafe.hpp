@@ -37,11 +37,11 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <map>
+#include <memory>
 #include <string>
 
 #include <sys/statvfs.h>
@@ -49,11 +49,11 @@
 namespace teasafe
 {
     class TeaSafe;
-    typedef boost::shared_ptr<TeaSafe> SharedTeaSafe;
+    typedef std::shared_ptr<TeaSafe> SharedTeaSafe;
 
     class TeaSafe
     {
-        typedef boost::shared_ptr<TeaSafeFolder> SharedTeaSafeFolder;
+        typedef std::shared_ptr<TeaSafeFolder> SharedTeaSafeFolder;
 
       public:
         explicit TeaSafe(SharedCoreIO const &io);

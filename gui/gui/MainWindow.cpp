@@ -66,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_workThread(this),
     m_cipherCallback(this),
     m_populatedSet(),
-    m_itemAdder(boost::make_shared<ItemAdder>()),
+    m_itemAdder(std::make_shared<ItemAdder>()),
     m_spinner()
 {
     //this->setWindowFlags(Qt::FramelessWindowHint);
@@ -115,13 +115,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this, SIGNAL(updateStatusTextSignal(QString)),
                      this, SLOT(updateStatusTextSlot(QString)));
 
-    m_contextMenu = boost::make_shared<QMenu>(ui->fileTree);
+    m_contextMenu = std::make_shared<QMenu>(ui->fileTree);
     ui->fileTree->setContextMenuPolicy(Qt::ActionsContextMenu);
-    m_extractAction = boost::make_shared<QAction>("Extract", m_contextMenu.get());
-    m_removeAction = boost::make_shared<QAction>("Remove", m_contextMenu.get());
-    m_newFolderAction = boost::make_shared<QAction>("Create folder", m_contextMenu.get());
-    m_addFileAction = boost::make_shared<QAction>("Add file", m_contextMenu.get());
-    m_addFolderAction = boost::make_shared<QAction>("Add folder", m_contextMenu.get());
+    m_extractAction = std::make_shared<QAction>("Extract", m_contextMenu.get());
+    m_removeAction = std::make_shared<QAction>("Remove", m_contextMenu.get());
+    m_newFolderAction = std::make_shared<QAction>("Create folder", m_contextMenu.get());
+    m_addFileAction = std::make_shared<QAction>("Add file", m_contextMenu.get());
+    m_addFolderAction = std::make_shared<QAction>("Add folder", m_contextMenu.get());
     ui->fileTree->addAction(m_extractAction.get());
     ui->fileTree->addAction(m_removeAction.get());
     ui->fileTree->addAction(m_newFolderAction.get());
@@ -169,7 +169,7 @@ void MainWindow::loadFileButtonHandler()
         std::set<std::string>().swap(m_populatedSet);
 
         // build new state
-        teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
+        teasafe::SharedCoreIO io(std::make_shared<teasafe::CoreTeaSafeIO>());
         io->path = dlg.selectedFiles().at(0).toStdString();
 
         bool ok;
@@ -186,7 +186,7 @@ void MainWindow::loadFileButtonHandler()
             io->ccb = f;
 
             // create a progress dialog to display progress of cipher generation
-            m_sd = boost::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
+            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
             m_sd->setWindowModality(Qt::WindowModal);
 
             // start loading of TeaSafe image
@@ -213,7 +213,7 @@ void MainWindow::newButtonHandler()
         std::set<std::string>().swap(m_populatedSet);
 
         // build new state
-        teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
+        teasafe::SharedCoreIO io(std::make_shared<teasafe::CoreTeaSafeIO>());
         io->path = dlg.selectedFiles().at(0).toStdString();
 
         bool ok;
@@ -266,7 +266,7 @@ void MainWindow::newButtonHandler()
             io->ccb = f;
 
             // create a progress dialog to display progress of cipher generation
-            m_sd = boost::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
+            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
             m_sd->setWindowModality(Qt::WindowModal);
 
             m_builderThread.setSharedIO(io);
@@ -373,7 +373,7 @@ void MainWindow::getTeaSafeFromBuilder()
 
 void MainWindow::setBusyIndicator()
 {
-    m_spinner = boost::make_shared<QMovie>(":/new/prefix1/graphix/spinner.gif");
+    m_spinner = std::make_shared<QMovie>(":/new/prefix1/graphix/spinner.gif");
     m_spinner->setScaledSize(QSize(16,16));
     ui->blinkerLabel->setMovie(m_spinner.get());
     m_spinner->start();

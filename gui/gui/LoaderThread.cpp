@@ -66,11 +66,11 @@ void LoaderThread::loadTSImage()
     teasafe::TeaSafeImageStream stream(m_io, std::ios::in | std::ios::binary);
     m_io->blocks = teasafe::detail::getBlockCount(stream);
     m_io->freeBlocks = m_io->blocks - teasafe::detail::getNumberOfAllocatedBlocks(stream);
-    m_io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(m_io);
+    m_io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(m_io);
     stream.close();
 
     // Create the basic file system
-    m_teaSafe = boost::make_shared<teasafe::TeaSafe>(m_io);
+    m_teaSafe = std::make_shared<teasafe::TeaSafe>(m_io);
 
     emit finishedLoadingSignal();
 }

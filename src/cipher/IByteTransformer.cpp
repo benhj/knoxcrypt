@@ -30,8 +30,6 @@
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "cipher/scrypt/crypto_scrypt.hpp"
 
-#include <boost/make_shared.hpp>
-
 namespace teasafe { namespace cipher
 {
 
@@ -50,7 +48,7 @@ namespace teasafe { namespace cipher
       , m_iv2(iv2)
       , m_iv3(iv3)
       , m_iv4(iv4)
-      , m_cipherSignal(boost::make_shared<CipherSignal>())
+      , m_cipherSignal(std::make_shared<CipherSignal>())
     {
     }
 

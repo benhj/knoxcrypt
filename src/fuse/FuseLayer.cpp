@@ -44,7 +44,6 @@
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 #include <boost/progress.hpp>
 
@@ -484,7 +483,7 @@ int main(int argc, char *argv[])
 
     // Setup a core teasafe io object which stores highlevel info about accessing
     // the TeaSafe image
-    teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
+    teasafe::SharedCoreIO io(std::make_shared<teasafe::CoreTeaSafeIO>());
     io->path = vm["imageName"].as<std::string>().c_str();
     io->password = teasafe::utility::getPassword("teasafe password: ");
     io->rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;
@@ -516,7 +515,7 @@ int main(int argc, char *argv[])
     printf("Counting allocated blocks. Please wait...\n");
 
     io->freeBlocks = io->blocks - teasafe::detail::getNumberOfAllocatedBlocks(stream);
-    io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
+    io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
 
     printf("Finished counting allocated blocks.\n");
 

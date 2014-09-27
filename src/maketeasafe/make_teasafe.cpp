@@ -34,7 +34,6 @@
 #include "utility/RandomNumberGenerator.hpp"
 
 #include <boost/bind.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/progress.hpp>
 #include <boost/program_options.hpp>
 #include <boost/random.hpp>
@@ -46,10 +45,10 @@
 
 void imagerCallback(teasafe::EventType eventType, long const amount)
 {
-    static boost::shared_ptr<boost::progress_display> pd;
+    static std::shared_ptr<boost::progress_display> pd;
     if(eventType == teasafe::EventType::ImageBuildStart) {
         std::cout<<"Building main fs image.."<<std::endl;
-        pd = boost::make_shared<boost::progress_display>(amount);
+        pd = std::make_shared<boost::progress_display>(amount);
     }
     if(eventType == teasafe::EventType::ImageBuildUpdate) {
         ++(*pd);
@@ -82,7 +81,7 @@ int main(int argc, char *argv[])
     (void)positionalOptions.add("imageName", 1);
     (void)positionalOptions.add("blockCount", 1);
 
-    teasafe::SharedCoreIO io(boost::make_shared<teasafe::CoreTeaSafeIO>());
+    teasafe::SharedCoreIO io(std::make_shared<teasafe::CoreTeaSafeIO>());
 
     // use a non-deterministic random device to generate the iv. This
     // allegedly pulls data from /dev/urandom

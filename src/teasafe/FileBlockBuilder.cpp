@@ -30,8 +30,6 @@
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 
-#include <boost/make_shared.hpp>
-
 namespace teasafe
 {
 
@@ -55,7 +53,7 @@ namespace teasafe
                 std::ios::openmode mode = std::ios::in;
                 mode |= std::ios::out;
                 mode |= std::ios::binary;
-                stream = boost::make_shared<TeaSafeImageStream>(io, mode);
+                stream = std::make_shared<TeaSafeImageStream>(io, mode);
             }
         }
 

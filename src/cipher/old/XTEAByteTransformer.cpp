@@ -33,8 +33,6 @@
 #include "cipher/scrypt/crypto_scrypt.hpp"
 #include "cipher/XTEAByteTransformer.hpp"
 
-#include <boost/make_shared.hpp>
-
 #include <vector>
 
 // use caching mechanism? Note doesn't work properly with sparse mode so

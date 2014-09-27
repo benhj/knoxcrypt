@@ -30,20 +30,18 @@
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/TeaSafeException.hpp"
 
-#include <boost/make_shared.hpp>
-
 namespace teasafe
 {
 
     TeaSafe::TeaSafe(SharedCoreIO const &io)
         : m_io(io)
-        , m_rootFolder(boost::make_shared<TeaSafeFolder>(io, io->rootBlock, "root"))
+        , m_rootFolder(std::make_shared<TeaSafeFolder>(io, io->rootBlock, "root"))
         , m_folderCache()
         , m_stateMutex()
         , m_fileCache()
     {
     }
-
+    
     TeaSafeFolder
     TeaSafe::getTeaSafeFolder(std::string const &path)
     {
@@ -361,7 +359,7 @@ namespace teasafe
             }
         }
 
-        SharedTeaSafeFile sf(boost::make_shared<TeaSafeFile>(parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(),
+        SharedTeaSafeFile sf(std::make_shared<TeaSafeFile>(parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(),
                                                                                          openMode)));
         m_fileCache.insert(std::make_pair(path, sf));
         return sf;
@@ -447,7 +445,7 @@ namespace teasafe
             if (pathBuilder == pathToCheck) {
 
                 if (entryInfo->type() == EntryType::FolderType) {
-                    SharedTeaSafeFolder folder(boost::make_shared<TeaSafeFolder>(folderOfInterest.getTeaSafeFolder(entryInfo->filename())));
+                    SharedTeaSafeFolder folder(std::make_shared<TeaSafeFolder>(folderOfInterest.getTeaSafeFolder(entryInfo->filename())));
                     m_folderCache.insert(std::make_pair(pathToCheck.string(), folder));
                     return folder;
                 } else {

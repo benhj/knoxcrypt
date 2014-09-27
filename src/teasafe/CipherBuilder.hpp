@@ -44,71 +44,69 @@
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-
+#include <memory>
 
 namespace teasafe
 {
 
-    boost::shared_ptr<cipher::IByteTransformer> buildCipherType(SharedCoreIO const &io)
+    std::shared_ptr<cipher::IByteTransformer> buildCipherType(SharedCoreIO const &io)
     {
         if(io->cipher == 2) {
-            return boost::make_shared<cipher::TwofishByteTransformer>(io->password,
+            return std::make_shared<cipher::TwofishByteTransformer>(io->password,
                                                                       io->iv,
                                                                       io->iv2,
                                                                       io->iv3,
                                                                       io->iv3);
         } else if(io->cipher == 3) {
-            return boost::make_shared<cipher::SerpentByteTransformer>(io->password,
+            return std::make_shared<cipher::SerpentByteTransformer>(io->password,
                                                                       io->iv,
                                                                       io->iv2,
                                                                       io->iv3,
                                                                       io->iv3);
         } else if(io->cipher == 4) {
-            return boost::make_shared<cipher::RC6ByteTransformer>(io->password,
+            return std::make_shared<cipher::RC6ByteTransformer>(io->password,
                                                                   io->iv,
                                                                   io->iv2,
                                                                   io->iv3,
                                                                   io->iv3);
         } else if(io->cipher == 5) {
-            return boost::make_shared<cipher::MARSByteTransformer>(io->password,
+            return std::make_shared<cipher::MARSByteTransformer>(io->password,
                                                                   io->iv,
                                                                   io->iv2,
                                                                   io->iv3,
                                                                   io->iv3);
         } else if(io->cipher == 6) {
-            return boost::make_shared<cipher::CASTByteTransformer>(io->password,
+            return std::make_shared<cipher::CASTByteTransformer>(io->password,
                                                                    io->iv,
                                                                    io->iv2,
                                                                    io->iv3,
                                                                    io->iv3);
         } else if(io->cipher == 7) {
-            return boost::make_shared<cipher::CamelliaByteTransformer>(io->password,
+            return std::make_shared<cipher::CamelliaByteTransformer>(io->password,
                                                                        io->iv,
                                                                        io->iv2,
                                                                        io->iv3,
                                                                        io->iv3);
         } else if(io->cipher == 8) {
-            return boost::make_shared<cipher::RC5ByteTransformer>(io->password,
+            return std::make_shared<cipher::RC5ByteTransformer>(io->password,
                                                                   io->iv,
                                                                   io->iv2,
                                                                   io->iv3,
                                                                   io->iv3);
         } else if(io->cipher == 9) {
-            return boost::make_shared<cipher::SHACAL2ByteTransformer>(io->password,
+            return std::make_shared<cipher::SHACAL2ByteTransformer>(io->password,
                                                                       io->iv,
                                                                       io->iv2,
                                                                       io->iv3,
                                                                       io->iv3);
         } else if(io->cipher == 0) {
-            return boost::make_shared<cipher::NullByteTransformer>(io->password,
+            return std::make_shared<cipher::NullByteTransformer>(io->password,
                                                                    io->iv,
                                                                    io->iv2,
                                                                    io->iv3,
                                                                    io->iv3);
         } else {
-            return boost::make_shared<cipher::AESByteTransformer>(io->password,
+            return std::make_shared<cipher::AESByteTransformer>(io->password,
                                                                   io->iv,
                                                                   io->iv2,
                                                                   io->iv3,

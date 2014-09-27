@@ -39,7 +39,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/make_shared.hpp>
 
 #include <cassert>
 #include <sstream>
@@ -66,14 +65,14 @@ class TeaSafeFileDeviceTest
         // test write get file size from same entry
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::SharedTeaSafeFile entry(boost::make_shared<teasafe::TeaSafeFile>(io, "test.txt"));
+            teasafe::SharedTeaSafeFile entry(std::make_shared<teasafe::TeaSafeFile>(io, "test.txt"));
             teasafe::FileStreamPtr stream(new teasafe::FileStream(teasafe::TeaSafeFileDevice(entry)));
             std::string testData(createLargeStringToWrite());
             (*stream) << testData.c_str();
         }
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::SharedTeaSafeFile entry(boost::make_shared<teasafe::TeaSafeFile>(io, "entry", uint64_t(1),
+            teasafe::SharedTeaSafeFile entry(std::make_shared<teasafe::TeaSafeFile>(io, "entry", uint64_t(1),
                                        teasafe::OpenDisposition::buildReadOnlyDisposition()));
             ASSERT_EQUAL(BIG_SIZE, entry->fileSize(), "FileStreamTest::testWriteReportsCorrectFileSize()");
         }
@@ -87,14 +86,14 @@ class TeaSafeFileDeviceTest
         std::string testData(createLargeStringToWrite());
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::SharedTeaSafeFile entry(boost::make_shared<teasafe::TeaSafeFile>(io, "test.txt"));
+            teasafe::SharedTeaSafeFile entry(std::make_shared<teasafe::TeaSafeFile>(io, "test.txt"));
             teasafe::TeaSafeFileDevice device(entry);
             std::streampos bytesWrote = device.write(testData.c_str(), testData.length());
             ASSERT_EQUAL(BIG_SIZE, bytesWrote, "FileStreamTest::testWriteFollowedByRead() bytes wrote");
         }
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::SharedTeaSafeFile entry(boost::make_shared<teasafe::TeaSafeFile>(io, "entry", uint64_t(1),
+            teasafe::SharedTeaSafeFile entry(std::make_shared<teasafe::TeaSafeFile>(io, "entry", uint64_t(1),
                                        teasafe::OpenDisposition::buildReadOnlyDisposition()));
             std::vector<uint8_t> buffer;
             buffer.resize(entry->fileSize());

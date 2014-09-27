@@ -37,7 +37,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/format.hpp>
-#include <boost/make_shared.hpp>
 
 #include <ctime>
 #include <string>
@@ -53,7 +52,7 @@ std::vector<std::string> failingTestPoints;
 
 teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
 {
-    teasafe::SharedCoreIO io = boost::make_shared<teasafe::CoreTeaSafeIO>();
+    teasafe::SharedCoreIO io = std::make_shared<teasafe::CoreTeaSafeIO>();
     io->path = testPath.string();
     io->blocks = 2048;
     io->freeBlocks = 2048;
@@ -65,7 +64,7 @@ teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
     io->rounds = 64;
     io->cipher = 0; // NULL cipher (no encryption)
     io->rootBlock = 0;
-    io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
+    io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
     return io;
 }
 
@@ -100,7 +99,7 @@ std::string createAString()
 
 teasafe::SharedBlockBuilder testBlockBuilder()
 {
-    return boost::make_shared<teasafe::FileBlockBuilder>();
+    return std::make_shared<teasafe::FileBlockBuilder>();
 }
 
 #define ASSERT_EQUAL(A, B, C)                                          \

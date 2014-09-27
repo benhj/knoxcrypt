@@ -35,18 +35,18 @@
 #include "teasafe/TeaSafe.hpp"
 #include "utility/EventType.hpp"
 
-#include <boost/shared_ptr.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <QThread>
+#include <memory>
 
 namespace teasafe
 {
     class TeaSafe;
 }
 
-typedef boost::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
+typedef std::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
 
 class LoaderThread : public QThread
 {

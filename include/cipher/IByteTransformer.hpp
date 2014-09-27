@@ -37,9 +37,9 @@
 
 #include "utility/EventType.hpp"
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/signals2.hpp>
 #include <iostream>
+#include <memory>
 #include <string>
 
 namespace teasafe { namespace cipher
@@ -94,7 +94,7 @@ namespace teasafe { namespace cipher
         // for emitting when something is done (e.g.
         // start of key generation)
         typedef boost::signals2::signal<void(EventType)> CipherSignal;
-        typedef boost::shared_ptr<CipherSignal> SharedSignal;
+        typedef std::shared_ptr<CipherSignal> SharedSignal;
         SharedSignal m_cipherSignal;
         void broadcastEvent(EventType const &event);
         

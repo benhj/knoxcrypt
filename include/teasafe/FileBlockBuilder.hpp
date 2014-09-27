@@ -33,7 +33,7 @@
 #include "teasafe/FileBlock.hpp"
 #include "teasafe/OpenDisposition.hpp"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <deque>
 
@@ -41,7 +41,7 @@ namespace teasafe
 {
 
     class FileBlockBuilder;
-    typedef boost::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
+    typedef std::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
     typedef std::deque<uint64_t> BlockDeque;
 
     class FileBlockBuilder

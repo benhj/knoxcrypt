@@ -34,10 +34,10 @@
 #include "cipher/IByteTransformer.hpp"
 #include "utility/EventType.hpp"
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace teasafe { namespace cipher
 {

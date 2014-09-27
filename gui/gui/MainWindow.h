@@ -35,12 +35,12 @@
 #include "GUICipherCallback.h"
 #include "utility/EventType.hpp"
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 #include <QMainWindow>
 #include <QProgressDialog>
 #include <QMenu>
 #include <QAction>
 #include <QMovie>
+#include <memory>
 #include <set>
 
 namespace Ui
@@ -53,7 +53,7 @@ namespace teasafe
     class TeaSafe;
 }
 
-typedef boost::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
+typedef std::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
 
 enum class WorkType { RemoveItem, CreateFolder, ExtractItem, AddFile, AddFolder };
 
@@ -115,17 +115,17 @@ class MainWindow : public QMainWindow
     ContainerBuilderThread m_builderThread;
     WorkThread m_workThread;
     GUICipherCallback m_cipherCallback;
-    boost::shared_ptr<QMenu> m_contextMenu;
-    boost::shared_ptr<QAction> m_extractAction;
-    boost::shared_ptr<QAction> m_removeAction;
-    boost::shared_ptr<QAction> m_newFolderAction;
-    boost::shared_ptr<QAction> m_addFileAction;
-    boost::shared_ptr<QAction> m_addFolderAction;
-    typedef boost::shared_ptr<QProgressDialog> SharedDialog;
+    std::shared_ptr<QMenu> m_contextMenu;
+    std::shared_ptr<QAction> m_extractAction;
+    std::shared_ptr<QAction> m_removeAction;
+    std::shared_ptr<QAction> m_newFolderAction;
+    std::shared_ptr<QAction> m_addFileAction;
+    std::shared_ptr<QAction> m_addFolderAction;
+    typedef std::shared_ptr<QProgressDialog> SharedDialog;
     SharedDialog m_sd;
     std::set<std::string> m_populatedSet;
-    boost::shared_ptr<ItemAdder> m_itemAdder;
-    boost::shared_ptr<QMovie> m_spinner;
+    std::shared_ptr<ItemAdder> m_itemAdder;
+    std::shared_ptr<QMovie> m_spinner;
     void doWork(WorkType workType);
     void createRootFolderInTree();
 };

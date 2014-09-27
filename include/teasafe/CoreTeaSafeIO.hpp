@@ -31,17 +31,16 @@
 
 #include "utility/EventType.hpp"
 
-#include <string>
-
 #include <boost/function.hpp>
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <string>
+#include <memory>
 
 namespace teasafe
 {
 
     class FileBlockBuilder;
-    typedef boost::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
+    typedef std::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
 
     struct CoreTeaSafeIO
     {
@@ -62,7 +61,7 @@ namespace teasafe
         OptionalCallback ccb;            // call back for cipher
     };
 
-    typedef boost::shared_ptr<CoreTeaSafeIO> SharedCoreIO;
+    typedef std::shared_ptr<CoreTeaSafeIO> SharedCoreIO;
 
 }
 

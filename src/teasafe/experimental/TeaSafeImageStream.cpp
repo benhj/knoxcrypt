@@ -29,8 +29,6 @@
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "cipher/XTEAByteTransformer.hpp"
 
-#include <boost/make_shared.hpp>
-
 #include <vector>
 
 namespace teasafe
@@ -87,7 +85,7 @@ namespace teasafe
 
     TeaSafeImageStream::TeaSafeImageStream(SharedCoreIO const &io, std::ios::openmode mode)
         : m_stream(fopen(io->path.c_str(), helper::getModeString(mode).c_str()))
-        , m_byteTransformer(boost::make_shared<cipher::XTEAByteTransformer>(io->password))
+        , m_byteTransformer(std::make_shared<cipher::XTEAByteTransformer>(io->password))
         , m_pos(0)
     {
 

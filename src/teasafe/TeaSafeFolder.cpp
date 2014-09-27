@@ -32,8 +32,7 @@
 #include "teasafe/detail/DetailFolder.hpp"
 
 #include <boost/bind.hpp>
-#include <boost/make_shared.hpp>
-
+  
 #include <stdexcept>
 
 namespace teasafe
@@ -461,7 +460,7 @@ namespace teasafe
             startBlock = n;
         }
 
-        SharedEntryInfo info(boost::make_shared<EntryInfo>(entryName,
+        SharedEntryInfo info(std::make_shared<EntryInfo>(entryName,
                                                            fileSize,
                                                            entryType,
                                                            true, // writable

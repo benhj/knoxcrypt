@@ -31,8 +31,6 @@
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/FileBlockException.hpp"
 
-#include <boost/make_shared.hpp>
-
 namespace teasafe
 {
 
@@ -99,7 +97,7 @@ namespace teasafe
             mode |= std::ios::app;
         }
         if(!m_stream) {
-            m_stream = boost::make_shared<TeaSafeImageStream>(m_io, mode);
+            m_stream = std::make_shared<TeaSafeImageStream>(m_io, mode);
         } else {
             if(!m_stream->is_open()) {
                 m_stream->open(m_io, mode);

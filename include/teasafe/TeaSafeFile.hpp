@@ -36,28 +36,25 @@
 
 #include <boost/function.hpp>
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 
+#include <memory>
 #include <vector>
-
 #include <iosfwd>                           // streamsize, seekdir
-
 #include <string>
-
 #include <deque>
 
 namespace teasafe
 {
 
     class TeaSafeFile;
-    typedef boost::shared_ptr<TeaSafeFile> SharedTeaSafeFile;
+    typedef std::shared_ptr<TeaSafeFile> SharedTeaSafeFile;
 
     class TeaSafeFile
     {
 
         typedef boost::function<void(uint64_t)> SetEntryInfoSizeCallback;
         typedef boost::optional<SetEntryInfoSizeCallback> OptionalSizeCallback;
-        typedef boost::shared_ptr<FileBlock> SharedFileBlock;
+        typedef std::shared_ptr<FileBlock> SharedFileBlock;
 
       public:
         /**

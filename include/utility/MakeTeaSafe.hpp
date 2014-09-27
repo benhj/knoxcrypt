@@ -39,16 +39,14 @@
 #include "utility/EventType.hpp"
 #include "utility/PassHasher.hpp"
 
-#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/signals2.hpp>
 
 #include <string>
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <memory>
 
 
 namespace teasafe
@@ -65,7 +63,7 @@ namespace teasafe
             : m_io(io)
             , m_omp(omp)
             , m_sparse(sparse)
-            , m_writeSignal(boost::make_shared<WriteSignal>())
+            , m_writeSignal(std::make_shared<WriteSignal>())
         {
         }
 
@@ -86,7 +84,7 @@ namespace teasafe
 
         /// to notify image-writing process
         typedef boost::signals2::signal<void(EventType)> WriteSignal;
-        typedef boost::shared_ptr<WriteSignal> SharedWriteSignal;
+        typedef std::shared_ptr<WriteSignal> SharedWriteSignal;
         SharedWriteSignal m_writeSignal;
 
         MakeTeaSafe(); // not required
@@ -238,7 +236,7 @@ namespace teasafe
             // always be block 0
             // added block builder here since can only work after bitmap created
             // fixes issue https://github.com/benhj/teasafe/issues/15
-            io->blockBuilder = boost::make_shared<teasafe::FileBlockBuilder>(io);
+            io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
             TeaSafeFolder rootDir(io, "root");
 
             // create an extra 'magic partition' which is another root folder

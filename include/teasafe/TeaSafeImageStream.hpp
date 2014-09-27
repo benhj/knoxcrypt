@@ -34,18 +34,18 @@
 #include "cipher/IByteTransformer.hpp"
 
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-
+#include <memory>
+  
 #include <fstream>
 #include <string>
 
 namespace teasafe
 {
 
-    typedef boost::shared_ptr<cipher::IByteTransformer> ByteTransformerPtr;
+    typedef std::shared_ptr<cipher::IByteTransformer> ByteTransformerPtr;
 
     class TeaSafeImageStream;
-    typedef boost::shared_ptr<TeaSafeImageStream> SharedImageStream;
+    typedef std::shared_ptr<TeaSafeImageStream> SharedImageStream;
 
     class TeaSafeImageStream
     {
