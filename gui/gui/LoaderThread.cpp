@@ -32,7 +32,8 @@
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
-#include <boost/make_shared.hpp>
+
+#include <memory>
 
 LoaderThread::LoaderThread(QObject *parent) :
     QThread(parent),

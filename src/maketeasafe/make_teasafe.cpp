@@ -35,8 +35,6 @@
 
 #include <boost/progress.hpp>
 #include <boost/program_options.hpp>
-#include <boost/random.hpp>
-#include <boost/nondet_random.hpp>
 
 #include <ctime>
 #include <functional>

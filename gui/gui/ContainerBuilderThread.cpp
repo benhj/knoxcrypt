@@ -1,8 +1,8 @@
 #include "ContainerBuilderThread.h"
 
-#include <boost/make_shared.hpp>
-
 #include <QDebug>
+
+#include <memory>
 
 ContainerBuilderThread::ContainerBuilderThread(QObject *parent)
     : QThread(parent)

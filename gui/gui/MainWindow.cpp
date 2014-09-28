@@ -45,7 +45,6 @@
 #include "utility/RemoveEntry.hpp"
 #include "utility/RandomNumberGenerator.hpp"
 
-#include <boost/make_shared.hpp>
 #include <QTreeWidgetItem>
 #include <QDebug>
 #include <QFileDialog>
@@ -55,6 +54,7 @@
 #include <fstream>
 #include <functional>
 #include <vector>
+#include <memory>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
