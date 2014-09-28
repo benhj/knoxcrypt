@@ -1,9 +1,8 @@
 #ifndef TEASAFE_UTILITY_CONCURRENT_QUEUE_HPP__
 #define TEASAFE_UTILITY_CONCURRENT_QUEUE_HPP__
 
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition_variable.hpp>
 #include <queue>
+#include <mutex>
 
 //
 // Note, this is not my code; found here:
@@ -20,7 +19,7 @@ namespace teasafe {
         {
         private:
             std::queue<Data> the_queue;
-            mutable boost::mutex the_mutex;
+            mutable std::mutex the_mutex;
             boost::condition_variable the_condition_variable;
             mutable bool m_wait;
         public:
@@ -31,7 +30,7 @@ namespace teasafe {
 
             void stopWaiting(Data const& killSignal)
             {
-                boost::mutex::scoped_lock lock(the_mutex);
+                std::mutex::scoped_lock lock(the_mutex);
                 the_queue.push(killSignal);
                 m_wait = false;
                 lock.unlock();
@@ -40,7 +39,7 @@ namespace teasafe {
 
             void push(Data const& data)
             {
-                boost::mutex::scoped_lock lock(the_mutex);
+                std::mutex::scoped_lock lock(the_mutex);
                 the_queue.push(data);
                 lock.unlock();
                 the_condition_variable.notify_one();
@@ -48,13 +47,13 @@ namespace teasafe {
 
             bool empty() const
             {
-                boost::mutex::scoped_lock lock(the_mutex);
+                std::mutex::scoped_lock lock(the_mutex);
                 return the_queue.empty();
             }
 
             bool try_pop(Data& popped_value)
             {
-                boost::mutex::scoped_lock lock(the_mutex);
+                std::mutex::scoped_lock lock(the_mutex);
                 if(the_queue.empty())
                 {
                     return false;
@@ -67,7 +66,7 @@ namespace teasafe {
 
             void wait_and_pop(Data& popped_value)
             {
-                boost::mutex::scoped_lock lock(the_mutex);
+                std::mutex::scoped_lock lock(the_mutex);
                 while(the_queue.empty() && m_wait)
                 {
                     the_condition_variable.wait(lock);

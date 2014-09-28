@@ -34,5 +34,4 @@ namespace teasafe
     enum class EntryType { FileType, FolderType };
 }
 
-
 #endif // TeaSafe_ENTRY_TYPE_HPP__

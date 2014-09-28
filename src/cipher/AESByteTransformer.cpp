@@ -59,6 +59,7 @@ DEALINGS IN THE SOFTWARE.
 #include "cryptopp/aes.h"
 #include "cryptopp/ccm.h"
 
+
 namespace teasafe { namespace cipher
 {
     AESByteTransformer::AESByteTransformer(std::string const &password,

@@ -37,12 +37,11 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/optional.hpp>
-#include <boost/thread/locks.hpp>
-#include <boost/thread/mutex.hpp>
 
 #include <map>
 #include <memory>
 #include <string>
+#include <mutex>
 
 #include <sys/statvfs.h>
 
@@ -167,8 +166,8 @@ namespace teasafe
         typedef std::map<std::string, SharedTeaSafeFolder> FolderCache;
         mutable FolderCache m_folderCache;
 
-        typedef boost::mutex StateMutex;
-        typedef boost::lock_guard<StateMutex> StateLock;
+        typedef std::mutex StateMutex;
+        typedef std::lock_guard<StateMutex> StateLock;
         mutable StateMutex m_stateMutex;
 
         // so that a new file doesn't need to be created each time the same file is opened

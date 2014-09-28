@@ -35,11 +35,9 @@
 #include "teasafe/TeaSafe.hpp"
 #include "utility/EventType.hpp"
 
-#include <boost/thread/locks.hpp>
-#include <boost/thread/mutex.hpp>
-
 #include <QThread>
 #include <memory>
+#include <mutex>
 
 namespace teasafe
 {
@@ -68,8 +66,8 @@ class LoaderThread : public QThread
   private:
     teasafe::SharedCoreIO m_io;
     SharedTeaSafe m_teaSafe;
-    typedef boost::mutex TeaMutex;
-    typedef boost::lock_guard<TeaMutex> TeaLock;
+    typedef std::mutex TeaMutex;
+    typedef std::lock_guard<TeaMutex> TeaLock;
     mutable TeaMutex m_teaMutex;
 
     void loadTSImage();
