@@ -11,22 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = gui
 TEMPLATE = app
 
-macx {
-    CONFIG += MAC_CONFIG
-    MAC_CONFIG {
-        QMAKE_CXXFLAGS = -std=c++11 -mmacosx-version-min=10.7
-        QMAKE_LFLAGS = -std=c++11 -mmacosx-version-min=10.7
-    }
-}
-
-unix {
-    CONFIG += UNIX_CONFIG
-    UNIX_CONFIG {
-        QMAKE_CXXFLAGS = -std=c++11
-        QMAKE_LFLAGS = -std=c++11
-    }
-}
-
+CONFIG += c++11
 
 LIBS += -L/usr/local/lib -L/usr/lib -lboost_system -lboost_filesystem -lboost_thread-mt -lboost_random
 LIBS += ../../libteasafe.a /usr/lib/libcryptopp.a
@@ -38,19 +23,18 @@ SOURCES += main.cpp \
            MainWindow.cpp \
            LoaderThread.cpp \
            WorkThread.cpp \
-    ItemAdder.cpp \
-    ContainerBuilderThread.cpp \
-    GUICipherCallback.cpp
+           ItemAdder.cpp \
+           ContainerBuilderThread.cpp \
+           GUICipherCallback.cpp
 
 HEADERS  += MainWindow.h \
             LoaderThread.h \
             TreeItemPathDeriver.h \
             WorkThread.h \
-    ItemAdder.h \
-    ContainerBuilderThread.h \
-    GUICipherCallback.h
+            ItemAdder.h \
+            ContainerBuilderThread.h \
+            GUICipherCallback.h
 
 FORMS += MainWindow.ui
 
-RESOURCES += \
-    resources.qrc
+RESOURCES += resources.qrc

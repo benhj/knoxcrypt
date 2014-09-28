@@ -18,7 +18,8 @@ void ContainerBuilderThread::setSharedIO(teasafe::SharedCoreIO const &io)
     m_imageBuilder = std::make_shared<teasafe::MakeTeaSafe>(m_io, sparseImage);
 
     // register progress callback for imager
-    std::function<void(teasafe::EventType)> fb(std::bind(&ContainerBuilderThread::imagerCallback, this, _1, m_io->blocks));
+    std::function<void(teasafe::EventType)> fb(std::bind(&ContainerBuilderThread::imagerCallback,
+                                                         this, std::placeholders::_1, m_io->blocks));
     m_imageBuilder->registerSignalHandler(fb);
 
 }

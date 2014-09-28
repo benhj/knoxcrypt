@@ -181,7 +181,9 @@ void MainWindow::loadFileButtonHandler()
 
             // give the cipher generation process a gui callback
             long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback, &m_cipherCallback, _1, amount));
+            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
+                                                                &m_cipherCallback,
+                                                                std::placeholders::_1, amount));
             io->ccb = f;
 
             // create a progress dialog to display progress of cipher generation
@@ -261,7 +263,9 @@ void MainWindow::newButtonHandler()
 
             // give the cipher generation process a gui callback
             long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback, &m_cipherCallback, _1, amount));
+            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
+                                                                &m_cipherCallback,
+                                                                std::placeholders::_1, amount));
             io->ccb = f;
 
             // create a progress dialog to display progress of cipher generation
@@ -416,7 +420,8 @@ void MainWindow::doWork(WorkType workType)
                 std::string fsPath = dlg.selectedFiles().at(0).toStdString();
 
                 qDebug() << "ExtractItem";
-                std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback, this, _1));
+                std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback,
+                                                              this, std::placeholders::_1));
                 f = std::bind(teasafe::utility::extractToPhysical, boost::ref(*m_teaSafe),
                                 teaPath, fsPath, cb);
             }
@@ -448,7 +453,8 @@ void MainWindow::doWork(WorkType workType)
                 if(dlg.exec()) {
 
                     std::string fsPath = dlg.selectedFiles().at(0).toStdString();
-                    std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback, this, _1));
+                    std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback,
+                                                                  this, std::placeholders::_1));
                     f = std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
                                     teaPath, fsPath, cb);
                     QTreeWidgetItem *item = new QTreeWidgetItem(*it);
@@ -464,7 +470,8 @@ void MainWindow::doWork(WorkType workType)
                 dlg.setFileMode(QFileDialog::AnyFile);
                 if(dlg.exec()) {
                     std::string fsPath = dlg.selectedFiles().at(0).toStdString();
-                    std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback, this, _1));
+                    std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback,
+                                                                  this, std::placeholders::_1));
                     f = std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
                                     teaPath, fsPath, cb);
                     QTreeWidgetItem *item = new QTreeWidgetItem(*it);

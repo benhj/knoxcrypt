@@ -30,7 +30,7 @@ namespace teasafe {
 
             void stopWaiting(Data const& killSignal)
             {
-                std::mutex::scoped_lock lock(the_mutex);
+                std::unique_lock<std::mutex> lock(the_mutex);
                 the_queue.push(killSignal);
                 m_wait = false;
                 lock.unlock();
@@ -39,7 +39,7 @@ namespace teasafe {
 
             void push(Data const& data)
             {
-                std::mutex::scoped_lock lock(the_mutex);
+                std::unique_lock<std::mutex> lock(the_mutex);
                 the_queue.push(data);
                 lock.unlock();
                 the_condition_variable.notify_one();
@@ -47,13 +47,13 @@ namespace teasafe {
 
             bool empty() const
             {
-                std::mutex::scoped_lock lock(the_mutex);
+                std::unique_lock<std::mutex> lock(the_mutex);
                 return the_queue.empty();
             }
 
             bool try_pop(Data& popped_value)
             {
-                std::mutex::scoped_lock lock(the_mutex);
+                std::unique_lock<std::mutex> lock(the_mutex);
                 if(the_queue.empty())
                 {
                     return false;
@@ -66,7 +66,7 @@ namespace teasafe {
 
             void wait_and_pop(Data& popped_value)
             {
-                std::mutex::scoped_lock lock(the_mutex);
+                std::unique_lock<std::mutex> lock(the_mutex);
                 while(the_queue.empty() && m_wait)
                 {
                     the_condition_variable.wait(lock);
