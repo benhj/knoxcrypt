@@ -20,7 +20,7 @@ namespace teasafe {
         private:
             std::queue<Data> the_queue;
             mutable std::mutex the_mutex;
-            boost::condition_variable the_condition_variable;
+            std::condition_variable the_condition_variable;
             mutable bool m_wait;
         public:
             ConcurrentQueue()
