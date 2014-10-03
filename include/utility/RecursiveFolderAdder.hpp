@@ -57,7 +57,7 @@ namespace teasafe
             boost::filesystem::path p(fsPath);
             boost::filesystem::directory_iterator itr(p);
             boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
-            for ( ; itr != end_itr; ++itr ) {
+            for (; itr != end_itr; ++itr) {
                 boost::filesystem::path tp(teaPath);
                 boost::filesystem::path fs(p);
                 fs /= itr->path().filename();

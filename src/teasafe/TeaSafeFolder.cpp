@@ -377,13 +377,12 @@ namespace teasafe
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        std::vector<EntryInfo> infos = entry.listAllEntries();
-        std::vector<EntryInfo>::iterator it = infos.begin();
-        for (; it != infos.end(); ++it) {
-            if (it->type() == EntryType::FileType) {
-                entry.removeTeaSafeFile(it->filename());
+        auto infos = entry.listAllEntries();
+        for (auto const &it : infos) {
+            if (it.type() == EntryType::FileType) {
+                entry.removeTeaSafeFile(it.filename());
             } else {
-                entry.removeTeaSafeFolder(it->filename());
+                entry.removeTeaSafeFolder(it.filename());
             }
         }
 

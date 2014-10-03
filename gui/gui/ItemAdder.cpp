@@ -47,12 +47,12 @@ void ItemAdder::populate(QTreeWidgetItem *parent,
         std::vector<teasafe::EntryInfo> entryInfos = f.listAllEntries();
         std::vector<teasafe::EntryInfo>::iterator it = entryInfos.begin();
 
-        for(; it != entryInfos.end(); ++it) {
+        for(auto const &it : entryInfos) {
             QTreeWidgetItem *item = new QTreeWidgetItem(parent);
-            if(it->type() == teasafe::EntryType::FolderType) {
+            if(it.type() == teasafe::EntryType::FolderType) {
                 item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
             }
-            item->setText(0, QString(it->filename().c_str()));
+            item->setText(0, QString(it.filename().c_str()));
         }
     }
 

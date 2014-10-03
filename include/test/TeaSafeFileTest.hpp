@@ -178,10 +178,9 @@ class TeaSafeFileTest
             ASSERT_EQUAL(0, entry.fileSize(), "testFileUnlink B");
 
             // test that blocks deallocated after unlink
-            std::vector<uint64_t>::iterator it = blockIndices.begin();
             teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
-            for (; it != blockIndices.end(); ++it) {
-                ASSERT_EQUAL(false, teasafe::detail::isBlockInUse(*it, blocks, in), "testFileUnlink: blockDeallocatedTest");
+            for (auto const & it : blockIndices) {
+                ASSERT_EQUAL(false, teasafe::detail::isBlockInUse(it, blocks, in), "testFileUnlink: blockDeallocatedTest");
             }
             in.close();
         }

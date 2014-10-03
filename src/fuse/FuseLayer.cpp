@@ -299,26 +299,25 @@ namespace fuselayer
                         off_t, struct fuse_file_info *)
         {
             try {
-                teasafe::TeaSafeFolder folder = TeaSafe_DATA->getTeaSafeFolder(path);
+                auto folder = TeaSafe_DATA->getTeaSafeFolder(path);
 
-                std::vector<teasafe::EntryInfo> infos = folder.listAllEntries();
-                std::vector<teasafe::EntryInfo>::iterator it = infos.begin();
+                auto infos = folder.listAllEntries();
 
                 filler(buf, ".", NULL, 0);           /* Current directory (.)  */
                 filler(buf, "..", NULL, 0);
 
-                for (; it != infos.end(); ++it) {
+                for(auto const &it : infos) {
                     struct stat stbuf;
-                    if (it->type() == teasafe::EntryType::FileType) {
+                    if (it.type() == teasafe::EntryType::FileType) {
                         stbuf.st_mode = S_IFREG | 0755;
                         stbuf.st_nlink = 1;
-                        stbuf.st_size = it->size();
+                        stbuf.st_size = it.size();
                     } else {
                         stbuf.st_mode = S_IFDIR | 0744;
                         stbuf.st_nlink = 3;
                     }
 
-                    filler(buf, it->filename().c_str(), &stbuf, 0);
+                    filler(buf, it.filename().c_str(), &stbuf, 0);
 
                 }
             } catch (teasafe::TeaSafeException const &e) {

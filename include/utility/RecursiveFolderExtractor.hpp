@@ -56,24 +56,23 @@ namespace teasafe
         {
 
             // get the parent folder
-            teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(teaPath);
+            auto folder = theBfs.getTeaSafeFolder(teaPath);
 
             // iterate over entries in folder
-            std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
+            auto entries = folder.listAllEntries();
 
-            std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
-            for (; it != entries.end(); ++it) {
+            for (auto const &it : entries) {
 
                 // If folder, create a folder at whereToWrite and recurse
                 // in to recurseExtract
-                if(it->type() == EntryType::FolderType) {
-                    visitor.enterFolder(*it);
+                if(it.type() == EntryType::FolderType) {
+                    visitor.enterFolder(it);
                     boost::filesystem::path teaLoc(teaPath);
-                    teaLoc /= it->filename();
+                    teaLoc /= it.filename();
                     recursiveExtract(visitor, theBfs, teaLoc.string());
-                    visitor.exitFolder(*it);
+                    visitor.exitFolder(it);
                 } else {
-                    visitor.enterFile(*it);
+                    visitor.enterFile(it);
                 }
 
             }

@@ -422,7 +422,7 @@ namespace teasafe
         pathToCheck = pathToCheck.relative_path().parent_path();
 
         // prefer to pull out of cache if it exists
-        FolderCache::const_iterator cacheIt = m_folderCache.find(pathToCheck.string());
+        auto cacheIt = m_folderCache.find(pathToCheck.string());
         if (cacheIt != m_folderCache.end()) {
             return cacheIt->second;
         }
@@ -430,11 +430,11 @@ namespace teasafe
 
         // iterate over path parts extracting sub folders along the way
         boost::filesystem::path::iterator it = pathToCheck.begin();
-        TeaSafeFolder folderOfInterest = *m_rootFolder;
+        auto folderOfInterest = *m_rootFolder;
         boost::filesystem::path pathBuilder;
-        for (; it != pathToCheck.end(); ++it) {
+        for (auto const & it : pathToCheck) {
 
-            SharedEntryInfo entryInfo = folderOfInterest.getEntryInfo(it->string());
+            SharedEntryInfo entryInfo = folderOfInterest.getEntryInfo(it.string());
 
             if (!entryInfo) {
                 return SharedTeaSafeFolder();

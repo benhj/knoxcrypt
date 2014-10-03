@@ -89,13 +89,12 @@ Commands g_availableCommands;
 /// lists all available commands
 void com_help()
 {
-    Commands::iterator it = g_availableCommands.begin();
     std::cout<<std::endl;
     std::cout<<boost::format("%1% %|20t|%2% %|80t|%3%\n") % "Command" % "Description" % "Usage";
     std::cout<<boost::format("%1% %|20t|%2% %|80t|%3%\n") % "-------" % "-----------" % "-----";
     std::cout<<std::endl;
-    for(; it != g_availableCommands.end(); ++it) {
-        std::cout<<boost::format("%1% %|20t|%2% %|80t|%3%\n") % it->command % it->desc % it->usage;
+    for(auto const & it : g_availableCommands) {
+        std::cout<<boost::format("%1% %|20t|%2% %|80t|%3%\n") % it.command % it.desc % it.usage;
     }
     std::cout<<std::endl;
 }
@@ -108,14 +107,13 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
     thePath.append(path);
 
     // iterate over entries in folder and print filenames of each
-    teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(thePath);
-    std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
-    std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
-    for (; it != entries.end(); ++it) {
-        if (it->type() == teasafe::EntryType::FileType) {
-            std::cout<<boost::format("%1% %|30t|%2%\n") % it->filename() % "<F>";
+    auto folder = theBfs.getTeaSafeFolder(thePath);
+    auto entries = folder.listAllEntries();
+    for (auto const &it : entries) {
+        if (it.type() == teasafe::EntryType::FileType) {
+            std::cout<<boost::format("%1% %|30t|%2%\n") % it.filename() % "<F>";
         } else {
-            std::cout<<boost::format("%1% %|30t|%2%\n") % it->filename() % "<D>";
+            std::cout<<boost::format("%1% %|30t|%2%\n") % it.filename() % "<D>";
         }
     }
 }
@@ -134,17 +132,16 @@ std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const 
     std::string parentPath(bp.parent_path().string());
 
     // get the parent folder
-    teasafe::TeaSafeFolder folder = theBfs.getTeaSafeFolder(parentPath);
+    auto folder = theBfs.getTeaSafeFolder(parentPath);
 
     // iterate over entries in folder
-    std::vector<teasafe::EntryInfo> entries = folder.listAllEntries();
-    std::vector<teasafe::EntryInfo>::iterator it = entries.begin();
-    for (; it != entries.end(); ++it) {
+    auto entries = folder.listAllEntries();
+    for (auto const &it : entries) {
 
         // try to match the entry with the thing that we want to tab-complete
-        std::string extracted(it->filename().substr(0, bp.filename().string().length()));
+        std::string extracted(it.filename().substr(0, bp.filename().string().length()));
         if(extracted == bp.filename()) {
-            return it->filename(); // match, return name of entry
+            return it.filename(); // match, return name of entry
         }
     }
     return bp.filename().string(); // no match, return non tab-completed token
@@ -154,13 +151,12 @@ std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const 
 std::string tabCompleteCommand(std::string const &command)
 {
     // iterate over entries in folder
-    Commands::iterator it = g_availableCommands.begin();
-    for (; it != g_availableCommands.end(); ++it) {
+    for (auto const & it : g_availableCommands) {
 
         // try to match the entry with the thing that we want to tab-complete
-        std::string extracted(it->command.substr(0, command.length()));
+        std::string extracted(it.command.substr(0, command.length()));
         if(extracted == command) {
-            return it->command; // match, return name of command
+            return it.command; // match, return name of command
         }
     }
     return command; // no match, return un tab-completed version
@@ -257,9 +253,9 @@ void com_cd(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string const
 /// from http://stackoverflow.com/questions/1746136/how-do-i-normalize-a-pathname-using-boostfilesystem
 boost::filesystem::path normalize(const boost::filesystem::path &path)
 {
-    boost::filesystem::path absPath = boost::filesystem::absolute(path);
-    boost::filesystem::path::iterator it = absPath.begin();
-    boost::filesystem::path result = *it++;
+    auto absPath = boost::filesystem::absolute(path);
+    auto it = absPath.begin();
+    auto result = *it++;
 
     // For the rest remove ".." and "." in a path with no symlinks
     for (; it != absPath.end(); ++it) {

@@ -402,16 +402,16 @@ void MainWindow::doWork(WorkType workType)
 {
     QList<QTreeWidgetItem*> selectedItems = ui->fileTree->selectedItems();
     QList<QTreeWidgetItem*>::iterator it = selectedItems.begin();
-    for (; it != selectedItems.end(); ++it) {
-        std::string teaPath(detail::getPathFromCurrentItem(*it));
+    for (auto const &it : selectedItems) {
+        std::string teaPath(detail::getPathFromCurrentItem(it));
         qDebug() << teaPath.c_str();
         std::function<void()> f;
-        if(       workType == WorkType::RemoveItem) {
+        if(workType == WorkType::RemoveItem) {
             qDebug() << "RemoveItem";
             f = std::bind(teasafe::utility::removeEntry, boost::ref(*m_teaSafe),
-                            teaPath);
+                          teaPath);
 
-            delete *it;
+            delete it;
         } else if(workType == WorkType::ExtractItem) {
             QFileDialog dlg( NULL, tr("Filesystem folder to extract to.."));
             dlg.setAcceptMode( QFileDialog::AcceptOpen );
@@ -434,12 +434,12 @@ void MainWindow::doWork(WorkType workType)
                                                                tr("Folder name:"), QLineEdit::Normal,"",&ok).toStdString();
 
                 if((!folderName.empty()) && ok) {
-                    std::string path((*it)->text(0).toStdString() == "/" ?
+                    std::string path((it)->text(0).toStdString() == "/" ?
                                      teaPath.append(folderName) :
                                      teaPath.append("/").append(folderName));
 
                     f = std::bind(&teasafe::TeaSafe::addFolder, m_teaSafe, path);
-                    QTreeWidgetItem *item = new QTreeWidgetItem(*it);
+                    QTreeWidgetItem *item = new QTreeWidgetItem(it);
                     item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
                     item->setText(0, QString(folderName.c_str()));
                 }
@@ -457,7 +457,7 @@ void MainWindow::doWork(WorkType workType)
                                                                   this, std::placeholders::_1));
                     f = std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
                                     teaPath, fsPath, cb);
-                    QTreeWidgetItem *item = new QTreeWidgetItem(*it);
+                    QTreeWidgetItem *item = new QTreeWidgetItem(it);
                     item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
                     item->setText(0, QString(boost::filesystem::path(fsPath).filename().c_str()));
                 }
@@ -474,7 +474,7 @@ void MainWindow::doWork(WorkType workType)
                                                                   this, std::placeholders::_1));
                     f = std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
                                     teaPath, fsPath, cb);
-                    QTreeWidgetItem *item = new QTreeWidgetItem(*it);
+                    QTreeWidgetItem *item = new QTreeWidgetItem(it);
                     item->setText(0, QString(boost::filesystem::path(fsPath).filename().c_str()));
                 }
             }
