@@ -40,9 +40,9 @@ namespace teasafe
         {
             // obtain all available blocks and store in a map for quick lookup
             teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
-            std::vector<uint64_t> allBlocks = detail::getNAvailableBlocks(stream,
-                                                                          io->freeBlocks,
-                                                                          io->blocks);
+            auto allBlocks = detail::getNAvailableBlocks(stream,
+                                                         io->freeBlocks,
+                                                         io->blocks);
             BlockDeque deque(allBlocks.begin(), allBlocks.end());
             return deque;
         }
@@ -50,7 +50,7 @@ namespace teasafe
         void checkAndInitStream(SharedCoreIO const & io, SharedImageStream &stream)
         {
             if(!stream) {
-                std::ios::openmode mode = std::ios::in;
+                auto mode = std::ios::in;
                 mode |= std::ios::out;
                 mode |= std::ios::binary;
                 stream = std::make_shared<TeaSafeImageStream>(io, mode);
@@ -64,7 +64,7 @@ namespace teasafe
             checkAndInitStream(io, stream);
 
             (void)stream->seekp(0, std::ios::end);
-            std::streamsize toReturn = stream->tellp();
+            auto toReturn = stream->tellp();
             stream->seekp(0);
             uint64_t const volumeBitMapBytes = io->blocks / uint64_t(8);
             toReturn -= (detail::beginning() + 8 /* block count */ + volumeBitMapBytes + 8 /* count */);

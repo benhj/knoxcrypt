@@ -193,7 +193,7 @@ namespace fuselayer
             }
 
             try {
-                teasafe::EntryInfo info = TeaSafe_DATA->getInfo(path);
+                auto info = TeaSafe_DATA->getInfo(path);
             } catch (teasafe::TeaSafeException const &e) {
                 return detail::exceptionDispatch(e);
             }
@@ -205,9 +205,9 @@ namespace fuselayer
         int
         teasafe_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *)
         {
-            teasafe::TeaSafeFileDevice device = TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
+            auto device = TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
             device.seek(offset, std::ios_base::beg);
-            std::streamsize read = device.read(buf,size);
+            auto read = device.read(buf,size);
             if(read < 0) { 
                 return 0;
             }
@@ -220,20 +220,20 @@ namespace fuselayer
                       struct fuse_file_info *fi)
         {
 
-            teasafe::ReadOrWriteOrBoth openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
+            auto openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
 
             /*
               if((fi->flags & O_RDWR) == O_RDWR) {
               openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
               }*/
 
-            teasafe::AppendOrOverwrite appendType = teasafe::AppendOrOverwrite::Append;
+            auto appendType = teasafe::AppendOrOverwrite::Append;
 
             if ((fi->flags & O_APPEND) == O_APPEND) {
                 appendType = teasafe::AppendOrOverwrite::Append;
             }
 
-            teasafe::TruncateOrKeep truncateType = teasafe::TruncateOrKeep::Keep;
+            auto truncateType = teasafe::TruncateOrKeep::Keep;
 
             if ((fi->flags & O_TRUNC) == O_TRUNC) {
                 truncateType = teasafe::TruncateOrKeep::Truncate;
@@ -241,9 +241,9 @@ namespace fuselayer
 
             teasafe::OpenDisposition od(openMode, appendType, teasafe::CreateOrDontCreate::Create, truncateType);
 
-            teasafe::TeaSafeFileDevice device = TeaSafe_DATA->openFile(path, od);
+            auto device = TeaSafe_DATA->openFile(path, od);
             device.seek(offset, std::ios_base::beg);
-            std::streamsize written = device.write(buf, size);
+            auto written = device.write(buf, size);
             if(written < 0) {
                 return 0;
             }
