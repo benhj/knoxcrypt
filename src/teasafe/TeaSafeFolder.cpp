@@ -93,11 +93,8 @@ namespace teasafe
         {
             std::vector<uint8_t> filename;
             filename.assign(MAX_FILENAME_LENGTH, 0);
-            std::vector<uint8_t>::size_type i = 0;
-            for (; i < name.length(); ++i) {
-                filename[i] = name[i];
-            }
-            filename[i] = '\0'; // set null byte to indicate end of filename
+            (void)memcpy(&filename.front(), &name.front(), name.length());
+            filename[name.length()] = '\0'; // set null byte to indicate end of filename
             return filename;
         }
     }

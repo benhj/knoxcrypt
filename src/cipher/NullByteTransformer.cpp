@@ -53,17 +53,13 @@ namespace teasafe { namespace cipher
     void 
     NullByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {
-        for(long i(0); i < length; ++i) {
-          out[i] = in[i];
-        }
+        (void)memcpy(out, in, length);
     }
 
     void 
     NullByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {
-        for(long i(0); i < length; ++i) {
-          out[i] = in[i];
-        }
+        (void)memcpy(out, in, length);
     }
 }
 }
