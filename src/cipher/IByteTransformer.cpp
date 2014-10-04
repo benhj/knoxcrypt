@@ -84,19 +84,10 @@ namespace teasafe { namespace cipher
             IByteTransformer::m_init = true;
 
             // construct the big IV
-            int c =0;
-            for(; c < 8; ++c) {
-              g_bigIV[c] = salt[c];
-            }
-            for(; c < 16; ++c) {
-              g_bigIV[c] = saltB[c-8];
-            }
-            for(; c < 24; ++c) {
-              g_bigIV[c] = saltC[c-16];
-            }
-            for(; c < 32; ++c) {
-              g_bigIV[c] = saltD[c-24];
-            }
+            (void)memcpy(g_bigIV, salt, 8);
+            (void)memcpy(g_bigIV + 8, saltB, 8);
+            (void)memcpy(g_bigIV + 16, saltC, 8);
+            (void)memcpy(g_bigIV + 24, saltD, 8);
             m_init = true;
         }
     }
