@@ -31,86 +31,57 @@
 #ifndef TEASAFE_CIPHER_BUILDER_HPP__
 #define TEASAFE_CIPHER_BUILDER_HPP__
 
-#include "cipher/AESByteTransformer.hpp"
-#include "cipher/TwofishByteTransformer.hpp"
-#include "cipher/SerpentByteTransformer.hpp"
-#include "cipher/RC6ByteTransformer.hpp"
-#include "cipher/MARSByteTransformer.hpp"
-#include "cipher/CASTByteTransformer.hpp"
-#include "cipher/CamelliaByteTransformer.hpp"
-#include "cipher/RC5ByteTransformer.hpp"
-#include "cipher/SHACAL2ByteTransformer.hpp"
+#include "cipher/CryptoByteTransformer.hpp"
 #include "cipher/NullByteTransformer.hpp"
-
 #include "teasafe/CoreTeaSafeIO.hpp"
+
+#include "cryptopp/aes.h"
+#include "cryptopp/camellia.h"
+#include "cryptopp/mars.h"
+#include "cryptopp/rc5.h"
+#include "cryptopp/rc6.h"
+#include "cryptopp/serpent.h"
+#include "cryptopp/shacal2.h"
+#include "cryptopp/twofish.h"
+#include "cryptopp/cast.h"
 
 #include <memory>
 
+#define BUILD_CIPHER(X)                                                              \
+  return std::make_shared<cipher::CryptoByteTransformer<CryptoPP::X> >(io->password, \
+                                                                       io->iv,       \ 
+                                                                       io->iv2,      \
+                                                                       io->iv3,      \
+                                                                       io->iv3);     
 namespace teasafe
 {
 
     std::shared_ptr<cipher::IByteTransformer> buildCipherType(SharedCoreIO const &io)
     {
         if(io->cipher == 2) {
-            return std::make_shared<cipher::TwofishByteTransformer>(io->password,
-                                                                      io->iv,
-                                                                      io->iv2,
-                                                                      io->iv3,
-                                                                      io->iv3);
+            BUILD_CIPHER(Twofish);
         } else if(io->cipher == 3) {
-            return std::make_shared<cipher::SerpentByteTransformer>(io->password,
-                                                                      io->iv,
-                                                                      io->iv2,
-                                                                      io->iv3,
-                                                                      io->iv3);
+            BUILD_CIPHER(Serpent);
         } else if(io->cipher == 4) {
-            return std::make_shared<cipher::RC6ByteTransformer>(io->password,
-                                                                  io->iv,
-                                                                  io->iv2,
-                                                                  io->iv3,
-                                                                  io->iv3);
+            BUILD_CIPHER(RC6);
         } else if(io->cipher == 5) {
-            return std::make_shared<cipher::MARSByteTransformer>(io->password,
-                                                                  io->iv,
-                                                                  io->iv2,
-                                                                  io->iv3,
-                                                                  io->iv3);
+            BUILD_CIPHER(MARS);
         } else if(io->cipher == 6) {
-            return std::make_shared<cipher::CASTByteTransformer>(io->password,
-                                                                   io->iv,
-                                                                   io->iv2,
-                                                                   io->iv3,
-                                                                   io->iv3);
+            BUILD_CIPHER(CAST256);
         } else if(io->cipher == 7) {
-            return std::make_shared<cipher::CamelliaByteTransformer>(io->password,
-                                                                       io->iv,
-                                                                       io->iv2,
-                                                                       io->iv3,
-                                                                       io->iv3);
+            BUILD_CIPHER(Camellia);
         } else if(io->cipher == 8) {
-            return std::make_shared<cipher::RC5ByteTransformer>(io->password,
-                                                                  io->iv,
-                                                                  io->iv2,
-                                                                  io->iv3,
-                                                                  io->iv3);
+            BUILD_CIPHER(RC5);
         } else if(io->cipher == 9) {
-            return std::make_shared<cipher::SHACAL2ByteTransformer>(io->password,
-                                                                      io->iv,
-                                                                      io->iv2,
-                                                                      io->iv3,
-                                                                      io->iv3);
+            BUILD_CIPHER(SHACAL2);
         } else if(io->cipher == 0) {
             return std::make_shared<cipher::NullByteTransformer>(io->password,
-                                                                   io->iv,
-                                                                   io->iv2,
-                                                                   io->iv3,
-                                                                   io->iv3);
+                                                                 io->iv,
+                                                                 io->iv2,
+                                                                 io->iv3,
+                                                                 io->iv3);
         } else {
-            return std::make_shared<cipher::AESByteTransformer>(io->password,
-                                                                  io->iv,
-                                                                  io->iv2,
-                                                                  io->iv3,
-                                                                  io->iv3);
+            BUILD_CIPHER(AES);
         }
     }
 }

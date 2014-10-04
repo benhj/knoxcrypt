@@ -55,38 +55,49 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "cipher/TwofishByteTransformer.hpp"
+#include "cipher/CryptoByteTransformer.hpp"
+#include "cryptopp/aes.h"
+#include "cryptopp/camellia.h"
+#include "cryptopp/mars.h"
+#include "cryptopp/rc5.h"
+#include "cryptopp/rc6.h"
+#include "cryptopp/serpent.h"
+#include "cryptopp/shacal2.h"
 #include "cryptopp/twofish.h"
+#include "cryptopp/cast.h"
 #include "cryptopp/ccm.h"
+
 
 namespace teasafe { namespace cipher
 {
-
-    TwofishByteTransformer::TwofishByteTransformer(std::string const &password,
-                                                   uint64_t const iv,
-                                                   uint64_t const iv2,
-                                                   uint64_t const iv3,
-                                                   uint64_t const iv4)
+    template <typename T>
+    CryptoByteTransformer<T>::CryptoByteTransformer(std::string const &password,
+                                                    uint64_t const iv,
+                                                    uint64_t const iv2,
+                                                    uint64_t const iv3,
+                                                    uint64_t const iv4)
       : IByteTransformer(password, iv, iv2, iv3, iv4)
     {
-
     }
 
+    template <typename T>
     void
-    TwofishByteTransformer::init()
+    CryptoByteTransformer<T>::init()
     {
         IByteTransformer::generateKeyAndIV();
     }
 
-    TwofishByteTransformer::~TwofishByteTransformer()
+    template <typename T>
+    CryptoByteTransformer<T>::~CryptoByteTransformer()
     {
 
     }
 
+    template <typename T>
     void 
-    TwofishByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    CryptoByteTransformer<T>::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {
-        CryptoPP::CTR_Mode<CryptoPP::Twofish>::Encryption encryptor;
+        typename CryptoPP::CTR_Mode<T>::Encryption encryptor;
         encryptor.SetKeyWithIV(IByteTransformer::g_bigKey, 
                                sizeof(IByteTransformer::g_bigKey), 
                                IByteTransformer::g_bigIV);
@@ -94,15 +105,27 @@ namespace teasafe { namespace cipher
         encryptor.ProcessData((uint8_t*)out, (uint8_t*)in, length);
     }
 
+    template <typename T>
     void 
-    TwofishByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    CryptoByteTransformer<T>::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {
-        CryptoPP::CTR_Mode<CryptoPP::Twofish>::Decryption decryptor;
+        typename CryptoPP::CTR_Mode<T>::Decryption decryptor;
         decryptor.SetKeyWithIV(IByteTransformer::g_bigKey, 
                                   sizeof(IByteTransformer::g_bigKey), 
                                   IByteTransformer::g_bigIV);
         decryptor.Seek(startPosition);
         decryptor.ProcessData((uint8_t*)out, (uint8_t*)in, length);
     }
+
+    // explicit instantiations
+    template class CryptoByteTransformer<CryptoPP::RC6>;
+    template class CryptoByteTransformer<CryptoPP::RC5>;
+    template class CryptoByteTransformer<CryptoPP::Twofish>;
+    template class CryptoByteTransformer<CryptoPP::SHACAL2>;
+    template class CryptoByteTransformer<CryptoPP::Serpent>;
+    template class CryptoByteTransformer<CryptoPP::MARS>;
+    template class CryptoByteTransformer<CryptoPP::CAST256>;
+    template class CryptoByteTransformer<CryptoPP::Camellia>;
+    template class CryptoByteTransformer<CryptoPP::AES>;
 }
 }

@@ -26,10 +26,10 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// uses the crypto++ libraries for AES encryption
+// uses the crypto++ libraries for encryption
 
-#ifndef TeaSafe_CIPHER_AES_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_AES_BYTE_TRANSFORMER_HPP__
+#ifndef TeaSafe_CIPHER_CRYPTO_BYTE_TRANSFORMER_HPP__
+#define TeaSafe_CIPHER_CRYPTO_BYTE_TRANSFORMER_HPP__
 
 #include "cipher/IByteTransformer.hpp"
 #include "utility/EventType.hpp"
@@ -39,22 +39,23 @@
 namespace teasafe { namespace cipher
 {
 
-    class AESByteTransformer : public IByteTransformer
+    template <typename Algorithm>
+    class CryptoByteTransformer : public IByteTransformer
     {
       public:
-        AESByteTransformer(std::string const &password,
-                            uint64_t const iv,
-                            uint64_t const iv2,
-                            uint64_t const iv3,
-                            uint64_t const iv4);
+        CryptoByteTransformer(std::string const &password,
+                              uint64_t const iv,
+                              uint64_t const iv2,
+                              uint64_t const iv3,
+                              uint64_t const iv4);
 
         void init();
 
-        ~AESByteTransformer();
+        ~CryptoByteTransformer();
 
       private:
 
-        AESByteTransformer(); // not required
+        CryptoByteTransformer(); // not required
 
         void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
         void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
@@ -63,4 +64,4 @@ namespace teasafe { namespace cipher
 }
 
 
-#endif // TeaSafe_CIPHER_XTEA_BYTE_TRANSFORMER_HPP__
+#endif // TeaSafe_CIPHER_CRYPTO_BYTE_TRANSFORMER_HPP__;
