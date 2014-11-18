@@ -397,9 +397,8 @@ namespace teasafe { namespace detail
                                    std::vector<uint64_t> const &blocksUsed,
                                    uint64_t const totalBlocks)
     {
-        std::vector<uint64_t>::const_iterator it = blocksUsed.begin();
-        for (; it != blocksUsed.end(); ++it) {
-            setBlockToInUse(*it, totalBlocks, in);
+        for (auto const & it : blocksUsed) {
+            setBlockToInUse(it, totalBlocks, in);
         }
     }
 

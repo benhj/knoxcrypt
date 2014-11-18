@@ -67,7 +67,7 @@ namespace teasafe { namespace detail
                                                           uint64_t const n,
                                                           uint64_t const totalBlocks)
     {
-        uint64_t offset = getOffsetOfFileBlock(n, totalBlocks) + 4;
+        auto offset = getOffsetOfFileBlock(n, totalBlocks) + 4;
         (void)in.seekg(offset);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
