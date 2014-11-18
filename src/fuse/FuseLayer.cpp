@@ -534,13 +534,13 @@ int main(int argc, char *argv[])
     char      arg2[] = "-s";
     char      arg3[] = "-d";
 
-//#ifdef __APPLE__
+#ifdef __APPLE__
     char      arg4[] = "-o";
-    char      arg5[] = "allow_other";
+    char      arg5[] = "noappledouble";
     char* fuseArgs[] = { &arg0[0], &arg1[0], &arg2[0], &arg3[0], &arg4[0], &arg5[0], NULL };
-//#else
-//    char* fuseArgs[] = { &arg0[0], &arg1[0], &arg2[0], &arg3[0], NULL };
-//#endif
+#else
+    char* fuseArgs[] = { &arg0[0], &arg1[0], &arg2[0], &arg3[0], NULL };
+#endif
 
     int fuseArgCount = (int)(sizeof(fuseArgs) / sizeof(fuseArgs[0])) - 1;
 
