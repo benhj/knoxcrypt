@@ -46,7 +46,7 @@ namespace teasafe
     TeaSafe::getTeaSafeFolder(std::string const &path)
     {
         StateLock lock(m_stateMutex);
-        std::string thePath(path);
+        auto thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
         // an entry of file type should never have a trailing
@@ -55,12 +55,12 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        auto parentEntry = doGetParentTeaSafeFolder(thePath);
+        auto parentEntry(doGetParentTeaSafeFolder(thePath));
         if (!parentEntry) {
             return *m_rootFolder;
         }
 
-        auto childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
+        auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string()));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -76,7 +76,7 @@ namespace teasafe
     TeaSafe::getInfo(std::string const &path)
     {
         StateLock lock(m_stateMutex);
-        std::string thePath(path);
+        auto thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
         // an entry of file type should never have a trailing
@@ -85,12 +85,12 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        auto parentEntry = doGetParentTeaSafeFolder(thePath);
+        auto parentEntry(doGetParentTeaSafeFolder(thePath));
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        std::string fname(boost::filesystem::path(thePath).filename().string());
+        auto fname(boost::filesystem::path(thePath).filename().string());
         auto childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
 
         if (!childInfo) {
@@ -118,14 +118,14 @@ namespace teasafe
     TeaSafe::addFile(std::string const &path)
     {
         StateLock lock(m_stateMutex);
-        std::string thePath(path);
+        auto thePath(path);
         char ch = *path.rbegin();
         // file entries with trailing slash should throw
         if (ch == '/') {
             throw TeaSafeException(TeaSafeError::IllegalFilename);
         }
 
-        auto parentEntry = doGetParentTeaSafeFolder(thePath);
+        auto parentEntry(doGetParentTeaSafeFolder(thePath));
 
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -141,14 +141,14 @@ namespace teasafe
     TeaSafe::addFolder(std::string const &path) const
     {
         StateLock lock(m_stateMutex);
-        std::string thePath(path);
+        auto thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash
         if (ch == '/') {
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        auto parentEntry = doGetParentTeaSafeFolder(thePath);
+        auto parentEntry(doGetParentTeaSafeFolder(thePath));
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -165,13 +165,13 @@ namespace teasafe
     TeaSafe::renameEntry(std::string const &src, std::string const &dst)
     {
         StateLock lock(m_stateMutex);
-        std::string srcPath(src);
+        auto srcPath(src);
         char ch = *src.rbegin();
         // ignore trailing slash
         if (ch == '/') {
             std::string(src.begin(), src.end() - 1).swap(srcPath);
         }
-        std::string dstPath(dst);
+        auto dstPath(dst);
         char chDst = *dst.rbegin();
         // ignore trailing slash
         if (chDst == '/') {
@@ -179,13 +179,13 @@ namespace teasafe
         }
 
         // throw if source parent doesn't exist
-        auto parentSrc = doGetParentTeaSafeFolder(srcPath);
+        auto parentSrc(doGetParentTeaSafeFolder(srcPath));
         if (!parentSrc) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
         // throw if destination parent doesn't exist
-        auto parentDst = doGetParentTeaSafeFolder(dstPath);
+        auto parentDst(doGetParentTeaSafeFolder(dstPath));
         if (!parentSrc) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -194,8 +194,8 @@ namespace teasafe
         throwIfAlreadyExists(dstPath);
 
         // throw if source doesn't exist
-        std::string const filename(boost::filesystem::path(srcPath).filename().string());
-        auto childInfo = parentSrc->getEntryInfo(filename);
+        auto const filename(boost::filesystem::path(srcPath).filename().string());
+        auto childInfo(parentSrc->getEntryInfo(filename));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -204,7 +204,7 @@ namespace teasafe
         // (i) Remove original entry metadata entry
         // (ii) Add new metadata entry with new file name
         parentSrc->putMetaDataOutOfUse(filename);
-        std::string dstFilename(boost::filesystem::path(dstPath).filename().string());
+        auto dstFilename(boost::filesystem::path(dstPath).filename().string());
         parentDst->writeNewMetaDataForEntry(dstFilename, childInfo->type(), childInfo->firstFileBlock());
 
     }
@@ -213,18 +213,18 @@ namespace teasafe
     TeaSafe::removeFile(std::string const &path)
     {
         StateLock lock(m_stateMutex);
-        std::string thePath(path);
+        auto thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash
         if (ch == '/') {
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
-        auto parentEntry = doGetParentTeaSafeFolder(thePath);
+        auto parentEntry(doGetParentTeaSafeFolder(thePath));
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        auto childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
+        auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string()));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -243,7 +243,7 @@ namespace teasafe
     TeaSafe::removeFolder(std::string const &path, FolderRemovalType const &removalType)
     {
         StateLock lock(m_stateMutex);
-        std::string thePath(path);
+        auto thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
         // an entry of file type should never have a trailing
@@ -252,12 +252,12 @@ namespace teasafe
             std::string(path.begin(), path.end() - 1).swap(thePath);
         }
 
-        auto parentEntry = doGetParentTeaSafeFolder(thePath);
+        auto parentEntry(doGetParentTeaSafeFolder(thePath));
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        auto childInfo = parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string());
+        auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string()));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -267,7 +267,7 @@ namespace teasafe
 
         if (removalType == FolderRemovalType::MustBeEmpty) {
 
-            auto childEntry = parentEntry->getTeaSafeFolder(boost::filesystem::path(thePath).filename().string());
+            auto childEntry(parentEntry->getTeaSafeFolder(boost::filesystem::path(thePath).filename().string()));
             if (!childEntry.listAllEntries().empty()) {
                 throw TeaSafeException(TeaSafeError::FolderNotEmpty);
             }
@@ -289,12 +289,12 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        auto parentEntry = doGetParentTeaSafeFolder(path);
+        auto parentEntry(doGetParentTeaSafeFolder(path));
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        auto childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
+        auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string()));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -302,7 +302,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        auto fe = this->setAndGetCachedFile(path, parentEntry, openMode);
+        auto fe(this->setAndGetCachedFile(path, parentEntry, openMode));
         return TeaSafeFileDevice(fe);
     }
 
@@ -310,12 +310,12 @@ namespace teasafe
     TeaSafe::truncateFile(std::string const &path, std::ios_base::streamoff offset)
     {
         StateLock lock(m_stateMutex);
-        auto parentEntry = doGetParentTeaSafeFolder(path);
+        auto parentEntry(doGetParentTeaSafeFolder(path));
         if (!parentEntry) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        auto childInfo = parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string());
+        auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string()));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
@@ -323,7 +323,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        auto fe = this->setAndGetCachedFile(path, parentEntry, OpenDisposition::buildOverwriteDisposition());
+        auto fe(this->setAndGetCachedFile(path, parentEntry, OpenDisposition::buildOverwriteDisposition()));
         fe->truncate(offset);
     }
 
@@ -347,7 +347,7 @@ namespace teasafe
             FileCache().swap(m_fileCache);
         }
 
-        FileCache::iterator it = m_fileCache.find(path);
+        auto it(m_fileCache.find(path));
         if(it != m_fileCache.end()) {
 
             // note: need to also check if the openMode is different to the cached
@@ -422,18 +422,18 @@ namespace teasafe
         pathToCheck = pathToCheck.relative_path().parent_path();
 
         // prefer to pull out of cache if it exists
-        auto cacheIt = m_folderCache.find(pathToCheck.string());
+        auto cacheIt(m_folderCache.find(pathToCheck.string()));
         if (cacheIt != m_folderCache.end()) {
             return cacheIt->second;
         }
 
 
         // iterate over path parts extracting sub folders along the way
-        auto folderOfInterest = *m_rootFolder;
+        auto folderOfInterest(*m_rootFolder);
         boost::filesystem::path pathBuilder;
         for (auto const & it : pathToCheck) {
 
-            SharedEntryInfo entryInfo = folderOfInterest.getEntryInfo(it.string());
+            SharedEntryInfo entryInfo(folderOfInterest.getEntryInfo(it.string()));
 
             if (!entryInfo) {
                 return SharedTeaSafeFolder();
@@ -463,7 +463,7 @@ namespace teasafe
     bool
     TeaSafe::doExistanceCheck(std::string const &path, EntryType const &entryType) const
     {
-        std::string thePath(path);
+        auto thePath(path);
 
         // special case, check if we're the root folder
         if(thePath == "/" && entryType == EntryType::FolderType) {
@@ -483,9 +483,9 @@ namespace teasafe
             return false;
         }
 
-        std::string filename(boost::filesystem::path(thePath).filename().string());
+        auto filename(boost::filesystem::path(thePath).filename().string());
 
-        auto entryInfo = parentEntry->getEntryInfo(filename);
+        auto entryInfo(parentEntry->getEntryInfo(filename));
 
         if (!entryInfo) {
             return false;
@@ -501,7 +501,7 @@ namespace teasafe
     void
     TeaSafe::removeDeletedParentFromCache(boost::filesystem::path const &path)
     {
-        auto it = m_folderCache.find(path.relative_path().string());
+        auto it(m_folderCache.find(path.relative_path().string()));
         if (it != m_folderCache.end()) {
             m_folderCache.erase(it);
         }
@@ -510,7 +510,7 @@ namespace teasafe
     void
     TeaSafe::removeFileFromFileCache(std::string const &path)
     {
-        auto it = m_fileCache.find(path);
+        auto it(m_fileCache.find(path));
         if(it != m_fileCache.end()) {
             m_fileCache.erase(it);
         }

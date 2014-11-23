@@ -38,6 +38,16 @@
 
 namespace teasafe
 {
+
+    namespace {
+
+        uint32_t blockWriteSpace()
+        {
+            return detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+        }
+
+    }
+
     // for writing a brand new entry where start block isn't known
     TeaSafeFile::TeaSafeFile(SharedCoreIO const &io,
                              std::string const &name,
@@ -97,16 +107,6 @@ namespace teasafe
                 }
             }
         }
-    }
-
-    namespace detail
-    {
-
-        uint32_t blockWriteSpace()
-        {
-            return FILE_BLOCK_SIZE - FILE_BLOCK_META;
-        }
-
     }
 
     std::string
@@ -180,10 +180,10 @@ namespace teasafe
 
     void TeaSafeFile::newWritableFileBlock() const
     {
-        FileBlock block(m_io->blockBuilder->buildWritableFileBlock(m_io,
-                                                                   teasafe::OpenDisposition::buildAppendDisposition(),
-                                                                   m_stream,
-                                                                   m_enforceStartBlock));
+        auto block(m_io->blockBuilder->buildWritableFileBlock(m_io,
+                                                              teasafe::OpenDisposition::buildAppendDisposition(),
+                                                              m_stream,
+                                                              m_enforceStartBlock));
         if (m_enforceStartBlock) { m_enforceStartBlock = false; }
 
         block.registerBlockWithVolumeBitmap();
@@ -230,7 +230,7 @@ namespace teasafe
         // is always updates after reads/writes
         uint32_t const bytesWritten = m_workingBlock->tell();
 
-        if (bytesWritten < detail::blockWriteSpace()) {
+        if (bytesWritten < blockWriteSpace()) {
             return true;
         }
         return false;
@@ -265,13 +265,13 @@ namespace teasafe
                 // if the reported stream position in the block is less that
                 // the block's total capacity, then we don't create a new block
                 // we simply overwrite
-                if (m_workingBlock->tell() < detail::blockWriteSpace()) {
+                if (m_workingBlock->tell() < blockWriteSpace()) {
                     return;
                 }
 
                 // edge case; if right at the very end of the block, need to
                 // iterate the block index and return if possible
-                if (m_workingBlock->tell() == detail::blockWriteSpace()) {
+                if (m_workingBlock->tell() == blockWriteSpace()) {
                     ++m_blockIndex;
                     m_workingBlock = std::make_shared<FileBlock>(m_io,
                                                                    m_workingBlock->getNextIndex(),
@@ -298,7 +298,7 @@ namespace teasafe
         // the stream position is subtracted since block may have already
         // had bytes written to it in which case the available size left
         // is approx. block size - stream position
-        return (detail::blockWriteSpace()) - streamPosition;
+        return (blockWriteSpace()) - streamPosition;
     }
 
     std::streamsize
@@ -337,7 +337,7 @@ namespace teasafe
     TeaSafeFile::bufferBytesForWorkingBlock(const char* s, std::streamsize n, uint32_t offset)
     {
 
-        uint32_t const spaceAvailable = getBytesLeftInWorkingBlock();
+        auto const spaceAvailable = getBytesLeftInWorkingBlock();
 
         // if n is smaller than space available, just copy in to buffer
         if (n < spaceAvailable) {
@@ -372,7 +372,7 @@ namespace teasafe
             // buffers the data that will be written to the working block
             // computed as a function of the data left to write and the
             // working block's available space
-            uint32_t actualWritten = bufferBytesForWorkingBlock(s, (n-wrote), wrote);
+            auto actualWritten = bufferBytesForWorkingBlock(s, (n-wrote), wrote);
 
             // does what it says
             writeBufferedDataToWorkingBlock(actualWritten);
@@ -393,7 +393,7 @@ namespace teasafe
     TeaSafeFile::truncate(std::ios_base::streamoff newSize)
     {
         // compute number of block required
-        uint16_t const blockSize = detail::blockWriteSpace();
+        auto const blockSize = blockWriteSpace();
 
         // edge case
         if (newSize < blockSize) {
@@ -432,7 +432,7 @@ namespace teasafe
     {
         // find what file block the offset would relate to and set extra offset in file block
         // to that position
-        uint16_t const blockSize = detail::blockWriteSpace();
+        auto const blockSize = blockWriteSpace();
         boost::iostreams::stream_offset casted = off;
         boost::iostreams::stream_offset const leftOver = casted % blockSize;
         int64_t block = 0;
@@ -474,13 +474,13 @@ namespace teasafe
                        boost::iostreams::stream_offset bytesWrittenToEnd)
     {
         // treat like begin and then 'inverse'
-        SeekPair treatLikeBegin = getPositionFromBegin(abs(off));
+        auto treatLikeBegin = getPositionFromBegin(abs(off));
 
         int64_t block = endBlockIndex - treatLikeBegin.first;
         boost::iostreams::stream_offset blockPosition = bytesWrittenToEnd - treatLikeBegin.second;
 
         if (blockPosition < 0) {
-            uint16_t const blockSize = detail::blockWriteSpace();
+            uint16_t const blockSize = blockWriteSpace();
             blockPosition = blockSize + blockPosition;
             --block;
         }
@@ -497,7 +497,7 @@ namespace teasafe
 
         // find what file block the offset would relate to and set extra offset in file block
         // to that position
-        uint16_t const blockSize = detail::blockWriteSpace();
+        auto const blockSize = blockWriteSpace();
         boost::iostreams::stream_offset const casted = off;
 
         boost::iostreams::stream_offset addition = casted + indexedBlockPosition;
