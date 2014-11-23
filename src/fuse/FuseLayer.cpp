@@ -88,7 +88,7 @@ namespace fuselayer
                 return 0;
             } else {
                 try {
-                    teasafe::EntryInfo info = TeaSafe_DATA->getInfo(path);
+                    auto info(TeaSafe_DATA->getInfo(path));
                     if (info.type() == teasafe::EntryType::FolderType) {
                         stbuf->st_mode = S_IFDIR | 0777;
                         stbuf->st_nlink = 3;
@@ -193,7 +193,7 @@ namespace fuselayer
             }
 
             try {
-                auto info = TeaSafe_DATA->getInfo(path);
+                auto info(TeaSafe_DATA->getInfo(path));
             } catch (teasafe::TeaSafeException const &e) {
                 return detail::exceptionDispatch(e);
             }
@@ -205,7 +205,7 @@ namespace fuselayer
         int
         teasafe_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *)
         {
-            auto device = TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
+            auto device(TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition()));
             device.seek(offset, std::ios_base::beg);
             auto read = device.read(buf,size);
             if(read < 0) { 
@@ -241,7 +241,7 @@ namespace fuselayer
 
             teasafe::OpenDisposition od(openMode, appendType, teasafe::CreateOrDontCreate::Create, truncateType);
 
-            auto device = TeaSafe_DATA->openFile(path, od);
+            auto device(TeaSafe_DATA->openFile(path, od));
             device.seek(offset, std::ios_base::beg);
             auto written = device.write(buf, size);
             if(written < 0) {
@@ -304,9 +304,9 @@ namespace fuselayer
                         off_t, struct fuse_file_info *)
         {
             try {
-                auto folder = TeaSafe_DATA->getTeaSafeFolder(path);
+                auto folder(TeaSafe_DATA->getTeaSafeFolder(path));
 
-                auto infos = folder.listAllEntries();
+                auto infos(folder.listAllEntries());
 
                 filler(buf, ".", NULL, 0);           /* Current directory (.)  */
                 filler(buf, "..", NULL, 0);
