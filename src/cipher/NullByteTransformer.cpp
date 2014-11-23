@@ -28,6 +28,9 @@
 
 #include "cipher/NullByteTransformer.hpp"
 
+#include <algorithm>
+#include <iterator>
+
 namespace teasafe { namespace cipher
 {
     NullByteTransformer::NullByteTransformer(std::string const &password,
@@ -53,13 +56,13 @@ namespace teasafe { namespace cipher
     void 
     NullByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {
-        (void)memcpy(out, in, length);
+        (void)std::copy(in, in + length, out);
     }
 
     void 
     NullByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
     {
-        (void)memcpy(out, in, length);
+        (void)std::copy(in, in + length, out);
     }
 }
 }

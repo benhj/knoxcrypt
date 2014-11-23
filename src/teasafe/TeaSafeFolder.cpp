@@ -31,6 +31,8 @@
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFolder.hpp"
 
+#include <algorithm>
+#include <iterator>
 #include <functional>
 #include <stdexcept>
 
@@ -92,7 +94,7 @@ namespace teasafe
         {
             std::vector<uint8_t> filename;
             filename.assign(detail::MAX_FILENAME_LENGTH, 0);
-            (void)memcpy(&filename.front(), &name.front(), name.length());
+            (void)std::copy(&name.front(), &name.front() + name.length(), &filename.front());
             filename[name.length()] = '\0'; // set null byte to indicate end of filename
             return filename;
         }

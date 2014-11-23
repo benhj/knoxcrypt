@@ -30,6 +30,9 @@
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "cipher/scrypt/crypto_scrypt.hpp"
 
+#include <algorithm>
+#include <iterator>
+
 namespace teasafe { namespace cipher
 {
 
@@ -84,10 +87,10 @@ namespace teasafe { namespace cipher
             IByteTransformer::m_init = true;
 
             // construct the big IV
-            (void)memcpy(g_bigIV, salt, 8);
-            (void)memcpy(g_bigIV + 8, saltB, 8);
-            (void)memcpy(g_bigIV + 16, saltC, 8);
-            (void)memcpy(g_bigIV + 24, saltD, 8);
+            (void)std::copy(salt,  salt + 8 , g_bigIV);
+            (void)std::copy(saltB, saltB + 8, g_bigIV + 8);
+            (void)std::copy(saltC, saltC + 8, g_bigIV + 16);
+            (void)std::copy(saltD, saltD + 8, g_bigIV + 24);
             m_init = true;
         }
     }
