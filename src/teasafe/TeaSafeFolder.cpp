@@ -37,16 +37,15 @@
 namespace teasafe
 {
 
-    namespace detail
-    {
+    namespace {
         /**
          * @brief put a metadata section out of use by unsetting the first bit
          * @param folderData the data that stores the folder metadata
          * @param n the metadata chunk to put out of use
          */
-        void putMetaDataOutOfUse(TeaSafeFile folderData, int n)
+        void metaDataToOutOfUse(TeaSafeFile folderData, int n)
         {
-            uint32_t bufferSize = 1 + MAX_FILENAME_LENGTH + 8;
+            uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
             uint32_t seekTo = (8 + (n * bufferSize));
             if (folderData.seek(seekTo) != -1) {
                 uint8_t byte = 0;
@@ -92,11 +91,97 @@ namespace teasafe
         std::vector<uint8_t> createFileNameVector(std::string const &name)
         {
             std::vector<uint8_t> filename;
-            filename.assign(MAX_FILENAME_LENGTH, 0);
+            filename.assign(detail::MAX_FILENAME_LENGTH, 0);
             (void)memcpy(&filename.front(), &name.front(), name.length());
             filename[name.length()] = '\0'; // set null byte to indicate end of filename
             return filename;
         }
+
+        /**
+         * @brief determines if entry metadata is enabled. Entry metadata
+         * consists of one byte, the first bit of which determines if the
+         * metadata is in use or not. It won't be in use if the entry
+         * associated with the metadata has been deleted in whcih case
+         * this associated metadata can be overwritten when creating
+         * a new entry.
+         * @param metaData the metadata
+         * @return a value indicating if specified entry metadata is in use
+         */
+        bool entryMetaDataIsEnabled(std::vector<uint8_t> const &bytes) 
+        {
+            uint8_t byte = bytes[0];
+            return detail::isBitSetInByte(byte, 0);
+        }
+
+        /**
+         * @brief retrieves the starting block index of a given entry
+         * @param metaData the metadata that contains the block index
+         * @return the starting block index
+         */
+        uint64_t getBlockIndexForEntry(std::vector<uint8_t> const &metaData) 
+        {
+            std::vector<uint8_t> theBuffer(metaData.begin() + detail::MAX_FILENAME_LENGTH + 1, metaData.end());
+            return detail::convertInt8ArrayToInt64(&theBuffer.front());
+        }
+
+        /**
+         * @brief retrieves the type of a given entry
+         * @param metaData the metadata that contains the block index
+         * @return the type of the entry
+         */
+        EntryType getTypeForEntry(std::vector<uint8_t> const &bytes) 
+        {
+            uint8_t byte = bytes[0];
+            return (detail::isBitSetInByte(byte, 1) ? EntryType::FileType : EntryType::FolderType);
+        }
+
+        /**
+         * @brief private accessor for getting entry name from metadata
+         * @param metaData the metadata
+         * @return name extracted from metadata
+         */
+        std::string getEntryName(std::vector<uint8_t> const &metaData) 
+        {
+            std::string nameDat(metaData.begin() + 1, metaData.end() - 8);
+            std::string returnString;
+            int c = 0;
+            while (nameDat[c] != '\0') {
+                returnString.push_back(nameDat[c]);
+                ++c;
+            }
+            return returnString;
+        }
+
+        /**
+         * @brief retrieves the name of an entry with given index
+         * @return the name
+         */
+        std::string getEntryName(TeaSafeFile const & folderData, uint64_t const n)
+        {
+            auto metaData(doSeekAndReadOfEntryMetaData(folderData, n));
+            return getEntryName(metaData);
+        }
+
+        /**
+         * @brief retrieves the number of entries in folder entry
+         * @return the number of folder entries
+         */
+        long getNumberOfEntries(TeaSafeFile const & folderData, uint64_t const blocks)
+        {
+            auto out(folderData.getStream());
+            uint64_t const offset = detail::getOffsetOfFileBlock(folderData.getStartVolumeBlockIndex(), blocks);
+            (void)out->seekg(offset + detail::FILE_BLOCK_META);
+            if(!out->bad()) { // bad when not initialized, i.e., when sparse image
+                uint8_t buf[8];
+                (void)out->read((char*)buf, 8);
+
+                // there will never be a number of entries that is greater than
+                // the max capacity of a long variable
+                return static_cast<long>(detail::convertInt8ArrayToInt64(buf));
+            }
+            return 0; // block not yet initialized (in case of sparse image)
+        }
+
     }
 
     TeaSafeFolder::TeaSafeFolder(SharedCoreIO const &io,
@@ -109,7 +194,7 @@ namespace teasafe
                        OpenDisposition::buildAppendDisposition())
         , m_startVolumeBlock(startVolumeBlock)
         , m_name(name)
-        , m_entryCount(doGetNumberOfEntries())
+        , m_entryCount(getNumberOfEntries(m_folderData, m_io->blocks))
         , m_entryInfoCacheMap()
     {
     }
@@ -156,7 +241,7 @@ namespace teasafe
     TeaSafeFolder::doWriteFilenameToEntryMetaData(std::string const &name)
     {
         // create a vector to hold filename
-        std::vector<uint8_t> filename = detail::createFileNameVector(name);
+        auto filename(createFileNameVector(name));
 
         // write out filename
         return doWrite((char*)&filename.front(), detail::MAX_FILENAME_LENGTH);
@@ -184,7 +269,7 @@ namespace teasafe
                                               EntryType const &entryType,
                                               uint64_t startBlock)
     {
-        OptionalOffset overWroteOld = doFindOffsetWhereMetaDataShouldBeWritten();
+        auto overWroteOld(doFindOffsetWhereMetaDataShouldBeWritten());
 
         if (overWroteOld) {
             m_folderData = TeaSafeFile(m_io, m_name, m_startVolumeBlock,
@@ -248,7 +333,7 @@ namespace teasafe
 
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
-        SharedEntryInfo info(doGetNamedEntryInfo(name));
+        auto info(doGetNamedEntryInfo(name));
         if (info) {
             if (info->type() == EntryType::FileType) {
                 TeaSafeFile file(m_io, name, info->firstFileBlock(), openDisposition);
@@ -266,7 +351,7 @@ namespace teasafe
     {
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
-        SharedEntryInfo info(doGetNamedEntryInfo(name));
+        auto info(doGetNamedEntryInfo(name));
         if (info) {
             if (info->type() == EntryType::FolderType) {
                 return TeaSafeFolder(m_io, info->firstFileBlock(), name);
@@ -289,8 +374,8 @@ namespace teasafe
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
 
             // read all metadata
-            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
-            if (doEntryMetaDataIsEnabled(metaData)) {
+            auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
+            if (entryMetaDataIsEnabled(metaData)) {
                 entries.push_back(*doGetEntryInfo(metaData, entryIndex));
             }
         }
@@ -303,10 +388,10 @@ namespace teasafe
         std::vector<EntryInfo> entries;
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
             // only push back if the metadata is enabled
-            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
+            auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
 
-            if (doEntryMetaDataIsEnabled(metaData) &&
-                doGetTypeForEntry(metaData) == entryType) {
+            if (entryMetaDataIsEnabled(metaData) &&
+                getTypeForEntry(metaData) == entryType) {
                 entries.push_back(*doGetEntryInfo(metaData, entryIndex));
             }
         }
@@ -332,7 +417,7 @@ namespace teasafe
         // then be later overwritten when a new entry is then added
         TeaSafeFile temp(m_io, m_name, m_startVolumeBlock,
                          OpenDisposition::buildOverwriteDisposition());
-        detail::putMetaDataOutOfUse(temp, doGetMetaDataIndexForEntry(name));
+        metaDataToOutOfUse(temp, doGetMetaDataIndexForEntry(name));
 
         // removes any info with name from cache
         this->invalidateEntryInEntryInfoCache(name);
@@ -347,7 +432,7 @@ namespace teasafe
     void
     TeaSafeFolder::invalidateEntryInEntryInfoCache(std::string const &name)
     {
-        EntryInfoCacheMap::iterator it = m_entryInfoCacheMap.find(name);
+        auto it(m_entryInfoCacheMap.find(name));
         if (it != m_entryInfoCacheMap.end()) {
             m_entryInfoCacheMap.erase(it);
         }
@@ -358,7 +443,7 @@ namespace teasafe
     {
         // first unlink; this deallocates the file blocks, updating the
         // volume bitmap accordingly; note doesn't matter what opendisposition is here
-        TeaSafeFile entry = getTeaSafeFile(name, OpenDisposition::buildAppendDisposition());
+        auto entry(getTeaSafeFile(name, OpenDisposition::buildAppendDisposition()));
         entry.unlink();
 
         // second set the metadata to an out of use state; this metadata can
@@ -370,11 +455,11 @@ namespace teasafe
     void
     TeaSafeFolder::removeTeaSafeFolder(std::string const &name)
     {
-        TeaSafeFolder entry = getTeaSafeFolder(name);
+        auto entry(getTeaSafeFolder(name));
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto infos = entry.listAllEntries();
+        auto infos(entry.listAllEntries());
         for (auto const &it : infos) {
             if (it.type() == EntryType::FileType) {
                 entry.removeTeaSafeFile(it.filename());
@@ -402,7 +487,7 @@ namespace teasafe
     {
 
         // try and pul out of cache fisrt
-        EntryInfoCacheMap::const_iterator it = m_entryInfoCacheMap.find(name);
+        auto it(m_entryInfoCacheMap.find(name));
         if (it != m_entryInfoCacheMap.end()) {
             return it->second;
         }
@@ -411,9 +496,9 @@ namespace teasafe
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
 
             // read all metadata
-            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
-            if (doEntryMetaDataIsEnabled(metaData)) {
-                SharedEntryInfo info = doGetEntryInfo(metaData, entryIndex);
+            auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
+            if (entryMetaDataIsEnabled(metaData)) {
+                auto info(doGetEntryInfo(metaData, entryIndex));
                 if (info->filename() == name) {
                     return info;
                 }
@@ -426,7 +511,7 @@ namespace teasafe
     EntryInfo
     TeaSafeFolder::getEntryInfo(uint64_t const entryIndex) const
     {
-        std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
+        auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
         return *doGetEntryInfo(metaData, entryIndex);
     }
 
@@ -434,35 +519,35 @@ namespace teasafe
     TeaSafeFolder::doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const entryIndex) const
     {
 
-        std::string const entryName = doGetEntryName(metaData);
+        auto const entryName(getEntryName(metaData));
 
         // experimental optimization; insert info in to cache
-        EntryInfoCacheMap::const_iterator it = m_entryInfoCacheMap.find(entryName);
+        auto it(m_entryInfoCacheMap.find(entryName));
         if (it != m_entryInfoCacheMap.end()) {
             return it->second;
         }
 
-        EntryType const entryType = doGetTypeForEntry(metaData);
+        auto const entryType(getTypeForEntry(metaData));
         uint64_t fileSize = 0;
         uint64_t startBlock;
         if (entryType == EntryType::FileType) {
             // note disposition doesn't matter here, can be anything
-            uint64_t n = doGetBlockIndexForEntry(metaData);
+            uint64_t n = getBlockIndexForEntry(metaData);
             TeaSafeFile fe(m_io, entryName, n, OpenDisposition::buildAppendDisposition());
             fileSize = fe.fileSize();
             startBlock = n;
         } else {
-            uint64_t n = doGetBlockIndexForEntry(metaData);
+            uint64_t n = getBlockIndexForEntry(metaData);
             TeaSafeFolder fe(m_io, n, entryName);
             startBlock = n;
         }
 
-        SharedEntryInfo info(std::make_shared<EntryInfo>(entryName,
-                                                           fileSize,
-                                                           entryType,
-                                                           true, // writable
-                                                           startBlock,
-                                                           entryIndex));
+        auto info(std::make_shared<EntryInfo>(entryName,
+                                              fileSize,
+                                              entryType,
+                                              true, // writable
+                                              startBlock,
+                                              entryIndex));
 
         m_entryInfoCacheMap.insert(std::make_pair(entryName, info));
 
@@ -470,73 +555,16 @@ namespace teasafe
     }
 
     long
-    TeaSafeFolder::doGetNumberOfEntries() const
-    {
-        teasafe::SharedImageStream out(m_folderData.getStream());
-        uint64_t const offset = detail::getOffsetOfFileBlock(m_folderData.getStartVolumeBlockIndex(), m_io->blocks);
-        (void)out->seekg(offset + detail::FILE_BLOCK_META);
-        if(!out->bad()) { // bad when not initialized, i.e., when sparse image
-            uint8_t buf[8];
-            (void)out->read((char*)buf, 8);
-
-            // there will never be a number of entries that is greater than
-            // the max capacity of a long variable
-            return static_cast<long>(detail::convertInt8ArrayToInt64(buf));
-        }
-        return 0; // block not yet initialized (in case of sparse image)
-    }
-
-    bool
-    TeaSafeFolder::doEntryMetaDataIsEnabled(std::vector<uint8_t> const &bytes) const
-    {
-        uint8_t byte = bytes[0];
-        return detail::isBitSetInByte(byte, 0);
-    }
-
-    EntryType
-    TeaSafeFolder::doGetTypeForEntry(std::vector<uint8_t> const &bytes) const
-    {
-        uint8_t byte = bytes[0];
-        return (detail::isBitSetInByte(byte, 1) ? EntryType::FileType : EntryType::FolderType);
-    }
-
-    std::string
-    TeaSafeFolder::doGetEntryName(uint64_t const n) const
-    {
-        std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, n);
-        return doGetEntryName(metaData);
-    }
-
-    std::string
-    TeaSafeFolder::doGetEntryName(std::vector<uint8_t> const &metaData) const
-    {
-        std::string nameDat(metaData.begin() + 1, metaData.end() - 8);
-        std::string returnString;
-        int c = 0;
-        while (nameDat[c] != '\0') {
-            returnString.push_back(nameDat[c]);
-            ++c;
-        }
-        return returnString;
-    }
-
-    long
     TeaSafeFolder::doGetMetaDataIndexForEntry(std::string const &name) const
     {
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
-            if (name == doGetEntryName(entryIndex)) {
+            if (name == getEntryName(m_folderData, entryIndex)) {
                 return entryIndex;
             }
         }
         throw std::runtime_error("Folder entry with that name not found");
     }
 
-    uint64_t
-    TeaSafeFolder::doGetBlockIndexForEntry(std::vector<uint8_t> const &metaData) const
-    {
-        std::vector<uint8_t> theBuffer(metaData.begin() + detail::MAX_FILENAME_LENGTH + 1, metaData.end());
-        return detail::convertInt8ArrayToInt64(&theBuffer.front());
-    }
 
     OptionalOffset
     TeaSafeFolder::doFindOffsetWhereMetaDataShouldBeWritten()
@@ -549,8 +577,8 @@ namespace teasafe
         // to overwrite?
 
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
-            std::vector<uint8_t> metaData = detail::doSeekAndReadOfEntryMetaData(m_folderData, entryIndex);
-            if (!doEntryMetaDataIsEnabled(metaData)) {
+            auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
+            if (!entryMetaDataIsEnabled(metaData)) {
                 uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
                 std::ios_base::streamoff offset = (8 + (entryIndex * bufferSize));
                 return OptionalOffset(offset);

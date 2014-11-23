@@ -217,25 +217,6 @@ namespace teasafe
         void doPutMetaDataOutOfUse(std::string const &name);
 
         /**
-         * @brief retrieves the starting block index of a given entry
-         * @param metaData the metadata that contains the block index
-         * @return the starting block index
-         */
-        uint64_t doGetBlockIndexForEntry(std::vector<uint8_t> const &metaData) const;
-
-        /**
-         * @brief retrieves the number of entries in folder entry
-         * @return the number of folder entries
-         */
-        long doGetNumberOfEntries() const;
-
-        /**
-         * @brief retrieves the name of an entry with given index
-         * @return the name
-         */
-        std::string doGetEntryName(uint64_t const index) const;
-
-        /**
          * @brief returns the entry index given the name
          * @param name the name of the entry
          * @return the index
@@ -270,32 +251,6 @@ namespace teasafe
          * @return number of bytes written
          */
         std::streamsize doWriteFirstBlockIndexToEntryMetaData(uint64_t firstBlock);
-
-        /**
-         * @brief retrieves the type of a given entry
-         * @param metaData the metadata that contains the block index
-         * @return the type of the entry
-         */
-        EntryType doGetTypeForEntry(std::vector<uint8_t> const &metaData) const;
-
-        /**
-         * @brief determines if entry metadata is enabled. Entry metadata
-         * consists of one byte, the first bit of which determines if the
-         * metadata is in use or not. It won't be in use if the entry
-         * associated with the metadata has been deleted in whcih case
-         * this associated metadata can be overwritten when creating
-         * a new entry.
-         * @param metaData the metadata
-         * @return a value indicating if specified entry metadata is in use
-         */
-        bool doEntryMetaDataIsEnabled(std::vector<uint8_t> const &metaData) const;
-
-        /**
-         * @brief private accessor for getting entry name from metadata
-         * @param metaData the metadata
-         * @return name extracted from metadata
-         */
-        std::string doGetEntryName(std::vector<uint8_t> const &metaData) const;
 
         /**
          * @brief seeks to where the metadata should be written. If
