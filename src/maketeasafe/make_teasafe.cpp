@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     (void)positionalOptions.add("imageName", 1);
     (void)positionalOptions.add("blockCount", 1);
 
-    teasafe::SharedCoreIO io(std::make_shared<teasafe::CoreTeaSafeIO>());
+    auto io(std::make_shared<teasafe::CoreTeaSafeIO>());
 
     // use a non-deterministic random device to generate the iv. This
     // allegedly pulls data from /dev/urandom
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    uint64_t blocks = vm["blockCount"].as<uint64_t>();
+    auto blocks = vm["blockCount"].as<uint64_t>();
 
     io->path = vm["imageName"].as<std::string>().c_str();
     io->blocks = blocks;
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
     teasafe::OptionalMagicPart omp;
     if (magicPartition) {
 
-        unsigned long partBlock = atoi(teasafe::utility::getPassword("sub-volume root block: ").c_str());
+        auto partBlock = atoi(teasafe::utility::getPassword("sub-volume root block: ").c_str());
         if(partBlock == 0 || partBlock >= blocks) {
             std::cout<<"Error: sub-volume root block must be less than "<<blocks<<" AND greater than 0"<<std::endl;
             return 1;
@@ -169,13 +169,13 @@ int main(int argc, char *argv[])
 
     // register progress call back for cipher
     long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-    std::function<void(teasafe::EventType)> f(std::bind(&teasafe::cipherCallback, std::placeholders::_1, amount));
+    auto f(std::bind(&teasafe::cipherCallback, std::placeholders::_1, amount));
     io->ccb = f;
 
     teasafe::MakeTeaSafe imager(io, sparse, omp);
 
     // register progress callback for imager
-    std::function<void(teasafe::EventType)> fb(std::bind(&imagerCallback, std::placeholders::_1, io->blocks));
+    auto fb(std::bind(&imagerCallback, std::placeholders::_1, io->blocks));
     imager.registerSignalHandler(fb);
     imager.buildImage();
 
