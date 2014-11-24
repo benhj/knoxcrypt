@@ -129,7 +129,7 @@ std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const 
     // find out the parent of the thing we're trying to tab complete
     // the item we're trying to tab-complete should be a child of this parent
     boost::filesystem::path bp(path);
-    std::string parentPath(bp.parent_path().string());
+    auto parentPath(bp.parent_path().string());
 
     // get the parent folder
     auto folder = theBfs.getTeaSafeFolder(parentPath);
@@ -139,7 +139,7 @@ std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const 
     for (auto const &it : entries) {
 
         // try to match the entry with the thing that we want to tab-complete
-        std::string extracted(it.filename().substr(0, bp.filename().string().length()));
+        auto extracted(it.filename().substr(0, bp.filename().string().length()));
         if(extracted == bp.filename()) {
             return it.filename(); // match, return name of entry
         }
@@ -154,7 +154,7 @@ std::string tabCompleteCommand(std::string const &command)
     for (auto const & it : g_availableCommands) {
 
         // try to match the entry with the thing that we want to tab-complete
-        std::string extracted(it.command.substr(0, command.length()));
+        auto extracted(it.command.substr(0, command.length()));
         if(extracted == command) {
             return it.command; // match, return name of command
         }
@@ -207,7 +207,7 @@ void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string 
 /// result: /hello/there
 void com_push(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string &fragment)
 {
-    std::string thePath(workingDir);
+    auto thePath(workingDir);
     if (*thePath.rbegin() != '/') {
         (void)thePath.append("/");
     }
@@ -276,7 +276,7 @@ boost::filesystem::path normalize(const boost::filesystem::path &path)
 /// gets the correct path to cd in to
 std::string formattedPath(std::string const &workingDir, std::string const &path)
 {
-    std::string wd(workingDir);
+    auto wd(workingDir);
     // absolute
     if (*path.begin() == '/') {
         return path;
@@ -422,10 +422,10 @@ void handleTabKey(teasafe::TeaSafe &theBfs,
     size_t len;
 
     if(comTokens.size() > 1) {
-        std::string toBeCompleted(comTokens[comTokens.size()-1]);
+        auto toBeCompleted(comTokens[comTokens.size()-1]);
 
         // make sure the working path is correctly formatted
-        std::string wd(workingPath);
+        auto wd(workingPath);
 
         // if relative then append a slash to working path
         if(*toBeCompleted.begin() != '/') {
@@ -618,7 +618,7 @@ int main(int argc, char *argv[])
 
     // Setup a core teasafe io object which stores highlevel info about accessing
     // the TeaSafe image
-    teasafe::SharedCoreIO io(std::make_shared<teasafe::CoreTeaSafeIO>());
+    auto io(std::make_shared<teasafe::CoreTeaSafeIO>());
     io->path = vm["imageName"].as<std::string>().c_str();
     io->password = teasafe::utility::getPassword("teasafe password: ");
     io->rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;
@@ -629,9 +629,7 @@ int main(int argc, char *argv[])
 
     // Obtain the number of blocks in the image by reading the image's block count
     long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-    std::function<void(teasafe::EventType)> f(std::bind(&teasafe::cipherCallback, 
-                                                        std::placeholders::_1, 
-                                                        amount));
+    auto f(std::bind(&teasafe::cipherCallback, std::placeholders::_1, amount));
     io->ccb = f;
     teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
 
