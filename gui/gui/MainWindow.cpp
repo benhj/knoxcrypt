@@ -401,7 +401,6 @@ void MainWindow::updateStatusTextSlot(QString const &str)
 void MainWindow::doWork(WorkType workType)
 {
     QList<QTreeWidgetItem*> selectedItems = ui->fileTree->selectedItems();
-    QList<QTreeWidgetItem*>::iterator it = selectedItems.begin();
     for (auto const &it : selectedItems) {
         std::string teaPath(detail::getPathFromCurrentItem(it));
         qDebug() << teaPath.c_str();
