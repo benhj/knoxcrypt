@@ -212,7 +212,7 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
          <number>0</number>
         </property>
         <item>
-         <widget class="QTreeWidget" name="fileTree">
+         <widget class="FileWidget" name="fileTree">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -403,6 +403,13 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>FileWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>FileWidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>
