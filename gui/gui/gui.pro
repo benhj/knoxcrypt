@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT += core gui
+QT -= opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,9 +16,9 @@ CONFIG += c++11
 LIBS += -L/usr/local/lib -L/usr/lib -lboost_system -lboost_filesystem -lboost_thread-mt -lboost_random
 LIBS += ../../libteasafe.a /usr/lib/libcryptopp.a
 
-INCLUDEPATH += ../../include \
-               /usr/local/include \
-               /usr/include
+INCLUDEPATH += ../../include
+QMAKE_CXXFLAGS += -isystem /usr/local/include
+QMAKE_CXXFLAGS += -isystem /usr/include
 
 SOURCES += main.cpp \
            MainWindow.cpp \
