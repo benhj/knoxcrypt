@@ -86,7 +86,6 @@ class MainWindow : public QMainWindow
     void addFolderClickedSlot();
     void itemExpanded(QTreeWidgetItem *);
     void itemFinishedExpanding();
-    bool eventFilter(QObject* o, QEvent* e);
 
     void closeProgressSlot();
     void openProgressSlot();

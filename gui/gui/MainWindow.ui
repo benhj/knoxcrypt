@@ -219,6 +219,9 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="acceptDrops">
+           <bool>true</bool>
+          </property>
           <property name="styleSheet">
            <string notr="true">left:5px;</string>
           </property>
@@ -231,11 +234,26 @@ radius: 1.0, stop: 0 #fff, stop: 1 #ddd);
           <property name="lineWidth">
            <number>0</number>
           </property>
+          <property name="dragEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::DropOnly</enum>
+          </property>
+          <property name="defaultDropAction">
+           <enum>Qt::IgnoreAction</enum>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>false</bool>
+          </property>
           <property name="autoExpandDelay">
            <number>-1</number>
           </property>
           <property name="indentation">
            <number>20</number>
+          </property>
+          <property name="uniformRowHeights">
+           <bool>false</bool>
           </property>
           <property name="headerHidden">
            <bool>true</bool>

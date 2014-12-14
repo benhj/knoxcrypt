@@ -1,29 +1,26 @@
 #include "FileWidget.h"
 
 #include <QDebug>
+#include <QDragEnterEvent>
 
 FileWidget::FileWidget(QWidget *parent) :
     QTreeWidget(parent)
 {
     setAcceptDrops(true);
-//    setDragEnabled(true);
-//    setDropIndicatorShown(true);
-//    setDragDropMode(QAbstractItemView::DragDrop);
+    setDragEnabled(true);
+    setDropIndicatorShown(true);
+    setDragDropMode(QAbstractItemView::DropOnly);
 }
 
 void
 FileWidget::dragEnterEvent(QDragEnterEvent *event)
 {
-    qDebug() << "drag enter event";
-    QTreeWidget::dragEnterEvent(event);
-
+    event->accept();
 }
 
 void
-FileWidget::dragLeaveEvent(QDragLeaveEvent *event)
+FileWidget::dragLeaveEvent(QDragLeaveEvent *)
 {
-    qDebug() << "drag leave event";
-    QTreeWidget::dragLeaveEvent(event);
 }
 
 bool
@@ -33,7 +30,6 @@ FileWidget::dropMimeData(QTreeWidgetItem * parent,
                          Qt::DropAction action )
 {
     qDebug() << "Dropped";
-    QTreeWidget::dropMimeData(parent, index, data, action);
     return true;
 }
 
@@ -41,15 +37,10 @@ void
 FileWidget::dropEvent(QDropEvent *event)
 {
     qDebug() << "Drop event!";
-    QTreeWidget::dropEvent(event);
-
 }
 
 void
-FileWidget::dragMoveEvent(QDragMoveEvent *event)
+FileWidget::dragMoveEvent(QDragMoveEvent *)
 {
-    qDebug() << "Drag move event!";
-    QTreeWidget::dragMoveEvent(event);
-
 }
 

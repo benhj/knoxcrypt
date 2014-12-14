@@ -133,12 +133,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(m_addFolderAction.get(), SIGNAL(triggered()), this, SLOT(addFolderClickedSlot()));
     QObject::connect(m_itemAdder.get(), SIGNAL(finished()), this, SLOT(itemFinishedExpanding()));
 
-    ui->fileTree->setDragEnabled(true);
-    ui->fileTree->setDropIndicatorShown(true);
-    ui->fileTree->setAcceptDrops(true);
-    ui->fileTree->setDragDropMode(QAbstractItemView::DropOnly);
-    ui->fileTree->viewport()->installEventFilter( this ); // that's what you need
-
     // not sure why I need this, but it prevents errors of the type
     // QObject::connect: Cannot queue arguments of type 'QVector<int>'
     // (Make sure 'QVector<int>' is registered using qRegisterMetaType().)
@@ -338,17 +332,6 @@ void MainWindow::itemExpanded(QTreeWidgetItem *parent)
 void MainWindow::itemFinishedExpanding()
 {
     ui->fileTree->repaint();
-}
-
-bool MainWindow::eventFilter( QObject* o, QEvent* e )
-{
-    if( o == ui->fileTree->viewport() && e->type() == QEvent::Drop )
-    {
-        // do what you would do in the slot
-        qDebug() << "drop!";
-    }
-
-    return false;
 }
 
 void MainWindow::closeProgressSlot()
