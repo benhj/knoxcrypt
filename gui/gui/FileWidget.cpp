@@ -43,6 +43,11 @@ FileWidget::dropEvent(QDropEvent *event)
        }
 
        // call a function to add files (TODO)
+       // try to insert item into position... (TODO)
+       QTreeWidgetItem * destItem = itemAt(event->pos());
+       if(destItem) {
+
+       }
    }
 
 }
