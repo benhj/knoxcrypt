@@ -13,16 +13,11 @@ protected:
 
     void dragEnterEvent(QDragEnterEvent *event);
 
-    virtual bool dropMimeData(QTreeWidgetItem * parent,
-                              int index,
-                              const QMimeData * data,
-                              Qt::DropAction action );
     void dropEvent(QDropEvent *event);
 
     void dragMoveEvent(QDragMoveEvent *event);
 
     void dragLeaveEvent(QDragLeaveEvent *event);
-
 };
 
 #endif // FILEWIDGET_H
