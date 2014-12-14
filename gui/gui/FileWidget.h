@@ -19,7 +19,9 @@ protected:
                               Qt::DropAction action );
     void dropEvent(QDropEvent *event);
 
+    void dragMoveEvent(QDragMoveEvent *event);
 
+    void dragLeaveEvent(QDragLeaveEvent *event);
 
 };
 
