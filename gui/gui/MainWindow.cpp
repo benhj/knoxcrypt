@@ -132,6 +132,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(m_addFileAction.get(), SIGNAL(triggered()), this, SLOT(addFileClickedSlot()));
     QObject::connect(m_addFolderAction.get(), SIGNAL(triggered()), this, SLOT(addFolderClickedSlot()));
     QObject::connect(m_itemAdder.get(), SIGNAL(finished()), this, SLOT(itemFinishedExpanding()));
+    QObject::connect(ui->fileTree, SIGNAL(fileDroppedSignal(QTreeWidgetItem*,std::string)),
+                     this, SLOT(fileDroppedSlot(QTreeWidgetItem*,std::string)));
 
     // not sure why I need this, but it prevents errors of the type
     // QObject::connect: Cannot queue arguments of type 'QVector<int>'
@@ -379,6 +381,60 @@ void MainWindow::loggerCallback(std::string const &str)
 void MainWindow::updateStatusTextSlot(QString const &str)
 {
     ui->statusText->appendPlainText(str);
+}
+
+void MainWindow::fileDroppedSlot(QTreeWidgetItem *dropItem, std::string const &fsPath)
+{
+    auto itemPath(detail::getPathFromCurrentItem(dropItem));
+    auto theFSPath(fsPath);
+    auto newItemText(QString(boost::filesystem::path(fsPath).filename().c_str()));
+    if(boost::filesystem::is_directory(fsPath)) {
+        theFSPath = boost::filesystem::path(fsPath).parent_path().string();
+        newItemText = QString(boost::filesystem::path(theFSPath).filename().c_str());
+    }
+
+    // if item is a folder, add as a child; if item is a file
+    // add to parent
+    // ------------------------------------------------------
+    bool isFolder = false;
+    // Note root is a special case, as it is always a folder
+    if(itemPath == "/") {
+        isFolder = true;
+    } else {
+        // Not the root folder so check entry info instead for type
+        auto info(m_teaSafe->getInfo(itemPath));
+        if(info.type() == teasafe::EntryType::FolderType) {
+            isFolder = true;
+        }
+    }
+    if(isFolder) {
+        std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback,
+                                                      this, std::placeholders::_1));
+        auto f(std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
+                         itemPath, theFSPath, cb));
+        QTreeWidgetItem *item = new QTreeWidgetItem(dropItem);
+        if(boost::filesystem::is_directory(theFSPath)) {
+            item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
+        }
+        item->setText(0, newItemText);
+        m_workThread.addWorkFunction(f);
+    } else {
+
+        std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback,
+                                                      this, std::placeholders::_1));
+
+        boost::filesystem::path parentTeaPath(itemPath);
+        parentTeaPath = parentTeaPath.parent_path();
+
+        auto f(std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
+                         parentTeaPath.string(), theFSPath, cb));
+        QTreeWidgetItem *item = new QTreeWidgetItem(dropItem);
+        if(boost::filesystem::is_directory(theFSPath)) {
+            item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
+        }
+        item->setText(0, newItemText);
+        m_workThread.addWorkFunction(f);
+    }
 }
 
 void MainWindow::doWork(WorkType workType)

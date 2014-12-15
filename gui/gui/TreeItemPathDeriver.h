@@ -37,7 +37,7 @@ namespace detail
 {
 
     inline
-        std::string getPathFromCurrentItem_(QTreeWidgetItem *item)
+    std::string getPathFromCurrentItem_(QTreeWidgetItem *item)
     {
         std::string str("");
         if (item->parent()) {
@@ -50,7 +50,7 @@ namespace detail
     }
 
     inline
-        std::string getPathFromCurrentItem(QTreeWidgetItem *item)
+    std::string getPathFromCurrentItem(QTreeWidgetItem *item)
     {
         // check if we're root
         if(item->text(0).toStdString() == "/") {

@@ -9,6 +9,11 @@ class FileWidget : public QTreeWidget
 public:
     explicit FileWidget(QWidget *parent = 0);
 
+signals:
+    // the widget item that was hovered over
+    // the string is the path
+    void fileDroppedSignal(QTreeWidgetItem*, std::string);
+
 protected:
 
     void dragEnterEvent(QDragEnterEvent *event);

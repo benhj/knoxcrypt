@@ -100,6 +100,10 @@ class MainWindow : public QMainWindow
 
     void updateStatusTextSlot(QString const &str);
 
+    // when user drops a file in to the tree widget, this slot
+    // will be called to add the file to the container
+    void fileDroppedSlot(QTreeWidgetItem *item, std::string const &path);
+
   signals:
     void updateProgressSignal(long);
     void setMaximumProgressSignal(long);
