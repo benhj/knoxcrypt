@@ -3,9 +3,11 @@
 #include <QDebug>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <QPainter>
 
-FileWidget::FileWidget(QWidget *parent) :
-    QTreeWidget(parent)
+FileWidget::FileWidget(QWidget *parent)
+  : QTreeWidget(parent)
+  , m_currentlyOver(0)
 {
     setAcceptDrops(true);
     setDragEnabled(true);
@@ -27,8 +29,6 @@ FileWidget::dragLeaveEvent(QDragLeaveEvent *)
 void
 FileWidget::dropEvent(QDropEvent *event)
 {
-    qDebug() << "Drop event!";
-
     QMimeData const * mimeData = event->mimeData();
 
    // check for our needed mime type, here a file or a list of files
@@ -37,12 +37,10 @@ FileWidget::dropEvent(QDropEvent *event)
 
        // extract the local paths of the files
        for (int i = 0; i < urlList.size() && i < 32; ++i) {
-
-           // call a function to add files (TODO)
-           // try to insert item into position... (TODO)
            QTreeWidgetItem * destItem = itemAt(event->pos());
            if(destItem) {
                emit fileDroppedSignal(destItem, urlList.at(i).path().toStdString());
+               m_currentlyOver->setBackgroundColor(0, Qt::black);
            }
 
        }
@@ -50,8 +48,15 @@ FileWidget::dropEvent(QDropEvent *event)
 
 }
 
+
 void
-FileWidget::dragMoveEvent(QDragMoveEvent *)
+FileWidget::dragMoveEvent(QDragMoveEvent * event)
 {
+    QTreeWidgetItem * destItem = itemAt(event->pos());
+    if(destItem != m_currentlyOver) {
+        if(m_currentlyOver) { m_currentlyOver->setBackgroundColor(0, Qt::black); }
+        m_currentlyOver = destItem;
+        m_currentlyOver->setBackgroundColor(0, Qt::gray);
+    }
 }
 

@@ -28,6 +28,7 @@
 
 #include "WorkThread.h"
 #include "utility/ExtractToPhysical.hpp"
+#include <QDebug>
 
 WorkThread::WorkThread(QObject *parent)
     : QThread(parent)

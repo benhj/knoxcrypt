@@ -23,6 +23,8 @@ protected:
     void dragMoveEvent(QDragMoveEvent *event);
 
     void dragLeaveEvent(QDragLeaveEvent *event);
+private:
+    QTreeWidgetItem * m_currentlyOver;
 };
 
 #endif // FILEWIDGET_H

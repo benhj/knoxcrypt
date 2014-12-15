@@ -361,15 +361,18 @@ void MainWindow::getTeaSafeFromBuilder()
 
 void MainWindow::setBusyIndicator()
 {
-    m_spinner = std::make_shared<QMovie>(":/new/prefix1/graphix/spinner.gif");
-    m_spinner->setScaledSize(QSize(16,16));
-    ui->blinkerLabel->setMovie(m_spinner.get());
-    m_spinner->start();
+    if(!m_spinner) {
+        m_spinner = std::make_shared<QMovie>(":/new/prefix1/graphix/spinner.gif");
+        m_spinner->setScaledSize(QSize(16,16));
+        ui->blinkerLabel->setMovie(m_spinner.get());
+        m_spinner->start();
+    }
 }
 
 void MainWindow::setReadyIndicator()
 {
     m_spinner->stop();
+    m_spinner.reset();
     ui->blinkerLabel->clear();
 }
 
@@ -428,7 +431,7 @@ void MainWindow::fileDroppedSlot(QTreeWidgetItem *dropItem, std::string const &f
 
         auto f(std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
                          parentTeaPath.string(), theFSPath, cb));
-        QTreeWidgetItem *item = new QTreeWidgetItem(dropItem);
+        QTreeWidgetItem *item = new QTreeWidgetItem(dropItem->parent());
         if(boost::filesystem::is_directory(theFSPath)) {
             item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
         }
