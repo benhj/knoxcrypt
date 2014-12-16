@@ -41,6 +41,7 @@ FileWidget::dropEvent(QDropEvent *event)
            if(destItem) {
                emit fileDroppedSignal(destItem, urlList.at(i).path().toStdString());
                m_currentlyOver->setBackgroundColor(0, Qt::black);
+               m_currentlyOver = 0;
            }
 
        }
@@ -55,8 +56,10 @@ FileWidget::dragMoveEvent(QDragMoveEvent * event)
     QTreeWidgetItem * destItem = itemAt(event->pos());
     if(destItem != m_currentlyOver) {
         if(m_currentlyOver) { m_currentlyOver->setBackgroundColor(0, Qt::black); }
-        m_currentlyOver = destItem;
-        m_currentlyOver->setBackgroundColor(0, Qt::gray);
+        if(destItem != 0) {
+            m_currentlyOver = destItem;
+            m_currentlyOver->setBackgroundColor(0, Qt::gray);
+        }
     }
 }
 

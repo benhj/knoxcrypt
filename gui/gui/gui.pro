@@ -26,7 +26,7 @@ SOURCES += main.cpp \
            ItemAdder.cpp \
            ContainerBuilderThread.cpp \
            GUICipherCallback.cpp \
-    FileWidget.cpp
+           FileWidget.cpp
 
 HEADERS  += MainWindow.h \
             LoaderThread.h \
@@ -35,7 +35,7 @@ HEADERS  += MainWindow.h \
             ItemAdder.h \
             ContainerBuilderThread.h \
             GUICipherCallback.h \
-    FileWidget.h
+            FileWidget.h
 
 FORMS += MainWindow.ui
 
