@@ -296,6 +296,11 @@ namespace teasafe
         typedef std::map<std::string, SharedEntryInfo> EntryInfoCacheMap;
         mutable EntryInfoCacheMap m_entryInfoCacheMap;
 
+        // when an entry is deleted, its metadata is put out of use meaning that
+        // there might be somewhere before the end that metadata for a new file can
+        // be written so should check list of entries to find 'blank' space.
+        bool m_checkForEarlyMetaData;
+
     };
 
 }

@@ -362,6 +362,7 @@ void MainWindow::getTeaSafeFromBuilder()
 void MainWindow::setBusyIndicator()
 {
     if(!m_spinner) {
+
         m_spinner = std::make_shared<QMovie>(":/new/prefix1/graphix/spinner.gif");
         m_spinner->setScaledSize(QSize(16,16));
         ui->blinkerLabel->setMovie(m_spinner.get());

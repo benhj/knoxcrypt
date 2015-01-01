@@ -198,6 +198,7 @@ namespace teasafe
         , m_name(name)
         , m_entryCount(getNumberOfEntries(m_folderData, m_io->blocks))
         , m_entryInfoCacheMap()
+        , m_checkForEarlyMetaData(true)
     {
     }
 
@@ -210,6 +211,7 @@ namespace teasafe
         , m_name(name)
         , m_entryCount(0)
         , m_entryInfoCacheMap()
+        , m_checkForEarlyMetaData(true)
     {
         // set initial number of entries; there will be none to begin with
         uint64_t startCount(0);
@@ -421,6 +423,10 @@ namespace teasafe
                          OpenDisposition::buildOverwriteDisposition());
         metaDataToOutOfUse(temp, doGetMetaDataIndexForEntry(name));
 
+        // signify that a 'space' might be available for metadata earlier in list
+        // than at end
+        m_checkForEarlyMetaData = true;
+
         // removes any info with name from cache
         this->invalidateEntryInEntryInfoCache(name);
     }
@@ -577,14 +583,18 @@ namespace teasafe
 
         // Note possible way of optimizing this? Store in cache available entries
         // to overwrite?
-
-        for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
-            auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
-            if (!entryMetaDataIsEnabled(metaData)) {
-                uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
-                std::ios_base::streamoff offset = (8 + (entryIndex * bufferSize));
-                return OptionalOffset(offset);
+        if(m_checkForEarlyMetaData) { // optimization
+            for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
+                auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
+                if (!entryMetaDataIsEnabled(metaData)) {
+                    uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
+                    std::ios_base::streamoff offset = (8 + (entryIndex * bufferSize));
+                    return OptionalOffset(offset);
+                }
             }
+
+            // couldn't be found before, means that it won't be found in future
+            m_checkForEarlyMetaData = false;
         }
 
         // free entry not found so signify that we should seek right to
