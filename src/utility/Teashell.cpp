@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2014-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,7 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
     thePath.append(path);
 
     // iterate over entries in folder and print filenames of each
-    auto folder = theBfs.getTeaSafeFolder(thePath);
+    auto folder = theBfs.getFolder(thePath);
     auto entries = folder.listAllEntries();
     for (auto const &it : entries) {
         if (it.type() == teasafe::EntryType::FileType) {
@@ -132,7 +132,7 @@ std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const 
     auto parentPath(bp.parent_path().string());
 
     // get the parent folder
-    auto folder = theBfs.getTeaSafeFolder(parentPath);
+    auto folder = theBfs.getFolder(parentPath);
 
     // iterate over entries in folder
     auto entries = folder.listAllEntries();

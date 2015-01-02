@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -304,7 +304,7 @@ namespace fuselayer
                         off_t, struct fuse_file_info *)
         {
             try {
-                auto folder(TeaSafe_DATA->getTeaSafeFolder(path));
+                auto folder(TeaSafe_DATA->getFolder(path));
 
                 auto infos(folder.listAllEntries());
 

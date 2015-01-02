@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/TeaSafeFileDevice.hpp"
-#include "teasafe/TeaSafeFolder.hpp"
+#include "teasafe/CompoundFolder.hpp"
 #include "teasafe/FolderRemovalType.hpp"
 #include "teasafe/OpenDisposition.hpp"
 
@@ -52,7 +52,7 @@ namespace teasafe
 
     class TeaSafe
     {
-        typedef std::shared_ptr<TeaSafeFolder> SharedTeaSafeFolder;
+        typedef std::shared_ptr<CompoundFolder> SharedCompoundFolder;
 
       public:
         explicit TeaSafe(SharedCoreIO const &io);
@@ -60,10 +60,10 @@ namespace teasafe
         /**
          * @brief  retrieves folder entry for given path
          * @param  path the path to retrieve entry for
-         * @return the TeaSafeFolder
+         * @return the CompoundFolder
          * @throw  TeaSafeException if path cannot be found
          */
-        TeaSafeFolder getTeaSafeFolder(std::string const &path);
+        CompoundFolder getFolder(std::string const &path);
 
         /**
          * @brief  retrieves metadata for given path
@@ -159,11 +159,11 @@ namespace teasafe
         SharedCoreIO m_io;
 
         // the root of the tea safe filesystem
-        mutable SharedTeaSafeFolder m_rootFolder;
+        mutable SharedCompoundFolder m_rootFolder;
 
         // so that folders don't have to be consistently rebuilt store
         // them as they are built in map and prefer to query map in future
-        typedef std::map<std::string, SharedTeaSafeFolder> FolderCache;
+        typedef std::map<std::string, SharedCompoundFolder> FolderCache;
         mutable FolderCache m_folderCache;
 
         typedef std::mutex StateMutex;
@@ -182,7 +182,7 @@ namespace teasafe
 
         bool doFolderExists(std::string const &path) const;
 
-        SharedTeaSafeFolder doGetParentTeaSafeFolder(std::string const &path) const;
+        SharedCompoundFolder doGetParentCompoundFolder(std::string const &path) const;
 
         bool doExistanceCheck(std::string const &path, EntryType const &entryType) const;
 
@@ -201,7 +201,7 @@ namespace teasafe
          * @return the cached file
          */
         SharedTeaSafeFile setAndGetCachedFile(std::string const &path,
-                                              SharedTeaSafeFolder const &parentEntry,
+                                              SharedCompoundFolder const &parentEntry,
                                               OpenDisposition openMode) const;
 
         /**
