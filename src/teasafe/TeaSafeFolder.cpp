@@ -294,10 +294,11 @@ namespace teasafe
 
         // increment entry count, but only if brand new
         if (!overWroteOld) {
-            detail::incrementFolderEntryCount(*m_folderData.getStream(),
-                                              m_io,
-                                              m_folderData.getStartVolumeBlockIndex());
             ++m_entryCount;
+            detail::writeFolderEntryCount(*m_folderData.getStream(),
+                                          m_io,
+                                          m_folderData.getStartVolumeBlockIndex(),
+                                          m_entryCount);
         }
 
         // make sure all data has been written

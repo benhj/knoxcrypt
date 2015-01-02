@@ -60,6 +60,7 @@ namespace teasafe
             return *m_rootFolder;
         }
 
+/*
         auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string()));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -67,6 +68,7 @@ namespace teasafe
         if (childInfo->type() == EntryType::FileType) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
+*/
         return parentEntry->getTeaSafeFolder(boost::filesystem::path(thePath).filename().string());
 
 
@@ -224,13 +226,14 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
+        /*
         auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string()));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
         if (childInfo->type() == EntryType::FolderType) {
             throw TeaSafeException(TeaSafeError::NotFound);
-        }
+        }*/
 
         parentEntry->removeTeaSafeFile(boost::filesystem::path(thePath).filename().string());
 
@@ -257,13 +260,14 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
+        /*
         auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string()));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
         if (childInfo->type() == EntryType::FileType) {
             throw TeaSafeException(TeaSafeError::NotFound);
-        }
+        }*/
 
         if (removalType == FolderRemovalType::MustBeEmpty) {
 
@@ -294,13 +298,14 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
+        /*
         auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string()));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
         if (childInfo->type() == EntryType::FolderType) {
             throw TeaSafeException(TeaSafeError::NotFound);
-        }
+        }*/
 
         auto fe(this->setAndGetCachedFile(path, parentEntry, openMode));
         return TeaSafeFileDevice(fe);
@@ -315,13 +320,14 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
+        /*
         auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string()));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
         if (childInfo->type() == EntryType::FolderType) {
             throw TeaSafeException(TeaSafeError::NotFound);
-        }
+        }*/
 
         auto fe(this->setAndGetCachedFile(path, parentEntry, OpenDisposition::buildOverwriteDisposition()));
         fe->truncate(offset);

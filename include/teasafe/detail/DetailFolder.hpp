@@ -40,6 +40,7 @@
 namespace teasafe { namespace detail
 {
 
+    /// for reading the entry count, incrementing it and writing out result again
     void incrementFolderEntryCount(teasafe::TeaSafeImageStream &out,
                                    teasafe::SharedCoreIO const& io,
                                    uint64_t const startBlock,
@@ -57,6 +58,21 @@ namespace teasafe { namespace detail
         (void)out.write((char*)buf, 8);
     }
 
+    /// for writing directly the entry count
+    void writeFolderEntryCount(teasafe::TeaSafeImageStream &out,
+                               teasafe::SharedCoreIO const& io,
+                               uint64_t const startBlock,
+                               uint64_t const entryCount)
+    {
+        //teasafe::TeaSafeImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
+        uint64_t const offset = getOffsetOfFileBlock(startBlock, io->blocks);
+        uint8_t buf[8];
+        (void)out.seekp(offset + FILE_BLOCK_META);
+        convertUInt64ToInt8Array(entryCount, buf);
+        (void)out.write((char*)buf, 8);
+    }
+
+    /// for reading entry count, decrementing it and then writing value back out again
     void decrementFolderEntryCount(SharedCoreIO const &io,
                                    uint64_t const startBlock,
                                    uint64_t const dec = 1)
