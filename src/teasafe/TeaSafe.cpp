@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 */
-        return parentEntry->getTeaSafeFolder(boost::filesystem::path(thePath).filename().string());
+        return *parentEntry->getTeaSafeFolder(boost::filesystem::path(thePath).filename().string());
 
 
     }
@@ -272,7 +272,7 @@ namespace teasafe
         if (removalType == FolderRemovalType::MustBeEmpty) {
 
             auto childEntry(parentEntry->getTeaSafeFolder(boost::filesystem::path(thePath).filename().string()));
-            if (!childEntry.listAllEntries().empty()) {
+            if (!childEntry->listAllEntries().empty()) {
                 throw TeaSafeException(TeaSafeError::FolderNotEmpty);
             }
         }
@@ -365,8 +365,8 @@ namespace teasafe
             }
         }
 
-        auto sf(std::make_shared<TeaSafeFile>(parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(),
-                                                                          openMode)));
+        auto sf(std::make_shared<TeaSafeFile>(*parentEntry->getTeaSafeFile(boost::filesystem::path(path).filename().string(),
+                                                                           openMode)));
         m_fileCache.insert(std::make_pair(path, sf));
         return sf;
     }
@@ -450,7 +450,7 @@ namespace teasafe
             if (pathBuilder == pathToCheck) {
 
                 if (entryInfo->type() == EntryType::FolderType) {
-                    SharedTeaSafeFolder folder(std::make_shared<TeaSafeFolder>(folderOfInterest.getTeaSafeFolder(entryInfo->filename())));
+                    SharedTeaSafeFolder folder(std::make_shared<TeaSafeFolder>(*folderOfInterest.getTeaSafeFolder(entryInfo->filename())));
                     m_folderCache.insert(std::make_pair(pathToCheck.string(), folder));
                     return folder;
                 } else {
@@ -458,7 +458,7 @@ namespace teasafe
                 }
             }
             // recurse deeper
-            folderOfInterest = folderOfInterest.getTeaSafeFolder(entryInfo->filename());
+            folderOfInterest = *folderOfInterest.getTeaSafeFolder(entryInfo->filename());
         }
 
 

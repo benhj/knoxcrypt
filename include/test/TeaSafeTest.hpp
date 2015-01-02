@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -83,18 +83,18 @@ class TeaSafeTest
         folder.addTeaSafeFile("vai.mp3");
         folder.addTeaSafeFolder("folderB");
 
-        teasafe::TeaSafeFolder folderA = folder.getTeaSafeFolder("folderA");
+        teasafe::TeaSafeFolder folderA = *folder.getTeaSafeFolder("folderA");
         folderA.addTeaSafeFile("fileA");
         folderA.addTeaSafeFile("fileB");
         folderA.addTeaSafeFolder("subFolderA");
 
-        teasafe::TeaSafeFolder subFolderA = folderA.getTeaSafeFolder("subFolderA");
+        teasafe::TeaSafeFolder subFolderA = *folderA.getTeaSafeFolder("subFolderA");
         subFolderA.addTeaSafeFolder("subFolderB");
         subFolderA.addTeaSafeFile("fileX");
         subFolderA.addTeaSafeFolder("subFolderC");
         subFolderA.addTeaSafeFile("fileY");
 
-        teasafe::TeaSafeFolder subFolderC = subFolderA.getTeaSafeFolder("subFolderC");
+        teasafe::TeaSafeFolder subFolderC = *subFolderA.getTeaSafeFolder("subFolderC");
         subFolderC.addTeaSafeFolder("finalFolder");
         subFolderC.addTeaSafeFile("finalFile.txt");
 
@@ -149,7 +149,7 @@ class TeaSafeTest
         teasafe::TeaSafe theTeaSafe(io);
 
         theTeaSafe.addFile("/folderA/subFolderA/subFolderC/testAdded.txt");
-        teasafe::TeaSafeFolder parent = root.getTeaSafeFolder("folderA").getTeaSafeFolder("subFolderA").getTeaSafeFolder("subFolderC");
+        teasafe::TeaSafeFolder parent = *root.getTeaSafeFolder("folderA")->getTeaSafeFolder("subFolderA")->getTeaSafeFolder("subFolderC");
         teasafe::SharedEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
         bool good = entryInfo ? true : false;
         ASSERT_EQUAL(true, good, "TeaSafeTest::testAddTeaSafeFile() getting info");
@@ -166,7 +166,7 @@ class TeaSafeTest
         teasafe::TeaSafe theTeaSafe(io);
 
         theTeaSafe.addFolder("/folderA/subFolderA/subFolderC/testAdded");
-        teasafe::TeaSafeFolder parent = root.getTeaSafeFolder("folderA").getTeaSafeFolder("subFolderA").getTeaSafeFolder("subFolderC");
+        teasafe::TeaSafeFolder parent = *root.getTeaSafeFolder("folderA")->getTeaSafeFolder("subFolderA")->getTeaSafeFolder("subFolderC");
         teasafe::SharedEntryInfo entryInfo = parent.getEntryInfo("testAdded");
         bool good = entryInfo ? true : false;
         ASSERT_EQUAL(true, good, "TeaSafeTest::testAddTeaSafeFolder() getting info");
@@ -258,9 +258,9 @@ class TeaSafeTest
         teasafe::TeaSafe theTeaSafe(io);
         theTeaSafe.removeFile("/folderA/subFolderA/subFolderC/finalFile.txt");
         teasafe::SharedEntryInfo info = root.getTeaSafeFolder("folderA")
-            .getTeaSafeFolder("subFolderA")
-            .getTeaSafeFolder("subFolderC")
-            .getEntryInfo("finalFile.txt");
+            ->getTeaSafeFolder("subFolderA")
+            ->getTeaSafeFolder("subFolderC")
+            ->getEntryInfo("finalFile.txt");
         bool exists = info ? true : false;
         ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveTeaSafeFile()");
     }
@@ -330,9 +330,9 @@ class TeaSafeTest
 
 
         teasafe::SharedEntryInfo info = root.getTeaSafeFolder("folderA")
-            .getTeaSafeFolder("subFolderA")
-            .getTeaSafeFolder("subFolderC")
-            .getEntryInfo("finalFolder");
+            ->getTeaSafeFolder("subFolderA")
+            ->getTeaSafeFolder("subFolderC")
+            ->getEntryInfo("finalFolder");
         bool exists = info ? true : false;
         ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveEmptyFolder()");
     }
@@ -364,7 +364,7 @@ class TeaSafeTest
         theTeaSafe.removeFolder("/folderA/subFolderA/",
                                 teasafe::FolderRemovalType::Recursive);
         teasafe::SharedEntryInfo info = root.getTeaSafeFolder("folderA")
-            .getEntryInfo("subFolderA");
+            ->getEntryInfo("subFolderA");
         bool exists = info ? true : false;
         ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveNonEmptyFolder()");
     }

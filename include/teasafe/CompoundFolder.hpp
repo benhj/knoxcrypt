@@ -96,6 +96,9 @@ namespace teasafe
          */
         CompoundFolder getFolder(std::string const &name) const;
 
+        /// retrieves main compound folder
+        TeaSafeFolder getCompoundFolder() const;
+
         /**
          * @brief retrieves the name of this folder
          * @return the name

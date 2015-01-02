@@ -103,7 +103,7 @@ namespace teasafe
         bool wasAdded = false;
         for(auto & f : m_compoundEntries) {
             if(f.getEntryCount() < 100) {
-                f.addTeaSafeFolder(name);
+                f.addCompoundFolder(name);
                 wasAdded = true;
             }
         }
@@ -112,7 +112,7 @@ namespace teasafe
         // another leaf folder
         if(!wasAdded) {
             doAddCompoundFolderEntry();
-            m_compoundEntries.back().addTeaSafeFolder(name);
+            m_compoundEntries.back().addCompoundFolder(name);
         }
     }
 
@@ -120,13 +120,31 @@ namespace teasafe
     CompoundFolder::getFile(std::string const &name,
                             OpenDisposition const &openDisposition) const
     {
-
+        for(auto & f : m_compoundEntries) {
+            auto file(f.getTeaSafeFile(name, openDisposition));
+            if(file) {
+                return *file;
+            }
+        }
+        throw std::runtime_error("File not found");
     }
 
     CompoundFolder 
     CompoundFolder::getFolder(std::string const &name) const
     {
+        for(auto & f : m_compoundEntries) {
+            auto folder(f.getCompoundFolder(name));
+            if(folder) {
+                return *folder;
+            }
+        }
+        throw std::runtime_error("Compound folder not found");
+    }
 
+    TeaSafeFolder 
+    CompoundFolder::getCompoundFolder() const
+    {
+        return m_compoundFolder;
     }
 
     std::string 
@@ -138,36 +156,65 @@ namespace teasafe
     SharedEntryInfo 
     CompoundFolder::getEntryInfo(std::string const &name) const
     {
-
+        for(auto const & f : m_compoundEntries) {
+            auto info(f.getEntryInfo(name));
+            if(info) { return info; }
+        }
+        return SharedEntryInfo();
     }
 
     std::vector<EntryInfo> 
     CompoundFolder::listAllEntries() const
     {
-
+        std::vector<EntryInfo> infos;
+        for(auto const & f : m_compoundEntries) {
+            auto leafEntries(f.listAllEntries());
+            for(auto const & entry : leafEntries) {
+                infos.push_back(entry);
+            }
+        }
+        return infos;
     }
 
     std::vector<EntryInfo> 
     CompoundFolder::listFileEntries() const
     {
-
+        std::vector<EntryInfo> infos;
+        for(auto const & f : m_compoundEntries) {
+            auto leafEntries(f.listFileEntries());
+            for(auto const & entry : leafEntries) {
+                infos.push_back(entry);
+            }
+        }
+        return infos;
     }
 
     std::vector<EntryInfo> 
     CompoundFolder::listFolderEntries() const
     {
-
+        std::vector<EntryInfo> infos;
+        for(auto const & f : m_compoundEntries) {
+            auto leafEntries(f.listFolderEntries());
+            for(auto const & entry : leafEntries) {
+                infos.push_back(entry);
+            }
+        }
+        return infos;
     }
 
     void 
     CompoundFolder::removeFile(std::string const &name)
     {
-
+        for(auto & f : m_compoundEntries) {
+            if(f.removeTeaSafeFile(name)) { return; }
+        }
     }
 
     void 
     CompoundFolder::removeFolder(std::string const &name)
     {
-
+        for(auto & f : m_compoundEntries) {
+            if(f.removeTeaSafeFolder(name)) { return; }
+        }
     }
 }

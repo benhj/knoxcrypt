@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "teasafe/CompoundFolder.hpp"
 #include "teasafe/TeaSafeImageStream.hpp"
 #include "teasafe/TeaSafeFolder.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
@@ -331,7 +332,20 @@ namespace teasafe
         this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry.m_folderData.getStartVolumeBlockIndex());
     }
 
-    TeaSafeFile
+    void
+    TeaSafeFolder::addCompoundFolder(std::string const &name)
+    {
+        // Create a new sub-folder entry
+        CompoundFolder entry(m_io, name);
+
+        // write the first block index to the file entry metadata
+        this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry
+                                                                      .getCompoundFolder()
+                                                                      .m_folderData
+                                                                      .getStartVolumeBlockIndex());
+    }
+
+    boost::optional<TeaSafeFile>
     TeaSafeFolder::getTeaSafeFile(std::string const &name,
                                   OpenDisposition const &openDisposition) const
     {
@@ -348,10 +362,10 @@ namespace teasafe
                 return file;
             }
         }
-        throw std::runtime_error("File entry with that name not found");
+        return boost::optional<TeaSafeFile>();
     }
 
-    TeaSafeFolder
+    boost::optional<TeaSafeFolder>
     TeaSafeFolder::getTeaSafeFolder(std::string const &name) const
     {
         // optimization is to build the file based on metadata stored in the
@@ -362,7 +376,21 @@ namespace teasafe
                 return TeaSafeFolder(m_io, info->firstFileBlock(), name);
             }
         }
-        throw std::runtime_error("Folder entry with that name not found");
+        return boost::optional<TeaSafeFolder>();
+    }
+
+    boost::optional<CompoundFolder> 
+    TeaSafeFolder::getCompoundFolder(std::string const &name) const
+    {
+        // optimization is to build the file based on metadata stored in the
+        // entry info which is hopefully cached
+        auto info(doGetNamedEntryInfo(name));
+        if (info) {
+            if (info->type() == EntryType::FolderType) {
+                return CompoundFolder(m_io, info->firstFileBlock(), name);
+            }
+        }
+        return boost::optional<CompoundFolder>();
     }
 
     std::string
@@ -447,33 +475,36 @@ namespace teasafe
         }
     }
 
-    void
+    bool
     TeaSafeFolder::removeTeaSafeFile(std::string const &name)
     {
         // first unlink; this deallocates the file blocks, updating the
         // volume bitmap accordingly; note doesn't matter what opendisposition is here
         auto entry(getTeaSafeFile(name, OpenDisposition::buildAppendDisposition()));
-        entry.unlink();
+        if(!entry) { return false; }
+        entry->unlink();
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
         this->doPutMetaDataOutOfUse(name);
+        return true;
 
     }
 
-    void
+    bool
     TeaSafeFolder::removeTeaSafeFolder(std::string const &name)
     {
         auto entry(getTeaSafeFolder(name));
+        if(!entry) { return false; }
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto infos(entry.listAllEntries());
+        auto infos(entry->listAllEntries());
         for (auto const &it : infos) {
             if (it.type() == EntryType::FileType) {
-                entry.removeTeaSafeFile(it.filename());
+                entry->removeTeaSafeFile(it.filename());
             } else {
-                entry.removeTeaSafeFolder(it.filename());
+                entry->removeTeaSafeFolder(it.filename());
             }
         }
 
@@ -482,7 +513,36 @@ namespace teasafe
         this->doPutMetaDataOutOfUse(name);
 
         // unlink entry's data
-        entry.m_folderData.unlink();
+        entry->m_folderData.unlink();
+
+        return true;
+    }
+
+    bool
+    TeaSafeFolder::removeCompoundFolder(std::string const &name)
+    {
+        auto entry(getCompoundFolder(name));
+        if(!entry) { return false; }
+
+        // loop over entries unlinking files and recursing into sub folders
+        // and deleting their entries
+        auto infos(entry->listAllEntries());
+        for (auto const &it : infos) {
+            if (it.type() == EntryType::FileType) {
+                entry->removeFile(it.filename());
+            } else {
+                entry->removeFolder(it.filename());
+            }
+        }
+
+        // second set the metadata to an out of use state; this metadata can
+        // then be later overwritten when a new entry is then added
+        this->doPutMetaDataOutOfUse(name);
+
+        // unlink entry's data
+        entry->getCompoundFolder().m_folderData.unlink();
+
+        return true;
     }
 
     SharedEntryInfo

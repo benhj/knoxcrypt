@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -177,7 +177,7 @@ class TeaSafeFolderTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         teasafe::TeaSafeFolder folder = createTestFolder(testPath);
         std::string testData("some test data!");
-        teasafe::TeaSafeFile entry = folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+        teasafe::TeaSafeFile entry = *folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), testData.length());
         entry.flush();
@@ -193,7 +193,7 @@ class TeaSafeFolderTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         teasafe::TeaSafeFolder folder = createTestFolder(testPath);
         std::string testString(createLargeStringToWrite());
-        teasafe::TeaSafeFile entry = folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+        teasafe::TeaSafeFile entry = *folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testString.begin(), testString.end());
         entry.write((char*)&vec.front(), testString.length());
         entry.flush();
@@ -212,14 +212,14 @@ class TeaSafeFolderTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFolder folder(io, 0, std::string("root"));
-            teasafe::TeaSafeFile entry = folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFile entry = *folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
         }
         {
             std::string testString(createLargeStringToWrite());
-            teasafe::TeaSafeFile entry = folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFile entry = *folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -241,13 +241,13 @@ class TeaSafeFolderTest
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::TeaSafeFolder folder(io, 0, std::string("root"));
-            teasafe::TeaSafeFile entry = folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFile entry = *folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
         }
         {
-            teasafe::TeaSafeFile entry = folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFile entry = *folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -266,7 +266,7 @@ class TeaSafeFolderTest
         teasafe::TeaSafeFolder folder = createTestFolder(testPath);
         {
             std::string testData("some test data!");
-            teasafe::TeaSafeFile entry = folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFile entry = *folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -278,7 +278,7 @@ class TeaSafeFolderTest
 
         {
             std::string testString(createLargeStringToWrite());
-            teasafe::TeaSafeFile entry = folder.getTeaSafeFile("picture.jpg", teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFile entry = *folder.getTeaSafeFile("picture.jpg", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -297,7 +297,7 @@ class TeaSafeFolderTest
 
         {
             std::string testString(createLargeStringToWrite());
-            teasafe::TeaSafeFile entry = folder.getTeaSafeFile("picture.jpg", teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFile entry = *folder.getTeaSafeFile("picture.jpg", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -308,7 +308,7 @@ class TeaSafeFolderTest
         }
         {
             std::string testData("some test data!");
-            teasafe::TeaSafeFile entry = folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFile entry = *folder.getTeaSafeFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -324,7 +324,7 @@ class TeaSafeFolderTest
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         teasafe::TeaSafeFolder folder = createTestFolder(testPath);
-        teasafe::TeaSafeFolder subFolder = folder.getTeaSafeFolder("folderA");
+        teasafe::TeaSafeFolder subFolder = *folder.getTeaSafeFolder("folderA");
         subFolder.addTeaSafeFile("subFileA");
         subFolder.addTeaSafeFile("subFileB");
         subFolder.addTeaSafeFile("subFileC");
@@ -356,14 +356,14 @@ class TeaSafeFolderTest
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         teasafe::TeaSafeFolder folder = createTestFolder(testPath);
-        teasafe::TeaSafeFolder subFolder = folder.getTeaSafeFolder("folderA");
+        teasafe::TeaSafeFolder subFolder = *folder.getTeaSafeFolder("folderA");
         subFolder.addTeaSafeFile("subFileA");
         subFolder.addTeaSafeFile("subFileB");
         subFolder.addTeaSafeFile("subFileC");
         subFolder.addTeaSafeFile("subFileD");
 
         std::string testData("some test data!");
-        teasafe::TeaSafeFile entry = subFolder.getTeaSafeFile("subFileB", teasafe::OpenDisposition::buildAppendDisposition());
+        teasafe::TeaSafeFile entry = *subFolder.getTeaSafeFile("subFileB", teasafe::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), testData.length());
         entry.flush();
@@ -397,14 +397,14 @@ class TeaSafeFolderTest
         {
             boost::filesystem::path testPath = buildImage(m_uniquePath);
             teasafe::TeaSafeFolder folder = createTestFolder(testPath);
-            teasafe::TeaSafeFolder subFolder = folder.getTeaSafeFolder("folderA");
+            teasafe::TeaSafeFolder subFolder = *folder.getTeaSafeFolder("folderA");
             subFolder.addTeaSafeFile("subFileA");
             subFolder.addTeaSafeFile("subFileB");
             subFolder.addTeaSafeFile("subFileC");
             subFolder.addTeaSafeFile("subFileD");
 
             std::string testData("some test data!");
-            teasafe::TeaSafeFile entry = subFolder.getTeaSafeFile("subFileB", teasafe::OpenDisposition::buildAppendDisposition());
+            teasafe::TeaSafeFile entry = *subFolder.getTeaSafeFile("subFileB", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();

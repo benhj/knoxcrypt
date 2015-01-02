@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@ namespace teasafe
     typedef boost::optional<std::ios_base::streamoff> OptionalOffset;
     typedef std::shared_ptr<EntryInfo> SharedEntryInfo;
 
+    class CompoundFolder;
+
     class TeaSafeFolder
     {
       public:
@@ -86,21 +88,27 @@ namespace teasafe
          */
         void addTeaSafeFolder(std::string const &name);
 
+        /// for adding a compound folder
+        void addCompoundFolder(std::string const &name);
+
         /**
          * @brief retrieves a TeaSafeFile with specific name
          * @param name the name of the entry to lookup
          * @param openDisposition open mode
          * @return a copy of the TeaSafeFile with name
          */
-        TeaSafeFile getTeaSafeFile(std::string const &name,
-                                   OpenDisposition const &openDisposition) const;
+        boost::optional<TeaSafeFile> getTeaSafeFile(std::string const &name,
+                                                    OpenDisposition const &openDisposition) const;
 
         /**
          * @brief retrieves a TeaSafeFolder with specific name
          * @param name the name of the entry to lookup
          * @return a copy of the TeaSafeFolder with name
          */
-        TeaSafeFolder getTeaSafeFolder(std::string const &name) const;
+        boost::optional<TeaSafeFolder> getTeaSafeFolder(std::string const &name) const;
+
+        /// for retrieving a compound folder
+        boost::optional<CompoundFolder> getCompoundFolder(std::string const &name) const;
 
         /**
          * @brief retrieves the name of this folder
@@ -163,14 +171,23 @@ namespace teasafe
         /**
          * @brief does what it says
          * @param name the name of the entry
+         * @return true if successful
          */
-        void removeTeaSafeFile(std::string const &name);
+        bool removeTeaSafeFile(std::string const &name);
 
         /**
          * @brief removes a sub folder and all its content
          * @param name the name of the entry
+         * @return true if successful
          */
-        void removeTeaSafeFolder(std::string const &name);
+        bool removeTeaSafeFolder(std::string const &name);
+
+        /**
+         * @brief removes a compound sub folder and all its content
+         * @param name the name of the entry
+         * @return true if successful
+         */
+        bool removeCompoundFolder(std::string const &name);
 
         /**
          * @brief puts metadata for given entry out of use
