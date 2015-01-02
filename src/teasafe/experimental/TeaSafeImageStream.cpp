@@ -135,7 +135,6 @@ namespace teasafe
             fseek(m_stream, off, SEEK_END);
         }
         m_pos = ftell(m_stream);
-        std::cout<<m_pos<<"\t"<<off<<std::endl;
         return *this;
     }
 

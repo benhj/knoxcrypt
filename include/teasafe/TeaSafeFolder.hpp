@@ -105,10 +105,10 @@ namespace teasafe
          * @param name the name of the entry to lookup
          * @return a copy of the TeaSafeFolder with name
          */
-        boost::optional<TeaSafeFolder> getTeaSafeFolder(std::string const &name) const;
+        std::shared_ptr<TeaSafeFolder> getTeaSafeFolder(std::string const &name) const;
 
         /// for retrieving a compound folder
-        boost::optional<CompoundFolder> getCompoundFolder(std::string const &name) const;
+        std::shared_ptr<CompoundFolder> getCompoundFolder(std::string const &name) const;
 
         /**
          * @brief retrieves the name of this folder
@@ -192,8 +192,9 @@ namespace teasafe
         /**
          * @brief puts metadata for given entry out of use
          * @param name name of entry
+         * @return true if successful
          */
-        void putMetaDataOutOfUse(std::string const &name);
+        bool putMetaDataOutOfUse(std::string const &name);
 
         /**
          * @brief for writing new entry metadata
@@ -232,15 +233,16 @@ namespace teasafe
         /**
          * @brief puts metadata for given entry out of use
          * @param name name of entry
+         * @return true if successful
          */
-        void doPutMetaDataOutOfUse(std::string const &name);
+        bool doPutMetaDataOutOfUse(std::string const &name);
 
         /**
          * @brief returns the entry index given the name
          * @param name the name of the entry
          * @return the index
          */
-        long doGetMetaDataIndexForEntry(std::string const &name) const;
+        boost::optional<long> doGetMetaDataIndexForEntry(std::string const &name) const;
 
         /**
          * @brief write metadata to this folder entry
@@ -314,6 +316,16 @@ namespace teasafe
         // Question: when to invalidate/update an entry in the cache?
         typedef std::map<std::string, SharedEntryInfo> EntryInfoCacheMap;
         mutable EntryInfoCacheMap m_entryInfoCacheMap;
+
+        // for caching TeaSafeFolders (an optimization)
+        typedef std::shared_ptr<TeaSafeFolder> SharedTeaSafeFolder;
+        typedef std::map<std::string, SharedTeaSafeFolder> FolderCache;
+        mutable FolderCache m_folderCache;
+
+        // for caching CompoundFolders (an optimization)
+        typedef std::shared_ptr<CompoundFolder> SharedCompoundFolder;
+        typedef std::map<std::string, SharedCompoundFolder> CompoundFolderCache;
+        mutable CompoundFolderCache m_compoundFolderCache;
 
         // when an entry is deleted, its metadata is put out of use meaning that
         // there might be somewhere before the end that metadata for a new file can

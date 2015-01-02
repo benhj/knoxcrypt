@@ -84,18 +84,18 @@ class TeaSafeTest
         folder.addFile("vai.mp3");
         folder.addFolder("folderB");
 
-        teasafe::CompoundFolder folderA = folder.getFolder("folderA");
+        teasafe::CompoundFolder folderA = *folder.getFolder("folderA");
         folderA.addFile("fileA");
         folderA.addFile("fileB");
         folderA.addFolder("subFolderA");
 
-        teasafe::CompoundFolder subFolderA = folderA.getFolder("subFolderA");
+        teasafe::CompoundFolder subFolderA = *folderA.getFolder("subFolderA");
         subFolderA.addFolder("subFolderB");
         subFolderA.addFile("fileX");
         subFolderA.addFolder("subFolderC");
         subFolderA.addFile("fileY");
 
-        teasafe::CompoundFolder subFolderC = subFolderA.getFolder("subFolderC");
+        teasafe::CompoundFolder subFolderC = *subFolderA.getFolder("subFolderC");
         subFolderC.addFolder("finalFolder");
         subFolderC.addFile("finalFile.txt");
 
@@ -148,7 +148,7 @@ class TeaSafeTest
         teasafe::TeaSafe theTeaSafe(io);
 
         theTeaSafe.addFile("/folderA/subFolderA/subFolderC/testAdded.txt");
-        teasafe::CompoundFolder parent = root.getFolder("folderA").getFolder("subFolderA").getFolder("subFolderC");
+        teasafe::CompoundFolder parent = *root.getFolder("folderA")->getFolder("subFolderA")->getFolder("subFolderC");
         teasafe::SharedEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
         bool good = entryInfo ? true : false;
         ASSERT_EQUAL(true, good, "TeaSafeTest::testAddTeaSafeFile() getting info");
@@ -165,7 +165,7 @@ class TeaSafeTest
         teasafe::TeaSafe theTeaSafe(io);
 
         theTeaSafe.addFolder("/folderA/subFolderA/subFolderC/testAdded");
-        teasafe::CompoundFolder parent = root.getFolder("folderA").getFolder("subFolderA").getFolder("subFolderC");
+        teasafe::CompoundFolder parent = *root.getFolder("folderA")->getFolder("subFolderA")->getFolder("subFolderC");
         teasafe::SharedEntryInfo entryInfo = parent.getEntryInfo("testAdded");
         bool good = entryInfo ? true : false;
         ASSERT_EQUAL(true, good, "TeaSafeTest::testAddCompoundFolder() getting info");
@@ -257,9 +257,9 @@ class TeaSafeTest
         teasafe::TeaSafe theTeaSafe(io);
         theTeaSafe.removeFile("/folderA/subFolderA/subFolderC/finalFile.txt");
         teasafe::SharedEntryInfo info = root.getFolder("folderA")
-            .getFolder("subFolderA")
-            .getFolder("subFolderC")
-            .getEntryInfo("finalFile.txt");
+            ->getFolder("subFolderA")
+            ->getFolder("subFolderC")
+            ->getEntryInfo("finalFile.txt");
         bool exists = info ? true : false;
         ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveTeaSafeFile()");
     }
@@ -329,9 +329,9 @@ class TeaSafeTest
 
 
         teasafe::SharedEntryInfo info = root.getFolder("folderA")
-            .getFolder("subFolderA")
-            .getFolder("subFolderC")
-            .getEntryInfo("finalFolder");
+            ->getFolder("subFolderA")
+            ->getFolder("subFolderC")
+            ->getEntryInfo("finalFolder");
         bool exists = info ? true : false;
         ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveEmptyFolder()");
     }
@@ -362,7 +362,7 @@ class TeaSafeTest
         teasafe::TeaSafe theTeaSafe(io);
         theTeaSafe.removeFolder("/folderA/subFolderA/",
                                 teasafe::FolderRemovalType::Recursive);
-        teasafe::SharedEntryInfo info = root.getFolder("folderA").getEntryInfo("subFolderA");
+        teasafe::SharedEntryInfo info = root.getFolder("folderA")->getEntryInfo("subFolderA");
         bool exists = info ? true : false;
         ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveNonEmptyFolder()");
     }

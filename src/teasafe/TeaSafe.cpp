@@ -69,7 +69,7 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 */
-        return parentEntry->getFolder(boost::filesystem::path(thePath).filename().string());
+        return *parentEntry->getFolder(boost::filesystem::path(thePath).filename().string());
     }
 
     EntryInfo
@@ -158,7 +158,7 @@ namespace teasafe
 
         parentEntry->addFolder(boost::filesystem::path(thePath).filename().string());
 
-        parentEntry->getCompoundFolder().getStream()->close();
+        parentEntry->getCompoundFolder()->getStream()->close();
     }
 
     void
@@ -203,10 +203,9 @@ namespace teasafe
         // do moving / renaming
         // (i) Remove original entry metadata entry
         // (ii) Add new metadata entry with new file name
-        parentSrc->getCompoundFolder().putMetaDataOutOfUse(filename);
+        parentSrc->putMetaDataOutOfUse(filename);
         auto dstFilename(boost::filesystem::path(dstPath).filename().string());
-        parentDst->getCompoundFolder().writeNewMetaDataForEntry(dstFilename, childInfo->type(), childInfo->firstFileBlock());
-
+        parentDst->writeNewMetaDataForEntry(dstFilename, childInfo->type(), childInfo->firstFileBlock());
     }
 
     void
@@ -270,7 +269,7 @@ namespace teasafe
         if (removalType == FolderRemovalType::MustBeEmpty) {
 
             auto childEntry(parentEntry->getFolder(boost::filesystem::path(thePath).filename().string()));
-            if (!childEntry.listAllEntries().empty()) {
+            if (!childEntry->listAllEntries().empty()) {
                 throw TeaSafeException(TeaSafeError::FolderNotEmpty);
             }
         }
@@ -431,13 +430,12 @@ namespace teasafe
             return cacheIt->second;
         }
 
-
         // iterate over path parts extracting sub folders along the way
-        auto folderOfInterest(*m_rootFolder);
+        auto folderOfInterest(m_rootFolder);
         boost::filesystem::path pathBuilder;
         for (auto const & it : pathToCheck) {
 
-            SharedEntryInfo entryInfo(folderOfInterest.getEntryInfo(it.string()));
+            SharedEntryInfo entryInfo(folderOfInterest->getEntryInfo(it.string()));
 
             if (!entryInfo) {
                 return SharedCompoundFolder();
@@ -448,7 +446,7 @@ namespace teasafe
             if (pathBuilder == pathToCheck) {
 
                 if (entryInfo->type() == EntryType::FolderType) {
-                    auto folder(std::make_shared<CompoundFolder>(folderOfInterest.getFolder(entryInfo->filename())));
+                    auto folder(folderOfInterest->getFolder(entryInfo->filename()));
                     m_folderCache.insert(std::make_pair(pathToCheck.string(), folder));
                     return folder;
                 } else {
@@ -456,7 +454,7 @@ namespace teasafe
                 }
             }
             // recurse deeper
-            folderOfInterest = folderOfInterest.getFolder(entryInfo->filename());
+            folderOfInterest = folderOfInterest->getFolder(entryInfo->filename());
         }
 
 

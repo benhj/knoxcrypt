@@ -33,7 +33,7 @@
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlock.hpp"
 #include "teasafe/FileBlockBuilder.hpp"
-#include "teasafe/TeaSafeFolder.hpp"
+#include "teasafe/CompoundFolder.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
 #include "utility/EventType.hpp"
@@ -237,7 +237,7 @@ namespace teasafe
             // added block builder here since can only work after bitmap created
             // fixes issue https://github.com/benhj/teasafe/issues/15
             io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
-            TeaSafeFolder rootDir(io, "root");
+            CompoundFolder rootDir(io, "root");
 
             // create an extra 'magic partition' which is another root folder
             // offset to a differing file block
@@ -245,7 +245,7 @@ namespace teasafe
                 SharedCoreIO magicIo(io);
                 magicIo->rootBlock = *m_omp;
                 bool const setRoot = true;
-                TeaSafeFolder magicDir(magicIo, "root", setRoot);
+                CompoundFolder magicDir(magicIo, "root", setRoot);
             }
 
             broadcastEvent(EventType::ImageBuildEnd);

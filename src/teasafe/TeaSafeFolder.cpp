@@ -199,6 +199,8 @@ namespace teasafe
         , m_name(name)
         , m_entryCount(getNumberOfEntries(m_folderData, m_io->blocks))
         , m_entryInfoCacheMap()
+        , m_folderCache()
+        , m_compoundFolderCache()
         , m_checkForEarlyMetaData(true)
     {
     }
@@ -212,6 +214,8 @@ namespace teasafe
         , m_name(name)
         , m_entryCount(0)
         , m_entryInfoCacheMap()
+        , m_folderCache()
+        , m_compoundFolderCache()
         , m_checkForEarlyMetaData(true)
     {
         // set initial number of entries; there will be none to begin with
@@ -326,10 +330,11 @@ namespace teasafe
     TeaSafeFolder::addTeaSafeFolder(std::string const &name)
     {
         // Create a new sub-folder entry
-        TeaSafeFolder entry(m_io, name);
+        auto entry(std::make_shared<TeaSafeFolder>(m_io, name));
+        m_folderCache.insert(std::make_pair(name, entry));
 
         // write the first block index to the file entry metadata
-        this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry.m_folderData.getStartVolumeBlockIndex());
+        this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry->m_folderData.getStartVolumeBlockIndex());
     }
 
     void
@@ -341,7 +346,7 @@ namespace teasafe
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry
                                                                       .getCompoundFolder()
-                                                                      .m_folderData
+                                                                      ->m_folderData
                                                                       .getStartVolumeBlockIndex());
     }
 
@@ -365,7 +370,7 @@ namespace teasafe
         return boost::optional<TeaSafeFile>();
     }
 
-    boost::optional<TeaSafeFolder>
+    TeaSafeFolder::SharedTeaSafeFolder
     TeaSafeFolder::getTeaSafeFolder(std::string const &name) const
     {
         // optimization is to build the file based on metadata stored in the
@@ -373,13 +378,15 @@ namespace teasafe
         auto info(doGetNamedEntryInfo(name));
         if (info) {
             if (info->type() == EntryType::FolderType) {
-                return TeaSafeFolder(m_io, info->firstFileBlock(), name);
+                auto folder(std::make_shared<TeaSafeFolder>(m_io, info->firstFileBlock(), name));
+                m_folderCache.insert(std::make_pair(name,folder));
+                return folder;
             }
         }
-        return boost::optional<TeaSafeFolder>();
+        return SharedTeaSafeFolder();
     }
 
-    boost::optional<CompoundFolder> 
+    TeaSafeFolder::SharedCompoundFolder
     TeaSafeFolder::getCompoundFolder(std::string const &name) const
     {
         // optimization is to build the file based on metadata stored in the
@@ -387,10 +394,12 @@ namespace teasafe
         auto info(doGetNamedEntryInfo(name));
         if (info) {
             if (info->type() == EntryType::FolderType) {
-                return CompoundFolder(m_io, info->firstFileBlock(), name);
+                auto folder(std::make_shared<CompoundFolder>(m_io, info->firstFileBlock(), name));
+                m_compoundFolderCache.insert(std::make_pair(name, folder));
+                return folder;
             }
         }
-        return boost::optional<CompoundFolder>();
+        return SharedCompoundFolder();
     }
 
     std::string
@@ -443,14 +452,20 @@ namespace teasafe
         return doListEntriesBasedOnType(EntryType::FolderType);
     }
 
-    void
+    bool
     TeaSafeFolder::doPutMetaDataOutOfUse(std::string const &name)
     {
+
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
         TeaSafeFile temp(m_io, m_name, m_startVolumeBlock,
                          OpenDisposition::buildOverwriteDisposition());
-        metaDataToOutOfUse(temp, doGetMetaDataIndexForEntry(name));
+
+        auto index(doGetMetaDataIndexForEntry(name));
+        if(!index) {
+            return false;
+        }
+        metaDataToOutOfUse(temp, *index);
 
         // signify that a 'space' might be available for metadata earlier in list
         // than at end
@@ -458,12 +473,14 @@ namespace teasafe
 
         // removes any info with name from cache
         this->invalidateEntryInEntryInfoCache(name);
+
+        return true;
     }
 
-    void
+    bool
     TeaSafeFolder::putMetaDataOutOfUse(std::string const &name)
     {
-        this->doPutMetaDataOutOfUse(name);
+        return this->doPutMetaDataOutOfUse(name);
     }
 
     void
@@ -540,7 +557,7 @@ namespace teasafe
         this->doPutMetaDataOutOfUse(name);
 
         // unlink entry's data
-        entry->getCompoundFolder().m_folderData.unlink();
+        entry->getCompoundFolder()->m_folderData.unlink();
 
         return true;
     }
@@ -599,6 +616,7 @@ namespace teasafe
         // experimental optimization; insert info in to cache
         auto it(m_entryInfoCacheMap.find(entryName));
         if (it != m_entryInfoCacheMap.end()) {
+            std::cout<<"cached.."<<std::endl;
             return it->second;
         }
 
@@ -629,7 +647,7 @@ namespace teasafe
         return info;
     }
 
-    long
+    boost::optional<long>
     TeaSafeFolder::doGetMetaDataIndexForEntry(std::string const &name) const
     {
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
@@ -637,7 +655,7 @@ namespace teasafe
                 return entryIndex;
             }
         }
-        throw std::runtime_error("Folder entry with that name not found");
+        return boost::optional<long>();
     }
 
 

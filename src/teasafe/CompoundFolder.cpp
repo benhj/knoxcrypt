@@ -38,21 +38,33 @@ namespace teasafe
     CompoundFolder::CompoundFolder(SharedCoreIO const &io,
                                    std::string const &name,
                                    bool const enforceRootBlock)
-      : m_compoundFolder(io, name, enforceRootBlock)
+      : m_compoundFolder(std::make_shared<TeaSafeFolder>(io, name, enforceRootBlock))
+      , m_compoundEntries()
       , m_name(name)
-      , m_compoundFolderCount(m_compoundFolder.getEntryCount())
+      , m_compoundFolderCount(m_compoundFolder->getEntryCount())
     {
-
+        if(m_compoundFolderCount > 0) {
+            auto folderInfos(m_compoundFolder->listFolderEntries());
+            for(auto const & f : folderInfos) {
+                m_compoundEntries.push_back(m_compoundFolder->getTeaSafeFolder(f.filename()));
+            }
+        }
     }
 
     CompoundFolder::CompoundFolder(SharedCoreIO const &io,
                                    uint64_t const startBlock,
                                    std::string const &name)
-      : m_compoundFolder(io, startBlock, name)
+      : m_compoundFolder(std::make_shared<TeaSafeFolder>(io, startBlock, name))
+      , m_compoundEntries()
       , m_name(name)
-      , m_compoundFolderCount(m_compoundFolder.getEntryCount())
+      , m_compoundFolderCount(m_compoundFolder->getEntryCount())
     {
-
+        if(m_compoundFolderCount > 0) {
+            auto folderInfos(m_compoundFolder->listFolderEntries());
+            for(auto const & f : folderInfos) {
+                m_compoundEntries.push_back(m_compoundFolder->getTeaSafeFolder(f.filename()));
+            }
+        }
     }
 
     void 
@@ -60,7 +72,8 @@ namespace teasafe
     {
         std::ostringstream ss;
         ss << "index_" << m_compoundFolderCount;
-        m_compoundFolder.addTeaSafeFolder(ss.str());
+        m_compoundFolder->addTeaSafeFolder(ss.str());
+        m_compoundEntries.push_back(m_compoundFolder->getTeaSafeFolder(ss.str()));
         ++m_compoundFolderCount;
     }
 
@@ -76,8 +89,8 @@ namespace teasafe
         // each leaf folder can have 100 entries
         bool wasAdded = false;
         for(auto & f : m_compoundEntries) {
-            if(f.getEntryCount() < 100) {
-                f.addTeaSafeFile(name);
+            if(f->getEntryCount() < 50) {
+                f->addTeaSafeFile(name);
                 wasAdded = true;
             }
         }
@@ -86,7 +99,7 @@ namespace teasafe
         // another leaf folder
         if(!wasAdded) {
             doAddCompoundFolderEntry();
-            m_compoundEntries.back().addTeaSafeFile(name);
+            m_compoundEntries.back()->addTeaSafeFile(name);
         }
     }
 
@@ -102,8 +115,8 @@ namespace teasafe
         // each leaf folder can have 100 entries
         bool wasAdded = false;
         for(auto & f : m_compoundEntries) {
-            if(f.getEntryCount() < 100) {
-                f.addCompoundFolder(name);
+            if(f->getEntryCount() < 50) {
+                f->addCompoundFolder(name);
                 wasAdded = true;
             }
         }
@@ -112,7 +125,7 @@ namespace teasafe
         // another leaf folder
         if(!wasAdded) {
             doAddCompoundFolderEntry();
-            m_compoundEntries.back().addCompoundFolder(name);
+            m_compoundEntries.back()->addCompoundFolder(name);
         }
     }
 
@@ -121,7 +134,7 @@ namespace teasafe
                             OpenDisposition const &openDisposition) const
     {
         for(auto & f : m_compoundEntries) {
-            auto file(f.getTeaSafeFile(name, openDisposition));
+            auto file(f->getTeaSafeFile(name, openDisposition));
             if(file) {
                 return *file;
             }
@@ -129,19 +142,19 @@ namespace teasafe
         throw std::runtime_error("File not found");
     }
 
-    CompoundFolder 
+    std::shared_ptr<CompoundFolder>
     CompoundFolder::getFolder(std::string const &name) const
     {
         for(auto & f : m_compoundEntries) {
-            auto folder(f.getCompoundFolder(name));
+            auto folder(f->getCompoundFolder(name));
             if(folder) {
-                return *folder;
+                return folder;
             }
         }
         throw std::runtime_error("Compound folder not found");
     }
 
-    TeaSafeFolder 
+    std::shared_ptr<TeaSafeFolder>
     CompoundFolder::getCompoundFolder() const
     {
         return m_compoundFolder;
@@ -156,9 +169,12 @@ namespace teasafe
     SharedEntryInfo 
     CompoundFolder::getEntryInfo(std::string const &name) const
     {
+        // try and pul out of cache fisrt
         for(auto const & f : m_compoundEntries) {
-            auto info(f.getEntryInfo(name));
-            if(info) { return info; }
+            auto info(f->getEntryInfo(name));
+            if(info) { 
+                return info; 
+            }
         }
         return SharedEntryInfo();
     }
@@ -167,12 +183,14 @@ namespace teasafe
     CompoundFolder::listAllEntries() const
     {
         std::vector<EntryInfo> infos;
+
         for(auto const & f : m_compoundEntries) {
-            auto leafEntries(f.listAllEntries());
+            auto leafEntries(f->listAllEntries());
             for(auto const & entry : leafEntries) {
                 infos.push_back(entry);
             }
         }
+
         return infos;
     }
 
@@ -181,7 +199,7 @@ namespace teasafe
     {
         std::vector<EntryInfo> infos;
         for(auto const & f : m_compoundEntries) {
-            auto leafEntries(f.listFileEntries());
+            auto leafEntries(f->listFileEntries());
             for(auto const & entry : leafEntries) {
                 infos.push_back(entry);
             }
@@ -194,7 +212,7 @@ namespace teasafe
     {
         std::vector<EntryInfo> infos;
         for(auto const & f : m_compoundEntries) {
-            auto leafEntries(f.listFolderEntries());
+            auto leafEntries(f->listFolderEntries());
             for(auto const & entry : leafEntries) {
                 infos.push_back(entry);
             }
@@ -206,7 +224,7 @@ namespace teasafe
     CompoundFolder::removeFile(std::string const &name)
     {
         for(auto & f : m_compoundEntries) {
-            if(f.removeTeaSafeFile(name)) { return; }
+            if(f->removeTeaSafeFile(name)) { return; }
         }
     }
 
@@ -214,7 +232,38 @@ namespace teasafe
     CompoundFolder::removeFolder(std::string const &name)
     {
         for(auto & f : m_compoundEntries) {
-            if(f.removeTeaSafeFolder(name)) { return; }
+            if(f->removeTeaSafeFolder(name)) { return; }
+        }
+    }
+
+    void
+    CompoundFolder::putMetaDataOutOfUse(std::string const &name)
+    {
+        for(auto & f : m_compoundEntries) {
+            if(f->putMetaDataOutOfUse(name)) { return; }
+        }
+        throw std::runtime_error("Error putting metadata out of use");
+    }
+
+    void
+    CompoundFolder::writeNewMetaDataForEntry(std::string const &name,
+                                             EntryType const &entryType,
+                                             uint64_t startBlock)
+    {
+        // each leaf folder can have 100 entries
+        bool wasAdded = false;
+        for(auto & f : m_compoundEntries) {
+            if(f->getEntryCount() < 50) {
+                f->writeNewMetaDataForEntry(name, entryType, startBlock);
+                wasAdded = true;
+            }
+        }
+
+        // wasn't added. Means that there wasn't room so create
+        // another leaf folder
+        if(!wasAdded) {
+            doAddCompoundFolderEntry();
+            m_compoundEntries.back()->writeNewMetaDataForEntry(name, entryType, startBlock);
         }
     }
 }
