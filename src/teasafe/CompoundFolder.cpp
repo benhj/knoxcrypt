@@ -29,6 +29,8 @@
 
 #include "teasafe/CompoundFolder.hpp"
 
+#include <sstream>
+
 namespace teasafe
 {
 
@@ -37,6 +39,8 @@ namespace teasafe
                                    std::string const &name,
                                    bool const enforceRootBlock)
       : m_compoundFolder(io, name, enforceRootBlock)
+      , m_name(name)
+      , m_compoundFolderCount(m_compoundFolder.getEntryCount())
     {
 
     }
@@ -45,14 +49,42 @@ namespace teasafe
                                    uint64_t const startBlock,
                                    std::string const &name)
       : m_compoundFolder(io, startBlock, name)
+      , m_name(name)
+      , m_compoundFolderCount(m_compoundFolder.getEntryCount())
     {
 
     }
 
     void 
+    CompoundFolder::doAddCompoundFolderEntry()
+    {
+        std::ostringstream ss;
+        ss << "index_" << m_compoundFolderCount;
+        m_compoundFolder.addTeaSafeFolder(ss.str());
+        ++m_compoundFolderCount;
+    }
+
+    void 
     CompoundFolder::addFile(std::string const &name)
     {
+        // check if compiund entries is empty. These are
+        // compound 'leaf' sub-folders
+        if(m_compoundEntries.empty()) {
+            doAddCompoundFolderEntry();
+        }
 
+        // each leaf folder can have 100 entries
+        bool wasAdded = false;
+        for(auto & f : m_compoundEntries) {
+            if(f.getEntryCount() < 100) {
+                f.addTeaSafeFile(name);
+                wasAdded = true;
+            }
+        }
+        if(!wasAdded) {
+            doAddCompoundFolderEntry();
+            m_compoundEntries.back().addTeaSafeFile(name);
+        }
     }
 
     void
