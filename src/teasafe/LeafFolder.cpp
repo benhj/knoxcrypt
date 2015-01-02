@@ -397,10 +397,10 @@ namespace teasafe
     LeafFolder::getCompoundFolder(std::string const &name) const
     {
 
-        auto it(m_compoundFolderCache.find(name));
-        if (it != m_compoundFolderCache.end()) {
-            return it->second;
-        }
+        // auto it(m_compoundFolderCache.find(name));
+        // if (it != m_compoundFolderCache.end()) {
+        //     return it->second;
+        // }
 
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
@@ -534,7 +534,8 @@ namespace teasafe
             if (it.type() == EntryType::FileType) {
                 entry->removeTeaSafeFile(it.filename());
             } else {
-                entry->removeLeafFolder(it.filename());
+                // a leaf will only contain compound folders
+                entry->removeCompoundFolder(it.filename());
             }
         }
 
@@ -544,6 +545,12 @@ namespace teasafe
 
         // unlink entry's data
         entry->m_folderData.unlink();
+
+        // make sure that folder cache is updated
+        auto it(m_folderCache.find(name));
+        if (it != m_folderCache.end()) {
+            m_folderCache.erase(it);
+        }
 
         return true;
     }
@@ -562,6 +569,8 @@ namespace teasafe
                 entry->removeFile(it.filename());
             } else {
                 entry->removeFolder(it.filename());
+
+                // TODO: remove from cache!!
             }
         }
 
@@ -571,6 +580,12 @@ namespace teasafe
 
         // unlink entry's data
         entry->getCompoundFolder()->m_folderData.unlink();
+
+        // make sure that compound folder cache is updated
+        auto it(m_compoundFolderCache.find(name));
+        if (it != m_compoundFolderCache.end()) {
+            m_compoundFolderCache.erase(it);
+        }
 
         return true;
     }

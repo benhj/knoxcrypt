@@ -148,7 +148,9 @@ class TeaSafeTest
         teasafe::TeaSafe theTeaSafe(io);
 
         theTeaSafe.addFile("/folderA/subFolderA/subFolderC/testAdded.txt");
+
         teasafe::CompoundFolder parent = *root.getFolder("folderA")->getFolder("subFolderA")->getFolder("subFolderC");
+
         teasafe::SharedEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
         bool good = entryInfo ? true : false;
         ASSERT_EQUAL(true, good, "TeaSafeTest::testAddTeaSafeFile() getting info");

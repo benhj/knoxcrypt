@@ -31,7 +31,7 @@
 #include "test/FileBlockIteratorTest.hpp"
 #include "test/TeaSafeFileTest.hpp"
 #include "test/TeaSafeFileDeviceTest.hpp"
-#include "test/MakeTeaSafeTest.hpp"
+#include "test/MakeTeaSafeTest.hpp" 
 #include "test/LeafFolderTest.hpp"
 #include "test/TestHelpers.hpp"
 

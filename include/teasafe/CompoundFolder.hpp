@@ -162,7 +162,7 @@ namespace teasafe
 
         // a compound folder will be composed of multiple sub-folders
         // which are there to build up a more efficient folder structure
-        std::vector<SharedLeafFolder> m_compoundEntries;
+        std::vector<SharedLeafFolder> m_leafFolders;
 
         // stores the name of this folder
         std::string m_name;
