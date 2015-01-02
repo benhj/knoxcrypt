@@ -97,7 +97,7 @@ namespace teasafe
          */
         std::shared_ptr<CompoundFolder> getFolder(std::string const &name) const;
 
-        /// retrieves main compound folder
+        /// retrieves main compound folder (the parent of leaf compound folders)
         std::shared_ptr<TeaSafeFolder> getCompoundFolder() const;
 
         /**

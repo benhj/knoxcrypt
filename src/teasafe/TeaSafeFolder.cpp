@@ -341,11 +341,12 @@ namespace teasafe
     TeaSafeFolder::addCompoundFolder(std::string const &name)
     {
         // Create a new sub-folder entry
-        CompoundFolder entry(m_io, name);
+        auto entry(std::make_shared<CompoundFolder>(m_io, name));
+        m_compoundFolderCache.insert(std::make_pair(name, entry));
 
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry
-                                                                      .getCompoundFolder()
+                                                                      ->getCompoundFolder()
                                                                       ->m_folderData
                                                                       .getStartVolumeBlockIndex());
     }
@@ -373,6 +374,12 @@ namespace teasafe
     TeaSafeFolder::SharedTeaSafeFolder
     TeaSafeFolder::getTeaSafeFolder(std::string const &name) const
     {
+
+        auto it(m_folderCache.find(name));
+        if (it != m_folderCache.end()) {
+            return it->second;
+        }
+
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
         auto info(doGetNamedEntryInfo(name));
@@ -389,6 +396,12 @@ namespace teasafe
     TeaSafeFolder::SharedCompoundFolder
     TeaSafeFolder::getCompoundFolder(std::string const &name) const
     {
+
+        auto it(m_compoundFolderCache.find(name));
+        if (it != m_compoundFolderCache.end()) {
+            return it->second;
+        }
+
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
         auto info(doGetNamedEntryInfo(name));
@@ -616,7 +629,6 @@ namespace teasafe
         // experimental optimization; insert info in to cache
         auto it(m_entryInfoCacheMap.find(entryName));
         if (it != m_entryInfoCacheMap.end()) {
-            std::cout<<"cached.."<<std::endl;
             return it->second;
         }
 
