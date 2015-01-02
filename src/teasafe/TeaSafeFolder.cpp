@@ -524,6 +524,12 @@ namespace teasafe
         return *doGetEntryInfo(metaData, entryIndex);
     }
 
+    uint64_t 
+    TeaSafeFolder::getEntryCount() const
+    {
+        return m_entryCount;
+    }
+
     SharedEntryInfo
     TeaSafeFolder::doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const entryIndex) const
     {

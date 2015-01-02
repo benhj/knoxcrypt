@@ -188,6 +188,8 @@ namespace teasafe
                                       EntryType const& entryType,
                                       uint64_t startBlock);
 
+        uint64_t getEntryCount() const;
+
       private:
 
         TeaSafeFolder();

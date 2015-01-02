@@ -33,6 +33,7 @@
 #include "teasafe/TeaSafeFolder.hpp"
 
 #include <boost/optional.hpp>
+#include <string>
 
 namespace teasafe
 {
@@ -142,11 +143,19 @@ namespace teasafe
 
         CompoundFolder();
 
+        void doAddCompoundFolderEntry();
+
         // the underlying folder that stores index folders
         mutable TeaSafeFolder m_compoundFolder;
 
+        // a compound folder will be composed of multiple sub-folders
+        // which are there to build up a more efficient folder structure
+        std::vector<TeaSafeFolder> m_compoundEntries;
+
         // stores the name of this folder
         std::string m_name;
+
+        int m_compoundFolderCount;
     };
 
 }

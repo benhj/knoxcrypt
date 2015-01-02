@@ -67,7 +67,7 @@ namespace teasafe
     void 
     CompoundFolder::addFile(std::string const &name)
     {
-        // check if compiund entries is empty. These are
+        // check if compound entries is empty. These are
         // compound 'leaf' sub-folders
         if(m_compoundEntries.empty()) {
             doAddCompoundFolderEntry();
@@ -81,6 +81,9 @@ namespace teasafe
                 wasAdded = true;
             }
         }
+
+        // wasn't added. Means that there wasn't room so create
+        // another leaf folder
         if(!wasAdded) {
             doAddCompoundFolderEntry();
             m_compoundEntries.back().addTeaSafeFile(name);
@@ -90,7 +93,27 @@ namespace teasafe
     void
     CompoundFolder::addFolder(std::string const &name)
     {
+        // check if compound entries is empty. These are
+        // compound 'leaf' sub-folders
+        if(m_compoundEntries.empty()) {
+            doAddCompoundFolderEntry();
+        }
 
+        // each leaf folder can have 100 entries
+        bool wasAdded = false;
+        for(auto & f : m_compoundEntries) {
+            if(f.getEntryCount() < 100) {
+                f.addTeaSafeFolder(name);
+                wasAdded = true;
+            }
+        }
+
+        // wasn't added. Means that there wasn't room so create
+        // another leaf folder
+        if(!wasAdded) {
+            doAddCompoundFolderEntry();
+            m_compoundEntries.back().addTeaSafeFolder(name);
+        }
     }
 
     TeaSafeFile 
