@@ -28,7 +28,7 @@
 
 #include "teasafe/CompoundFolder.hpp"
 #include "teasafe/TeaSafeImageStream.hpp"
-#include "teasafe/TeaSafeFolder.hpp"
+#include "teasafe/LeafFolder.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFolder.hpp"
 
@@ -187,7 +187,7 @@ namespace teasafe
 
     }
 
-    TeaSafeFolder::TeaSafeFolder(SharedCoreIO const &io,
+    LeafFolder::LeafFolder(SharedCoreIO const &io,
                                  uint64_t const startVolumeBlock,
                                  std::string const &name)
         : m_io(io)
@@ -205,7 +205,7 @@ namespace teasafe
     {
     }
 
-    TeaSafeFolder::TeaSafeFolder(SharedCoreIO const &io,
+    LeafFolder::LeafFolder(SharedCoreIO const &io,
                                  std::string const &name,
                                  bool const enforceRootBlock)
         : m_io(io)
@@ -227,13 +227,13 @@ namespace teasafe
     }
 
     std::streamsize
-    TeaSafeFolder::doWrite(char const * buf, std::streampos n)
+    LeafFolder::doWrite(char const * buf, std::streampos n)
     {
         return m_folderData.write(buf, n);
     }
 
     std::streamsize
-    TeaSafeFolder::doWriteFirstByteToEntryMetaData(EntryType const &entryType)
+    LeafFolder::doWriteFirstByteToEntryMetaData(EntryType const &entryType)
     {
         // set the first bit to indicate that this entry is in use
         uint8_t byte = 0;
@@ -247,7 +247,7 @@ namespace teasafe
     }
 
     std::streamsize
-    TeaSafeFolder::doWriteFilenameToEntryMetaData(std::string const &name)
+    LeafFolder::doWriteFilenameToEntryMetaData(std::string const &name)
     {
         // create a vector to hold filename
         auto filename(createFileNameVector(name));
@@ -257,7 +257,7 @@ namespace teasafe
     }
 
     std::streamsize
-    TeaSafeFolder::doWriteFirstBlockIndexToEntryMetaData(uint64_t firstBlock)
+    LeafFolder::doWriteFirstBlockIndexToEntryMetaData(uint64_t firstBlock)
     {
         // create bytes to represent first block
         uint8_t buf[8];
@@ -266,7 +266,7 @@ namespace teasafe
     }
 
     void
-    TeaSafeFolder::writeNewMetaDataForEntry(std::string const &name,
+    LeafFolder::writeNewMetaDataForEntry(std::string const &name,
                                             EntryType const &entryType,
                                             uint64_t startBlock)
     {
@@ -274,7 +274,7 @@ namespace teasafe
     }
 
     void
-    TeaSafeFolder::doWriteNewMetaDataForEntry(std::string const &name,
+    LeafFolder::doWriteNewMetaDataForEntry(std::string const &name,
                                               EntryType const &entryType,
                                               uint64_t startBlock)
     {
@@ -311,13 +311,13 @@ namespace teasafe
     }
 
     SharedImageStream
-    TeaSafeFolder::getStream() const
+    LeafFolder::getStream() const
     {
         return m_folderData.getStream();
     }
 
     void
-    TeaSafeFolder::addTeaSafeFile(std::string const &name)
+    LeafFolder::addTeaSafeFile(std::string const &name)
     {
         // Create a new file entry
         TeaSafeFile entry(m_io, name);
@@ -327,10 +327,10 @@ namespace teasafe
     }
 
     void
-    TeaSafeFolder::addTeaSafeFolder(std::string const &name)
+    LeafFolder::addLeafFolder(std::string const &name)
     {
         // Create a new sub-folder entry
-        auto entry(std::make_shared<TeaSafeFolder>(m_io, name));
+        auto entry(std::make_shared<LeafFolder>(m_io, name));
         m_folderCache.insert(std::make_pair(name, entry));
 
         // write the first block index to the file entry metadata
@@ -338,7 +338,7 @@ namespace teasafe
     }
 
     void
-    TeaSafeFolder::addCompoundFolder(std::string const &name)
+    LeafFolder::addCompoundFolder(std::string const &name)
     {
         // Create a new sub-folder entry
         auto entry(std::make_shared<CompoundFolder>(m_io, name));
@@ -352,7 +352,7 @@ namespace teasafe
     }
 
     boost::optional<TeaSafeFile>
-    TeaSafeFolder::getTeaSafeFile(std::string const &name,
+    LeafFolder::getTeaSafeFile(std::string const &name,
                                   OpenDisposition const &openDisposition) const
     {
 
@@ -371,8 +371,8 @@ namespace teasafe
         return boost::optional<TeaSafeFile>();
     }
 
-    TeaSafeFolder::SharedTeaSafeFolder
-    TeaSafeFolder::getTeaSafeFolder(std::string const &name) const
+    LeafFolder::SharedLeafFolder
+    LeafFolder::getLeafFolder(std::string const &name) const
     {
 
         auto it(m_folderCache.find(name));
@@ -385,16 +385,16 @@ namespace teasafe
         auto info(doGetNamedEntryInfo(name));
         if (info) {
             if (info->type() == EntryType::FolderType) {
-                auto folder(std::make_shared<TeaSafeFolder>(m_io, info->firstFileBlock(), name));
+                auto folder(std::make_shared<LeafFolder>(m_io, info->firstFileBlock(), name));
                 m_folderCache.insert(std::make_pair(name,folder));
                 return folder;
             }
         }
-        return SharedTeaSafeFolder();
+        return SharedLeafFolder();
     }
 
-    TeaSafeFolder::SharedCompoundFolder
-    TeaSafeFolder::getCompoundFolder(std::string const &name) const
+    LeafFolder::SharedCompoundFolder
+    LeafFolder::getCompoundFolder(std::string const &name) const
     {
 
         auto it(m_compoundFolderCache.find(name));
@@ -416,13 +416,13 @@ namespace teasafe
     }
 
     std::string
-    TeaSafeFolder::getName() const
+    LeafFolder::getName() const
     {
         return m_name;
     }
 
     std::vector<EntryInfo>
-    TeaSafeFolder::listAllEntries() const
+    LeafFolder::listAllEntries() const
     {
         std::vector<EntryInfo> entries;
 
@@ -438,7 +438,7 @@ namespace teasafe
     }
 
     std::vector<EntryInfo>
-    TeaSafeFolder::doListEntriesBasedOnType(EntryType entryType) const
+    LeafFolder::doListEntriesBasedOnType(EntryType entryType) const
     {
         std::vector<EntryInfo> entries;
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
@@ -454,19 +454,19 @@ namespace teasafe
     }
 
     std::vector<EntryInfo>
-    TeaSafeFolder::listFileEntries() const
+    LeafFolder::listFileEntries() const
     {
         return doListEntriesBasedOnType(EntryType::FileType);
     }
 
     std::vector<EntryInfo>
-    TeaSafeFolder::listFolderEntries() const
+    LeafFolder::listFolderEntries() const
     {
         return doListEntriesBasedOnType(EntryType::FolderType);
     }
 
     bool
-    TeaSafeFolder::doPutMetaDataOutOfUse(std::string const &name)
+    LeafFolder::doPutMetaDataOutOfUse(std::string const &name)
     {
 
         // second set the metadata to an out of use state; this metadata can
@@ -491,13 +491,13 @@ namespace teasafe
     }
 
     bool
-    TeaSafeFolder::putMetaDataOutOfUse(std::string const &name)
+    LeafFolder::putMetaDataOutOfUse(std::string const &name)
     {
         return this->doPutMetaDataOutOfUse(name);
     }
 
     void
-    TeaSafeFolder::invalidateEntryInEntryInfoCache(std::string const &name)
+    LeafFolder::invalidateEntryInEntryInfoCache(std::string const &name)
     {
         auto it(m_entryInfoCacheMap.find(name));
         if (it != m_entryInfoCacheMap.end()) {
@@ -506,7 +506,7 @@ namespace teasafe
     }
 
     bool
-    TeaSafeFolder::removeTeaSafeFile(std::string const &name)
+    LeafFolder::removeTeaSafeFile(std::string const &name)
     {
         // first unlink; this deallocates the file blocks, updating the
         // volume bitmap accordingly; note doesn't matter what opendisposition is here
@@ -522,9 +522,9 @@ namespace teasafe
     }
 
     bool
-    TeaSafeFolder::removeTeaSafeFolder(std::string const &name)
+    LeafFolder::removeLeafFolder(std::string const &name)
     {
-        auto entry(getTeaSafeFolder(name));
+        auto entry(getLeafFolder(name));
         if(!entry) { return false; }
 
         // loop over entries unlinking files and recursing into sub folders
@@ -534,7 +534,7 @@ namespace teasafe
             if (it.type() == EntryType::FileType) {
                 entry->removeTeaSafeFile(it.filename());
             } else {
-                entry->removeTeaSafeFolder(it.filename());
+                entry->removeLeafFolder(it.filename());
             }
         }
 
@@ -549,7 +549,7 @@ namespace teasafe
     }
 
     bool
-    TeaSafeFolder::removeCompoundFolder(std::string const &name)
+    LeafFolder::removeCompoundFolder(std::string const &name)
     {
         auto entry(getCompoundFolder(name));
         if(!entry) { return false; }
@@ -576,13 +576,13 @@ namespace teasafe
     }
 
     SharedEntryInfo
-    TeaSafeFolder::getEntryInfo(std::string const &name) const
+    LeafFolder::getEntryInfo(std::string const &name) const
     {
         return this->doGetNamedEntryInfo(name);
     }
 
     SharedEntryInfo
-    TeaSafeFolder::doGetNamedEntryInfo(std::string const &name) const
+    LeafFolder::doGetNamedEntryInfo(std::string const &name) const
     {
 
         // try and pul out of cache fisrt
@@ -608,20 +608,20 @@ namespace teasafe
     }
 
     EntryInfo
-    TeaSafeFolder::getEntryInfo(uint64_t const entryIndex) const
+    LeafFolder::getEntryInfo(uint64_t const entryIndex) const
     {
         auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
         return *doGetEntryInfo(metaData, entryIndex);
     }
 
     uint64_t 
-    TeaSafeFolder::getEntryCount() const
+    LeafFolder::getEntryCount() const
     {
         return m_entryCount;
     }
 
     SharedEntryInfo
-    TeaSafeFolder::doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const entryIndex) const
+    LeafFolder::doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const entryIndex) const
     {
 
         auto const entryName(getEntryName(metaData));
@@ -643,7 +643,7 @@ namespace teasafe
             startBlock = n;
         } else {
             uint64_t n = getBlockIndexForEntry(metaData);
-            TeaSafeFolder fe(m_io, n, entryName);
+            LeafFolder fe(m_io, n, entryName);
             startBlock = n;
         }
 
@@ -660,7 +660,7 @@ namespace teasafe
     }
 
     boost::optional<long>
-    TeaSafeFolder::doGetMetaDataIndexForEntry(std::string const &name) const
+    LeafFolder::doGetMetaDataIndexForEntry(std::string const &name) const
     {
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
             if (name == getEntryName(m_folderData, entryIndex)) {
@@ -672,7 +672,7 @@ namespace teasafe
 
 
     OptionalOffset
-    TeaSafeFolder::doFindOffsetWhereMetaDataShouldBeWritten()
+    LeafFolder::doFindOffsetWhereMetaDataShouldBeWritten()
     {
 
         // loop over all entries and try and find a previously deleted one

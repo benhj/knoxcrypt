@@ -40,7 +40,7 @@ namespace teasafe
     namespace utility
     {
 
-        class TeaSafeFolderVisitor
+        class LeafFolderVisitor
         {
           public:
             virtual void enterFolder(EntryInfo const &)
@@ -55,7 +55,7 @@ namespace teasafe
             {
             }
 
-            virtual ~TeaSafeFolderVisitor()
+            virtual ~LeafFolderVisitor()
             {
             }
 

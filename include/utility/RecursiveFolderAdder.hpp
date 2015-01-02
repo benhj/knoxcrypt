@@ -26,7 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/// For recursively copying a physical disk location to a TeaSafeFolder
+/// For recursively copying a physical disk location to a LeafFolder
 
 #ifndef TeaSafe_UTILITY_RECURSIVE_FOLDER_ADDER_HPP__
 #define TeaSafe_UTILITY_RECURSIVE_FOLDER_ADDER_HPP__

@@ -32,7 +32,7 @@
 #include "test/TeaSafeFileTest.hpp"
 #include "test/TeaSafeFileDeviceTest.hpp"
 #include "test/MakeTeaSafeTest.hpp"
-#include "test/TeaSafeFolderTest.hpp"
+#include "test/LeafFolderTest.hpp"
 #include "test/TestHelpers.hpp"
 
 #include <boost/progress.hpp>
@@ -50,7 +50,7 @@ int main()
         FileBlockTest();
         FileBlockIteratorTest();
         TeaSafeFileTest();
-        TeaSafeFolderTest();
+        LeafFolderTest();
     }
 
     std::cout<<"\n\nThere were "<<testFailures<<"/"<<passedPoints<<" assertion failures\n\n"<<std::endl;

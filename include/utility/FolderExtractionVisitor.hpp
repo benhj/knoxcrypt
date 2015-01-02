@@ -34,7 +34,7 @@
 #include "teasafe/EntryInfo.hpp"
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/TeaSafeFileDevice.hpp"
-#include "utility/TeaSafeFolderVisitor.hpp"
+#include "utility/LeafFolderVisitor.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -49,7 +49,7 @@ namespace teasafe
     namespace utility
     {
 
-        class FolderExtractionVisitor : public TeaSafeFolderVisitor
+        class FolderExtractionVisitor : public LeafFolderVisitor
         {
           public:
             FolderExtractionVisitor(TeaSafe &theBfs,

@@ -26,7 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/// For recursively copying a TeaSafeFolder to some physical disk location
+/// For recursively copying a LeafFolder to some physical disk location
 
 #ifndef TeaSafe_UTILITY_RECURSIVE_FOLDER_EXTRACTOR_HPP__
 #define TeaSafe_UTILITY_RECURSIVE_FOLDER_EXTRACTOR_HPP__
@@ -34,7 +34,7 @@
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/EntryInfo.hpp"
 #include "teasafe/EntryType.hpp"
-#include "utility/TeaSafeFolderVisitor.hpp"
+#include "utility/LeafFolderVisitor.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -50,7 +50,7 @@ namespace teasafe
     {
 
         inline
-        void recursiveExtract(TeaSafeFolderVisitor &visitor,
+        void recursiveExtract(LeafFolderVisitor &visitor,
                               TeaSafe &theBfs,
                               std::string const &teaPath)
         {

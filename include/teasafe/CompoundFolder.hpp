@@ -30,7 +30,7 @@
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/EntryInfo.hpp"
-#include "teasafe/TeaSafeFolder.hpp"
+#include "teasafe/LeafFolder.hpp"
 
 #include <boost/optional.hpp>
 #include <memory>
@@ -98,7 +98,7 @@ namespace teasafe
         std::shared_ptr<CompoundFolder> getFolder(std::string const &name) const;
 
         /// retrieves main compound folder (the parent of leaf compound folders)
-        std::shared_ptr<TeaSafeFolder> getCompoundFolder() const;
+        std::shared_ptr<LeafFolder> getCompoundFolder() const;
 
         /**
          * @brief retrieves the name of this folder
@@ -157,12 +157,12 @@ namespace teasafe
         void doAddCompoundFolderEntry();
 
         // the underlying folder that stores index folders
-        typedef std::shared_ptr<TeaSafeFolder> SharedTeaSafeFolder;
-        mutable SharedTeaSafeFolder m_compoundFolder;
+        typedef std::shared_ptr<LeafFolder> SharedLeafFolder;
+        mutable SharedLeafFolder m_compoundFolder;
 
         // a compound folder will be composed of multiple sub-folders
         // which are there to build up a more efficient folder structure
-        std::vector<SharedTeaSafeFolder> m_compoundEntries;
+        std::vector<SharedLeafFolder> m_compoundEntries;
 
         // stores the name of this folder
         std::string m_name;

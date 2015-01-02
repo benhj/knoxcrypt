@@ -46,11 +46,11 @@ namespace teasafe
 
     class CompoundFolder;
 
-    class TeaSafeFolder
+    class LeafFolder
     {
       public:
         /**
-         * @brief constructs a TeaSafeFolder to write to. In this case the
+         * @brief constructs a LeafFolder to write to. In this case the
          * starting block is unknown
          * @param the core teasafe io (path, blocks, password)
          * @param startBlock the index of the starting file block making up entry data
@@ -58,18 +58,18 @@ namespace teasafe
          * @param name the name of the entry
          * @param enforceRootBlock true if we want to enforce the starting root block
          */
-        TeaSafeFolder(SharedCoreIO const &io,
+        LeafFolder(SharedCoreIO const &io,
                       std::string const &name = "root",
                       bool const enforceRootBlock = false);
 
         /**
-         * @brief constructs a TeaSafeFolder to read from
+         * @brief constructs a LeafFolder to read from
          * @param the core teasafe io (path, blocks, password)
          * @param startBlock the index of the starting file block making up entry data
          * @param writable if data entries can be added to folder
          * @param name the name of the entry
          */
-        TeaSafeFolder(SharedCoreIO const &io,
+        LeafFolder(SharedCoreIO const &io,
                       uint64_t const startBlock,
                       std::string const &name = "root");
 
@@ -84,9 +84,9 @@ namespace teasafe
         /**
          * @brief appends a new folder entry and start index of the entry data
          * @param name the name of the entry
-         * @return a copy of a TeaSafeFolder that will be used to reference the folder data
+         * @return a copy of a LeafFolder that will be used to reference the folder data
          */
-        void addTeaSafeFolder(std::string const &name);
+        void addLeafFolder(std::string const &name);
 
         /// for adding a compound folder
         void addCompoundFolder(std::string const &name);
@@ -101,11 +101,11 @@ namespace teasafe
                                                     OpenDisposition const &openDisposition) const;
 
         /**
-         * @brief retrieves a TeaSafeFolder with specific name
+         * @brief retrieves a LeafFolder with specific name
          * @param name the name of the entry to lookup
-         * @return a copy of the TeaSafeFolder with name
+         * @return a copy of the LeafFolder with name
          */
-        std::shared_ptr<TeaSafeFolder> getTeaSafeFolder(std::string const &name) const;
+        std::shared_ptr<LeafFolder> getLeafFolder(std::string const &name) const;
 
         /// for retrieving a compound folder
         std::shared_ptr<CompoundFolder> getCompoundFolder(std::string const &name) const;
@@ -180,7 +180,7 @@ namespace teasafe
          * @param name the name of the entry
          * @return true if successful
          */
-        bool removeTeaSafeFolder(std::string const &name);
+        bool removeLeafFolder(std::string const &name);
 
         /**
          * @brief removes a compound sub folder and all its content
@@ -210,7 +210,7 @@ namespace teasafe
 
       private:
 
-        TeaSafeFolder();
+        LeafFolder();
 
         /**
          * @brief for writing new entry metadata
@@ -317,9 +317,9 @@ namespace teasafe
         typedef std::map<std::string, SharedEntryInfo> EntryInfoCacheMap;
         mutable EntryInfoCacheMap m_entryInfoCacheMap;
 
-        // for caching TeaSafeFolders (an optimization)
-        typedef std::shared_ptr<TeaSafeFolder> SharedTeaSafeFolder;
-        typedef std::map<std::string, SharedTeaSafeFolder> FolderCache;
+        // for caching LeafFolders (an optimization)
+        typedef std::shared_ptr<LeafFolder> SharedLeafFolder;
+        typedef std::map<std::string, SharedLeafFolder> FolderCache;
         mutable FolderCache m_folderCache;
 
         // for caching CompoundFolders (an optimization)

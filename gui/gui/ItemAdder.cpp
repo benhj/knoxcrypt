@@ -43,7 +43,7 @@ void ItemAdder::populate(QTreeWidgetItem *parent,
                          std::string const &path)
 {
     if(teaSafe->folderExists(path)) {
-        teasafe::TeaSafeFolder f = teaSafe->getTeaSafeFolder(path);
+        teasafe::LeafFolder f = teaSafe->getLeafFolder(path);
         std::vector<teasafe::EntryInfo> entryInfos = f.listAllEntries();
         for(auto const &it : entryInfos) {
             QTreeWidgetItem *item = new QTreeWidgetItem(parent);

@@ -32,7 +32,7 @@
 #define TeaSafe_UTILITY_EXTRACT_TO_PHYSICAL_HPP__
 
 #include "teasafe/TeaSafe.hpp"
-#include "utility/TeaSafeFolderVisitor.hpp"
+#include "utility/LeafFolderVisitor.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
 #include "utility/FolderExtractionVisitor.hpp"
 
