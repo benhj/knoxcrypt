@@ -415,29 +415,29 @@ namespace teasafe
         return m_entryInfoCacheMap;
     }
 
-    std::vector<EntryInfo>
+    std::vector<SharedEntryInfo>
     LeafFolder::doListEntriesBasedOnType(EntryType entryType) const
     {
-        std::vector<EntryInfo> entries;
+        std::vector<SharedEntryInfo> entries;
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
             // only push back if the metadata is enabled
             auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
 
             if (entryMetaDataIsEnabled(metaData) &&
                 getTypeForEntry(metaData) == entryType) {
-                entries.push_back(*doGetEntryInfo(metaData, entryIndex));
+                entries.push_back(doGetEntryInfo(metaData, entryIndex));
             }
         }
         return entries;
     }
 
-    std::vector<EntryInfo>
+    std::vector<SharedEntryInfo>
     LeafFolder::listFileEntries() const
     {
         return doListEntriesBasedOnType(EntryType::FileType);
     }
 
-    std::vector<EntryInfo>
+    std::vector<SharedEntryInfo>
     LeafFolder::listFolderEntries() const
     {
         return doListEntriesBasedOnType(EntryType::FolderType);

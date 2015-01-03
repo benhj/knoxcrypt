@@ -161,13 +161,13 @@ namespace teasafe
          * @brief returns a vector of file entry infos
          * @return all file entry infos
          */
-        std::vector<EntryInfo> listFileEntries() const;
+        std::vector<SharedEntryInfo> listFileEntries() const;
 
         /**
          * @brief returns a vector of folder entry infos
          * @return all folder entry infos
          */
-        std::vector<EntryInfo> listFolderEntries() const;
+        std::vector<SharedEntryInfo> listFolderEntries() const;
 
         /**
          * @brief does what it says
@@ -288,7 +288,7 @@ namespace teasafe
          * @brief lists a particular type of entry, file or folder
          * @return a list of entries of specified type
          */
-        std::vector<EntryInfo> doListEntriesBasedOnType(EntryType entryType) const;
+        std::vector<SharedEntryInfo> doListEntriesBasedOnType(EntryType entryType) const;
 
         /**
          * @brief after unlinking this will be called to indicate that cache entry

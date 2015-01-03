@@ -134,22 +134,22 @@ class LeafFolderTest
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         teasafe::LeafFolder folder = createTestFolder(testPath);
-        std::vector<teasafe::EntryInfo> entries = folder.listFileEntries();
+        auto entries = folder.listFileEntries();
         ASSERT_EQUAL(entries.size(), 4, "testListFileEntries: number of entries");
-        ASSERT_EQUAL(entries[0].filename(), "test.txt", "testListFileEntries: filename A");
-        ASSERT_EQUAL(entries[1].filename(), "some.log", "testListFileEntries: filename B");
-        ASSERT_EQUAL(entries[2].filename(), "picture.jpg", "testListFileEntries: filename D");
-        ASSERT_EQUAL(entries[3].filename(), "vai.mp3", "testListFileEntries: filename E");
+        ASSERT_EQUAL(entries[0]->filename(), "test.txt", "testListFileEntries: filename A");
+        ASSERT_EQUAL(entries[1]->filename(), "some.log", "testListFileEntries: filename B");
+        ASSERT_EQUAL(entries[2]->filename(), "picture.jpg", "testListFileEntries: filename D");
+        ASSERT_EQUAL(entries[3]->filename(), "vai.mp3", "testListFileEntries: filename E");
     }
 
     void testListFolderEntries()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         teasafe::LeafFolder folder = createTestFolder(testPath);
-        std::vector<teasafe::EntryInfo> entries = folder.listFolderEntries();
+        auto entries = folder.listFolderEntries();
         ASSERT_EQUAL(entries.size(), 2, "testListFolderEntries: number of entries");
-        ASSERT_EQUAL(entries[0].filename(), "folderA", "testListFolderEntries: filename C");
-        ASSERT_EQUAL(entries[1].filename(), "folderB", "testListFolderEntries: filename F");
+        ASSERT_EQUAL(entries[0]->filename(), "folderA", "testListFolderEntries: filename C");
+        ASSERT_EQUAL(entries[1]->filename(), "folderB", "testListFolderEntries: filename F");
     }
 
     /* Commented out, since block size dependent

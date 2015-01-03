@@ -48,7 +48,7 @@ namespace teasafe
         if(m_leafFolderCount > 0) {
             auto folderInfos(m_compoundFolder->listFolderEntries());
             for(auto const & f : folderInfos) {
-                m_leafFolders.push_back(m_compoundFolder->getLeafFolder(f.filename()));
+                m_leafFolders.push_back(m_compoundFolder->getLeafFolder(f->filename()));
             }
         }
     }
@@ -66,7 +66,7 @@ namespace teasafe
         if(m_leafFolderCount > 0) {
             auto folderInfos(m_compoundFolder->listFolderEntries());
             for(auto const & f : folderInfos) {
-                m_leafFolders.push_back(m_compoundFolder->getLeafFolder(f.filename()));
+                m_leafFolders.push_back(m_compoundFolder->getLeafFolder(f->filename()));
             }
         }
     }
@@ -207,15 +207,15 @@ namespace teasafe
         return m_cache;
     }
 
-    std::vector<EntryInfo> 
+    std::vector<SharedEntryInfo> 
     CompoundFolder::listFileEntries() const
     {
-        std::vector<EntryInfo> infos;
+        std::vector<SharedEntryInfo> infos;
         for(auto const & f : m_leafFolders) {
             auto leafEntries(f->listFileEntries());
             for(auto const & entry : leafEntries) {
-                if(m_cache.find(entry.filename()) == m_cache.end()) {
-                    //m_cache.insert(std::make_pair(entry.filename(), entry));
+                if(m_cache.find(entry->filename()) == m_cache.end()) {
+                    m_cache.insert(std::make_pair(entry->filename(), entry));
                 }
                 infos.push_back(entry);
             }
@@ -223,15 +223,15 @@ namespace teasafe
         return infos;
     }
 
-    std::vector<EntryInfo> 
+    std::vector<SharedEntryInfo> 
     CompoundFolder::listFolderEntries() const
     {
-        std::vector<EntryInfo> infos;
+        std::vector<SharedEntryInfo> infos;
         for(auto const & f : m_leafFolders) {
             auto leafEntries(f->listFolderEntries());
             for(auto const & entry : leafEntries) {
-                if(m_cache.find(entry.filename()) == m_cache.end()) {
-                    //m_cache.insert(std::make_pair(entry.filename(), entry));
+                if(m_cache.find(entry->filename()) == m_cache.end()) {
+                    m_cache.insert(std::make_pair(entry->filename(), entry));
                 }
                 infos.push_back(entry);
             }

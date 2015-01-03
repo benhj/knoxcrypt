@@ -123,13 +123,13 @@ namespace teasafe
          * @brief returns a vector of file entry infos
          * @return all file entry infos
          */
-        std::vector<EntryInfo> listFileEntries() const;
+        std::vector<SharedEntryInfo> listFileEntries() const;
 
         /**
          * @brief returns a vector of folder entry infos
          * @return all folder entry infos
          */
-        std::vector<EntryInfo> listFolderEntries() const;
+        std::vector<SharedEntryInfo> listFolderEntries() const;
 
         /**
          * @brief does what it says
