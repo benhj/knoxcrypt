@@ -232,6 +232,7 @@ namespace teasafe
                 return; 
             }
         }
+        throw std::runtime_error("Error removing: file not found");
     }
 
     void 
@@ -246,6 +247,7 @@ namespace teasafe
                 return;
             }
         }
+        throw std::runtime_error("Error removing: folder not found");
     }
 
     void

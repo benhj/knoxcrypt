@@ -232,7 +232,11 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }*/
 
-        parentEntry->removeFile(boost::filesystem::path(thePath).filename().string());
+        try {
+            parentEntry->removeFile(boost::filesystem::path(thePath).filename().string());
+        } catch (...) {
+            throw TeaSafeException(TeaSafeError::NotFound);
+        }
 
         // also remove it from the cache if it exists
         this->removeFileFromFileCache(path);
@@ -274,7 +278,11 @@ namespace teasafe
             }
         }
 
-        parentEntry->removeFolder(boost::filesystem::path(thePath).filename().string());
+        try {
+            parentEntry->removeFolder(boost::filesystem::path(thePath).filename().string());
+        } catch (...) {
+            throw TeaSafeException(TeaSafeError::NotFound);
+        }
 
         // also remove entry from parent cache
         this->removeDeletedParentFromCache(boost::filesystem::path(thePath));

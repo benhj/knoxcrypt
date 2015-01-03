@@ -54,7 +54,7 @@ class TeaSafeTest
         testAddFolderThrowsIfAlreadyExists();
         testRemoveTeaSafeFile();
         testRemoveTeaSafeFileThrowsIfBadParent();
-        //testRemoveFileThrowsIfNotFound();
+        testRemoveFileThrowsIfNotFound();
         //testRemoveFileThrowsIfFolder();
         testRemoveEmptyFolder();
         testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty();
