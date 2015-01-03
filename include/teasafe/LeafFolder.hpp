@@ -317,16 +317,6 @@ namespace teasafe
         typedef std::map<std::string, SharedEntryInfo> EntryInfoCacheMap;
         mutable EntryInfoCacheMap m_entryInfoCacheMap;
 
-        // for caching LeafFolders (an optimization)
-        typedef std::shared_ptr<LeafFolder> SharedLeafFolder;
-        typedef std::map<std::string, SharedLeafFolder> FolderCache;
-        mutable FolderCache m_folderCache;
-
-        // for caching CompoundFolders (an optimization)
-        typedef std::shared_ptr<CompoundFolder> SharedCompoundFolder;
-        typedef std::map<std::string, SharedCompoundFolder> CompoundFolderCache;
-        mutable CompoundFolderCache m_compoundFolderCache;
-
         // when an entry is deleted, its metadata is put out of use meaning that
         // there might be somewhere before the end that metadata for a new file can
         // be written so should check list of entries to find 'blank' space.

@@ -199,8 +199,6 @@ namespace teasafe
         , m_name(name)
         , m_entryCount(getNumberOfEntries(m_folderData, m_io->blocks))
         , m_entryInfoCacheMap()
-        , m_folderCache()
-        , m_compoundFolderCache()
         , m_checkForEarlyMetaData(true)
     {
     }
@@ -214,8 +212,6 @@ namespace teasafe
         , m_name(name)
         , m_entryCount(0)
         , m_entryInfoCacheMap()
-        , m_folderCache()
-        , m_compoundFolderCache()
         , m_checkForEarlyMetaData(true)
     {
         // set initial number of entries; there will be none to begin with
@@ -331,7 +327,6 @@ namespace teasafe
     {
         // Create a new sub-folder entry
         auto entry(std::make_shared<LeafFolder>(m_io, name));
-        m_folderCache.insert(std::make_pair(name, entry));
 
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry->m_folderData.getStartVolumeBlockIndex());
@@ -342,7 +337,6 @@ namespace teasafe
     {
         // Create a new sub-folder entry
         auto entry(std::make_shared<CompoundFolder>(m_io, name));
-        m_compoundFolderCache.insert(std::make_pair(name, entry));
 
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry
@@ -371,48 +365,33 @@ namespace teasafe
         return boost::optional<TeaSafeFile>();
     }
 
-    LeafFolder::SharedLeafFolder
+    std::shared_ptr<LeafFolder>
     LeafFolder::getLeafFolder(std::string const &name) const
     {
-
-        auto it(m_folderCache.find(name));
-        if (it != m_folderCache.end()) {
-            return it->second;
-        }
-
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
         auto info(doGetNamedEntryInfo(name));
         if (info) {
             if (info->type() == EntryType::FolderType) {
-                auto folder(std::make_shared<LeafFolder>(m_io, info->firstFileBlock(), name));
-                m_folderCache.insert(std::make_pair(name,folder));
-                return folder;
+                return std::make_shared<LeafFolder>(m_io, info->firstFileBlock(), name);
             }
         }
-        return SharedLeafFolder();
+        return std::shared_ptr<LeafFolder>();
     }
 
-    LeafFolder::SharedCompoundFolder
+    std::shared_ptr<CompoundFolder>
     LeafFolder::getCompoundFolder(std::string const &name) const
     {
 
-        // auto it(m_compoundFolderCache.find(name));
-        // if (it != m_compoundFolderCache.end()) {
-        //     return it->second;
-        // }
-
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
         auto info(doGetNamedEntryInfo(name));
         if (info) {
             if (info->type() == EntryType::FolderType) {
-                auto folder(std::make_shared<CompoundFolder>(m_io, info->firstFileBlock(), name));
-                m_compoundFolderCache.insert(std::make_pair(name, folder));
-                return folder;
+                return std::make_shared<CompoundFolder>(m_io, info->firstFileBlock(), name);
             }
         }
-        return SharedCompoundFolder();
+        return std::shared_ptr<CompoundFolder>();
     }
 
     std::string
@@ -546,12 +525,6 @@ namespace teasafe
         // unlink entry's data
         entry->m_folderData.unlink();
 
-        // make sure that folder cache is updated
-        auto it(m_folderCache.find(name));
-        if (it != m_folderCache.end()) {
-            m_folderCache.erase(it);
-        }
-
         return true;
     }
 
@@ -580,12 +553,6 @@ namespace teasafe
 
         // unlink entry's data
         entry->getCompoundFolder()->m_folderData.unlink();
-
-        // make sure that compound folder cache is updated
-        auto it(m_compoundFolderCache.find(name));
-        if (it != m_compoundFolderCache.end()) {
-            m_compoundFolderCache.erase(it);
-        }
 
         return true;
     }
@@ -652,14 +619,11 @@ namespace teasafe
         uint64_t startBlock;
         if (entryType == EntryType::FileType) {
             // note disposition doesn't matter here, can be anything
-            uint64_t n = getBlockIndexForEntry(metaData);
-            TeaSafeFile fe(m_io, entryName, n, OpenDisposition::buildAppendDisposition());
+            startBlock = getBlockIndexForEntry(metaData);
+            TeaSafeFile fe(m_io, entryName, startBlock, OpenDisposition::buildAppendDisposition());
             fileSize = fe.fileSize();
-            startBlock = n;
         } else {
-            uint64_t n = getBlockIndexForEntry(metaData);
-            LeafFolder fe(m_io, n, entryName);
-            startBlock = n;
+            startBlock = getBlockIndexForEntry(metaData);
         }
 
         auto info(std::make_shared<EntryInfo>(entryName,

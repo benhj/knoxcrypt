@@ -154,7 +154,7 @@ namespace teasafe
 
         CompoundFolder();
 
-        void doAddCompoundFolderEntry();
+        void doAddLeafFolder();
 
         // the underlying folder that stores index folders
         typedef std::shared_ptr<LeafFolder> SharedLeafFolder;
@@ -167,7 +167,7 @@ namespace teasafe
         // stores the name of this folder
         std::string m_name;
 
-        int m_compoundFolderCount;
+        int m_leafFolderCount;
 
     };
 

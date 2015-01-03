@@ -41,9 +41,9 @@ namespace teasafe
       : m_compoundFolder(std::make_shared<LeafFolder>(io, name, enforceRootBlock))
       , m_leafFolders()
       , m_name(name)
-      , m_compoundFolderCount(m_compoundFolder->getEntryCount())
+      , m_leafFolderCount(m_compoundFolder->getEntryCount())
     {
-        if(m_compoundFolderCount > 0) {
+        if(m_leafFolderCount > 0) {
             auto folderInfos(m_compoundFolder->listFolderEntries());
             for(auto const & f : folderInfos) {
                 m_leafFolders.push_back(m_compoundFolder->getLeafFolder(f.filename()));
@@ -57,9 +57,9 @@ namespace teasafe
       : m_compoundFolder(std::make_shared<LeafFolder>(io, startBlock, name))
       , m_leafFolders()
       , m_name(name)
-      , m_compoundFolderCount(m_compoundFolder->getEntryCount())
+      , m_leafFolderCount(m_compoundFolder->getEntryCount())
     {
-        if(m_compoundFolderCount > 0) {
+        if(m_leafFolderCount > 0) {
             auto folderInfos(m_compoundFolder->listFolderEntries());
             for(auto const & f : folderInfos) {
                 m_leafFolders.push_back(m_compoundFolder->getLeafFolder(f.filename()));
@@ -68,13 +68,13 @@ namespace teasafe
     }
 
     void 
-    CompoundFolder::doAddCompoundFolderEntry()
+    CompoundFolder::doAddLeafFolder()
     {
         std::ostringstream ss;
-        ss << "index_" << m_compoundFolderCount;
+        ss << "index_" << m_leafFolderCount;
         m_compoundFolder->addLeafFolder(ss.str());
         m_leafFolders.push_back(m_compoundFolder->getLeafFolder(ss.str()));
-        ++m_compoundFolderCount;
+        ++m_leafFolderCount;
     }
 
     void 
@@ -83,7 +83,7 @@ namespace teasafe
         // check if compound entries is empty. These are
         // compound 'leaf' sub-folders
         if(m_leafFolders.empty()) {
-            doAddCompoundFolderEntry();
+            doAddLeafFolder();
         }
 
         // each leaf folder can have 100 entries
@@ -98,7 +98,7 @@ namespace teasafe
         // wasn't added. Means that there wasn't room so create
         // another leaf folder
         if(!wasAdded) {
-            doAddCompoundFolderEntry();
+            doAddLeafFolder();
             m_leafFolders.back()->addTeaSafeFile(name);
         }
     }
@@ -109,7 +109,7 @@ namespace teasafe
         // check if compound entries is empty. These are
         // compound 'leaf' sub-folders
         if(m_leafFolders.empty()) {
-            doAddCompoundFolderEntry();
+            doAddLeafFolder();
         }
 
         // each leaf folder can have 100 entries
@@ -124,7 +124,7 @@ namespace teasafe
         // wasn't added. Means that there wasn't room so create
         // another leaf folder
         if(!wasAdded) {
-            doAddCompoundFolderEntry();
+            doAddLeafFolder();
             m_leafFolders.back()->addCompoundFolder(name);
         }
     }
@@ -169,7 +169,7 @@ namespace teasafe
     SharedEntryInfo 
     CompoundFolder::getEntryInfo(std::string const &name) const
     {
-        // try and pul out of cache fisrt
+        // try and pull out of cache fisrt
         for(auto const & f : m_leafFolders) {
             auto info(f->getEntryInfo(name));
             if(info) { 
@@ -274,7 +274,7 @@ namespace teasafe
         // wasn't added. Means that there wasn't room so create
         // another leaf folder
         if(!wasAdded) {
-            doAddCompoundFolderEntry();
+            doAddLeafFolder();
             m_leafFolders.back()->writeNewMetaDataForEntry(name, entryType, startBlock);
         }
     }
