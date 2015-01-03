@@ -156,6 +156,11 @@ namespace teasafe
 
         void doAddLeafFolder();
 
+        void doPopulateLeafFolders();
+
+        /// remove an entry info from the cache with given name
+        void doRemoveEntryFromCache(std::string const &name);
+
         // the underlying folder that stores index folders
         typedef std::shared_ptr<LeafFolder> SharedLeafFolder;
         mutable SharedLeafFolder m_compoundFolder;

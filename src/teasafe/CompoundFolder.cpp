@@ -45,12 +45,7 @@ namespace teasafe
       , m_cache()
       , m_cacheShouldBeUpdated(true)
     {
-        if(m_leafFolderCount > 0) {
-            auto folderInfos(m_compoundFolder->listFolderEntries());
-            for(auto const & f : folderInfos) {
-                m_leafFolders.push_back(m_compoundFolder->getLeafFolder(f->filename()));
-            }
-        }
+        doPopulateLeafFolders();
     }
 
     CompoundFolder::CompoundFolder(SharedCoreIO const &io,
@@ -62,6 +57,12 @@ namespace teasafe
       , m_leafFolderCount(m_compoundFolder->getEntryCount())
       , m_cache()
       , m_cacheShouldBeUpdated(true)
+    {
+        doPopulateLeafFolders();
+    }
+
+    void 
+    CompoundFolder::doPopulateLeafFolders()
     {
         if(m_leafFolderCount > 0) {
             auto folderInfos(m_compoundFolder->listFolderEntries());
@@ -182,7 +183,7 @@ namespace teasafe
         if(it != m_cache.end()) {
             return it->second;
         }
-        
+
         for(auto const & f : m_leafFolders) {
             auto info(f->getEntryInfo(name));
             if(info) { 
@@ -246,6 +247,15 @@ namespace teasafe
     }
 
     void 
+    CompoundFolder::doRemoveEntryFromCache(std::string const &name)
+    {
+        auto it = m_cache.find(name);
+        if(it != m_cache.end()) {
+            m_cache.erase(it);
+        }
+    }
+
+    void 
     CompoundFolder::removeFile(std::string const &name)
     {
         for(auto & f : m_leafFolders) {
@@ -254,10 +264,7 @@ namespace teasafe
                 if(f->getEntryCount() == 0) {
                     m_compoundFolder->removeLeafFolder(f->getName());
                 }
-                auto it = m_cache.find(name);
-                if(it != m_cache.end()) {
-                    m_cache.erase(it);
-                }
+                doRemoveEntryFromCache(name);
                 return; 
             }
         }
@@ -273,10 +280,7 @@ namespace teasafe
                 if(f->getEntryCount() == 0) {
                     m_compoundFolder->removeLeafFolder(f->getName());
                 }
-                auto it = m_cache.find(name);
-                if(it != m_cache.end()) {
-                    m_cache.erase(it);
-                }
+                doRemoveEntryFromCache(name);
                 return;
             }
         }
@@ -287,7 +291,10 @@ namespace teasafe
     CompoundFolder::putMetaDataOutOfUse(std::string const &name)
     {
         for(auto & f : m_leafFolders) {
-            if(f->putMetaDataOutOfUse(name)) { return; }
+            if(f->putMetaDataOutOfUse(name)) { 
+                doRemoveEntryFromCache(name);
+                return; 
+            }
         }
         throw std::runtime_error("Error putting metadata out of use");
     }
