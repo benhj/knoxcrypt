@@ -178,11 +178,16 @@ namespace teasafe
     CompoundFolder::getEntryInfo(std::string const &name) const
     {
         // try and pull out of cache fisrt
+        auto it = m_cache.find(name);
+        if(it != m_cache.end()) {
+            return it->second;
+        }
+        
         for(auto const & f : m_leafFolders) {
             auto info(f->getEntryInfo(name));
             if(info) { 
                 if(m_cache.find(name) == m_cache.end()) {
-                    //m_cache.insert(std::make_pair(name, std::make_shared<EntryInfo>(info)));
+                    m_cache.insert(std::make_pair(name, info));
                 }
                 return info; 
             }
@@ -202,6 +207,7 @@ namespace teasafe
                     }
                 }
             }
+            m_cacheShouldBeUpdated = false;
         }
 
         return m_cache;

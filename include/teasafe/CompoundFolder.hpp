@@ -173,7 +173,7 @@ namespace teasafe
         mutable EntryInfoCacheMap m_cache;
 
         // indicate when need to update cache map
-        bool m_cacheShouldBeUpdated;
+        mutable bool m_cacheShouldBeUpdated;
 
     };
 
