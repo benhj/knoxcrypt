@@ -108,7 +108,7 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
 
     // iterate over entries in folder and print filenames of each
     auto folder = theBfs.getFolder(thePath);
-    auto entries = folder.listAllEntries();
+    auto & entries = folder.listAllEntries();
     for (auto const &it : entries) {
         if (it.second->type() == teasafe::EntryType::FileType) {
             std::cout<<boost::format("%1% %|30t|%2%\n") % it.second->filename() % "<F>";
@@ -135,7 +135,7 @@ std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const 
     auto folder = theBfs.getFolder(parentPath);
 
     // iterate over entries in folder
-    auto entries = folder.listAllEntries();
+    auto & entries = folder.listAllEntries();
     for (auto const &it : entries) {
 
         // try to match the entry with the thing that we want to tab-complete

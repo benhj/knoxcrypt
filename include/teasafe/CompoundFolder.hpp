@@ -117,7 +117,7 @@ namespace teasafe
          * @brief returns a vector of all entry infos
          * @return all entry infos
          */
-        EntryInfoCacheMap listAllEntries() const;
+        EntryInfoCacheMap & listAllEntries() const;
 
         /**
          * @brief returns a vector of file entry infos
@@ -168,6 +168,12 @@ namespace teasafe
         std::string m_name;
 
         int m_leafFolderCount;
+
+        // optimization
+        mutable EntryInfoCacheMap m_cache;
+
+        // indicate when need to update cache map
+        bool m_cacheShouldBeUpdated;
 
     };
 

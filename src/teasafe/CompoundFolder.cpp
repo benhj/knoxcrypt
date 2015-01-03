@@ -42,6 +42,8 @@ namespace teasafe
       , m_leafFolders()
       , m_name(name)
       , m_leafFolderCount(m_compoundFolder->getEntryCount())
+      , m_cache()
+      , m_cacheShouldBeUpdated(true)
     {
         if(m_leafFolderCount > 0) {
             auto folderInfos(m_compoundFolder->listFolderEntries());
@@ -58,6 +60,8 @@ namespace teasafe
       , m_leafFolders()
       , m_name(name)
       , m_leafFolderCount(m_compoundFolder->getEntryCount())
+      , m_cache()
+      , m_cacheShouldBeUpdated(true)
     {
         if(m_leafFolderCount > 0) {
             auto folderInfos(m_compoundFolder->listFolderEntries());
@@ -101,6 +105,8 @@ namespace teasafe
             doAddLeafFolder();
             m_leafFolders.back()->addTeaSafeFile(name);
         }
+
+        m_cacheShouldBeUpdated = true;
     }
 
     void
@@ -127,6 +133,8 @@ namespace teasafe
             doAddLeafFolder();
             m_leafFolders.back()->addCompoundFolder(name);
         }
+
+        m_cacheShouldBeUpdated = true;
     }
 
     TeaSafeFile 
@@ -173,25 +181,30 @@ namespace teasafe
         for(auto const & f : m_leafFolders) {
             auto info(f->getEntryInfo(name));
             if(info) { 
+                if(m_cache.find(name) == m_cache.end()) {
+                    //m_cache.insert(std::make_pair(name, std::make_shared<EntryInfo>(info)));
+                }
                 return info; 
             }
         }
         return SharedEntryInfo();
     }
 
-    EntryInfoCacheMap
+    EntryInfoCacheMap &
     CompoundFolder::listAllEntries() const
     {
-        EntryInfoCacheMap map;
-
-        for(auto const & f : m_leafFolders) {
-            auto & leafEntries(f->listAllEntries());
-            for(auto const & entry : leafEntries) {
-                map.insert(entry);
+        if(m_cacheShouldBeUpdated) {
+            for(auto const & f : m_leafFolders) {
+                auto & leafEntries(f->listAllEntries());
+                for(auto const & entry : leafEntries) {
+                    if(m_cache.find(entry.first) == m_cache.end()) {
+                        m_cache.insert(entry);
+                    }
+                }
             }
         }
 
-        return map;
+        return m_cache;
     }
 
     std::vector<EntryInfo> 
@@ -201,6 +214,9 @@ namespace teasafe
         for(auto const & f : m_leafFolders) {
             auto leafEntries(f->listFileEntries());
             for(auto const & entry : leafEntries) {
+                if(m_cache.find(entry.filename()) == m_cache.end()) {
+                    //m_cache.insert(std::make_pair(entry.filename(), entry));
+                }
                 infos.push_back(entry);
             }
         }
@@ -214,6 +230,9 @@ namespace teasafe
         for(auto const & f : m_leafFolders) {
             auto leafEntries(f->listFolderEntries());
             for(auto const & entry : leafEntries) {
+                if(m_cache.find(entry.filename()) == m_cache.end()) {
+                    //m_cache.insert(std::make_pair(entry.filename(), entry));
+                }
                 infos.push_back(entry);
             }
         }
@@ -229,6 +248,10 @@ namespace teasafe
                 if(f->getEntryCount() == 0) {
                     m_compoundFolder->removeLeafFolder(f->getName());
                 }
+                auto it = m_cache.find(name);
+                if(it != m_cache.end()) {
+                    m_cache.erase(it);
+                }
                 return; 
             }
         }
@@ -243,6 +266,10 @@ namespace teasafe
                 // decrement number of entries in leaf
                 if(f->getEntryCount() == 0) {
                     m_compoundFolder->removeLeafFolder(f->getName());
+                }
+                auto it = m_cache.find(name);
+                if(it != m_cache.end()) {
+                    m_cache.erase(it);
                 }
                 return;
             }

@@ -59,7 +59,7 @@ namespace teasafe
             auto folder = theBfs.getFolder(teaPath);
 
             // iterate over entries in folder
-            auto entries = folder.listAllEntries();
+            auto & entries = folder.listAllEntries();
 
             for (auto const &it : entries) {
 

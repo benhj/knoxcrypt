@@ -306,7 +306,7 @@ namespace fuselayer
             try {
                 auto folder(TeaSafe_DATA->getFolder(path));
 
-                auto infos(folder.listAllEntries());
+                auto & infos(folder.listAllEntries());
 
                 filler(buf, ".", NULL, 0);           /* Current directory (.)  */
                 filler(buf, "..", NULL, 0);
