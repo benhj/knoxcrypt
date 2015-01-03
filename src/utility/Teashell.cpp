@@ -110,10 +110,10 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
     auto folder = theBfs.getFolder(thePath);
     auto entries = folder.listAllEntries();
     for (auto const &it : entries) {
-        if (it.type() == teasafe::EntryType::FileType) {
-            std::cout<<boost::format("%1% %|30t|%2%\n") % it.filename() % "<F>";
+        if (it.second->type() == teasafe::EntryType::FileType) {
+            std::cout<<boost::format("%1% %|30t|%2%\n") % it.second->filename() % "<F>";
         } else {
-            std::cout<<boost::format("%1% %|30t|%2%\n") % it.filename() % "<D>";
+            std::cout<<boost::format("%1% %|30t|%2%\n") % it.second->filename() % "<D>";
         }
     }
 }
@@ -139,9 +139,9 @@ std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const 
     for (auto const &it : entries) {
 
         // try to match the entry with the thing that we want to tab-complete
-        auto extracted(it.filename().substr(0, bp.filename().string().length()));
+        auto extracted(it.second->filename().substr(0, bp.filename().string().length()));
         if(extracted == bp.filename()) {
-            return it.filename(); // match, return name of entry
+            return it.second->filename(); // match, return name of entry
         }
     }
     return bp.filename().string(); // no match, return non tab-completed token

@@ -179,19 +179,19 @@ namespace teasafe
         return SharedEntryInfo();
     }
 
-    std::vector<EntryInfo> 
+    EntryInfoCacheMap
     CompoundFolder::listAllEntries() const
     {
-        std::vector<EntryInfo> infos;
+        EntryInfoCacheMap map;
 
         for(auto const & f : m_leafFolders) {
-            auto leafEntries(f->listAllEntries());
+            auto & leafEntries(f->listAllEntries());
             for(auto const & entry : leafEntries) {
-                infos.push_back(entry);
+                map.insert(entry);
             }
         }
 
-        return infos;
+        return map;
     }
 
     std::vector<EntryInfo> 
@@ -238,7 +238,7 @@ namespace teasafe
     CompoundFolder::removeFolder(std::string const &name)
     {
         for(auto & f : m_leafFolders) {
-            if(f->removeLeafFolder(name)) { 
+            if(f->removeCompoundFolder(name)) { 
                 // decrement number of entries in leaf
                 if(f->getEntryCount() == 0) {
                     m_compoundFolder->removeLeafFolder(f->getName());

@@ -53,7 +53,7 @@ int main()
         LeafFolderTest();
     }
 
-    std::cout<<"\n\nThere were "<<testFailures<<"/"<<passedPoints<<" assertion failures\n\n"<<std::endl;
+    std::cout<<"\n\nThere were "<<testFailures<<"/"<<(passedPoints + testFailures)<<" assertion failures\n\n"<<std::endl;
     if (testFailures > 0) {
         std::cout<<"The failures were:\n\n"<<std::endl;
         for (auto const & it : failingTestPoints) {

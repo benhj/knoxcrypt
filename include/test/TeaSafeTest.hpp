@@ -419,7 +419,7 @@ class TeaSafeTest
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::TeaSafe theTeaSafe(io);
         teasafe::CompoundFolder fe = theTeaSafe.getFolder("/");
-        std::vector<teasafe::EntryInfo> infos = fe.listAllEntries();
+        auto infos = fe.listAllEntries();
         ASSERT_EQUAL(infos.empty(), true, "TeaSafeTest::testListAllEntriesEmpty()");
     }
 

@@ -43,6 +43,7 @@ namespace teasafe
 
     typedef boost::optional<std::ios_base::streamoff> OptionalOffset;
     typedef std::shared_ptr<EntryInfo> SharedEntryInfo;
+    typedef std::map<std::string, SharedEntryInfo> EntryInfoCacheMap;
 
     class CompoundFolder;
 
@@ -154,7 +155,7 @@ namespace teasafe
          * @brief returns a vector of all entry infos
          * @return all entry infos
          */
-        std::vector<EntryInfo> listAllEntries() const;
+        EntryInfoCacheMap & listAllEntries() const;
 
         /**
          * @brief returns a vector of file entry infos
@@ -314,7 +315,6 @@ namespace teasafe
         // An experimental optimization: a map will store entry infos as they
         // are generated so that in future, they don't have to be regenerated.
         // Question: when to invalidate/update an entry in the cache?
-        typedef std::map<std::string, SharedEntryInfo> EntryInfoCacheMap;
         mutable EntryInfoCacheMap m_entryInfoCacheMap;
 
         // when an entry is deleted, its metadata is put out of use meaning that

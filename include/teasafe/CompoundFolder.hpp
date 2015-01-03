@@ -117,7 +117,7 @@ namespace teasafe
          * @brief returns a vector of all entry infos
          * @return all entry infos
          */
-        std::vector<EntryInfo> listAllEntries() const;
+        EntryInfoCacheMap listAllEntries() const;
 
         /**
          * @brief returns a vector of file entry infos

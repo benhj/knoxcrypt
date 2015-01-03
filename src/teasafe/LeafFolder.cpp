@@ -400,20 +400,19 @@ namespace teasafe
         return m_name;
     }
 
-    std::vector<EntryInfo>
+    EntryInfoCacheMap &
     LeafFolder::listAllEntries() const
     {
-        std::vector<EntryInfo> entries;
 
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
 
             // read all metadata
             auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
             if (entryMetaDataIsEnabled(metaData)) {
-                entries.push_back(*doGetEntryInfo(metaData, entryIndex));
+                (void)doGetEntryInfo(metaData, entryIndex);
             }
         }
-        return entries;
+        return m_entryInfoCacheMap;
     }
 
     std::vector<EntryInfo>
@@ -508,13 +507,13 @@ namespace teasafe
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto infos(entry->listAllEntries());
+        auto & infos(entry->listAllEntries());
         for (auto const &it : infos) {
-            if (it.type() == EntryType::FileType) {
-                entry->removeTeaSafeFile(it.filename());
+            if (it.second->type() == EntryType::FileType) {
+                entry->removeTeaSafeFile(it.second->filename());
             } else {
                 // a leaf will only contain compound folders
-                entry->removeCompoundFolder(it.filename());
+                entry->removeCompoundFolder(it.second->filename());
             }
         }
 
@@ -538,12 +537,10 @@ namespace teasafe
         // and deleting their entries
         auto infos(entry->listAllEntries());
         for (auto const &it : infos) {
-            if (it.type() == EntryType::FileType) {
-                entry->removeFile(it.filename());
+            if (it.second->type() == EntryType::FileType) {
+                entry->removeFile(it.second->filename());
             } else {
-                entry->removeFolder(it.filename());
-
-                // TODO: remove from cache!!
+                entry->removeFolder(it.second->filename());
             }
         }
 

@@ -313,16 +313,16 @@ namespace fuselayer
 
                 for(auto const &it : infos) {
                     struct stat stbuf;
-                    if (it.type() == teasafe::EntryType::FileType) {
+                    if (it.second->type() == teasafe::EntryType::FileType) {
                         stbuf.st_mode = S_IFREG | 0755;
                         stbuf.st_nlink = 1;
-                        stbuf.st_size = it.size();
+                        stbuf.st_size = it.second->size();
                     } else {
                         stbuf.st_mode = S_IFDIR | 0744;
                         stbuf.st_nlink = 3;
                     }
 
-                    filler(buf, it.filename().c_str(), &stbuf, 0);
+                    filler(buf, it.second->filename().c_str(), &stbuf, 0);
 
                 }
             } catch (teasafe::TeaSafeException const &e) {

@@ -65,14 +65,14 @@ namespace teasafe
 
                 // If folder, create a folder at whereToWrite and recurse
                 // in to recurseExtract
-                if(it.type() == EntryType::FolderType) {
-                    visitor.enterFolder(it);
+                if(it.second->type() == EntryType::FolderType) {
+                    visitor.enterFolder(*it.second);
                     boost::filesystem::path teaLoc(teaPath);
-                    teaLoc /= it.filename();
+                    teaLoc /= it.second->filename();
                     recursiveExtract(visitor, theBfs, teaLoc.string());
-                    visitor.exitFolder(it);
+                    visitor.exitFolder(*it.second);
                 } else {
-                    visitor.enterFile(it);
+                    visitor.enterFile(*it.second);
                 }
 
             }
