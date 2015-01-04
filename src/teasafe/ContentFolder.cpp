@@ -200,6 +200,7 @@ namespace teasafe
         , m_entryCount(getNumberOfEntries(m_folderData, m_io->blocks))
         , m_entryInfoCacheMap()
         , m_checkForEarlyMetaData(true)
+        , m_oldSpaceAvailableForEntry(false)
     {
     }
 
@@ -213,6 +214,7 @@ namespace teasafe
         , m_entryCount(0)
         , m_entryInfoCacheMap()
         , m_checkForEarlyMetaData(true)
+        , m_oldSpaceAvailableForEntry(false)
     {
         // set initial number of entries; there will be none to begin with
         uint64_t startCount(0);
@@ -461,6 +463,7 @@ namespace teasafe
         // signify that a 'space' might be available for metadata earlier in list
         // than at end
         m_checkForEarlyMetaData = true;
+        m_oldSpaceAvailableForEntry = true;
 
         // removes any info with name from cache
         this->invalidateEntryInEntryInfoCache(name);
@@ -495,8 +498,8 @@ namespace teasafe
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
         this->doPutMetaDataOutOfUse(name);
-        return true;
 
+        return true;
     }
 
     bool
@@ -646,6 +649,11 @@ namespace teasafe
         return boost::optional<long>();
     }
 
+    bool 
+    ContentFolder::anOldSpaceIsAvailableForNewEntry() const
+    {
+        return m_oldSpaceAvailableForEntry;
+    }
 
     OptionalOffset
     ContentFolder::doFindOffsetWhereMetaDataShouldBeWritten()
@@ -669,6 +677,8 @@ namespace teasafe
             // couldn't be found before, means that it won't be found in future
             m_checkForEarlyMetaData = false;
         }
+
+        m_oldSpaceAvailableForEntry = false;
 
         // free entry not found so signify that we should seek right to
         // end by returning an empty optional

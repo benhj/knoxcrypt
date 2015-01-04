@@ -208,6 +208,10 @@ namespace teasafe
 
         uint64_t getEntryCount() const;
 
+        /// when an old entry is deleted a 'space' become available in which
+        /// this function should return true
+        bool anOldSpaceIsAvailableForNewEntry() const;
+
       private:
 
         ContentFolder();
@@ -320,6 +324,10 @@ namespace teasafe
         // there might be somewhere before the end that metadata for a new file can
         // be written so should check list of entries to find 'blank' space.
         bool m_checkForEarlyMetaData;
+
+        // An entry was deleted meaning that there is a 'space' available for 
+        // an old entry
+        bool m_oldSpaceAvailableForEntry;
 
     };
 

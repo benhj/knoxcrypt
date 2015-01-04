@@ -26,7 +26,6 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 #include "teasafe/CompoundFolder.hpp"
 
 #include <sstream>
@@ -34,6 +33,8 @@
 namespace teasafe
 {
 
+    // number of entries a bucket (content) folder is permitted to have
+    #define CONTENT_SIZE 50
 
     CompoundFolder::CompoundFolder(SharedCoreIO const &io,
                                    std::string const &name,
@@ -91,10 +92,10 @@ namespace teasafe
             doAddContentFolder();
         }
 
-        // each leaf folder can have 100 entries
+        // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
         for(auto & f : m_ContentFolders) {
-            if(f->getEntryCount() < 50) {
+            if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
                 f->addFile(name);
                 wasAdded = true;
             }
@@ -119,10 +120,10 @@ namespace teasafe
             doAddContentFolder();
         }
 
-        // each leaf folder can have 100 entries
+        // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
         for(auto & f : m_ContentFolders) {
-            if(f->getEntryCount() < 50) {
+            if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
                 f->addCompoundFolder(name);
                 wasAdded = true;
             }
@@ -304,10 +305,10 @@ namespace teasafe
                                              EntryType const &entryType,
                                              uint64_t startBlock)
     {
-        // each leaf folder can have 100 entries
+        // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
         for(auto & f : m_ContentFolders) {
-            if(f->getEntryCount() < 50) {
+            if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
                 f->writeNewMetaDataForEntry(name, entryType, startBlock);
                 wasAdded = true;
             }
