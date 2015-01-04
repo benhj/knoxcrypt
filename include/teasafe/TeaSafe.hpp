@@ -30,7 +30,7 @@
 #define TEASAFE_TEASAFE_HPP__
 
 #include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/TeaSafeFileDevice.hpp"
+#include "teasafe/FileDevice.hpp"
 #include "teasafe/CompoundFolder.hpp"
 #include "teasafe/FolderRemovalType.hpp"
 #include "teasafe/OpenDisposition.hpp"
@@ -136,7 +136,7 @@ namespace teasafe
          * @return a seekable device to the opened file
          * @throw  TeaSaFeException not found if can't be found
          */
-        TeaSafeFileDevice openFile(std::string const &path, OpenDisposition const &openMode);
+        FileDevice openFile(std::string const &path, OpenDisposition const &openMode);
 
         /**
          * @brief chops off end a file at given offset
@@ -171,7 +171,7 @@ namespace teasafe
         mutable StateMutex m_stateMutex;
 
         // so that a new file doesn't need to be created each time the same file is opened
-        typedef std::map<std::string, SharedTeaSafeFile> FileCache;
+        typedef std::map<std::string, SharedFile> FileCache;
         mutable FileCache m_fileCache;
 
         TeaSafe(); // not required
@@ -200,7 +200,7 @@ namespace teasafe
          * @param  openMode the mode to open the file in
          * @return the cached file
          */
-        SharedTeaSafeFile setAndGetCachedFile(std::string const &path,
+        SharedFile setAndGetCachedFile(std::string const &path,
                                               SharedCompoundFolder const &parentEntry,
                                               OpenDisposition openMode) const;
 

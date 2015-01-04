@@ -73,7 +73,7 @@ namespace teasafe
                 theBfs.addFile(addPath);
                 // create a stream to read resource from and a device to write to
                 std::ifstream in(fsPath.c_str(), std::ios_base::binary);
-                teasafe::TeaSafeFileDevice device = theBfs.openFile(addPath, teasafe::OpenDisposition::buildWriteOnlyDisposition());
+                teasafe::FileDevice device = theBfs.openFile(addPath, teasafe::OpenDisposition::buildWriteOnlyDisposition());
                 boost::iostreams::copy(in, device);
             }
         }

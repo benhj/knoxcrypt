@@ -73,7 +73,7 @@ namespace teasafe
                     ss << "Adding "<<tp<<"...";
                     callback(ss.str());
                     theBfs.addFile(tp.string());
-                    teasafe::TeaSafeFileDevice device = theBfs.openFile(tp.string(), teasafe::OpenDisposition::buildWriteOnlyDisposition());
+                    teasafe::FileDevice device = theBfs.openFile(tp.string(), teasafe::OpenDisposition::buildWriteOnlyDisposition());
                     std::ifstream in(fs.string().c_str(), std::ios_base::binary);
                     boost::iostreams::copy(in, device);
                 }

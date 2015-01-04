@@ -95,7 +95,7 @@ namespace teasafe
         bool wasAdded = false;
         for(auto & f : m_leafFolders) {
             if(f->getEntryCount() < 50) {
-                f->addTeaSafeFile(name);
+                f->addFile(name);
                 wasAdded = true;
             }
         }
@@ -104,7 +104,7 @@ namespace teasafe
         // another leaf folder
         if(!wasAdded) {
             doAddLeafFolder();
-            m_leafFolders.back()->addTeaSafeFile(name);
+            m_leafFolders.back()->addFile(name);
         }
 
         m_cacheShouldBeUpdated = true;
@@ -138,12 +138,12 @@ namespace teasafe
         m_cacheShouldBeUpdated = true;
     }
 
-    TeaSafeFile 
+    File 
     CompoundFolder::getFile(std::string const &name,
                             OpenDisposition const &openDisposition) const
     {
         for(auto & f : m_leafFolders) {
-            auto file(f->getTeaSafeFile(name, openDisposition));
+            auto file(f->getFile(name, openDisposition));
             if(file) {
                 return *file;
             }
@@ -259,7 +259,7 @@ namespace teasafe
     CompoundFolder::removeFile(std::string const &name)
     {
         for(auto & f : m_leafFolders) {
-            if(f->removeTeaSafeFile(name)) {                
+            if(f->removeFile(name)) {                
                 // decrement number of entries in leaf
                 if(f->getEntryCount() == 0) {
                     m_compoundFolder->removeLeafFolder(f->getName());

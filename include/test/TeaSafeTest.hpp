@@ -46,14 +46,14 @@ class TeaSafeTest
         boost::filesystem::create_directories(m_uniquePath);
         testFileExists();
         testFolderExists();
-        testAddTeaSafeFile();
+        testAddFile();
         testAddCompoundFolder();
         testAddFileThrowsIfParentNotFound();
         testAddFolderThrowsIfParentNotFound();
         testAddFileThrowsIfAlreadyExists();
         testAddFolderThrowsIfAlreadyExists();
-        testRemoveTeaSafeFile();
-        testRemoveTeaSafeFileThrowsIfBadParent();
+        testRemoveFile();
+        testRemoveFileThrowsIfBadParent();
         testRemoveFileThrowsIfNotFound();
         //testRemoveFileThrowsIfFolder();
         testRemoveEmptyFolder();
@@ -139,7 +139,7 @@ class TeaSafeTest
         ASSERT_EQUAL(false, theTeaSafe.folderExists(testNegative), "TeaSafeTest::testFolderExists() negative case");
     }
 
-    void testAddTeaSafeFile()
+    void testAddFile()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         teasafe::CompoundFolder root = createTestFolder(testPath);
@@ -153,9 +153,9 @@ class TeaSafeTest
 
         teasafe::SharedEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
         bool good = entryInfo ? true : false;
-        ASSERT_EQUAL(true, good, "TeaSafeTest::testAddTeaSafeFile() getting info");
-        ASSERT_EQUAL(teasafe::EntryType::FileType, entryInfo->type(), "TeaSafeTest::testAddTeaSafeFile() info type");
-        ASSERT_EQUAL("testAdded.txt", entryInfo->filename(), "TeaSafeTest::testAddTeaSafeFile() info name");
+        ASSERT_EQUAL(true, good, "TeaSafeTest::testAddFile() getting info");
+        ASSERT_EQUAL(teasafe::EntryType::FileType, entryInfo->type(), "TeaSafeTest::testAddFile() info type");
+        ASSERT_EQUAL("testAdded.txt", entryInfo->filename(), "TeaSafeTest::testAddFile() info name");
     }
 
     void testAddCompoundFolder()
@@ -251,7 +251,7 @@ class TeaSafeTest
         ASSERT_EQUAL(true, caught, "TeaSafeTest::testAddFolderThrowsIfAlreadyExists() caught");
     }
 
-    void testRemoveTeaSafeFile()
+    void testRemoveFile()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         teasafe::CompoundFolder root = createTestFolder(testPath);
@@ -263,10 +263,10 @@ class TeaSafeTest
             ->getFolder("subFolderC")
             ->getEntryInfo("finalFile.txt");
         bool exists = info ? true : false;
-        ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveTeaSafeFile()");
+        ASSERT_EQUAL(false, exists, "TeaSafeTest::testRemoveFile()");
     }
 
-    void testRemoveTeaSafeFileThrowsIfBadParent()
+    void testRemoveFileThrowsIfBadParent()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         teasafe::CompoundFolder root = createTestFolder(testPath);
@@ -279,9 +279,9 @@ class TeaSafeTest
         } catch (teasafe::TeaSafeException const &e) {
             caught = true;
             ASSERT_EQUAL(teasafe::TeaSafeException(teasafe::TeaSafeError::NotFound), e,
-                         "TeaSafeTest::testRemoveTeaSafeFileThrowsIfBadParent() asserting error type");
+                         "TeaSafeTest::testRemoveFileThrowsIfBadParent() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "TeaSafeTest::testRemoveTeaSafeFileThrowsIfBadParent() caught");
+        ASSERT_EQUAL(true, caught, "TeaSafeTest::testRemoveFileThrowsIfBadParent() caught");
     }
 
     void testRemoveFileThrowsIfNotFound()
@@ -397,7 +397,7 @@ class TeaSafeTest
         // open file and append to end of it
         std::string const &testString(createLargeStringToWrite());
 
-        teasafe::TeaSafeFileDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
+        teasafe::FileDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
                                                                 teasafe::OpenDisposition::buildAppendDisposition());
 
         std::streampos wrote = device.write(testString.c_str(), testString.length());
@@ -471,7 +471,7 @@ class TeaSafeTest
         // open file and append to end of it
         std::string const &testString(createLargeStringToWrite());
         {
-            teasafe::TeaSafeFileDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
+            teasafe::FileDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
                                                                     teasafe::OpenDisposition::buildAppendDisposition());
             (void)device.write(testString.c_str(), testString.length());
         }
@@ -517,7 +517,7 @@ class TeaSafeTest
             (void)createTestFolder(testPath);
         }
         {
-            teasafe::TeaSafeFileDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
+            teasafe::FileDevice device = theTeaSafe.openFile("/folderA/subFolderA/fileX",
                                                                     teasafe::OpenDisposition::buildAppendDisposition());
             (void)device.write(testString.c_str(), testString.length());
         }

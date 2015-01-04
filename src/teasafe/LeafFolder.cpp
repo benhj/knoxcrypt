@@ -46,7 +46,7 @@ namespace teasafe
          * @param folderData the data that stores the folder metadata
          * @param n the metadata chunk to put out of use
          */
-        void metaDataToOutOfUse(TeaSafeFile folderData, int n)
+        void metaDataToOutOfUse(File folderData, int n)
         {
             uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
             uint32_t seekTo = (8 + (n * bufferSize));
@@ -68,7 +68,7 @@ namespace teasafe
          * @param seekOff the seek offset
          * @return the read meta data
          */
-        std::vector<uint8_t> doSeekAndReadOfEntryMetaData(TeaSafeFile folderData,
+        std::vector<uint8_t> doSeekAndReadOfEntryMetaData(File folderData,
                                                           int n,
                                                           uint32_t bufSize = 0,
                                                           uint64_t seekOff = 0)
@@ -159,7 +159,7 @@ namespace teasafe
          * @brief retrieves the name of an entry with given index
          * @return the name
          */
-        std::string getEntryName(TeaSafeFile const & folderData, uint64_t const n)
+        std::string getEntryName(File const & folderData, uint64_t const n)
         {
             auto metaData(doSeekAndReadOfEntryMetaData(folderData, n));
             return getEntryName(metaData);
@@ -169,7 +169,7 @@ namespace teasafe
          * @brief retrieves the number of entries in folder entry
          * @return the number of folder entries
          */
-        long getNumberOfEntries(TeaSafeFile const & folderData, uint64_t const blocks)
+        long getNumberOfEntries(File const & folderData, uint64_t const blocks)
         {
             auto out(folderData.getStream());
             uint64_t const offset = detail::getOffsetOfFileBlock(folderData.getStartVolumeBlockIndex(), blocks);
@@ -277,7 +277,7 @@ namespace teasafe
         auto overWroteOld(doFindOffsetWhereMetaDataShouldBeWritten());
 
         if (overWroteOld) {
-            m_folderData = TeaSafeFile(m_io, m_name, m_startVolumeBlock,
+            m_folderData = File(m_io, m_name, m_startVolumeBlock,
                                        OpenDisposition::buildOverwriteDisposition());
             m_folderData.seek(*overWroteOld);
         } else {
@@ -313,10 +313,10 @@ namespace teasafe
     }
 
     void
-    LeafFolder::addTeaSafeFile(std::string const &name)
+    LeafFolder::addFile(std::string const &name)
     {
         // Create a new file entry
-        TeaSafeFile entry(m_io, name);
+        File entry(m_io, name);
 
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FileType, entry.getStartVolumeBlockIndex());
@@ -345,8 +345,8 @@ namespace teasafe
                                                                       .getStartVolumeBlockIndex());
     }
 
-    boost::optional<TeaSafeFile>
-    LeafFolder::getTeaSafeFile(std::string const &name,
+    boost::optional<File>
+    LeafFolder::getFile(std::string const &name,
                                   OpenDisposition const &openDisposition) const
     {
 
@@ -355,14 +355,14 @@ namespace teasafe
         auto info(doGetNamedEntryInfo(name));
         if (info) {
             if (info->type() == EntryType::FileType) {
-                TeaSafeFile file(m_io, name, info->firstFileBlock(), openDisposition);
+                File file(m_io, name, info->firstFileBlock(), openDisposition);
                 file.setOptionalSizeUpdateCallback(std::bind(&EntryInfo::updateSize, 
                                                              info, 
                                                              std::placeholders::_1));
                 return file;
             }
         }
-        return boost::optional<TeaSafeFile>();
+        return boost::optional<File>();
     }
 
     std::shared_ptr<LeafFolder>
@@ -449,7 +449,7 @@ namespace teasafe
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        TeaSafeFile temp(m_io, m_name, m_startVolumeBlock,
+        File temp(m_io, m_name, m_startVolumeBlock,
                          OpenDisposition::buildOverwriteDisposition());
 
         auto index(doGetMetaDataIndexForEntry(name));
@@ -484,11 +484,11 @@ namespace teasafe
     }
 
     bool
-    LeafFolder::removeTeaSafeFile(std::string const &name)
+    LeafFolder::removeFile(std::string const &name)
     {
         // first unlink; this deallocates the file blocks, updating the
         // volume bitmap accordingly; note doesn't matter what opendisposition is here
-        auto entry(getTeaSafeFile(name, OpenDisposition::buildAppendDisposition()));
+        auto entry(getFile(name, OpenDisposition::buildAppendDisposition()));
         if(!entry) { return false; }
         entry->unlink();
 
@@ -510,7 +510,7 @@ namespace teasafe
         auto & infos(entry->listAllEntries());
         for (auto const &it : infos) {
             if (it.second->type() == EntryType::FileType) {
-                entry->removeTeaSafeFile(it.second->filename());
+                entry->removeFile(it.second->filename());
             } else {
                 // a leaf will only contain compound folders
                 entry->removeCompoundFolder(it.second->filename());
@@ -617,7 +617,7 @@ namespace teasafe
         if (entryType == EntryType::FileType) {
             // note disposition doesn't matter here, can be anything
             startBlock = getBlockIndexForEntry(metaData);
-            TeaSafeFile fe(m_io, entryName, startBlock, OpenDisposition::buildAppendDisposition());
+            File fe(m_io, entryName, startBlock, OpenDisposition::buildAppendDisposition());
             fileSize = fe.fileSize();
         } else {
             startBlock = getBlockIndexForEntry(metaData);

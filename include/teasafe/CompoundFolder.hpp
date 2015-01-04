@@ -70,7 +70,7 @@ namespace teasafe
         /**
          * @brief appends a new file entry and start index to the entry data
          * @param name the name of the entry
-         * @return a copy of a TeaSafeFile that will be used to reference the file data
+         * @return a copy of a File that will be used to reference the file data
          */
         void addFile(std::string const &name);
 
@@ -82,12 +82,12 @@ namespace teasafe
         void addFolder(std::string const &name);
 
         /**
-         * @brief retrieves a TeaSafeFile with specific name
+         * @brief retrieves a File with specific name
          * @param name the name of the entry to lookup
          * @param openDisposition open mode
-         * @return a copy of the TeaSafeFile with name
+         * @return a copy of the File with name
          */
-        TeaSafeFile getFile(std::string const &name,
+        File getFile(std::string const &name,
                             OpenDisposition const &openDisposition) const;
 
         /**

@@ -289,7 +289,7 @@ namespace teasafe
 
     }
 
-    TeaSafeFileDevice
+    FileDevice
     TeaSafe::openFile(std::string const &path, OpenDisposition const &openMode)
     {
         StateLock lock(m_stateMutex);
@@ -313,7 +313,7 @@ namespace teasafe
         }*/
 
         auto fe(this->setAndGetCachedFile(path, parentEntry, openMode));
-        return TeaSafeFileDevice(fe);
+        return FileDevice(fe);
     }
 
     void
@@ -345,7 +345,7 @@ namespace teasafe
         FileCache().swap(m_fileCache);
     }
 
-    SharedTeaSafeFile
+    SharedFile
     TeaSafe::setAndGetCachedFile(std::string const &path,
                                  SharedCompoundFolder const &parentEntry,
                                  OpenDisposition openMode) const
@@ -370,7 +370,7 @@ namespace teasafe
             }
         }
 
-        auto sf(std::make_shared<TeaSafeFile>(parentEntry->getFile(boost::filesystem::path(path).filename().string(),
+        auto sf(std::make_shared<File>(parentEntry->getFile(boost::filesystem::path(path).filename().string(),
                                                                    openMode)));
         m_fileCache.insert(std::make_pair(path, sf));
         return sf;

@@ -71,7 +71,7 @@ namespace teasafe
                 std::stringstream ss;
                 ss << "Extracting file "<<dstPath<<"...";
                 callback(dstPath);
-                teasafe::TeaSafeFileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
+                teasafe::FileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
                 device.seek(0, std::ios_base::beg);
                 std::ofstream out(dstPath.c_str(), std::ios_base::binary);
                 boost::iostreams::copy(device, out);

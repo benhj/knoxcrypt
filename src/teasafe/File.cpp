@@ -27,7 +27,7 @@
 */
 
 #include "teasafe/TeaSafeImageStream.hpp"
-#include "teasafe/TeaSafeFile.hpp"
+#include "teasafe/File.hpp"
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/FileBlockIterator.hpp"
 #include "teasafe/FileEntryException.hpp"
@@ -49,7 +49,7 @@ namespace teasafe
     }
 
     // for writing a brand new entry where start block isn't known
-    TeaSafeFile::TeaSafeFile(SharedCoreIO const &io,
+    File::File(SharedCoreIO const &io,
                              std::string const &name,
                              bool const enforceStartBlock)
         : m_io(io)
@@ -68,7 +68,7 @@ namespace teasafe
     }
 
     // for appending or overwriting
-    TeaSafeFile::TeaSafeFile(SharedCoreIO const &io,
+    File::File(SharedCoreIO const &io,
                              std::string const &name,
                              uint64_t const startBlock,
                              OpenDisposition const &openDisposition)
@@ -110,31 +110,31 @@ namespace teasafe
     }
 
     std::string
-    TeaSafeFile::filename() const
+    File::filename() const
     {
         return m_name;
     }
 
     uint64_t
-    TeaSafeFile::fileSize() const
+    File::fileSize() const
     {
         return m_fileSize;
     }
 
     OpenDisposition
-    TeaSafeFile::getOpenDisposition() const
+    File::getOpenDisposition() const
     {
         return m_openDisposition;
     }
 
     SharedImageStream
-    TeaSafeFile::getStream() const
+    File::getStream() const
     {
         return m_stream;
     }
 
     uint64_t
-    TeaSafeFile::getCurrentVolumeBlockIndex()
+    File::getCurrentVolumeBlockIndex()
     {
         if (!m_workingBlock) {
             checkAndUpdateWorkingBlockWithNew();
@@ -143,7 +143,7 @@ namespace teasafe
     }
 
     uint64_t
-    TeaSafeFile::getStartVolumeBlockIndex() const
+    File::getStartVolumeBlockIndex() const
     {
         if (!m_workingBlock) {
             checkAndUpdateWorkingBlockWithNew();
@@ -153,7 +153,7 @@ namespace teasafe
     }
 
     std::streamsize
-    TeaSafeFile::readWorkingBlockBytes(uint32_t const thisMany)
+    File::readWorkingBlockBytes(uint32_t const thisMany)
     {
 
         // need to take into account the currently seeked-to position and
@@ -178,7 +178,7 @@ namespace teasafe
         return bytesToRead;
     }
 
-    void TeaSafeFile::newWritableFileBlock() const
+    void File::newWritableFileBlock() const
     {
         auto block(m_io->blockBuilder->buildWritableFileBlock(m_io,
                                                               teasafe::OpenDisposition::buildAppendDisposition(),
@@ -197,7 +197,7 @@ namespace teasafe
         m_workingBlock = std::make_shared<FileBlock>(block);
     }
 
-    void TeaSafeFile::enumerateBlockStats()
+    void File::enumerateBlockStats()
     {
         // find very first block
         FileBlockIterator block(m_io,
@@ -212,7 +212,7 @@ namespace teasafe
     }
 
     void
-    TeaSafeFile::writeBufferedDataToWorkingBlock(uint32_t const bytes)
+    File::writeBufferedDataToWorkingBlock(uint32_t const bytes)
     {
         m_workingBlock->write((char*)&m_buffer.front(), bytes);
         std::vector<uint8_t>().swap(m_buffer);
@@ -224,7 +224,7 @@ namespace teasafe
     }
 
     bool
-    TeaSafeFile::workingBlockHasAvailableSpace() const
+    File::workingBlockHasAvailableSpace() const
     {
         // use tell to get bytes written so far as the read/write head position
         // is always updates after reads/writes
@@ -238,7 +238,7 @@ namespace teasafe
     }
 
     void
-    TeaSafeFile::checkAndUpdateWorkingBlockWithNew() const
+    File::checkAndUpdateWorkingBlockWithNew() const
     {
         // first case no file blocks so absolutely need one to write to
         if (!m_workingBlock) {
@@ -289,7 +289,7 @@ namespace teasafe
     }
 
     uint32_t
-    TeaSafeFile::getBytesLeftInWorkingBlock()
+    File::getBytesLeftInWorkingBlock()
     {
         // if given the stream position no more bytes can be written
         // then write out buffer
@@ -302,7 +302,7 @@ namespace teasafe
     }
 
     std::streamsize
-    TeaSafeFile::read(char* s, std::streamsize n)
+    File::read(char* s, std::streamsize n)
     {
         if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::WriteOnly) {
             throw FileEntryException(FileEntryError::NotReadable);
@@ -334,7 +334,7 @@ namespace teasafe
     }
 
     uint32_t
-    TeaSafeFile::bufferBytesForWorkingBlock(const char* s, std::streamsize n, uint32_t offset)
+    File::bufferBytesForWorkingBlock(const char* s, std::streamsize n, uint32_t offset)
     {
 
         auto const spaceAvailable = getBytesLeftInWorkingBlock();
@@ -356,7 +356,7 @@ namespace teasafe
     }
 
     std::streamsize
-    TeaSafeFile::write(const char* s, std::streamsize n)
+    File::write(const char* s, std::streamsize n)
     {
 
         if (m_openDisposition.readWrite() == ReadOrWriteOrBoth::ReadOnly) {
@@ -390,7 +390,7 @@ namespace teasafe
     }
 
     void
-    TeaSafeFile::truncate(std::ios_base::streamoff newSize)
+    File::truncate(std::ios_base::streamoff newSize)
     {
         // compute number of block required
         auto const blockSize = blockWriteSpace();
@@ -533,7 +533,7 @@ namespace teasafe
     }
 
     boost::iostreams::stream_offset
-    TeaSafeFile::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
+    File::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
     {
         // reset any offset values to zero but only if not seeking from the current
         // position. When seeking from the current position, we need to keep
@@ -600,13 +600,13 @@ namespace teasafe
     }
 
     boost::iostreams::stream_offset
-    TeaSafeFile::tell() const
+    File::tell() const
     {
         return m_pos;
     }
 
     void
-    TeaSafeFile::flush()
+    File::flush()
     {
         writeBufferedDataToWorkingBlock(m_buffer.size());
         if (m_optionalSizeCallback) {
@@ -615,7 +615,7 @@ namespace teasafe
     }
 
     void
-    TeaSafeFile::unlink()
+    File::unlink()
     {
         // loop over all file blocks and update the volume bitmap indicating
         // that block is no longer in use
@@ -633,13 +633,13 @@ namespace teasafe
     }
 
     void
-    TeaSafeFile::setOptionalSizeUpdateCallback(SetEntryInfoSizeCallback callback)
+    File::setOptionalSizeUpdateCallback(SetEntryInfoSizeCallback callback)
     {
         m_optionalSizeCallback = OptionalSizeCallback(callback);
     }
 
     FileBlock
-    TeaSafeFile::getBlockWithIndex(uint64_t n) const
+    File::getBlockWithIndex(uint64_t n) const
     {
 
         {
@@ -670,6 +670,6 @@ namespace teasafe
             }
         }
 
-        throw std::runtime_error("Whoops! Something went wrong in TeaSafeFile::getBlockWithIndex");
+        throw std::runtime_error("Whoops! Something went wrong in File::getBlockWithIndex");
     }
 }

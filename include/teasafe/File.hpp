@@ -46,10 +46,10 @@
 namespace teasafe
 {
 
-    class TeaSafeFile;
-    typedef std::shared_ptr<TeaSafeFile> SharedTeaSafeFile;
+    class File;
+    typedef std::shared_ptr<File> SharedFile;
 
-    class TeaSafeFile
+    class File
     {
 
         typedef std::function<void(uint64_t)> SetEntryInfoSizeCallback;
@@ -63,7 +63,7 @@ namespace teasafe
          * @param name the name of the file entry
          * @param enforceStartBlock true if start block should be set
          */
-        TeaSafeFile(SharedCoreIO const &io, std::string const &name, bool const enforceStartBlock = false);
+        File(SharedCoreIO const &io, std::string const &name, bool const enforceStartBlock = false);
 
         /**
          * @brief when reading or appending or overwriting this constructor should be used
@@ -72,7 +72,7 @@ namespace teasafe
          * @param block the starting block of the file entry
          * @param openDisposition open mode
          */
-        TeaSafeFile(SharedCoreIO const &io,
+        File(SharedCoreIO const &io,
                     std::string const &name,
                     uint64_t const startBlock,
                     OpenDisposition const &openDisposition);

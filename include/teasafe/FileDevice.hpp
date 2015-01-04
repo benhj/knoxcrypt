@@ -26,49 +26,38 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/TeaSafeFileDevice.hpp"
+#ifndef TeaSafe_TEASAFE_FILE_DEVICE_HPP__
+#define TeaSafe_TEASAFE_FILE_DEVICE_HPP__
+
+#include <teasafe/File.hpp>
+
+#include <iosfwd>                           // streamsize, seekdir
+#include <boost/iostreams/categories.hpp>   // seekable_device_tag
+#include <boost/iostreams/positioning.hpp>  // stream_offset
 
 namespace teasafe
 {
-
-    TeaSafeFileDevice::TeaSafeFileDevice(SharedTeaSafeFile const &entry)
-        : m_entry(entry)
+    class FileDevice
     {
-    }
 
-    std::streamsize
-    TeaSafeFileDevice::read(char* s, std::streamsize n)
-    {
-        std::streamsize read = m_entry->read(s, n);
-        if(read == 0) {
-            return -1;
-        }
-        return read;
-    }
+      public:
 
-    std::streamsize
-    TeaSafeFileDevice::write(const char* s, std::streamsize n)
-    {
-        std::streamsize wrote = m_entry->write(s, n);
-        m_entry->flush();
-        return wrote;
-    }
+        typedef char                                   char_type;
+        typedef boost::iostreams::seekable_device_tag  category;
 
-    std::streampos
-    TeaSafeFileDevice::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
-    {
-        return m_entry->seek(off, way);
-    }
+        explicit FileDevice(SharedFile const &entry);
 
-    std::streampos
-    TeaSafeFileDevice::tellg() const
-    {
-        return m_entry->tell();
-    }
+        std::streamsize read(char* s, std::streamsize n);
+        std::streamsize write(const char* s, std::streamsize n);
+        std::streampos seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
+        std::streampos tellg() const;
+        std::streampos tellp() const;
 
-    std::streampos
-    TeaSafeFileDevice::tellp() const
-    {
-        return m_entry->tell();
-    }
+      private:
+        FileDevice();
+        SharedFile m_entry;
+    };
+
 }
+
+#endif // TeaSafe_TEASAFE_FILE_DEVICE_HPP__

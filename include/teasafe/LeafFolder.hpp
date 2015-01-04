@@ -31,7 +31,7 @@
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/EntryInfo.hpp"
-#include "teasafe/TeaSafeFile.hpp"
+#include "teasafe/File.hpp"
 
 #include <boost/optional.hpp>
   
@@ -78,9 +78,9 @@ namespace teasafe
         /**
          * @brief appends a new file entry and start index to the entry data
          * @param name the name of the entry
-         * @return a copy of a TeaSafeFile that will be used to reference the file data
+         * @return a copy of a File that will be used to reference the file data
          */
-        void addTeaSafeFile(std::string const &name);
+        void addFile(std::string const &name);
 
         /**
          * @brief appends a new folder entry and start index of the entry data
@@ -93,12 +93,12 @@ namespace teasafe
         void addCompoundFolder(std::string const &name);
 
         /**
-         * @brief retrieves a TeaSafeFile with specific name
+         * @brief retrieves a File with specific name
          * @param name the name of the entry to lookup
          * @param openDisposition open mode
-         * @return a copy of the TeaSafeFile with name
+         * @return a copy of the File with name
          */
-        boost::optional<TeaSafeFile> getTeaSafeFile(std::string const &name,
+        boost::optional<File> getFile(std::string const &name,
                                                     OpenDisposition const &openDisposition) const;
 
         /**
@@ -174,7 +174,7 @@ namespace teasafe
          * @param name the name of the entry
          * @return true if successful
          */
-        bool removeTeaSafeFile(std::string const &name);
+        bool removeFile(std::string const &name);
 
         /**
          * @brief removes a sub folder and all its content
@@ -301,7 +301,7 @@ namespace teasafe
         SharedCoreIO m_io;
 
         // the underlying file blocks storing the folder entry data
-        mutable TeaSafeFile m_folderData;
+        mutable File m_folderData;
 
         uint64_t m_startVolumeBlock;
 

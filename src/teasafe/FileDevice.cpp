@@ -26,38 +26,49 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_TEASAFE_FILE_DEVICE_HPP__
-#define TeaSafe_TEASAFE_FILE_DEVICE_HPP__
-
-#include <teasafe/TeaSafeFile.hpp>
-
-#include <iosfwd>                           // streamsize, seekdir
-#include <boost/iostreams/categories.hpp>   // seekable_device_tag
-#include <boost/iostreams/positioning.hpp>  // stream_offset
+#include "teasafe/FileDevice.hpp"
 
 namespace teasafe
 {
-    class TeaSafeFileDevice
+
+    FileDevice::FileDevice(SharedFile const &entry)
+        : m_entry(entry)
     {
+    }
 
-      public:
+    std::streamsize
+    FileDevice::read(char* s, std::streamsize n)
+    {
+        std::streamsize read = m_entry->read(s, n);
+        if(read == 0) {
+            return -1;
+        }
+        return read;
+    }
 
-        typedef char                                   char_type;
-        typedef boost::iostreams::seekable_device_tag  category;
+    std::streamsize
+    FileDevice::write(const char* s, std::streamsize n)
+    {
+        std::streamsize wrote = m_entry->write(s, n);
+        m_entry->flush();
+        return wrote;
+    }
 
-        explicit TeaSafeFileDevice(SharedTeaSafeFile const &entry);
+    std::streampos
+    FileDevice::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
+    {
+        return m_entry->seek(off, way);
+    }
 
-        std::streamsize read(char* s, std::streamsize n);
-        std::streamsize write(const char* s, std::streamsize n);
-        std::streampos seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
-        std::streampos tellg() const;
-        std::streampos tellp() const;
+    std::streampos
+    FileDevice::tellg() const
+    {
+        return m_entry->tell();
+    }
 
-      private:
-        TeaSafeFileDevice();
-        SharedTeaSafeFile m_entry;
-    };
-
+    std::streampos
+    FileDevice::tellp() const
+    {
+        return m_entry->tell();
+    }
 }
-
-#endif // TeaSafe_TEASAFE_FILE_DEVICE_HPP__

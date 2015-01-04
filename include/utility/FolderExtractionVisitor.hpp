@@ -33,7 +33,7 @@
 
 #include "teasafe/EntryInfo.hpp"
 #include "teasafe/TeaSafe.hpp"
-#include "teasafe/TeaSafeFileDevice.hpp"
+#include "teasafe/FileDevice.hpp"
 #include "utility/LeafFolderVisitor.hpp"
 
 #include <boost/filesystem/path.hpp>
@@ -90,7 +90,7 @@ namespace teasafe
                 std::stringstream ss;
                 ss << "Extracting file "<<fsLoc<<"...";
                 m_callback(ss.str());
-                teasafe::TeaSafeFileDevice device = m_theBfs.openFile(teaLoc.string(), teasafe::OpenDisposition::buildReadOnlyDisposition());
+                teasafe::FileDevice device = m_theBfs.openFile(teaLoc.string(), teasafe::OpenDisposition::buildReadOnlyDisposition());
                 device.seek(0, std::ios_base::beg);
                 std::ofstream out(fsLoc.string().c_str(), std::ios_base::binary);
                 boost::iostreams::copy(device, out);

@@ -58,7 +58,7 @@ class FileBlockIteratorTest
 
         // build some blocks to iterate over
         teasafe::SharedCoreIO io(createTestIO(testPath));
-        teasafe::TeaSafeFile entry(io, "test.txt");
+        teasafe::File entry(io, "test.txt");
         std::string testData(createLargeStringToWrite());
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), BIG_SIZE);
