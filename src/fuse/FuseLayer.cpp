@@ -501,7 +501,7 @@ int main(int argc, char *argv[])
     long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
     std::function<void(teasafe::EventType)> f(std::bind(&teasafe::cipherCallback, std::placeholders::_1, amount));
     io->ccb = f;
-    teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::binary);
+    teasafe::ContainerImageStream stream(io, std::ios::in | std::ios::binary);
 
     // compare password hashes
     uint8_t hashRecovered[32];

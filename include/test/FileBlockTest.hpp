@@ -26,7 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/FileBlock.hpp"
 #include "teasafe/FileBlockException.hpp"
 #include "teasafe/OpenDisposition.hpp"
@@ -80,7 +80,7 @@ class FileBlockTest
 
         // test that actual written correct
         assert(block.getDataBytesWritten() == 26);
-        teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
+        teasafe::ContainerImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t size = teasafe::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
         ASSERT_EQUAL(size, 26, "FileBlockTest::blockWriteAndReadTest(): correctly returned block size");
 

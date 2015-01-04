@@ -32,7 +32,7 @@
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlock.hpp"
 #include "teasafe/OpenDisposition.hpp"
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 
 #include <functional>
 #include <boost/optional.hpp>

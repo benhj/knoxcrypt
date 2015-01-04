@@ -29,7 +29,7 @@
 #ifndef TeaSafe_TeaSafe_DETAIL_TeaSafe_HPP__
 #define TeaSafe_TeaSafe_DETAIL_TeaSafe_HPP__
 
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 
 #include <boost/optional.hpp>
 
@@ -99,7 +99,7 @@ namespace teasafe { namespace detail
      * @param in the image stream
      * @return image size
      */
-    inline void getPassHash(teasafe::TeaSafeImageStream &in, uint8_t hash[32])
+    inline void getPassHash(teasafe::ContainerImageStream &in, uint8_t hash[32])
     {
         in.seekg(beginning() - PASS_HASH_BYTES);
         (void)in.read((char*)hash, 32);
@@ -110,7 +110,7 @@ namespace teasafe { namespace detail
      * @param in the image stream
      * @return a string of the hash
      */
-    inline uint64_t getImageSize(teasafe::TeaSafeImageStream &in)
+    inline uint64_t getImageSize(teasafe::ContainerImageStream &in)
     {
         in.seekg(0, std::ios::end);
         uint64_t const bytes(in.tellg());
@@ -122,7 +122,7 @@ namespace teasafe { namespace detail
      * @param in the image stream
      * @return amount of file space
      */
-    inline uint64_t getBlockCount(teasafe::TeaSafeImageStream &in)
+    inline uint64_t getBlockCount(teasafe::ContainerImageStream &in)
     {
         in.seekg(beginning());
         uint8_t dat[8];
@@ -135,7 +135,7 @@ namespace teasafe { namespace detail
      * @param in the teasafe image stream
      * @return the number of blocks
      */
-    inline uint64_t getNumberOfBlocks(teasafe::TeaSafeImageStream &in)
+    inline uint64_t getNumberOfBlocks(teasafe::ContainerImageStream &in)
     {
         (void)in.seekg(beginning());
         uint8_t dat[8];
@@ -192,7 +192,7 @@ namespace teasafe { namespace detail
      */
     inline void setBlockToInUse(uint64_t const block,
                                 uint64_t const,// blocks,
-                                teasafe::TeaSafeImageStream &in,
+                                teasafe::ContainerImageStream &in,
                                 bool const set = true)
     {
         uint64_t byteThatStoresBit(0);
@@ -230,7 +230,7 @@ namespace teasafe { namespace detail
      */
     inline bool isBlockInUse(uint64_t const block,
                              uint64_t const blocks,
-                             teasafe::TeaSafeImageStream &in)
+                             teasafe::ContainerImageStream &in)
     {
         uint64_t bytes = blocks / uint64_t(8);
         // read the bytes in to a buffer
@@ -258,7 +258,7 @@ namespace teasafe { namespace detail
      * @param in the teasafe image stream
      * @return the number of allocated blocks
      */
-    inline uint64_t getNumberOfAllocatedBlocks(teasafe::TeaSafeImageStream &in)
+    inline uint64_t getNumberOfAllocatedBlocks(teasafe::ContainerImageStream &in)
     {
         (void)in.seekg(beginning());
         uint8_t dat[8];
@@ -299,7 +299,7 @@ namespace teasafe { namespace detail
      * @return the next available block
      */
     typedef boost::optional<uint64_t> OptionalBlock;
-    inline OptionalBlock getNextAvailableBlock(teasafe::TeaSafeImageStream &in, uint64_t const blocks_ = 0)
+    inline OptionalBlock getNextAvailableBlock(teasafe::ContainerImageStream &in, uint64_t const blocks_ = 0)
     {
         // get number of blocks that make up fs
         uint64_t blocks = blocks_;
@@ -354,7 +354,7 @@ namespace teasafe { namespace detail
      * @return a vector of available file block indices. Note this might
      * be less that blocksRequired if there are not enough blocks available
      */
-    inline std::vector<uint64_t> getNAvailableBlocks(teasafe::TeaSafeImageStream &in,
+    inline std::vector<uint64_t> getNAvailableBlocks(teasafe::ContainerImageStream &in,
                                                      uint64_t const blocksRequired,
                                                      uint64_t const totalBlocks)
     {
@@ -393,7 +393,7 @@ namespace teasafe { namespace detail
      * @param blocksUsed a vector of newly allocated file block indices
      * @param totalBlocks total number of fs blocks
      */
-    inline void updateVolumeBitmap(TeaSafeImageStream &in,
+    inline void updateVolumeBitmap(ContainerImageStream &in,
                                    std::vector<uint64_t> const &blocksUsed,
                                    uint64_t const totalBlocks)
     {
@@ -408,7 +408,7 @@ namespace teasafe { namespace detail
      * @param blockUsed the used block
      * @param totalBlocks total number of fs blocks
      */
-    inline void updateVolumeBitmapWithOne(TeaSafeImageStream &in,
+    inline void updateVolumeBitmapWithOne(ContainerImageStream &in,
                                           uint64_t const &blockUsed,
                                           uint64_t const totalBlocks,
                                           bool const set = true)
@@ -422,7 +422,7 @@ namespace teasafe { namespace detail
      * @param  offset the position to seek to
      * @return true seeking was successful, false otherwise
      */
-    inline bool checkAndSeekG(TeaSafeImageStream &stream, std::streamoff offset)
+    inline bool checkAndSeekG(ContainerImageStream &stream, std::streamoff offset)
     {
         if(stream.tellg() != offset) {
             bool bad = stream.seekg(offset).bad();
@@ -437,7 +437,7 @@ namespace teasafe { namespace detail
      * @param offset the position to seek to
      * @return true seeking was successful, false otherwise
      */
-    inline bool checkAndSeekP(TeaSafeImageStream &stream, std::streamoff offset)
+    inline bool checkAndSeekP(ContainerImageStream &stream, std::streamoff offset)
     {
         if(stream.tellp() != offset) {
             bool bad = stream.seekp(offset).bad();

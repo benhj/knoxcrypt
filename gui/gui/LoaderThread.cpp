@@ -30,7 +30,7 @@
 
 #include "LoaderThread.h"
 #include "teasafe/FileBlockBuilder.hpp"
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 
 #include <memory>
@@ -64,7 +64,7 @@ void LoaderThread::loadTSImage()
     teasafe::detail::readImageIVAndRounds(m_io);
 
     // Obtain the number of blocks in the image by reading the image's block count
-    teasafe::TeaSafeImageStream stream(m_io, std::ios::in | std::ios::binary);
+    teasafe::ContainerImageStream stream(m_io, std::ios::in | std::ios::binary);
     m_io->blocks = teasafe::detail::getBlockCount(stream);
     m_io->freeBlocks = m_io->blocks - teasafe::detail::getNumberOfAllocatedBlocks(stream);
     m_io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(m_io);

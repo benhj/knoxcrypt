@@ -26,7 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
@@ -64,7 +64,7 @@ class MakeTeaSafeTest
         teasafe::SharedCoreIO io(createTestIO(testPath));
 
         // test that enough bytes are written
-        teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::binary);
+        teasafe::ContainerImageStream is(io, std::ios::in | std::ios::binary);
         ASSERT_EQUAL(blocks, teasafe::detail::getBlockCount(is), "MakeTeaSafeTest::correctBlockCountIsReported");
         is.close();
     }
@@ -75,7 +75,7 @@ class MakeTeaSafeTest
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
 
-        teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::binary);
+        teasafe::ContainerImageStream is(io, std::ios::in | std::ios::binary);
         teasafe::detail::OptionalBlock p = teasafe::detail::getNextAvailableBlock(is);
         ASSERT_EQUAL(*p, 1, "MakeTeaSafeTest::firstBlockIsReportedAsBeingFree");
         is.close();
@@ -88,7 +88,7 @@ class MakeTeaSafeTest
 
         teasafe::SharedCoreIO io(createTestIO(testPath));
 
-        teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
+        teasafe::ContainerImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
         teasafe::detail::setBlockToInUse(1, blocks, is);
         teasafe::detail::OptionalBlock p = teasafe::detail::getNextAvailableBlock(is);
         ASSERT_EQUAL(2, *p, "MakeTeaSafeTest::blocksCanBeSetAndCleared next available block");
@@ -130,7 +130,7 @@ class MakeTeaSafeTest
         uint64_t offset = teasafe::detail::getOffsetOfFileBlock(0, blocks);
         // open a stream and read the first byte which signifies number of entries
         teasafe::SharedCoreIO io(createTestIO(testPath));
-        teasafe::TeaSafeImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
+        teasafe::ContainerImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
         is.seekg(offset + teasafe::detail::FILE_BLOCK_META);
         uint8_t bytes[8];
         (void)is.read((char*)bytes, 8);

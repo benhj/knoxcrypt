@@ -29,7 +29,7 @@
 #ifndef TeaSafe_TeaSafe_DETAIL_FOLDER_HPP__
 #define TeaSafe_TeaSafe_DETAIL_FOLDER_HPP__
 
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
 
@@ -41,12 +41,12 @@ namespace teasafe { namespace detail
 {
 
     /// for reading the entry count, incrementing it and writing out result again
-    void incrementFolderEntryCount(teasafe::TeaSafeImageStream &out,
+    void incrementFolderEntryCount(teasafe::ContainerImageStream &out,
                                    teasafe::SharedCoreIO const& io,
                                    uint64_t const startBlock,
                                    uint64_t const inc = 1)
     {
-        //teasafe::TeaSafeImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
+        //teasafe::ContainerImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, io->blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
@@ -59,12 +59,12 @@ namespace teasafe { namespace detail
     }
 
     /// for writing directly the entry count
-    void writeFolderEntryCount(teasafe::TeaSafeImageStream &out,
+    void writeFolderEntryCount(teasafe::ContainerImageStream &out,
                                teasafe::SharedCoreIO const& io,
                                uint64_t const startBlock,
                                uint64_t const entryCount)
     {
-        //teasafe::TeaSafeImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
+        //teasafe::ContainerImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, io->blocks);
         uint8_t buf[8];
         (void)out.seekp(offset + FILE_BLOCK_META);
@@ -77,7 +77,7 @@ namespace teasafe { namespace detail
                                    uint64_t const startBlock,
                                    uint64_t const dec = 1)
     {
-        teasafe::TeaSafeImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
+        teasafe::ContainerImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
         uint64_t const offset = getOffsetOfFileBlock(startBlock, io->blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];

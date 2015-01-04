@@ -27,7 +27,7 @@
 */
 
 #include "teasafe/CompoundFolder.hpp"
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/LeafFolder.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFolder.hpp"

@@ -97,7 +97,7 @@ namespace teasafe
             mode |= std::ios::app;
         }
         if(!m_stream) {
-            m_stream = std::make_shared<TeaSafeImageStream>(m_io, mode);
+            m_stream = std::make_shared<ContainerImageStream>(m_io, mode);
         } else {
             if(!m_stream->is_open()) {
                 m_stream->open(m_io, mode);
@@ -252,7 +252,7 @@ namespace teasafe
     }
 
     void
-    FileBlock::doSetSize(TeaSafeImageStream &stream, std::ios_base::streamoff size) const
+    FileBlock::doSetSize(ContainerImageStream &stream, std::ios_base::streamoff size) const
     {
         // update m_bytesWritten
         (void)stream.seekp(m_offset);
@@ -271,7 +271,7 @@ namespace teasafe
     }
 
     void
-    FileBlock::doSetNextIndex(TeaSafeImageStream &stream, uint64_t nextIndex) const
+    FileBlock::doSetNextIndex(ContainerImageStream &stream, uint64_t nextIndex) const
     {
         // update m_next
         (void)stream.seekp(m_offset + 4);

@@ -29,7 +29,7 @@
 #ifndef TeaSafe_MAKE_TeaSafe_HPP__
 #define TeaSafe_MAKE_TeaSafe_HPP__
 
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlock.hpp"
 #include "teasafe/FileBlockBuilder.hpp"
@@ -104,7 +104,7 @@ namespace teasafe
             (*m_writeSignal)(event);
         }
 
-        void writeOutFileSpaceBytes(SharedCoreIO const &io, TeaSafeImageStream &out)
+        void writeOutFileSpaceBytes(SharedCoreIO const &io, ContainerImageStream &out)
         {
 
             broadcastEvent(EventType::ImageBuildStart);
@@ -128,7 +128,7 @@ namespace teasafe
          *
          * @param blocks
          */
-        void createVolumeBitMap(uint64_t const blocks, TeaSafeImageStream &out)
+        void createVolumeBitMap(uint64_t const blocks, ContainerImageStream &out)
         {
             //
             // each block will be represented by a bit. If allocated this
@@ -199,7 +199,7 @@ namespace teasafe
             uint8_t sizeBytes[8];
             buildBlockBytes(io->blocks, sizeBytes);
             // write out size, and volume bitmap bytes
-            TeaSafeImageStream out(io, std::ios::out | std::ios::app | std::ios::binary);
+            ContainerImageStream out(io, std::ios::out | std::ios::app | std::ios::binary);
 
             // write out an encrypted hash of the password; will be compared
             // with that entered when reading back in so we know if an

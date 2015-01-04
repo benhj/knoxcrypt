@@ -479,7 +479,7 @@ class TeaSafeTest
         // see what blocks are in use
         std::vector<long> blocksInUse;
         {
-            teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            teasafe::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             for (long i = 0; i < blocks; ++i) {
 
                 if (teasafe::detail::isBlockInUse(i, blocks, in)) {
@@ -500,7 +500,7 @@ class TeaSafeTest
         // have been deallocated
         {
             bool blockCheckPassed = true;
-            teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            teasafe::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             for (int i = 1; i<blocks; ++i) {
 
                 if (teasafe::detail::isBlockInUse(i, blocks, in)) {
@@ -525,7 +525,7 @@ class TeaSafeTest
         // see what blocks are in use this time around; should be same as first time around
         std::vector<long> blocksInUseB;
         {
-            teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            teasafe::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             for (long i = 0; i < blocks; ++i) {
 
                 if (teasafe::detail::isBlockInUse(i, blocks, in)) {

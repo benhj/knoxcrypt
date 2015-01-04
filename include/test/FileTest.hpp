@@ -26,7 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/File.hpp"
 #include "teasafe/FileEntryException.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
@@ -117,7 +117,7 @@ class FileTest
             entry.flush();
 
             uint64_t startBlock = entry.getStartVolumeBlockIndex();
-            teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            teasafe::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             ASSERT_EQUAL(true, teasafe::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
             teasafe::FileBlock block(io, startBlock,
                                      teasafe::OpenDisposition::buildReadOnlyDisposition());
@@ -151,7 +151,7 @@ class FileTest
 
             // get allocated block indices
             uint64_t startBlock = entry.getStartVolumeBlockIndex();
-            teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            teasafe::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             blockIndices.push_back(startBlock);
 
             teasafe::FileBlock block(io, startBlock,
@@ -178,7 +178,7 @@ class FileTest
             ASSERT_EQUAL(0, entry.fileSize(), "testFileUnlink B");
 
             // test that blocks deallocated after unlink
-            teasafe::TeaSafeImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            teasafe::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             for (auto const & it : blockIndices) {
                 ASSERT_EQUAL(false, teasafe::detail::isBlockInUse(it, blocks, in), "testFileUnlink: blockDeallocatedTest");
             }

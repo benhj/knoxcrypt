@@ -27,7 +27,7 @@
 */
 
 #include "teasafe/FileBlockBuilder.hpp"
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 
 namespace teasafe
@@ -39,7 +39,7 @@ namespace teasafe
         teasafe::BlockDeque populateBlockDeque(SharedCoreIO const &io)
         {
             // obtain all available blocks and store in a map for quick lookup
-            teasafe::TeaSafeImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
+            teasafe::ContainerImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
             auto allBlocks = detail::getNAvailableBlocks(stream,
                                                          io->freeBlocks,
                                                          io->blocks);
@@ -53,7 +53,7 @@ namespace teasafe
                 auto mode = std::ios::in;
                 mode |= std::ios::out;
                 mode |= std::ios::binary;
-                stream = std::make_shared<TeaSafeImageStream>(io, mode);
+                stream = std::make_shared<ContainerImageStream>(io, mode);
             }
         }
 

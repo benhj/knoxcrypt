@@ -26,7 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "cipher/XTEAByteTransformer.hpp"
 
 #include <vector>
@@ -34,15 +34,15 @@
 namespace teasafe
 {
 
-    TeaSafeImageStream::TeaSafeImageStream(SharedCoreIO const &io, std::ios::openmode mode)
+    ContainerImageStream::ContainerImageStream(SharedCoreIO const &io, std::ios::openmode mode)
         : m_stream(io->path.c_str(), mode)
         , m_byteTransformer(std::make_shared<cipher::XTEAByteTransformer>(io->password))
         , m_pos(0)
     {
     }
 
-    TeaSafeImageStream&
-    TeaSafeImageStream::read(char * const buf, std::streamsize const n)
+    ContainerImageStream&
+    ContainerImageStream::read(char * const buf, std::streamsize const n)
     {
         std::ios_base::streamoff start = m_pos;//m_stream.tellg();
         std::vector<char> in;
@@ -53,8 +53,8 @@ namespace teasafe
         return *this;
     }
 
-    TeaSafeImageStream&
-    TeaSafeImageStream::write(char const * buf, std::streamsize const n)
+    ContainerImageStream&
+    ContainerImageStream::write(char const * buf, std::streamsize const n)
     {
         std::vector<char> out;
         out.resize(n);
@@ -65,30 +65,30 @@ namespace teasafe
         return *this;
     }
 
-    TeaSafeImageStream&
-    TeaSafeImageStream::seekg(std::streampos pos)
+    ContainerImageStream&
+    ContainerImageStream::seekg(std::streampos pos)
     {
         (void)m_stream.seekg(pos);
         m_pos = pos;
         return *this;
     }
-    TeaSafeImageStream&
-    TeaSafeImageStream::seekg(std::streamoff off, std::ios_base::seekdir way)
+    ContainerImageStream&
+    ContainerImageStream::seekg(std::streamoff off, std::ios_base::seekdir way)
     {
         (void)m_stream.seekg(off, way);
         m_pos = m_stream.tellg();
         return *this;
     }
 
-    TeaSafeImageStream&
-    TeaSafeImageStream::seekp(std::streampos pos)
+    ContainerImageStream&
+    ContainerImageStream::seekp(std::streampos pos)
     {
         (void)m_stream.seekp(pos);
         m_pos = pos;
         return *this;
     }
-    TeaSafeImageStream&
-    TeaSafeImageStream::seekp(std::streamoff off, std::ios_base::seekdir way)
+    ContainerImageStream&
+    ContainerImageStream::seekp(std::streamoff off, std::ios_base::seekdir way)
     {
         (void)m_stream.seekp(off, way);
         m_pos = m_stream.tellp();
@@ -96,24 +96,24 @@ namespace teasafe
     }
 
     std::streampos
-    TeaSafeImageStream::tellg()
+    ContainerImageStream::tellg()
     {
         return m_pos;//m_stream.tellg();
     }
     std::streampos
-    TeaSafeImageStream::tellp()
+    ContainerImageStream::tellp()
     {
         return m_pos;//m_stream.tellp();
     }
 
     void
-    TeaSafeImageStream::close()
+    ContainerImageStream::close()
     {
         m_stream.close();
     }
 
     void
-    TeaSafeImageStream::flush()
+    ContainerImageStream::flush()
     {
         m_stream.flush();
     }

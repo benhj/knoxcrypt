@@ -29,7 +29,7 @@
 #ifndef TeaSafe_FILE_BLOCK_HPP__
 #define TeaSafe_FILE_BLOCK_HPP__
 
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/OpenDisposition.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
@@ -179,14 +179,14 @@ namespace teasafe
          * @brief sets number of bytes written
          * @param size
          */
-        void doSetSize(TeaSafeImageStream &stream, std::ios_base::streamoff size) const;
+        void doSetSize(ContainerImageStream &stream, std::ios_base::streamoff size) const;
 
         /**
          * @brief sets the next index of the block
          * @param stream the image stream to operate over
          * @param nextIndex the next index to set next of this to
          */
-        void doSetNextIndex(TeaSafeImageStream &stream, uint64_t nextIndex) const;
+        void doSetNextIndex(ContainerImageStream &stream, uint64_t nextIndex) const;
 
         /**
          * @brief check if the image stream pointer is initialized,

@@ -41,20 +41,20 @@ namespace teasafe
 
     typedef std::shared_ptr<cipher::IByteTransformer> ByteTransformerPtr;
 
-    class TeaSafeImageStream
+    class ContainerImageStream
     {
       public:
-        explicit TeaSafeImageStream(SharedCoreIO const &io,
+        explicit ContainerImageStream(SharedCoreIO const &io,
                                     std::ios::openmode mode = std::ios::out | std::ios::binary);
 
-        TeaSafeImageStream& read(char * const buf, std::streamsize const n);
+        ContainerImageStream& read(char * const buf, std::streamsize const n);
 
-        TeaSafeImageStream& write(char const * buf, std::streamsize const n);
+        ContainerImageStream& write(char const * buf, std::streamsize const n);
 
-        TeaSafeImageStream& seekg(std::streampos pos);
-        TeaSafeImageStream& seekg(std::streamoff off, std::ios_base::seekdir way);
-        TeaSafeImageStream& seekp(std::streampos pos);
-        TeaSafeImageStream& seekp(std::streamoff off, std::ios_base::seekdir way);
+        ContainerImageStream& seekg(std::streampos pos);
+        ContainerImageStream& seekg(std::streamoff off, std::ios_base::seekdir way);
+        ContainerImageStream& seekp(std::streampos pos);
+        ContainerImageStream& seekp(std::streamoff off, std::ios_base::seekdir way);
         std::streampos tellg();
         std::streampos tellp();
 
@@ -62,10 +62,10 @@ namespace teasafe
 
         void close();
 
-        ~TeaSafeImageStream();
+        ~ContainerImageStream();
 
       private:
-        TeaSafeImageStream();
+        ContainerImageStream();
         FILE *m_stream;
         ByteTransformerPtr m_byteTransformer;
 

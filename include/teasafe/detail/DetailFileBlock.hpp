@@ -30,7 +30,7 @@
 #define TeaSafe_TeaSafe_DETAIL_FILE_BLOCK_HPP__
 
 #include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/TeaSafeImageStream.hpp"
+#include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 
 #include <iostream>
@@ -63,7 +63,7 @@ namespace teasafe { namespace detail
      * @param totalBlocks the total number of blocks in the teasafe
      * @return the next file block index
      */
-    inline uint64_t getIndexOfNextFileBlockFromFileBlockN(teasafe::TeaSafeImageStream &in,
+    inline uint64_t getIndexOfNextFileBlockFromFileBlockN(teasafe::ContainerImageStream &in,
                                                           uint64_t const n,
                                                           uint64_t const totalBlocks)
     {
@@ -81,7 +81,7 @@ namespace teasafe { namespace detail
      * @param totalBlocks the total number of blocks in the teasafe
      * @return the next file block index
      */
-    inline uint32_t getNumberOfDataBytesWrittenToFileBlockN(teasafe::TeaSafeImageStream &in,
+    inline uint32_t getNumberOfDataBytesWrittenToFileBlockN(teasafe::ContainerImageStream &in,
                                                             uint64_t const n,
                                                             uint64_t const totalBlocks)
     {
@@ -98,7 +98,7 @@ namespace teasafe { namespace detail
      * @param out the image stream to write to
      * @param block the block to write out
      */
-    inline void writeBlock(SharedCoreIO const &io, TeaSafeImageStream &out, uint64_t const block)
+    inline void writeBlock(SharedCoreIO const &io, ContainerImageStream &out, uint64_t const block)
     {
         std::vector<uint8_t> ints;
         ints.assign(FILE_BLOCK_SIZE - FILE_BLOCK_META, 0);
