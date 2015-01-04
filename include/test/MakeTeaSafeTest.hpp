@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
+#include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
 #include "utility/MakeTeaSafe.hpp"
 
@@ -37,6 +38,8 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <cassert>
+
+using namespace simpletest;
 
 class MakeTeaSafeTest
 {

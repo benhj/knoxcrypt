@@ -33,6 +33,7 @@
 #include "test/FileDeviceTest.hpp"
 #include "test/MakeTeaSafeTest.hpp" 
 #include "test/LeafFolderTest.hpp"
+#include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
 
 #include <boost/progress.hpp>
@@ -53,12 +54,5 @@ int main()
         LeafFolderTest();
     }
 
-    std::cout<<"\n\nThere were "<<testFailures<<"/"<<(passedPoints + testFailures)<<" assertion failures\n\n"<<std::endl;
-    if (testFailures > 0) {
-        std::cout<<"The failures were:\n\n"<<std::endl;
-        for (auto const & it : failingTestPoints) {
-            std::cout<<it<<std::endl;
-        }
-        std::cout<<"\n\n"<<std::endl;
-    }
+    simpletest::showResults();
 }

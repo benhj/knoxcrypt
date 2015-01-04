@@ -32,6 +32,7 @@
 #include "teasafe/LeafFolder.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
+#include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
 #include "utility/MakeTeaSafe.hpp"
 
@@ -42,6 +43,8 @@
 
 #include <cassert>
 #include <sstream>
+
+using namespace simpletest;
 
 class LeafFolderTest
 {

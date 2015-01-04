@@ -102,24 +102,4 @@ teasafe::SharedBlockBuilder testBlockBuilder()
     return std::make_shared<teasafe::FileBlockBuilder>();
 }
 
-#define ASSERT_EQUAL(A, B, C)                                          \
-    if(A == B) {                                                       \
-        std::cout<<boost::format("%1% %|100t|%2%\n") % C % "passed";   \
-        ++passedPoints;                                                \
-    } else {                                                           \
-        std::cout<<boost::format("%1% %|100t|%2%\n") % C % "failed";   \
-        ++testFailures;                                                \
-        failingTestPoints.push_back(C);                                \
-    }
-
-#define ASSERT_UNEQUAL(A, B, C)                                          \
-    if(A != B) {                                                       \
-        std::cout<<boost::format("%1% %|100t|%2%\n") % C % "passed";   \
-        ++passedPoints;                                                \
-    } else {                                                           \
-        std::cout<<boost::format("%1% %|100t|%2%\n") % C % "failed";   \
-        ++testFailures;                                                \
-        failingTestPoints.push_back(C);                                \
-    }
-
 #endif

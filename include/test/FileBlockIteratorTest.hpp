@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,13 @@
 #include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlockIterator.hpp"
+#include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+
+using namespace simpletest;
 
 class FileBlockIteratorTest
 {

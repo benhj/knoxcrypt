@@ -29,6 +29,7 @@
 #include "teasafe/CompoundFolder.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/TeaSafe.hpp"
+#include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
 
 #include <boost/filesystem/path.hpp>
@@ -37,6 +38,7 @@
 
 #include <sstream>
 
+using namespace simpletest;
 
 class TeaSafeTest
 {
