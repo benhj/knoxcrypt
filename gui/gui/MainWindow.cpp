@@ -38,7 +38,7 @@
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/OpenDisposition.hpp"
 #include "teasafe/TeaSafe.hpp"
-#include "teasafe/LeafFolder.hpp"
+#include "teasafe/CompoundFolder.hpp"
 #include "utility/CopyFromPhysical.hpp"
 #include "utility/ExtractToPhysical.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"

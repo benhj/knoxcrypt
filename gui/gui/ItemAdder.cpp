@@ -43,14 +43,14 @@ void ItemAdder::populate(QTreeWidgetItem *parent,
                          std::string const &path)
 {
     if(teaSafe->folderExists(path)) {
-        teasafe::LeafFolder f = teaSafe->getLeafFolder(path);
-        std::vector<teasafe::EntryInfo> entryInfos = f.listAllEntries();
+        auto f = teaSafe->getFolder(path);
+        auto entryInfos = f.listAllEntries();
         for(auto const &it : entryInfos) {
             QTreeWidgetItem *item = new QTreeWidgetItem(parent);
-            if(it.type() == teasafe::EntryType::FolderType) {
+            if(it.second->type() == teasafe::EntryType::FolderType) {
                 item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
             }
-            item->setText(0, QString(it.filename().c_str()));
+            item->setText(0, QString(it.second->filename().c_str()));
         }
     }
 
