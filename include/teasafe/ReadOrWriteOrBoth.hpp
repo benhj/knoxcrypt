@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,9 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_READ_OR_WRITE_OR_BOTH_HPP__
-#define TeaSafe_READ_OR_WRITE_OR_BOTH_HPP__
+#pragma once
 
 namespace teasafe
 {
     enum class ReadOrWriteOrBoth { ReadOnly, WriteOnly, ReadWrite };
 }
-
-
-#endif // TeaSafe_READ_OR_WRITE_OR_BOTH_HPP__

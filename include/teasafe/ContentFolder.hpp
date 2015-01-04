@@ -26,8 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_TEASAFE_FOLDER_HPP__
-#define TeaSafe_TEASAFE_FOLDER_HPP__
+#pragma once
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/EntryInfo.hpp"
@@ -47,11 +46,11 @@ namespace teasafe
 
     class CompoundFolder;
 
-    class LeafFolder
+    class ContentFolder
     {
       public:
         /**
-         * @brief constructs a LeafFolder to write to. In this case the
+         * @brief constructs a ContentFolder to write to. In this case the
          * starting block is unknown
          * @param the core teasafe io (path, blocks, password)
          * @param startBlock the index of the starting file block making up entry data
@@ -59,18 +58,18 @@ namespace teasafe
          * @param name the name of the entry
          * @param enforceRootBlock true if we want to enforce the starting root block
          */
-        LeafFolder(SharedCoreIO const &io,
+        ContentFolder(SharedCoreIO const &io,
                       std::string const &name = "root",
                       bool const enforceRootBlock = false);
 
         /**
-         * @brief constructs a LeafFolder to read from
+         * @brief constructs a ContentFolder to read from
          * @param the core teasafe io (path, blocks, password)
          * @param startBlock the index of the starting file block making up entry data
          * @param writable if data entries can be added to folder
          * @param name the name of the entry
          */
-        LeafFolder(SharedCoreIO const &io,
+        ContentFolder(SharedCoreIO const &io,
                       uint64_t const startBlock,
                       std::string const &name = "root");
 
@@ -85,9 +84,9 @@ namespace teasafe
         /**
          * @brief appends a new folder entry and start index of the entry data
          * @param name the name of the entry
-         * @return a copy of a LeafFolder that will be used to reference the folder data
+         * @return a copy of a ContentFolder that will be used to reference the folder data
          */
-        void addLeafFolder(std::string const &name);
+        void addContentFolder(std::string const &name);
 
         /// for adding a compound folder
         void addCompoundFolder(std::string const &name);
@@ -102,11 +101,11 @@ namespace teasafe
                                                     OpenDisposition const &openDisposition) const;
 
         /**
-         * @brief retrieves a LeafFolder with specific name
+         * @brief retrieves a ContentFolder with specific name
          * @param name the name of the entry to lookup
-         * @return a copy of the LeafFolder with name
+         * @return a copy of the ContentFolder with name
          */
-        std::shared_ptr<LeafFolder> getLeafFolder(std::string const &name) const;
+        std::shared_ptr<ContentFolder> getContentFolder(std::string const &name) const;
 
         /// for retrieving a compound folder
         std::shared_ptr<CompoundFolder> getCompoundFolder(std::string const &name) const;
@@ -181,7 +180,7 @@ namespace teasafe
          * @param name the name of the entry
          * @return true if successful
          */
-        bool removeLeafFolder(std::string const &name);
+        bool removeContentFolder(std::string const &name);
 
         /**
          * @brief removes a compound sub folder and all its content
@@ -211,7 +210,7 @@ namespace teasafe
 
       private:
 
-        LeafFolder();
+        ContentFolder();
 
         /**
          * @brief for writing new entry metadata
@@ -326,6 +325,3 @@ namespace teasafe
 
 }
 
-
-
-#endif // TeaSafe_TEASAFE_FOLDER_HPP__

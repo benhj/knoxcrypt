@@ -29,7 +29,7 @@
 #include "teasafe/ContainerImageStream.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/File.hpp"
-#include "teasafe/LeafFolder.hpp"
+#include "teasafe/ContentFolder.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
 #include "teasafe/detail/DetailFileBlock.hpp"
 #include "test/SimpleTest.hpp"
@@ -46,11 +46,11 @@
 
 using namespace simpletest;
 
-class LeafFolderTest
+class ContentFolderTest
 {
 
   public:
-    LeafFolderTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
+    ContentFolderTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
         testAddEntryNameRetrieval();
@@ -66,14 +66,14 @@ class LeafFolderTest
         testEntryRetrievalAppendLargeFollowedByAppendSmall();
         testEntryRetrievalAppendSmallToFirstFileAndAppendLargeToSecond();
         testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond();
-        testLeafFolderRetrievalAddEntries();
-        testLeafFolderRetrievalAddEntriesAppendData();
+        testContentFolderRetrievalAddEntries();
+        testContentFolderRetrievalAddEntriesAppendData();
         testRemoveFile();
         testRemoveEmptySubFolder();
         testRemoveNonEmptySubFolder();
     }
 
-    ~LeafFolderTest()
+    ~ContentFolderTest()
     {
         boost::filesystem::remove_all(m_uniquePath);
     }
@@ -82,16 +82,16 @@ class LeafFolderTest
 
     boost::filesystem::path m_uniquePath;
 
-    teasafe::LeafFolder createTestFolder(boost::filesystem::path const &p)
+    teasafe::ContentFolder createTestFolder(boost::filesystem::path const &p)
     {
         teasafe::SharedCoreIO io(createTestIO(p));
-        teasafe::LeafFolder folder(io, 0, std::string("root"));
+        teasafe::ContentFolder folder(io, 0, std::string("root"));
         folder.addFile("test.txt");
         folder.addFile("some.log");
-        folder.addLeafFolder("folderA");
+        folder.addContentFolder("folderA");
         folder.addFile("picture.jpg");
         folder.addFile("vai.mp3");
-        folder.addLeafFolder("folderB");
+        folder.addContentFolder("folderB");
         return folder;
     }
 
@@ -100,7 +100,7 @@ class LeafFolderTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         {
-            teasafe::LeafFolder folder = createTestFolder(testPath);
+            teasafe::ContentFolder folder = createTestFolder(testPath);
             ASSERT_EQUAL(folder.getEntryInfo(0).filename(), "test.txt", "testAddEntryNameRetrieval A");
             ASSERT_EQUAL(folder.getEntryInfo(1).filename(), "some.log", "testAddEntryNameRetrieval B");
             ASSERT_EQUAL(folder.getEntryInfo(2).filename(), "folderA", "testAddEntryNameRetrieval B");
@@ -113,7 +113,7 @@ class LeafFolderTest
     void testListAllEntries()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder folder = createTestFolder(testPath);
         auto entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 6, "testListAllEntries: number of entries");
         ASSERT_UNEQUAL(entries.find("test.txt"), (entries.end()), "testListAllEntries: filename A");
@@ -128,7 +128,7 @@ class LeafFolderTest
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         teasafe::SharedCoreIO io(createTestIO(testPath));
-        teasafe::LeafFolder folder(io, 0, std::string("root"));
+        teasafe::ContentFolder folder(io, 0, std::string("root"));
         auto entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 0, "testListAllEntriesEmpty: number of entries");
     }
@@ -136,7 +136,7 @@ class LeafFolderTest
     void testListFileEntries()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder folder = createTestFolder(testPath);
         auto entries = folder.listFileEntries();
         ASSERT_EQUAL(entries.size(), 4, "testListFileEntries: number of entries");
         ASSERT_EQUAL(entries[0]->filename(), "test.txt", "testListFileEntries: filename A");
@@ -148,7 +148,7 @@ class LeafFolderTest
     void testListFolderEntries()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder folder = createTestFolder(testPath);
         auto entries = folder.listFolderEntries();
         ASSERT_EQUAL(entries.size(), 2, "testListFolderEntries: number of entries");
         ASSERT_EQUAL(entries[0]->filename(), "folderA", "testListFolderEntries: filename C");
@@ -160,7 +160,7 @@ class LeafFolderTest
        {
        long const blocks = 2048;
        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-       teasafe::LeafFolder folder = createTestFolder(testPath, blocks);
+       teasafe::ContentFolder folder = createTestFolder(testPath, blocks);
 
        uint64_t b1 = folder.getEntryInfo(0).firstFileBlock();
        uint64_t b2 = folder.getEntryInfo(1).firstFileBlock();
@@ -178,7 +178,7 @@ class LeafFolderTest
     void testEntryRetrievalAndAppendSmallData()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder folder = createTestFolder(testPath);
         std::string testData("some test data!");
         teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -194,7 +194,7 @@ class LeafFolderTest
     void testEntryRetrievalAndAppendLargeData()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder folder = createTestFolder(testPath);
         std::string testString(createLargeStringToWrite());
         teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testString.begin(), testString.end());
@@ -210,11 +210,11 @@ class LeafFolderTest
     void testEntryRetrievalAppendSmallFollowedByAppendLarge()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder folder = createTestFolder(testPath);
         std::string testData("some test data!");
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::LeafFolder folder(io, 0, std::string("root"));
+            teasafe::ContentFolder folder(io, 0, std::string("root"));
             teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -238,12 +238,12 @@ class LeafFolderTest
     void testEntryRetrievalAppendLargeFollowedByAppendSmall()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder folder = createTestFolder(testPath);
         std::string testData("some test data!");
         std::string testString(createLargeStringToWrite());
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::LeafFolder folder(io, 0, std::string("root"));
+            teasafe::ContentFolder folder(io, 0, std::string("root"));
             teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
@@ -266,7 +266,7 @@ class LeafFolderTest
     void testEntryRetrievalAppendSmallToFirstFileAndAppendLargeToSecond()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder folder = createTestFolder(testPath);
         {
             std::string testData("some test data!");
             teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
@@ -296,7 +296,7 @@ class LeafFolderTest
     void testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder folder = createTestFolder(testPath);
 
         {
             std::string testString(createLargeStringToWrite());
@@ -323,11 +323,11 @@ class LeafFolderTest
         }
     }
 
-    void testLeafFolderRetrievalAddEntries()
+    void testContentFolderRetrievalAddEntries()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
-        teasafe::LeafFolder subFolder = *folder.getLeafFolder("folderA");
+        teasafe::ContentFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder subFolder = *folder.getContentFolder("folderA");
         subFolder.addFile("subFileA");
         subFolder.addFile("subFileB");
         subFolder.addFile("subFileC");
@@ -336,30 +336,30 @@ class LeafFolderTest
         // test root entries still intact
         {
             auto entries = folder.listAllEntries();
-            ASSERT_EQUAL(entries.size(), 6, "testLeafFolderRetrievalAddEntries: root number of entries");
-            ASSERT_UNEQUAL(entries.find("test.txt"), (entries.end()), "testLeafFolderRetrievalAddEntries: root filename A");
-            ASSERT_UNEQUAL(entries.find("some.log"), (entries.end()), "testLeafFolderRetrievalAddEntries: root filename B");
-            ASSERT_UNEQUAL(entries.find("folderA"), (entries.end()), "testLeafFolderRetrievalAddEntries: root filename C");
-            ASSERT_UNEQUAL(entries.find("picture.jpg"), (entries.end()), "testLeafFolderRetrievalAddEntries: root filename D");
-            ASSERT_UNEQUAL(entries.find("vai.mp3"), (entries.end()), "testLeafFolderRetrievalAddEntries: root filename E");
-            ASSERT_UNEQUAL(entries.find("folderB"), (entries.end()), "testLeafFolderRetrievalAddEntries: root filename F");
+            ASSERT_EQUAL(entries.size(), 6, "testContentFolderRetrievalAddEntries: root number of entries");
+            ASSERT_UNEQUAL(entries.find("test.txt"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename A");
+            ASSERT_UNEQUAL(entries.find("some.log"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename B");
+            ASSERT_UNEQUAL(entries.find("folderA"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename C");
+            ASSERT_UNEQUAL(entries.find("picture.jpg"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename D");
+            ASSERT_UNEQUAL(entries.find("vai.mp3"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename E");
+            ASSERT_UNEQUAL(entries.find("folderB"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename F");
         }
         // test sub folder entries exist
         {
             auto entries = subFolder.listAllEntries();
-            ASSERT_EQUAL(entries.size(), 4, "testLeafFolderRetrievalAddEntries: subfolder number of entries");
-            ASSERT_UNEQUAL(entries.find("subFileA"), (entries.end()), "testLeafFolderRetrievalAddEntries: subFolder filename A");
-            ASSERT_UNEQUAL(entries.find("subFileB"), (entries.end()), "testLeafFolderRetrievalAddEntries: subFolder filename B");
-            ASSERT_UNEQUAL(entries.find("subFileC"), (entries.end()), "testLeafFolderRetrievalAddEntries: subFolder filename C");
-            ASSERT_UNEQUAL(entries.find("subFileD"), (entries.end()), "testLeafFolderRetrievalAddEntries: subFolder filename D");
+            ASSERT_EQUAL(entries.size(), 4, "testContentFolderRetrievalAddEntries: subfolder number of entries");
+            ASSERT_UNEQUAL(entries.find("subFileA"), (entries.end()), "testContentFolderRetrievalAddEntries: subFolder filename A");
+            ASSERT_UNEQUAL(entries.find("subFileB"), (entries.end()), "testContentFolderRetrievalAddEntries: subFolder filename B");
+            ASSERT_UNEQUAL(entries.find("subFileC"), (entries.end()), "testContentFolderRetrievalAddEntries: subFolder filename C");
+            ASSERT_UNEQUAL(entries.find("subFileD"), (entries.end()), "testContentFolderRetrievalAddEntries: subFolder filename D");
         }
     }
 
-    void testLeafFolderRetrievalAddEntriesAppendData()
+    void testContentFolderRetrievalAddEntriesAppendData()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
-        teasafe::LeafFolder subFolder = *folder.getLeafFolder("folderA");
+        teasafe::ContentFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder subFolder = *folder.getContentFolder("folderA");
         subFolder.addFile("subFileA");
         subFolder.addFile("subFileB");
         subFolder.addFile("subFileC");
@@ -374,13 +374,13 @@ class LeafFolderTest
         vec.resize(entry.fileSize());
         entry.read((char*)&vec.front(), entry.fileSize());
         std::string result(vec.begin(), vec.end());
-        ASSERT_EQUAL(result, testData, "testLeafFolderRetrievalAddEntriesAppendData");
+        ASSERT_EQUAL(result, testData, "testContentFolderRetrievalAddEntriesAppendData");
     }
 
     void testRemoveFile()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
+        teasafe::ContentFolder folder = createTestFolder(testPath);
         folder.removeFile("test.txt");
         auto entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 5, "testRemoveFile: number of entries after removal");
@@ -389,8 +389,8 @@ class LeafFolderTest
     void testRemoveEmptySubFolder()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::LeafFolder folder = createTestFolder(testPath);
-        folder.removeLeafFolder("folderA");
+        teasafe::ContentFolder folder = createTestFolder(testPath);
+        folder.removeContentFolder("folderA");
         auto entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 5, "testRemoveEmptySubFolder: number of entries after removal");
     }
@@ -399,8 +399,8 @@ class LeafFolderTest
     {
         {
             boost::filesystem::path testPath = buildImage(m_uniquePath);
-            teasafe::LeafFolder folder = createTestFolder(testPath);
-            teasafe::LeafFolder subFolder = *folder.getLeafFolder("folderA");
+            teasafe::ContentFolder folder = createTestFolder(testPath);
+            teasafe::ContentFolder subFolder = *folder.getContentFolder("folderA");
             subFolder.addFile("subFileA");
             subFolder.addFile("subFileB");
             subFolder.addFile("subFileC");
@@ -414,8 +414,8 @@ class LeafFolderTest
         }
         {
             boost::filesystem::path testPath = buildImage(m_uniquePath);
-            teasafe::LeafFolder folder = createTestFolder(testPath);
-            folder.removeLeafFolder("folderA");
+            teasafe::ContentFolder folder = createTestFolder(testPath);
+            folder.removeContentFolder("folderA");
             auto entries = folder.listAllEntries();
             ASSERT_EQUAL(entries.size(), 5, "testRemoveNonEmptySubFolder: number of entries after removal");
         }

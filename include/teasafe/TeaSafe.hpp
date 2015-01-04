@@ -26,8 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TEASAFE_TEASAFE_HPP__
-#define TEASAFE_TEASAFE_HPP__
+#pragma once
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileDevice.hpp"
@@ -211,5 +210,3 @@ namespace teasafe
         void removeFileFromFileCache(std::string const &path);
     };
 }
-
-#endif // TeaSafe_TeaSafe_HPP__

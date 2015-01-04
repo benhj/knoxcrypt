@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,7 @@
 */
 
 
-#ifndef TeaSafe_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__
-#define TeaSafe_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -81,4 +80,3 @@ namespace teasafe
     }
 }
 
-#endif // TeaSafe_UTILITY_ECHOLESS_PASSWORD_PROMPT_HPP__

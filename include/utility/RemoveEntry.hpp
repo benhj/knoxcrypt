@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2014-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,7 @@
 
 /// Removes an entry, file or folder
 
-#ifndef TeaSafe_UTILITY_REMOVE_ENTRY_HPP__
-#define TeaSafe_UTILITY_REMOVE_ENTRY_HPP__
+#pragma once
 
 #include "teasafe/TeaSafe.hpp"
 
@@ -56,6 +55,4 @@ namespace teasafe
         }
     }
 }
-
-#endif // TeaSafe_UTILITY_EXTRACT_TO_PHYSICAL_HPP__
 

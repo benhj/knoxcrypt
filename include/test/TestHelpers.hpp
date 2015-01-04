@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_TEST_HELPERS_HPP__
-#define TeaSafe_TEST_HELPERS_HPP__
+#pragma once
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlockBuilder.hpp"
@@ -102,4 +101,3 @@ teasafe::SharedBlockBuilder testBlockBuilder()
     return std::make_shared<teasafe::FileBlockBuilder>();
 }
 
-#endif

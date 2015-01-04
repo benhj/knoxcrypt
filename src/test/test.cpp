@@ -32,7 +32,7 @@
 #include "test/FileTest.hpp"
 #include "test/FileDeviceTest.hpp"
 #include "test/MakeTeaSafeTest.hpp" 
-#include "test/LeafFolderTest.hpp"
+#include "test/ContentFolderTest.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
 
@@ -51,7 +51,7 @@ int main()
         FileBlockTest();
         FileBlockIteratorTest();
         FileTest();
-        LeafFolderTest();
+        ContentFolderTest();
     }
 
     simpletest::showResults();

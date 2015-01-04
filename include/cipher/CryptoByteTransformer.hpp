@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2014-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,7 @@
 
 // uses the crypto++ libraries for encryption
 
-#ifndef TeaSafe_CIPHER_CRYPTO_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_CRYPTO_BYTE_TRANSFORMER_HPP__
+#pragma once
 
 #include "cipher/IByteTransformer.hpp"
 #include "utility/EventType.hpp"
@@ -63,5 +62,3 @@ namespace teasafe { namespace cipher
 }
 }
 
-
-#endif // TeaSafe_CIPHER_CRYPTO_BYTE_TRANSFORMER_HPP__;

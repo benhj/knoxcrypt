@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_TeaSafe_DETAIL_FILE_BLOCK_HPP__
-#define TeaSafe_TeaSafe_DETAIL_FILE_BLOCK_HPP__
+#pragma once
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/ContainerImageStream.hpp"
@@ -126,4 +125,3 @@ namespace teasafe { namespace detail
 }
 }
 
-#endif // TeaSafe_TeaSafe_DETAIL_FILE_BLOCK_HPP__

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2014-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,7 @@
 */
 
 
-#ifndef TeaSafe_UTILITY_PASS_HASHER_HPP__
-#define TeaSafe_UTILITY_PASS_HASHER_HPP__
+#pragma once
 
 #include "cipher/scrypt/sha256.hpp"
 #include <string>
@@ -67,5 +66,3 @@ namespace teasafe { namespace utility {
 
 }
 }
-
-#endif

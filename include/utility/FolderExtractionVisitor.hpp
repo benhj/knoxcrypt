@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2014-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -28,13 +28,12 @@
 
 /// A visitor for extracting fles and folders
 
-#ifndef TeaSafe_UTILITY_FOLDER_EXTRACTION_VISITOR_HPP__
-#define TeaSafe_UTILITY_FOLDER_EXTRACTION_VISITOR_HPP__
+#pragma once
 
 #include "teasafe/EntryInfo.hpp"
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/FileDevice.hpp"
-#include "utility/LeafFolderVisitor.hpp"
+#include "utility/ContentFolderVisitor.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -49,7 +48,7 @@ namespace teasafe
     namespace utility
     {
 
-        class FolderExtractionVisitor : public LeafFolderVisitor
+        class FolderExtractionVisitor : public ContentFolderVisitor
         {
           public:
             FolderExtractionVisitor(TeaSafe &theBfs,
@@ -118,4 +117,3 @@ namespace teasafe
 
 }
 
-#endif // TeaSafe_UTILITY_FOLDER_EXTRACTION_VISITOR_HPP__

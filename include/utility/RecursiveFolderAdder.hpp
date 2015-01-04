@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2014-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,9 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/// For recursively copying a physical disk location to a LeafFolder
+/// For recursively copying a physical disk location to a ContentFolder
 
-#ifndef TeaSafe_UTILITY_RECURSIVE_FOLDER_ADDER_HPP__
-#define TeaSafe_UTILITY_RECURSIVE_FOLDER_ADDER_HPP__
+#pragma once
 
 #include "teasafe/TeaSafe.hpp"
 #include "teasafe/EntryType.hpp"
@@ -82,4 +81,3 @@ namespace teasafe
     }
 }
 
-#endif // TeaSafe_UTILITY_RECURSIVE_FOLDER_ADDER_HPP__

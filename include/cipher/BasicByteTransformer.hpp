@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,7 @@
 
 // a basic stream transformation algorithm *very loosely* based on ARCFOUR
 
-#ifndef TeaSafe_CIPHER_BASIC_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_BASIC_BYTE_TRANSFORMER_HPP__
+#pragma once
 
 #include "cipher/IByteTransformer.hpp"
 
@@ -116,5 +115,3 @@ namespace teasafe { namespace cipher
 }
 }
 
-
-#endif // TeaSafe_CIPHER_BASIC_TRANSFORMER_CIPHER_HPP__

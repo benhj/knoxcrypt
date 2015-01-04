@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2014-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,7 @@
 
 /// For generating a cryptographically secure random number
 
-#ifndef TeaSafe_UTILITY_RANDOM_NUMBER_GENERATOR_HPP__
-#define TeaSafe_UTILITY_RANDOM_NUMBER_GENERATOR_HPP__
+#pragma once
 
 #include <random>
 
@@ -57,5 +56,3 @@ namespace teasafe
     }
 
 }
-
-#endif // TeaSafe_UTILITY_RANDOM_NUMBER_GENERATOR_HPP__

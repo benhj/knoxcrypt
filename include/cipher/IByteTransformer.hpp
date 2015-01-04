@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
-#define TeaSafe_CIPHER_I_BYTE_TRANSFORMER_HPP__
+#pragma once
 
 // Crappy clang shipped with mac -- at least the version I have -- doesn't support
 // std::move and std::forward
@@ -102,5 +101,3 @@ namespace teasafe { namespace cipher
     };
 }
 }
-
-#endif // TeaSafe_CIPHER_I_TRANSFORMER_HPP__

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TEASAFE_FILE_BLOCK_ITERATOR_HPP__
-#define TEASAFE_FILE_BLOCK_ITERATOR_HPP__
+#pragma once
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlock.hpp"
@@ -80,5 +79,3 @@ namespace teasafe
 
 
 }
-
-#endif // TEASAFE_FILE_BLOCK_ITERATOR_HPP__

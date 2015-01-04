@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2014-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TeaSafe_EVENT_TYPE_HPP__
-#define TeaSafe_EVENT_TYPE_HPP__
+#pragma once
 
 /// used to notifying when certain things happen
 
@@ -48,5 +47,3 @@ namespace teasafe
     };
 }
 
-
-#endif // TeaSafe_EVENT_TYPE_HPP__

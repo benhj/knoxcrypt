@@ -30,7 +30,7 @@
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/EntryInfo.hpp"
-#include "teasafe/LeafFolder.hpp"
+#include "teasafe/ContentFolder.hpp"
 
 #include <boost/optional.hpp>
 #include <memory>
@@ -98,7 +98,7 @@ namespace teasafe
         std::shared_ptr<CompoundFolder> getFolder(std::string const &name) const;
 
         /// retrieves main compound folder (the parent of leaf compound folders)
-        std::shared_ptr<LeafFolder> getCompoundFolder() const;
+        std::shared_ptr<ContentFolder> getCompoundFolder() const;
 
         /**
          * @brief retrieves the name of this folder
@@ -154,25 +154,25 @@ namespace teasafe
 
         CompoundFolder();
 
-        void doAddLeafFolder();
+        void doAddContentFolder();
 
-        void doPopulateLeafFolders();
+        void doPopulateContentFolders();
 
         /// remove an entry info from the cache with given name
         void doRemoveEntryFromCache(std::string const &name);
 
         // the underlying folder that stores index folders
-        typedef std::shared_ptr<LeafFolder> SharedLeafFolder;
-        mutable SharedLeafFolder m_compoundFolder;
+        typedef std::shared_ptr<ContentFolder> SharedContentFolder;
+        mutable SharedContentFolder m_compoundFolder;
 
         // a compound folder will be composed of multiple sub-folders
         // which are there to build up a more efficient folder structure
-        std::vector<SharedLeafFolder> m_leafFolders;
+        std::vector<SharedContentFolder> m_ContentFolders;
 
         // stores the name of this folder
         std::string m_name;
 
-        int m_leafFolderCount;
+        int m_ContentFolderCount;
 
         // optimization
         mutable EntryInfoCacheMap m_cache;

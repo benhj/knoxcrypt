@@ -1,6 +1,4 @@
-#ifndef TEASAFE_UTILITY_CONCURRENT_QUEUE_HPP__
-#define TEASAFE_UTILITY_CONCURRENT_QUEUE_HPP__
-
+#pragma once
 #include <queue>
 #include <mutex>
 
@@ -81,4 +79,3 @@ namespace teasafe {
     }
 }
 
-#endif // TEASAFE_UTILITY_BLOCKING_QUEUE_HPP__
