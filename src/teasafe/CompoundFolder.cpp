@@ -212,7 +212,7 @@ namespace teasafe
             return it->second;
         }
 
-        uint64_t index(0);
+        uint64_t index(m_contentFolders.size()-1);
         for(auto const & f : boost::adaptors::reverse(m_contentFolders)) {
             auto info(f->getEntryInfo(name));
             if(info) { 
@@ -222,7 +222,7 @@ namespace teasafe
                 }
                 return info; 
             }
-            ++index;
+            --index;
         }
         return SharedEntryInfo();
     }
