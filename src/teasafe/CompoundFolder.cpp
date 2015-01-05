@@ -28,13 +28,17 @@
 
 #include "teasafe/CompoundFolder.hpp"
 
+#include <boost/range/adaptor/reversed.hpp>
+
 #include <sstream>
 
 namespace teasafe
 {
 
-    // number of entries a bucket (content) folder is permitted to have
-    #define CONTENT_SIZE 50
+    // number of entries a bucket (content) folder is permitted to have.
+    // The smaller this number, the faster the multiple file-write, but the
+    // more space required
+    #define CONTENT_SIZE 10
 
     CompoundFolder::CompoundFolder(SharedCoreIO const &io,
                                    std::string const &name,
@@ -94,10 +98,12 @@ namespace teasafe
 
         // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
-        for(auto & f : m_ContentFolders) {
+
+        for(auto & f : boost::adaptors::reverse(m_ContentFolders)) {
             if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
                 f->addFile(name);
                 wasAdded = true;
+                break;
             }
         }
 
@@ -126,6 +132,7 @@ namespace teasafe
             if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
                 f->addCompoundFolder(name);
                 wasAdded = true;
+                break;
             }
         }
 
@@ -143,7 +150,9 @@ namespace teasafe
     CompoundFolder::getFile(std::string const &name,
                             OpenDisposition const &openDisposition) const
     {
-        for(auto & f : m_ContentFolders) {
+
+
+        for(auto & f : boost::adaptors::reverse(m_ContentFolders)) {
             auto file(f->getFile(name, openDisposition));
             if(file) {
                 return *file;
@@ -185,7 +194,7 @@ namespace teasafe
             return it->second;
         }
 
-        for(auto const & f : m_ContentFolders) {
+        for(auto const & f : boost::adaptors::reverse(m_ContentFolders)) {
             auto info(f->getEntryInfo(name));
             if(info) { 
                 if(m_cache.find(name) == m_cache.end()) {
@@ -307,10 +316,12 @@ namespace teasafe
     {
         // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
-        for(auto & f : m_ContentFolders) {
+
+        for(auto & f : boost::adaptors::reverse(m_ContentFolders)) {
             if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
                 f->writeNewMetaDataForEntry(name, entryType, startBlock);
                 wasAdded = true;
+                break;
             }
         }
 
