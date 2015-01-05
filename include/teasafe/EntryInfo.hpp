@@ -89,6 +89,15 @@ namespace teasafe
          */
         uint64_t folderIndex() const;
 
+        /**
+         * @brief  reports the compound bucket entry that file or folder is a member of
+         * @return the index of the bucket
+         */
+        uint64_t bucketIndex() const;
+        void setBucketIndex(uint64_t const bucketIndex);
+
+        bool hasBucketIndex() const;
+
       private:
         std::string m_fileName;
         uint64_t m_fileSize;
@@ -96,6 +105,8 @@ namespace teasafe
         bool m_writable;
         uint64_t m_firstFileBlock;
         uint64_t m_folderIndex;
+        bool m_hasBucketIndex;
+        uint64_t m_bucketIndex;
     };
 
 }

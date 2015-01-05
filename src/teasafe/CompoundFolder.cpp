@@ -44,7 +44,7 @@ namespace teasafe
                                    std::string const &name,
                                    bool const enforceRootBlock)
       : m_compoundFolder(std::make_shared<ContentFolder>(io, name, enforceRootBlock))
-      , m_ContentFolders()
+      , m_contentFolders()
       , m_name(name)
       , m_ContentFolderCount(m_compoundFolder->getEntryCount())
       , m_cache()
@@ -57,7 +57,7 @@ namespace teasafe
                                    uint64_t const startBlock,
                                    std::string const &name)
       : m_compoundFolder(std::make_shared<ContentFolder>(io, startBlock, name))
-      , m_ContentFolders()
+      , m_contentFolders()
       , m_name(name)
       , m_ContentFolderCount(m_compoundFolder->getEntryCount())
       , m_cache()
@@ -72,7 +72,7 @@ namespace teasafe
         if(m_ContentFolderCount > 0) {
             auto folderInfos(m_compoundFolder->listFolderEntries());
             for(auto const & f : folderInfos) {
-                m_ContentFolders.push_back(m_compoundFolder->getContentFolder(f->filename()));
+                m_contentFolders.push_back(m_compoundFolder->getContentFolder(f->filename()));
             }
         }
     }
@@ -83,7 +83,7 @@ namespace teasafe
         std::ostringstream ss;
         ss << "index_" << m_ContentFolderCount;
         m_compoundFolder->addContentFolder(ss.str());
-        m_ContentFolders.push_back(m_compoundFolder->getContentFolder(ss.str()));
+        m_contentFolders.push_back(m_compoundFolder->getContentFolder(ss.str()));
         ++m_ContentFolderCount;
     }
 
@@ -92,14 +92,14 @@ namespace teasafe
     {
         // check if compound entries is empty. These are
         // compound 'leaf' sub-folders
-        if(m_ContentFolders.empty()) {
+        if(m_contentFolders.empty()) {
             doAddContentFolder();
         }
 
         // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
 
-        for(auto & f : boost::adaptors::reverse(m_ContentFolders)) {
+        for(auto & f : boost::adaptors::reverse(m_contentFolders)) {
             if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
                 f->addFile(name);
                 wasAdded = true;
@@ -111,7 +111,7 @@ namespace teasafe
         // another leaf folder
         if(!wasAdded) {
             doAddContentFolder();
-            m_ContentFolders.back()->addFile(name);
+            m_contentFolders.back()->addFile(name);
         }
 
         m_cacheShouldBeUpdated = true;
@@ -122,13 +122,13 @@ namespace teasafe
     {
         // check if compound entries is empty. These are
         // compound 'leaf' sub-folders
-        if(m_ContentFolders.empty()) {
+        if(m_contentFolders.empty()) {
             doAddContentFolder();
         }
 
         // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
-        for(auto & f : m_ContentFolders) {
+        for(auto & f : m_contentFolders) {
             if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
                 f->addCompoundFolder(name);
                 wasAdded = true;
@@ -140,7 +140,7 @@ namespace teasafe
         // another leaf folder
         if(!wasAdded) {
             doAddContentFolder();
-            m_ContentFolders.back()->addCompoundFolder(name);
+            m_contentFolders.back()->addCompoundFolder(name);
         }
 
         m_cacheShouldBeUpdated = true;
@@ -151,8 +151,16 @@ namespace teasafe
                             OpenDisposition const &openDisposition) const
     {
 
+        // query entry info cache to try and get index of bucket (optimization)
+        auto it = m_cache.find(name);
+        if(it != m_cache.end()) {
+            if(it->second->hasBucketIndex()) {
+                return *m_contentFolders[it->second->bucketIndex()]->getFile(name, openDisposition);
+            }
+        }
 
-        for(auto & f : boost::adaptors::reverse(m_ContentFolders)) {
+        // wasn't found in cache, therefore need to loop over content folders 
+        for(auto & f : boost::adaptors::reverse(m_contentFolders)) {
             auto file(f->getFile(name, openDisposition));
             if(file) {
                 return *file;
@@ -164,7 +172,17 @@ namespace teasafe
     std::shared_ptr<CompoundFolder>
     CompoundFolder::getFolder(std::string const &name) const
     {
-        for(auto & f : m_ContentFolders) {
+
+        // query entry info cache to try and get index of bucket (optimization)
+        auto it = m_cache.find(name);
+        if(it != m_cache.end()) {
+            if(it->second->hasBucketIndex()) {
+                return m_contentFolders[it->second->bucketIndex()]->getCompoundFolder(name);
+            }
+        }
+
+        // wasn't found in cache, therefore need to loop over content folders 
+        for(auto & f : m_contentFolders) {
             auto folder(f->getCompoundFolder(name));
             if(folder) {
                 return folder;
@@ -194,14 +212,17 @@ namespace teasafe
             return it->second;
         }
 
-        for(auto const & f : boost::adaptors::reverse(m_ContentFolders)) {
+        uint64_t index(0);
+        for(auto const & f : boost::adaptors::reverse(m_contentFolders)) {
             auto info(f->getEntryInfo(name));
             if(info) { 
                 if(m_cache.find(name) == m_cache.end()) {
+                    info->setBucketIndex(index);
                     m_cache.insert(std::make_pair(name, info));
                 }
                 return info; 
             }
+            ++index;
         }
         return SharedEntryInfo();
     }
@@ -210,13 +231,16 @@ namespace teasafe
     CompoundFolder::listAllEntries() const
     {
         if(m_cacheShouldBeUpdated) {
-            for(auto const & f : m_ContentFolders) {
+            uint64_t index(0);
+            for(auto const & f : m_contentFolders) {
                 auto & leafEntries(f->listAllEntries());
                 for(auto const & entry : leafEntries) {
                     if(m_cache.find(entry.first) == m_cache.end()) {
+                        entry.second->setBucketIndex(index);
                         m_cache.insert(entry);
                     }
                 }
+                ++index;
             }
             m_cacheShouldBeUpdated = false;
         }
@@ -228,14 +252,17 @@ namespace teasafe
     CompoundFolder::listFileEntries() const
     {
         std::vector<SharedEntryInfo> infos;
-        for(auto const & f : m_ContentFolders) {
+        uint64_t index(0);
+        for(auto const & f : m_contentFolders) {
             auto leafEntries(f->listFileEntries());
             for(auto const & entry : leafEntries) {
                 if(m_cache.find(entry->filename()) == m_cache.end()) {
+                    entry->setBucketIndex(index);
                     m_cache.insert(std::make_pair(entry->filename(), entry));
                 }
                 infos.push_back(entry);
             }
+            ++index;
         }
         return infos;
     }
@@ -244,14 +271,17 @@ namespace teasafe
     CompoundFolder::listFolderEntries() const
     {
         std::vector<SharedEntryInfo> infos;
-        for(auto const & f : m_ContentFolders) {
+        uint64_t index(0);
+        for(auto const & f : m_contentFolders) {
             auto leafEntries(f->listFolderEntries());
             for(auto const & entry : leafEntries) {
                 if(m_cache.find(entry->filename()) == m_cache.end()) {
+                    entry->setBucketIndex(index);
                     m_cache.insert(std::make_pair(entry->filename(), entry));
                 }
                 infos.push_back(entry);
             }
+            ++index;
         }
         return infos;
     }
@@ -268,7 +298,7 @@ namespace teasafe
     void 
     CompoundFolder::removeFile(std::string const &name)
     {
-        for(auto & f : m_ContentFolders) {
+        for(auto & f : m_contentFolders) {
             if(f->removeFile(name)) {                
                 // decrement number of entries in leaf
                 if(f->getEntryCount() == 0) {
@@ -284,7 +314,7 @@ namespace teasafe
     void 
     CompoundFolder::removeFolder(std::string const &name)
     {
-        for(auto & f : m_ContentFolders) {
+        for(auto & f : m_contentFolders) {
             if(f->removeCompoundFolder(name)) { 
                 // decrement number of entries in leaf
                 if(f->getEntryCount() == 0) {
@@ -300,7 +330,7 @@ namespace teasafe
     void
     CompoundFolder::putMetaDataOutOfUse(std::string const &name)
     {
-        for(auto & f : m_ContentFolders) {
+        for(auto & f : m_contentFolders) {
             if(f->putMetaDataOutOfUse(name)) { 
                 doRemoveEntryFromCache(name);
                 return; 
@@ -317,7 +347,7 @@ namespace teasafe
         // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
 
-        for(auto & f : boost::adaptors::reverse(m_ContentFolders)) {
+        for(auto & f : boost::adaptors::reverse(m_contentFolders)) {
             if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
                 f->writeNewMetaDataForEntry(name, entryType, startBlock);
                 wasAdded = true;
@@ -329,7 +359,7 @@ namespace teasafe
         // another leaf folder
         if(!wasAdded) {
             doAddContentFolder();
-            m_ContentFolders.back()->writeNewMetaDataForEntry(name, entryType, startBlock);
+            m_contentFolders.back()->writeNewMetaDataForEntry(name, entryType, startBlock);
         }
     }
 }

@@ -42,6 +42,8 @@ namespace teasafe
         , m_writable(writable)
         , m_firstFileBlock(firstFileBlock)
         , m_folderIndex(folderIndex)
+        , m_hasBucketIndex(false)
+        , m_bucketIndex(0) // TODO, is this initialization wise?
     {
 
     }
@@ -86,6 +88,25 @@ namespace teasafe
     EntryInfo::folderIndex() const
     {
         return m_folderIndex;
+    }
+
+    void 
+    EntryInfo::setBucketIndex(uint64_t const bucketIndex)
+    {
+        m_bucketIndex = bucketIndex;
+        m_hasBucketIndex = true;
+    }
+
+    bool
+    EntryInfo::hasBucketIndex() const 
+    {
+        return m_hasBucketIndex;
+    }
+
+    uint64_t
+    EntryInfo::bucketIndex() const
+    {
+        return m_bucketIndex;
     }
 
 }
