@@ -31,7 +31,8 @@
 #pragma once
 
 #include "IByteTransformer.hpp"
-#include <iostream>
+#include <cstdint>
+#include <ios>
 #include <string>
 
 namespace cryptostreampp

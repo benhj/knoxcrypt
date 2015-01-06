@@ -28,8 +28,8 @@
 
 #pragma once
 
-#include <iostream>
-#include <memory>
+#include <cstdint>
+#include <ios>
 #include <string>
 
 namespace cryptostreampp
