@@ -30,7 +30,7 @@
 
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "utility/EventType.hpp"
-#include "cipher/IByteTransformer.hpp"
+#include "cryptostreampp/CryptoStreamPP.hpp"
 
 #include <functional>
 #include <memory>
@@ -40,9 +40,6 @@
 
 namespace teasafe
 {
-
-    typedef std::shared_ptr<cipher::IByteTransformer> ByteTransformerPtr;
-
     class ContainerImageStream;
     typedef std::shared_ptr<ContainerImageStream> SharedImageStream;
 
@@ -50,7 +47,7 @@ namespace teasafe
     {
       public:
         explicit ContainerImageStream(SharedCoreIO const &io,
-                                    std::ios::openmode mode = std::ios::out | std::ios::binary);
+                                      std::ios::openmode mode = std::ios::out | std::ios::binary);
 
         ContainerImageStream& read(char * const buf, std::streamsize const n);
 
@@ -75,10 +72,7 @@ namespace teasafe
                   std::ios::openmode mode = std::ios::out | std::ios::binary);
       private:
         ContainerImageStream();
-        std::fstream m_stream;
-        ByteTransformerPtr m_byteTransformer;
-        std::streampos m_gpos;
-        std::streampos m_ppos;
+        cryptostreampp::SharedCryptoStream m_cryptoStream;
     };
 
 }

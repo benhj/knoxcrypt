@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2014-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,43 +26,36 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "cipher/NullByteTransformer.hpp"
+#pragma once
 
-#include <algorithm>
-#include <iterator>
+#include "IByteTransformer.hpp"
+#include <iostream>
+#include <string>
 
-namespace teasafe { namespace cipher
+namespace cryptostreampp
 {
-    NullByteTransformer::NullByteTransformer(std::string const &password,
-                                           uint64_t const iv,
-                                           uint64_t const iv2,
-                                           uint64_t const iv3,
-                                           uint64_t const iv4)
-      : IByteTransformer(password, iv, iv2, iv3, iv4)
-    {
-    }
 
-    void
-    NullByteTransformer::init()
+    template <typename Algorithm>
+    class CryptoByteTransformer : public IByteTransformer
     {
-        IByteTransformer::generateKeyAndIV();
-    }
+      public:
+        CryptoByteTransformer(std::string const &password,
+                              uint64_t const iv,
+                              uint64_t const iv2,
+                              uint64_t const iv3,
+                              uint64_t const iv4);
 
-    NullByteTransformer::~NullByteTransformer()
-    {
+        void init();
 
-    }
+        ~CryptoByteTransformer();
 
-    void 
-    NullByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
-    {
-        (void)std::copy(in, in + length, out);
-    }
+      private:
 
-    void 
-    NullByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
-    {
-        (void)std::copy(in, in + length, out);
-    }
+        CryptoByteTransformer(); // not required
+
+        void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
+        void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
+    };
+
 }
-}
+

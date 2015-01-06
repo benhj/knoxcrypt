@@ -31,6 +31,8 @@
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/FileBlockException.hpp"
 
+#include <stdexcept>
+
 namespace teasafe
 {
 

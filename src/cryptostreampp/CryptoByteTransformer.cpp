@@ -55,7 +55,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "cipher/CryptoByteTransformer.hpp"
+#include "cryptostreampp/CryptoByteTransformer.hpp"
 #include "cryptopp/aes.h"
 #include "cryptopp/camellia.h"
 #include "cryptopp/mars.h"
@@ -68,7 +68,7 @@ DEALINGS IN THE SOFTWARE.
 #include "cryptopp/ccm.h"
 
 
-namespace teasafe { namespace cipher
+namespace cryptostreampp
 {
     template <typename T>
     CryptoByteTransformer<T>::CryptoByteTransformer(std::string const &password,
@@ -127,5 +127,4 @@ namespace teasafe { namespace cipher
     template class CryptoByteTransformer<CryptoPP::CAST256>;
     template class CryptoByteTransformer<CryptoPP::Camellia>;
     template class CryptoByteTransformer<CryptoPP::AES>;
-}
 }

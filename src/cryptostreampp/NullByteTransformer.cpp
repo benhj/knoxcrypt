@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2015>, <BenHJ>
+  Copyright (c) <2014>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,42 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "cryptostreampp/NullByteTransformer.hpp"
 
-#pragma once
+#include <algorithm>
+#include <iterator>
 
-#include <cstdint>
-#include <string>
-
-namespace teasafe
+namespace cryptostreampp
 {
-    struct EncryptionProperties
+    NullByteTransformer::NullByteTransformer(std::string const &password,
+                                             uint64_t const iv,
+                                             uint64_t const iv2,
+                                             uint64_t const iv3,
+                                             uint64_t const iv4)
+      : IByteTransformer(password, iv, iv2, iv3, iv4)
     {
-        std::string password;  // password used to generate encryption key
-        uint64_t iv;           // IV used to initialize the cipher stream
-        uint64_t iv2;          // IV used to initialize the cipher stream
-        uint64_t iv3;          // IV used to initialize the cipher stream
-        uint64_t iv4;          // IV used to initialize the cipher stream
-        int cipher;            // identifies the encryption algorithm (TODO: ENUM??)      
-    };
+    }
+
+    void
+    NullByteTransformer::init()
+    {
+        IByteTransformer::generateKeyAndIV();
+    }
+
+    NullByteTransformer::~NullByteTransformer()
+    {
+
+    }
+
+    void 
+    NullByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    {
+        (void)std::copy(in, in + length, out);
+    }
+
+    void 
+    NullByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    {
+        (void)std::copy(in, in + length, out);
+    }
 }

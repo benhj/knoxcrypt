@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014-2015>, <BenHJ>
+  Copyright (c) <2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,39 +26,21 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// uses the crypto++ libraries for encryption
 
 #pragma once
 
-#include "cipher/IByteTransformer.hpp"
-#include "utility/EventType.hpp"
-#include <iostream>
+#include <cstdint>
 #include <string>
 
-namespace teasafe { namespace cipher
+namespace cryptostreampp
 {
-
-    template <typename Algorithm>
-    class CryptoByteTransformer : public IByteTransformer
+    struct EncryptionProperties
     {
-      public:
-        CryptoByteTransformer(std::string const &password,
-                              uint64_t const iv,
-                              uint64_t const iv2,
-                              uint64_t const iv3,
-                              uint64_t const iv4);
-
-        void init();
-
-        ~CryptoByteTransformer();
-
-      private:
-
-        CryptoByteTransformer(); // not required
-
-        void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
-        void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
+        std::string password;  // password used to generate encryption key
+        uint64_t iv;           // IV used to initialize the cipher stream
+        uint64_t iv2;          // IV used to initialize the cipher stream
+        uint64_t iv3;          // IV used to initialize the cipher stream
+        uint64_t iv4;          // IV used to initialize the cipher stream
+        int cipher;            // identifies the encryption algorithm (TODO: ENUM??)      
     };
 }
-}
-

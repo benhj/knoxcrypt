@@ -26,14 +26,12 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/// builds a specifc type of cipher that will be used by the main image stream
 
 #pragma once
 
-#include "cipher/CryptoByteTransformer.hpp"
-#include "cipher/NullByteTransformer.hpp"
-#include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/EncryptionProperties.hpp"
+#include "cryptostreampp/CryptoByteTransformer.hpp"
+#include "cryptostreampp/NullByteTransformer.hpp"
+#include "cryptostreampp/EncryptionProperties.hpp"
 
 #include "cryptopp/aes.h"
 #include "cryptopp/camellia.h"
@@ -47,16 +45,16 @@
 
 #include <memory>
 
-#define BUILD_CIPHER(X)                                                                \
-  return std::make_shared<cipher::CryptoByteTransformer<CryptoPP::X> >(props.password, \
-                                                                       props.iv,       \ 
-                                                                       props.iv2,      \
-                                                                       props.iv3,      \
-                                                                       props.iv3);     
-namespace teasafe
+#define BUILD_CIPHER(X)                                                        \
+  return std::make_shared<CryptoByteTransformer<CryptoPP::X> >(props.password, \
+                                                               props.iv,       \ 
+                                                               props.iv2,      \
+                                                               props.iv3,      \
+                                                               props.iv3);     
+namespace cryptostreampp
 {
 
-    std::shared_ptr<cipher::IByteTransformer> buildCipherType(EncryptionProperties const &props)
+    std::shared_ptr<IByteTransformer> buildCipherType(EncryptionProperties const &props)
     {
         if(props.cipher == 2) {
             BUILD_CIPHER(Twofish);
@@ -75,11 +73,11 @@ namespace teasafe
         } else if(props.cipher == 9) {
             BUILD_CIPHER(SHACAL2);
         } else if(props.cipher == 0) {
-            return std::make_shared<cipher::NullByteTransformer>(props.password,
-                                                                 props.iv,
-                                                                 props.iv2,
-                                                                 props.iv3,
-                                                                 props.iv3);
+            return std::make_shared<NullByteTransformer>(props.password,
+                                                         props.iv,
+                                                         props.iv2,
+                                                         props.iv3,
+                                                         props.iv3);
         } else {
             BUILD_CIPHER(AES);
         }

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2014-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,37 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+// a cipher type that performs zero encryption
+
 #pragma once
 
-#include "cryptostreampp/EncryptionProperties.hpp"
-
-#include "utility/EventType.hpp"
-
-#include <functional>
-#include <boost/optional.hpp>
+#include "IByteTransformer.hpp"
+#include <iostream>
 #include <string>
-#include <memory>
 
-namespace teasafe
+namespace cryptostreampp
 {
 
-    class FileBlockBuilder;
-    typedef std::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
-
-    struct CoreTeaSafeIO
+    class NullByteTransformer : public IByteTransformer
     {
-        std::string path;                // path of the tea safe image
-        uint64_t blocks;                 // total number of blocks
-        uint64_t freeBlocks;             // number of free blocks
-        cryptostreampp::EncryptionProperties encProps; // stuff like password and iv
-        unsigned int rounds;             // number of rounds used by enc. process
-        uint64_t rootBlock;              // the start block of the root folder
-        SharedBlockBuilder blockBuilder; // a block factory / resource manage
-        typedef std::function<void(teasafe::EventType)> Callback;
-        typedef boost::optional<Callback> OptionalCallback;
-        OptionalCallback ccb;            // call back for cipher
+      public:
+        NullByteTransformer(std::string const &password,
+                            uint64_t const iv,
+                            uint64_t const iv2,
+                            uint64_t const iv3,
+                            uint64_t const iv4);
+
+        void init();
+
+        ~NullByteTransformer();
+
+      private:
+
+        NullByteTransformer(); // not required
+
+        void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
+        void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
     };
-
-    typedef std::shared_ptr<CoreTeaSafeIO> SharedCoreIO;
-
 }
+
 

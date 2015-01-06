@@ -28,20 +28,11 @@
 
 #pragma once
 
-// Crappy clang shipped with mac -- at least the version I have -- doesn't support
-// std::move and std::forward
-#if __APPLE__ && (__GNUC_LIBSTD__ <= 4) && (__GNUC_LIBSTD_MINOR__ <= 2)
-#  define BOOST_NO_CXX11_RVALUE_REFERENCES
-#endif
-
-#include "utility/EventType.hpp"
-#include <functional>
-#include <boost/signals2.hpp>
 #include <iostream>
 #include <memory>
 #include <string>
 
-namespace teasafe { namespace cipher
+namespace cryptostreampp
 {
     class IByteTransformer
     {
@@ -58,9 +49,6 @@ namespace teasafe { namespace cipher
         void encrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length);
         void decrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length);
 
-        /// to notify when different parts of the cipher have been initialized
-        /// also see EventType for different event types
-        virtual void registerSignalHandler(std::function<void(EventType)> const &f);
         virtual ~IByteTransformer();
 
         /// has key and IV been initialized yet?
@@ -89,15 +77,7 @@ namespace teasafe { namespace cipher
 
         /// build the key using scrypt and big IV
         void generateKeyAndIV();
-
-        // for emitting when something is done (e.g.
-        // start of key generation)
-        typedef boost::signals2::signal<void(EventType)> CipherSignal;
-        typedef std::shared_ptr<CipherSignal> SharedSignal;
-        SharedSignal m_cipherSignal;
-        void broadcastEvent(EventType const &event);
-        
-
+       
     };
 }
-}
+

@@ -26,16 +26,29 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "cipher/IByteTransformer.hpp"
-#include "teasafe/detail/DetailTeaSafe.hpp"
+#include "cryptostreampp/IByteTransformer.hpp"
 #include "cryptopp/pwdbased.h"
 #include "cryptopp/sha.h"
 
 #include <algorithm>
 #include <iterator>
 
-namespace teasafe { namespace cipher
+namespace cryptostreampp
 {
+
+    namespace {
+        inline void convertUInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
+        {
+            array[0] = static_cast<uint8_t>((bigNum >> 56) & 0xFF);
+            array[1] = static_cast<uint8_t>((bigNum >> 48) & 0xFF);
+            array[2] = static_cast<uint8_t>((bigNum >> 40) & 0xFF);
+            array[3] = static_cast<uint8_t>((bigNum >> 32) & 0xFF);
+            array[4] = static_cast<uint8_t>((bigNum >> 24) & 0xFF);
+            array[5] = static_cast<uint8_t>((bigNum >> 16) & 0xFF);
+            array[6] = static_cast<uint8_t>((bigNum >> 8) & 0xFF);
+            array[7] = static_cast<uint8_t>((bigNum) & 0xFF);
+        }
+    }
 
     bool IByteTransformer::m_init = false;
 
@@ -52,7 +65,6 @@ namespace teasafe { namespace cipher
       , m_iv2(iv2)
       , m_iv3(iv3)
       , m_iv4(iv4)
-      , m_cipherSignal(std::make_shared<CipherSignal>())
     {
     }
 
@@ -68,17 +80,16 @@ namespace teasafe { namespace cipher
         // The following g_bigKey generation algorithm uses scrypt, with N = 2^20; r = 8; p = 1
         //
         if (!m_init) {
-            broadcastEvent(EventType::KeyGenBegin);
 
             // create a 256 bit IV out of 4 individual 64 bit IVs
             uint8_t salt[8];
             uint8_t saltB[8];
             uint8_t saltC[8];
             uint8_t saltD[8];
-            teasafe::detail::convertUInt64ToInt8Array(m_iv, salt);
-            teasafe::detail::convertUInt64ToInt8Array(m_iv2, saltB);
-            teasafe::detail::convertUInt64ToInt8Array(m_iv3, saltC);
-            teasafe::detail::convertUInt64ToInt8Array(m_iv4, saltD);
+            convertUInt64ToInt8Array(m_iv, salt);
+            convertUInt64ToInt8Array(m_iv2, saltB);
+            convertUInt64ToInt8Array(m_iv3, saltC);
+            convertUInt64ToInt8Array(m_iv4, saltD);
 
 
             // construct the big IV
@@ -94,23 +105,10 @@ namespace teasafe { namespace cipher
                              g_bigIV, sizeof(g_bigIV), 
                              1000000);
 
-            broadcastEvent(EventType::KeyGenEnd);
             IByteTransformer::m_init = true;
 
             m_init = true;
         }
-    }
-
-    void
-    IByteTransformer::registerSignalHandler(std::function<void(EventType)> const &f)
-    {
-        m_cipherSignal->connect(f);
-    }
-
-    void
-    IByteTransformer::broadcastEvent(EventType const &event)
-    {
-        (*m_cipherSignal)(event);
     }
 
     void
@@ -119,10 +117,10 @@ namespace teasafe { namespace cipher
         this->doEncrypt(in, out, startPosition, length);
     }
 
-        void
+    void
     IByteTransformer::decrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length)
     {
         this->doDecrypt(in, out, startPosition, length);
     }
 }
-}
+

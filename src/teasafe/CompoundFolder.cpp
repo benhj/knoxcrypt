@@ -31,6 +31,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 
 #include <sstream>
+#include <stdexcept>
 
 namespace teasafe
 {

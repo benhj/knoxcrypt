@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014-2015>, <BenHJ>
+  Copyright (c) <2013-2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,59 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// a cipher type that performs zero encryption
-
 #pragma once
 
-#include "cipher/IByteTransformer.hpp"
-#include "utility/EventType.hpp"
-#include <iostream>
+#include "EncryptionProperties.hpp"
+#include "IByteTransformer.hpp"
+
+#include <functional>
+#include <memory>
+  
+#include <fstream>
 #include <string>
 
-namespace teasafe { namespace cipher
+namespace cryptostreampp
 {
+    typedef std::shared_ptr<IByteTransformer> ByteTransformerPtr;
 
-    class NullByteTransformer : public IByteTransformer
+    class CryptoStreamPP;
+    typedef std::shared_ptr<CryptoStreamPP> SharedCryptoStream;
+
+    class CryptoStreamPP
     {
       public:
-        NullByteTransformer(std::string const &password,
-                                uint64_t const iv,
-                                uint64_t const iv2,
-                                uint64_t const iv3,
-                                uint64_t const iv4);
+        CryptoStreamPP(std::string const & path,
+                       EncryptionProperties const &encProps,
+                       std::ios::openmode mode = std::ios::out | std::ios::binary);
 
-        void init();
+        CryptoStreamPP& read(char * const buf, std::streamsize const n);
 
-        ~NullByteTransformer();
+        CryptoStreamPP& write(char const * buf, std::streamsize const n);
 
+        CryptoStreamPP& seekg(std::streampos pos);
+        CryptoStreamPP& seekg(std::streamoff off, std::ios_base::seekdir way);
+        CryptoStreamPP& seekp(std::streampos pos);
+        CryptoStreamPP& seekp(std::streamoff off, std::ios_base::seekdir way);
+        std::streampos tellg();
+        std::streampos tellp();
+        bool bad() const;
+        void clear();
+
+        void flush();
+
+        void close();
+
+        bool is_open() const;
+
+        void open(std::string const &path,
+                  std::ios::openmode mode = std::ios::out | std::ios::binary);
       private:
-
-        NullByteTransformer(); // not required
-
-        void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
-        void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
+        CryptoStreamPP();
+        std::fstream m_stream;
+        ByteTransformerPtr m_byteTransformer;
+        std::streampos m_gpos;
+        std::streampos m_ppos;
     };
-}
+
 }
 

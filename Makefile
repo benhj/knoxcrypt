@@ -69,7 +69,7 @@ SOURCES := $(wildcard src/teasafe/*.cpp)
 MAKE_TeaSafe_SRC := $(wildcard src/maketeasafe/*.cpp)
 TEST_SRC := $(wildcard src/test/*.cpp)
 FUSE_SRC := $(wildcard src/fuse/*.cpp)
-CIPHER_SRC := $(wildcard src/cipher/*.cpp)
+CIPHER_SRC := $(wildcard src/cryptostreampp/*.cpp)
 UTILITY_SRC := $(wildcard src/utility/*.cpp)
 
 # specify object locations; they will be dumped in several directories
@@ -109,7 +109,7 @@ obj-utility/%.o: src/utility/%.cpp
 obj-fuse/%.o: src/fuse/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_FUSE) -c -o $@ $<
 
-obj-cipher/%.o: src/cipher/%.cpp
+obj-cipher/%.o: src/cryptostreampp/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 all: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
