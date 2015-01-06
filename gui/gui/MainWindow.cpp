@@ -168,7 +168,7 @@ void MainWindow::loadFileButtonHandler()
         io->path = dlg.selectedFiles().at(0).toStdString();
 
         bool ok;
-        io->password = QInputDialog::getText(this, tr("Password dialog"),
+        io->encProps.password = QInputDialog::getText(this, tr("Password dialog"),
                                              tr("Password:"), QLineEdit::NoEcho, "", &ok).toStdString();
 
         if((!io->password.empty() && ok)) {
@@ -246,11 +246,11 @@ void MainWindow::newButtonHandler()
 
             io->rootBlock = 0;
             io->rounds = 64;
-            io->iv = teasafe::utility::random();
-            io->iv2 = teasafe::utility::random();
-            io->iv3 = teasafe::utility::random();
-            io->iv4 = teasafe::utility::random();
-            io->cipher = 1; // AES for now; TODO: add ability to chose
+            io->encProps.iv = teasafe::utility::random();
+            io->encProps.iv2 = teasafe::utility::random();
+            io->encProps.iv3 = teasafe::utility::random();
+            io->encProps.iv4 = teasafe::utility::random();
+            io->encProps.cipher = 1; // AES for now; TODO: add ability to chose
 
             // note, getInt arguably too constraining
             io->blocks = input.getInt(this, tr("#4096 byte blocks"),

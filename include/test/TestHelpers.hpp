@@ -55,13 +55,13 @@ teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
     io->path = testPath.string();
     io->blocks = 2048;
     io->freeBlocks = 2048;
-    io->password = "abcd1234";
-    io->iv = uint64_t(3081342484970028645);
-    io->iv2 = uint64_t(3081342484970028645);
-    io->iv3 = uint64_t(3081342484970028645);
-    io->iv4 = uint64_t(3081342484970028645);
+    io->encProps.password = "abcd1234";
+    io->encProps.iv = uint64_t(3081342484970028645);
+    io->encProps.iv2 = uint64_t(3081342484970028645);
+    io->encProps.iv3 = uint64_t(3081342484970028645);
+    io->encProps.iv4 = uint64_t(3081342484970028645);
     io->rounds = 64;
-    io->cipher = 1; // NULL cipher (no encryption)
+    io->encProps.cipher = 1; // NULL cipher (no encryption)
     io->rootBlock = 0;
     io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
     return io;

@@ -35,7 +35,7 @@ namespace teasafe
 {
     ContainerImageStream::ContainerImageStream(SharedCoreIO const &io, std::ios::openmode mode)
         : m_stream(io->path.c_str(), mode)
-        , m_byteTransformer(buildCipherType(io))
+        , m_byteTransformer(buildCipherType(io->encProps))
         , m_gpos(0)
         , m_ppos(0)
     {

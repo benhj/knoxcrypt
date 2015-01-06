@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,21 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+
 #pragma once
 
-#include "EncryptionProperties.hpp"
-
-#include "utility/EventType.hpp"
-
-#include <functional>
-#include <boost/optional.hpp>
+#include <cstdint>
 #include <string>
-#include <memory>
 
 namespace teasafe
 {
-
-    class FileBlockBuilder;
-    typedef std::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
-
-    struct CoreTeaSafeIO
+    struct EncryptionProperties
     {
-        std::string path;                // path of the tea safe image
-        uint64_t blocks;                 // total number of blocks
-        uint64_t freeBlocks;             // number of free blocks
-        EncryptionProperties encProps;   // stuff like password and iv
-        unsigned int rounds;             // number of rounds used by enc. process
-        uint64_t rootBlock;              // the start block of the root folder
-        SharedBlockBuilder blockBuilder; // a block factory / resource manage
-        typedef std::function<void(teasafe::EventType)> Callback;
-        typedef boost::optional<Callback> OptionalCallback;
-        OptionalCallback ccb;            // call back for cipher
+        std::string password;  // password used to generate encryption key
+        uint64_t iv;           // IV used to initialize the cipher stream
+        uint64_t iv2;          // IV used to initialize the cipher stream
+        uint64_t iv3;          // IV used to initialize the cipher stream
+        uint64_t iv4;          // IV used to initialize the cipher stream
+        int cipher;            // identifies the encryption algorithm (TODO: ENUM??)      
     };
-
-    typedef std::shared_ptr<CoreTeaSafeIO> SharedCoreIO;
-
 }
-

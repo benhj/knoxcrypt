@@ -620,7 +620,7 @@ int main(int argc, char *argv[])
     // the TeaSafe image
     auto io(std::make_shared<teasafe::CoreTeaSafeIO>());
     io->path = vm["imageName"].as<std::string>().c_str();
-    io->password = teasafe::utility::getPassword("teasafe password: ");
+    io->encProps.password = teasafe::utility::getPassword("teasafe password: ");
     io->rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;
 
     // Obtain the initialization vector from the first 8 bytes
@@ -637,7 +637,7 @@ int main(int argc, char *argv[])
     uint8_t hashRecovered[32];
     teasafe::detail::getPassHash(stream, hashRecovered);
     uint8_t hashEntered[32];
-    teasafe::utility::sha256((char*)io->password.c_str(), hashEntered);
+    teasafe::utility::sha256((char*)io->encProps.password.c_str(), hashEntered);
     if(!teasafe::utility::compareTwoHashes(hashEntered, hashRecovered)) {
         std::cout<<"Incorrect password"<<std::endl;
         exit(0);

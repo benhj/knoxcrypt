@@ -28,12 +28,12 @@
 
 /// builds a specifc type of cipher that will be used by the main image stream
 
-#ifndef TEASAFE_CIPHER_BUILDER_HPP__
-#define TEASAFE_CIPHER_BUILDER_HPP__
+#pragma once
 
 #include "cipher/CryptoByteTransformer.hpp"
 #include "cipher/NullByteTransformer.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
+#include "teasafe/EncryptionProperties.hpp"
 
 #include "cryptopp/aes.h"
 #include "cryptopp/camellia.h"
@@ -47,43 +47,41 @@
 
 #include <memory>
 
-#define BUILD_CIPHER(X)                                                              \
-  return std::make_shared<cipher::CryptoByteTransformer<CryptoPP::X> >(io->password, \
-                                                                       io->iv,       \ 
-                                                                       io->iv2,      \
-                                                                       io->iv3,      \
-                                                                       io->iv3);     
+#define BUILD_CIPHER(X)                                                                \
+  return std::make_shared<cipher::CryptoByteTransformer<CryptoPP::X> >(props.password, \
+                                                                       props.iv,       \ 
+                                                                       props.iv2,      \
+                                                                       props.iv3,      \
+                                                                       props.iv3);     
 namespace teasafe
 {
 
-    std::shared_ptr<cipher::IByteTransformer> buildCipherType(SharedCoreIO const &io)
+    std::shared_ptr<cipher::IByteTransformer> buildCipherType(EncryptionProperties const &props)
     {
-        if(io->cipher == 2) {
+        if(props.cipher == 2) {
             BUILD_CIPHER(Twofish);
-        } else if(io->cipher == 3) {
+        } else if(props.cipher == 3) {
             BUILD_CIPHER(Serpent);
-        } else if(io->cipher == 4) {
+        } else if(props.cipher == 4) {
             BUILD_CIPHER(RC6);
-        } else if(io->cipher == 5) {
+        } else if(props.cipher == 5) {
             BUILD_CIPHER(MARS);
-        } else if(io->cipher == 6) {
+        } else if(props.cipher == 6) {
             BUILD_CIPHER(CAST256);
-        } else if(io->cipher == 7) {
+        } else if(props.cipher == 7) {
             BUILD_CIPHER(Camellia);
-        } else if(io->cipher == 8) {
+        } else if(props.cipher == 8) {
             BUILD_CIPHER(RC5);
-        } else if(io->cipher == 9) {
+        } else if(props.cipher == 9) {
             BUILD_CIPHER(SHACAL2);
-        } else if(io->cipher == 0) {
-            return std::make_shared<cipher::NullByteTransformer>(io->password,
-                                                                 io->iv,
-                                                                 io->iv2,
-                                                                 io->iv3,
-                                                                 io->iv3);
+        } else if(props.cipher == 0) {
+            return std::make_shared<cipher::NullByteTransformer>(props.password,
+                                                                 props.iv,
+                                                                 props.iv2,
+                                                                 props.iv3,
+                                                                 props.iv3);
         } else {
             BUILD_CIPHER(AES);
         }
     }
 }
-
-#endif // TEASAFE_CIPHER_BUILDER_HPP__

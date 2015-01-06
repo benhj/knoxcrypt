@@ -471,12 +471,12 @@ namespace teasafe { namespace detail
         (void)in.read((char*)&j, 1);
         // note, i should always > 0 <= 255
         io->rounds = (unsigned int)i;
-        io->cipher = (unsigned int)j;
+        io->encProps.cipher = (unsigned int)j;
         in.close();
-        io->iv = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer.front());
-        io->iv2 = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer2.front());
-        io->iv3 = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer3.front());
-        io->iv4 = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer4.front());
+        io->encProps.iv = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer.front());
+        io->encProps.iv2 = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer2.front());
+        io->encProps.iv3 = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer3.front());
+        io->encProps.iv4 = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer4.front());
     }
 
 }

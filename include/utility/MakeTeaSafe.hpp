@@ -169,14 +169,14 @@ namespace teasafe
             {
                 broadcastEvent(EventType::IVWriteEvent);
                 uint8_t ivBytes[8];
-                detail::convertUInt64ToInt8Array(io->iv, ivBytes);
+                detail::convertUInt64ToInt8Array(io->encProps.iv, ivBytes);
                 std::ofstream ivout(io->path.c_str(), std::ios::out | std::ios::binary);
                 (void)ivout.write((char*)ivBytes, 8);
-                detail::convertUInt64ToInt8Array(io->iv2, ivBytes);
+                detail::convertUInt64ToInt8Array(io->encProps.iv2, ivBytes);
                 (void)ivout.write((char*)ivBytes, 8);
-                detail::convertUInt64ToInt8Array(io->iv3, ivBytes);
+                detail::convertUInt64ToInt8Array(io->encProps.iv3, ivBytes);
                 (void)ivout.write((char*)ivBytes, 8);
-                detail::convertUInt64ToInt8Array(io->iv4, ivBytes);
+                detail::convertUInt64ToInt8Array(io->encProps.iv4, ivBytes);
                 (void)ivout.write((char*)ivBytes, 8);
 
                 // broadcastEvent(EventType::RoundsWriteEvent);
@@ -185,7 +185,7 @@ namespace teasafe
                 // ciphers (for example)
                 (void)ivout.write((char*)&io->rounds, 1);
                 for(int i = 0; i < 7; ++i) {
-                    (void)ivout.write((char*)&io->cipher, 1);
+                    (void)ivout.write((char*)&io->encProps.cipher, 1);
                 }
 
                 ivout.flush();
@@ -205,7 +205,7 @@ namespace teasafe
             // incorrect password has been entered
             out.seekp(detail::beginning() - detail::PASS_HASH_BYTES); // seek past iv + header bytes
             uint8_t passHash[32];
-            utility::sha256(io->password, passHash);
+            utility::sha256(io->encProps.password, passHash);
             out.write((char*)passHash, 32);
 
             // now seek past iv, header and hash bytes before continuing to write

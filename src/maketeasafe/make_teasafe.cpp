@@ -83,10 +83,10 @@ int main(int argc, char *argv[])
 
     // use a non-deterministic random device to generate the iv. This
     // allegedly pulls data from /dev/urandom
-    io->iv = teasafe::utility::random();
-    io->iv2 = teasafe::utility::random();
-    io->iv3 = teasafe::utility::random();
-    io->iv4 = teasafe::utility::random();
+    io->encProps.iv = teasafe::utility::random();
+    io->encProps.iv2 = teasafe::utility::random();
+    io->encProps.iv3 = teasafe::utility::random();
+    io->encProps.iv4 = teasafe::utility::random();
 
     po::variables_map vm;
     try {
@@ -111,10 +111,10 @@ int main(int argc, char *argv[])
 
             std::cout<<"image path: "<<vm["imageName"].as<std::string>()<<std::endl;
             std::cout<<"file system size in blocks: "<<vm["blockCount"].as<uint64_t>()<<std::endl;
-            std::cout<<"initialization vector A: "<<io->iv<<std::endl;
-            std::cout<<"initialization vector B: "<<io->iv2<<std::endl;
-            std::cout<<"initialization vector C: "<<io->iv3<<std::endl;
-            std::cout<<"initialization vector D: "<<io->iv4<<std::endl;
+            std::cout<<"initialization vector A: "<<io->encProps.iv<<std::endl;
+            std::cout<<"initialization vector B: "<<io->encProps.iv2<<std::endl;
+            std::cout<<"initialization vector C: "<<io->encProps.iv3<<std::endl;
+            std::cout<<"initialization vector D: "<<io->encProps.iv4<<std::endl;
             std::cout<<"Encryption algorithm: "<<cipher<<std::endl;
         }
     } catch (...) {
@@ -128,30 +128,30 @@ int main(int argc, char *argv[])
     io->path = vm["imageName"].as<std::string>().c_str();
     io->blocks = blocks;
     io->freeBlocks = blocks;
-    io->password.append(teasafe::utility::getPassword("teasafe password: "));
+    io->encProps.password.append(teasafe::utility::getPassword("teasafe password: "));
     io->rounds = 64; // obsolete (not currently used; used to be used by XTEA)
-    io->cipher = 1; // AES
+    io->encProps.cipher = 1; // AES
 
     if(cipher == "aes") {
-        io->cipher = 1; 
+        io->encProps.cipher = 1; 
     } else if(cipher == "twofish") {
-        io->cipher = 2;
+        io->encProps.cipher = 2;
     } else if(cipher == "serpent") {
-        io->cipher = 3;
+        io->encProps.cipher = 3;
     } else if(cipher == "rc6") {
-        io->cipher = 4;
+        io->encProps.cipher = 4;
     } else if(cipher == "mars") {
-        io->cipher = 5;
+        io->encProps.cipher = 5;
     } else if(cipher == "cast256") {
-        io->cipher = 6;
+        io->encProps.cipher = 6;
     } else if(cipher == "camellia") {
-        io->cipher = 7;
+        io->encProps.cipher = 7;
     } else if(cipher == "rc5") {
-        io->cipher = 8;
+        io->encProps.cipher = 8;
     } else if(cipher == "shacal2") {
-        io->cipher = 9;
+        io->encProps.cipher = 9;
     } else if(cipher == "null") {
-        io->cipher = 0;
+        io->encProps.cipher = 0;
     }
 
     // magic partition?
