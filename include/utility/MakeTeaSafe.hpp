@@ -205,7 +205,7 @@ namespace teasafe
             // incorrect password has been entered
             out.seekp(detail::beginning() - detail::PASS_HASH_BYTES); // seek past iv + header bytes
             uint8_t passHash[32];
-            utility::sha256((char*)io->password.c_str(), passHash);
+            utility::sha256(io->password, passHash);
             out.write((char*)passHash, 32);
 
             // now seek past iv, header and hash bytes before continuing to write

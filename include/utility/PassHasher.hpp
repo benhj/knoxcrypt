@@ -29,17 +29,16 @@
 
 #pragma once
 
-#include "cipher/scrypt/sha256.hpp"
+#include "cryptopp/sha.h"
 #include <string>
 
 namespace teasafe { namespace utility {
 
-    inline void sha256(char *string, uint8_t hash[32])
+    inline void sha256(std::string const &toHash, uint8_t hash[32])
     {
-        SHA256_CTX sha256;
-        SHA256_Init(&sha256);
-        SHA256_Update(&sha256, string, strlen(string));
-        SHA256_Final(hash, &sha256);
+        CryptoPP::SHA256 sha256;
+        sha256.Update((unsigned char *)toHash.c_str(), toHash.length());
+        sha256.Final(hash);
     }
 
     inline void hashToString(uint8_t hash[32], char outputBuffer[65])

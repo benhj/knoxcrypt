@@ -28,7 +28,8 @@
 
 #include "cipher/IByteTransformer.hpp"
 #include "teasafe/detail/DetailTeaSafe.hpp"
-#include "cipher/scrypt/crypto_scrypt.hpp"
+#include "cryptopp/pwdbased.h"
+#include "cryptopp/sha.h"
 
 #include <algorithm>
 #include <iterator>
@@ -79,18 +80,23 @@ namespace teasafe { namespace cipher
             teasafe::detail::convertUInt64ToInt8Array(m_iv3, saltC);
             teasafe::detail::convertUInt64ToInt8Array(m_iv4, saltD);
 
-            // initialize the 256 bit g_bigKey from IV1 salt
-            ::crypto_scrypt((uint8_t*)m_password.c_str(), m_password.size(), salt, 8,
-                            1048576, 8, 1, g_bigKey, 32);
-
-            broadcastEvent(EventType::KeyGenEnd);
-            IByteTransformer::m_init = true;
 
             // construct the big IV
             (void)std::copy(salt,  salt + 8 , g_bigIV);
             (void)std::copy(saltB, saltB + 8, g_bigIV + 8);
             (void)std::copy(saltC, saltC + 8, g_bigIV + 16);
             (void)std::copy(saltD, saltD + 8, g_bigIV + 24);
+
+            // derive the key using a million iterations
+            CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA512> pbkdf2;
+            pbkdf2.DeriveKey(g_bigKey, sizeof(g_bigKey), 0, 
+                             (const unsigned char*)&m_password.front(), m_password.length(), 
+                             g_bigIV, sizeof(g_bigIV), 
+                             1000000);
+
+            broadcastEvent(EventType::KeyGenEnd);
+            IByteTransformer::m_init = true;
+
             m_init = true;
         }
     }
