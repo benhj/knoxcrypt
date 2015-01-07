@@ -28,6 +28,11 @@
 
 #pragma once
 
+#include "cryptopp/pwdbased.h"
+#include "cryptopp/sha.h"
+
+#include <algorithm>
+#include <iterator>
 #include <cstdint>
 #include <ios>
 #include <string>
@@ -77,7 +82,91 @@ namespace cryptostreampp
 
         /// build the key using scrypt and big IV
         void generateKeyAndIV();
-       
     };
+
+    namespace {
+        inline void convertUInt64ToInt8Array(uint64_t const bigNum, uint8_t array[8])
+        {
+            array[0] = static_cast<uint8_t>((bigNum >> 56) & 0xFF);
+            array[1] = static_cast<uint8_t>((bigNum >> 48) & 0xFF);
+            array[2] = static_cast<uint8_t>((bigNum >> 40) & 0xFF);
+            array[3] = static_cast<uint8_t>((bigNum >> 32) & 0xFF);
+            array[4] = static_cast<uint8_t>((bigNum >> 24) & 0xFF);
+            array[5] = static_cast<uint8_t>((bigNum >> 16) & 0xFF);
+            array[6] = static_cast<uint8_t>((bigNum >> 8) & 0xFF);
+            array[7] = static_cast<uint8_t>((bigNum) & 0xFF);
+        }
+    }
+
+    inline
+    IByteTransformer::IByteTransformer(std::string const &password,
+                                       uint64_t const iv,
+                                       uint64_t const iv2,
+                                       uint64_t const iv3,
+                                       uint64_t const iv4)
+      : m_password(password)
+      , m_iv(iv)
+      , m_iv2(iv2)
+      , m_iv3(iv3)
+      , m_iv4(iv4)
+    {
+    }
+
+    inline
+    IByteTransformer::~IByteTransformer()
+    {
+
+    }
+
+    inline
+    void 
+    IByteTransformer::generateKeyAndIV()
+    {
+        //
+        // The following g_bigKey generation algorithm uses scrypt, with N = 2^20; r = 8; p = 1
+        //
+        if (!m_init) {
+
+            // create a 256 bit IV out of 4 individual 64 bit IVs
+            uint8_t salt[8];
+            uint8_t saltB[8];
+            uint8_t saltC[8];
+            uint8_t saltD[8];
+            convertUInt64ToInt8Array(m_iv, salt);
+            convertUInt64ToInt8Array(m_iv2, saltB);
+            convertUInt64ToInt8Array(m_iv3, saltC);
+            convertUInt64ToInt8Array(m_iv4, saltD);
+
+
+            // construct the big IV
+            (void)std::copy(salt,  salt + 8 , g_bigIV);
+            (void)std::copy(saltB, saltB + 8, g_bigIV + 8);
+            (void)std::copy(saltC, saltC + 8, g_bigIV + 16);
+            (void)std::copy(saltD, saltD + 8, g_bigIV + 24);
+
+            // derive the key using a million iterations
+            CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA512> pbkdf2;
+            pbkdf2.DeriveKey(g_bigKey, sizeof(g_bigKey), 0, 
+                             (const unsigned char*)&m_password.front(), m_password.length(), 
+                             g_bigIV, sizeof(g_bigIV), 
+                             1000000);
+
+            IByteTransformer::m_init = true;
+        }
+    }
+
+    inline
+    void
+    IByteTransformer::encrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length)
+    {
+        this->doEncrypt(in, out, startPosition, length);
+    }
+
+    inline
+    void
+    IByteTransformer::decrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length)
+    {
+        this->doDecrypt(in, out, startPosition, length);
+    }
 }
 

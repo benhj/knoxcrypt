@@ -29,6 +29,16 @@
 #pragma once
 
 #include "IByteTransformer.hpp"
+#include "cryptopp/aes.h"
+#include "cryptopp/camellia.h"
+#include "cryptopp/mars.h"
+#include "cryptopp/rc5.h"
+#include "cryptopp/rc6.h"
+#include "cryptopp/serpent.h"
+#include "cryptopp/shacal2.h"
+#include "cryptopp/twofish.h"
+#include "cryptopp/cast.h"
+#include "cryptopp/ccm.h"
 #include <cstdint>
 #include <ios>
 #include <string>
@@ -57,6 +67,56 @@ namespace cryptostreampp
         void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
         void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
     };
+
+    template <typename T>
+    CryptoByteTransformer<T>::CryptoByteTransformer(std::string const &password,
+                                                    uint64_t const iv,
+                                                    uint64_t const iv2,
+                                                    uint64_t const iv3,
+                                                    uint64_t const iv4)
+      : IByteTransformer(password, iv, iv2, iv3, iv4)
+    {
+    }
+
+    template <typename T>
+    inline
+    void
+    CryptoByteTransformer<T>::init()
+    {
+        IByteTransformer::generateKeyAndIV();
+    }
+
+    template <typename T>
+    CryptoByteTransformer<T>::~CryptoByteTransformer()
+    {
+
+    }
+
+    template <typename T>
+    inline
+    void 
+    CryptoByteTransformer<T>::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    {
+        typename CryptoPP::CTR_Mode<T>::Encryption encryptor;
+        encryptor.SetKeyWithIV(IByteTransformer::g_bigKey, 
+                               sizeof(IByteTransformer::g_bigKey), 
+                               IByteTransformer::g_bigIV);
+        encryptor.Seek(startPosition);
+        encryptor.ProcessData((uint8_t*)out, (uint8_t*)in, length);
+    }
+
+    template <typename T>
+    inline
+    void 
+    CryptoByteTransformer<T>::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    {
+        typename CryptoPP::CTR_Mode<T>::Decryption decryptor;
+        decryptor.SetKeyWithIV(IByteTransformer::g_bigKey, 
+                                  sizeof(IByteTransformer::g_bigKey), 
+                                  IByteTransformer::g_bigIV);
+        decryptor.Seek(startPosition);
+        decryptor.ProcessData((uint8_t*)out, (uint8_t*)in, length);
+    }
 
 }
 

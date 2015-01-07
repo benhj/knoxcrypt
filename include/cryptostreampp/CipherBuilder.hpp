@@ -47,13 +47,14 @@
 
 #define BUILD_CIPHER(X)                                                        \
   return std::make_shared<CryptoByteTransformer<CryptoPP::X> >(props.password, \
-                                                               props.iv,       \ 
+                                                               props.iv,       \
                                                                props.iv2,      \
                                                                props.iv3,      \
                                                                props.iv3);     
 namespace cryptostreampp
 {
 
+    inline
     std::shared_ptr<IByteTransformer> buildCipherType(EncryptionProperties const &props)
     {
         if(props.cipher == 2) {

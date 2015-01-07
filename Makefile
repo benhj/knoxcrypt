@@ -69,7 +69,6 @@ SOURCES := $(wildcard src/teasafe/*.cpp)
 MAKE_TeaSafe_SRC := $(wildcard src/maketeasafe/*.cpp)
 TEST_SRC := $(wildcard src/test/*.cpp)
 FUSE_SRC := $(wildcard src/fuse/*.cpp)
-CIPHER_SRC := $(wildcard src/cryptostreampp/*.cpp)
 UTILITY_SRC := $(wildcard src/utility/*.cpp)
 
 # specify object locations; they will be dumped in several directories
@@ -78,7 +77,6 @@ OBJECTS := $(addprefix obj/,$(notdir $(SOURCES:.cpp=.o)))
 OBJECTS_MAKEBIN := $(addprefix obj-maketeasafe/,$(notdir $(MAKE_TeaSafe_SRC:.cpp=.o)))
 OBJECTS_TEST := $(addprefix obj-test/,$(notdir $(TEST_SRC:.cpp=.o)))
 OBJECTS_FUSE := $(addprefix obj-fuse/,$(notdir $(FUSE_SRC:.cpp=.o)))
-OBJECTS_CIPHER := $(addprefix obj-cipher/,$(notdir $(CIPHER_SRC:.cpp=.o)))
 OBJECTS_UTILITY := $(addprefix obj-utility/,$(notdir $(UTILITY_SRC:.cpp=.o)))
 
 # the executable used for running the test harness
@@ -109,15 +107,12 @@ obj-utility/%.o: src/utility/%.cpp
 obj-fuse/%.o: src/fuse/%.cpp
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_FUSE) -c -o $@ $<
 
-obj-cipher/%.o: src/cryptostreampp/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
-
-all: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
+all: $(SOURCES) $(CIPHER_SRC) directoryObj \
      $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a \
      $(TEST_SRC) $(TEST_EXECUTABLE) $(FUSE_LAYER) $(MAKETeaSafe_EXECUTABLE) \
      $(SHELL_BIN)
 
-lib: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a
+lib: $(SOURCES) directoryObj $(OBJECTS) libteasafe.a
 
 $(TEST_EXECUTABLE): directoryObjTest $(OBJECTS_TEST) libteasafe.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_TEST) ./libteasafe.a /usr/lib/libcryptopp.a $(BOOST_LD) -o $@
@@ -131,16 +126,16 @@ $(SHELL_BIN): directoryObjUtility $(OBJECTS_UTILITY) libteasafe.a
 $(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE) libteasafe.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a /usr/lib/libcryptopp.a $(FUSE_LIBS) $(BOOST_LD) -o $@
 
-shell:  $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
-        $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a \
+shell:  $(SOURCES) directoryObj \
+        $(OBJECTS) libteasafe.a \
         $(SHELL_BIN)
         
-maketeasafe: $(SOURCES) $(CIPHER_SRC) directoryObj directoryObjCipher \
-             $(OBJECTS) $(OBJECTS_CIPHER) libteasafe.a \
+maketeasafe: $(SOURCES) directoryObj \
+             $(OBJECTS) libteasafe.a \
              $(MAKETeaSafe_EXECUTABLE)
         
 clean:
-	/bin/rm -fr obj obj-maketeasafe obj-test obj-fuse test_$(UNAME) maketeasafe_$(UNAME) teasafe_$(UNAME) teashell_$(UNAME) obj-cipher obj-utility libteasafe.a
+	/bin/rm -fr obj obj-maketeasafe obj-test obj-fuse test_$(UNAME) maketeasafe_$(UNAME) teasafe_$(UNAME) teashell_$(UNAME) obj-utility libteasafe.a
 
 directoryObj:
 	/bin/mkdir -p obj
@@ -154,14 +149,11 @@ directoryObjMakeBfs:
 directoryObjFuse:
 	/bin/mkdir -p obj-fuse
 
-directoryObjCipher:
-	/bin/mkdir -p obj-cipher
-
 directoryObjUtility:
 	/bin/mkdir -p obj-utility
 
-libteasafe.a: $(OBJECTS) $(OBJECTS_CIPHER)
-	/usr/bin/ar rcs libteasafe.a obj/* obj-cipher/*
+libteasafe.a: $(OBJECTS) 
+	/usr/bin/ar rcs libteasafe.a obj/* 
 
 check: $(TEST_EXECUTABLE)
 	./$(TEST_EXECUTABLE)

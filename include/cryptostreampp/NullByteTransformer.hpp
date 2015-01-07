@@ -58,6 +58,43 @@ namespace cryptostreampp
         void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
         void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
     };
+
+    inline
+    NullByteTransformer::NullByteTransformer(std::string const &password,
+                                             uint64_t const iv,
+                                             uint64_t const iv2,
+                                             uint64_t const iv3,
+                                             uint64_t const iv4)
+      : IByteTransformer(password, iv, iv2, iv3, iv4)
+    {
+    }
+
+    inline
+    void
+    NullByteTransformer::init()
+    {
+        IByteTransformer::generateKeyAndIV();
+    }
+
+    inline
+    NullByteTransformer::~NullByteTransformer()
+    {
+
+    }
+
+    inline
+    void 
+    NullByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    {
+        (void)std::copy(in, in + length, out);
+    }
+
+    inline
+    void 
+    NullByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
+    {
+        (void)std::copy(in, in + length, out);
+    }
 }
 
 

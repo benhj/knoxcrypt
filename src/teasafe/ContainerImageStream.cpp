@@ -29,6 +29,11 @@
 
 #include "teasafe/ContainerImageStream.hpp"
 
+/// Since these are statics need to make sure they're instantiated here!
+bool cryptostreampp::IByteTransformer::m_init = false;
+uint8_t cryptostreampp::IByteTransformer::g_bigKey[32]; 
+uint8_t cryptostreampp::IByteTransformer::g_bigIV[32];   
+
 namespace teasafe
 {
     ContainerImageStream::ContainerImageStream(SharedCoreIO const &io, std::ios::openmode mode)
