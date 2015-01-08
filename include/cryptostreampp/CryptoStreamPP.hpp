@@ -55,24 +55,18 @@ namespace cryptostreampp
                        std::ios::openmode mode = std::ios::out | std::ios::binary);
 
         CryptoStreamPP& read(char * const buf, std::streamsize const n);
-
         CryptoStreamPP& write(char const * buf, std::streamsize const n);
-
         CryptoStreamPP& seekg(std::streampos pos);
         CryptoStreamPP& seekg(std::streamoff off, std::ios_base::seekdir way);
         CryptoStreamPP& seekp(std::streampos pos);
         CryptoStreamPP& seekp(std::streamoff off, std::ios_base::seekdir way);
-        std::streampos tellg();
-        std::streampos tellp();
+        std::streampos tellg() const;
+        std::streampos tellp() const;
         bool bad() const;
         void clear();
-
         void flush();
-
         void close();
-
         bool is_open() const;
-
         void open(std::string const &path,
                   std::ios::openmode mode = std::ios::out | std::ios::binary);
       private:
@@ -179,14 +173,14 @@ namespace cryptostreampp
 
     inline
     std::streampos
-    CryptoStreamPP::tellg()
+    CryptoStreamPP::tellg() const
     {
         return m_gpos;
     }
 
     inline
     std::streampos
-    CryptoStreamPP::tellp()
+    CryptoStreamPP::tellp() const
     {
         return m_ppos;
     }

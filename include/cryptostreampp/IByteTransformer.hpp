@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include "EncryptionProperties.hpp"
+
 #include "cryptopp/pwdbased.h"
 #include "cryptopp/sha.h"
 
@@ -42,11 +44,7 @@ namespace cryptostreampp
     class IByteTransformer
     {
       public:
-        IByteTransformer(std::string const &password,
-                         uint64_t const iv,
-                         uint64_t const iv2,
-                         uint64_t const iv3,
-                         uint64_t const iv4);
+        IByteTransformer(EncryptionProperties const &encProps);
 
         /// must be implemented and called before anything else!!
         virtual void init() = 0;
@@ -71,14 +69,8 @@ namespace cryptostreampp
 
       protected:
 
-        // password used to build the 256 bit key
-        mutable std::string m_password;
-
-        // multiple 64 bit iv blocks used to build 256 bit IV
-        mutable uint64_t m_iv;
-        mutable uint64_t m_iv2;
-        mutable uint64_t m_iv3;
-        mutable uint64_t m_iv4;
+        /// stores password and iv all used to derive key
+        EncryptionProperties m_props;
 
         /// build the key using scrypt and big IV
         void generateKeyAndIV();
@@ -99,16 +91,8 @@ namespace cryptostreampp
     }
 
     inline
-    IByteTransformer::IByteTransformer(std::string const &password,
-                                       uint64_t const iv,
-                                       uint64_t const iv2,
-                                       uint64_t const iv3,
-                                       uint64_t const iv4)
-      : m_password(password)
-      , m_iv(iv)
-      , m_iv2(iv2)
-      , m_iv3(iv3)
-      , m_iv4(iv4)
+    IByteTransformer::IByteTransformer(EncryptionProperties const &encProps)
+      : m_props(encProps)
     {
     }
 
@@ -132,10 +116,10 @@ namespace cryptostreampp
             uint8_t saltB[8];
             uint8_t saltC[8];
             uint8_t saltD[8];
-            convertUInt64ToInt8Array(m_iv, salt);
-            convertUInt64ToInt8Array(m_iv2, saltB);
-            convertUInt64ToInt8Array(m_iv3, saltC);
-            convertUInt64ToInt8Array(m_iv4, saltD);
+            convertUInt64ToInt8Array(m_props.iv, salt);
+            convertUInt64ToInt8Array(m_props.iv2, saltB);
+            convertUInt64ToInt8Array(m_props.iv3, saltC);
+            convertUInt64ToInt8Array(m_props.iv4, saltD);
 
 
             // construct the big IV
@@ -147,7 +131,7 @@ namespace cryptostreampp
             // derive the key using a million iterations
             CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA512> pbkdf2;
             pbkdf2.DeriveKey(g_bigKey, sizeof(g_bigKey), 0, 
-                             (const unsigned char*)&m_password.front(), m_password.length(), 
+                             (const unsigned char*)&m_props.password.front(), m_props.password.length(), 
                              g_bigIV, sizeof(g_bigIV), 
                              1000000);
 

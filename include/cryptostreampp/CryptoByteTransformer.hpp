@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include "EncryptionProperties.hpp"
 #include "IByteTransformer.hpp"
 #include "cryptopp/aes.h"
 #include "cryptopp/camellia.h"
@@ -50,11 +51,7 @@ namespace cryptostreampp
     class CryptoByteTransformer : public IByteTransformer
     {
       public:
-        CryptoByteTransformer(std::string const &password,
-                              uint64_t const iv,
-                              uint64_t const iv2,
-                              uint64_t const iv3,
-                              uint64_t const iv4);
+        CryptoByteTransformer(EncryptionProperties const &encProps);
 
         void init();
 
@@ -69,12 +66,8 @@ namespace cryptostreampp
     };
 
     template <typename T>
-    CryptoByteTransformer<T>::CryptoByteTransformer(std::string const &password,
-                                                    uint64_t const iv,
-                                                    uint64_t const iv2,
-                                                    uint64_t const iv3,
-                                                    uint64_t const iv4)
-      : IByteTransformer(password, iv, iv2, iv3, iv4)
+    CryptoByteTransformer<T>::CryptoByteTransformer(EncryptionProperties const &encProps)
+      : IByteTransformer(encProps)
     {
     }
 

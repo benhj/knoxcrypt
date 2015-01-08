@@ -30,6 +30,7 @@
 
 #pragma once
 
+#include "EncryptionProperties.hpp"
 #include "IByteTransformer.hpp"
 #include <cstdint>
 #include <ios>
@@ -41,11 +42,7 @@ namespace cryptostreampp
     class NullByteTransformer : public IByteTransformer
     {
       public:
-        NullByteTransformer(std::string const &password,
-                            uint64_t const iv,
-                            uint64_t const iv2,
-                            uint64_t const iv3,
-                            uint64_t const iv4);
+        NullByteTransformer(EncryptionProperties const &encProps);
 
         void init();
 
@@ -60,12 +57,8 @@ namespace cryptostreampp
     };
 
     inline
-    NullByteTransformer::NullByteTransformer(std::string const &password,
-                                             uint64_t const iv,
-                                             uint64_t const iv2,
-                                             uint64_t const iv3,
-                                             uint64_t const iv4)
-      : IByteTransformer(password, iv, iv2, iv3, iv4)
+    NullByteTransformer::NullByteTransformer(EncryptionProperties const &encProps)
+      : IByteTransformer(encProps)
     {
     }
 

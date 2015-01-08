@@ -45,12 +45,9 @@
 
 #include <memory>
 
-#define BUILD_CIPHER(X)                                                        \
-  return std::make_shared<CryptoByteTransformer<CryptoPP::X> >(props.password, \
-                                                               props.iv,       \
-                                                               props.iv2,      \
-                                                               props.iv3,      \
-                                                               props.iv3);     
+#define BUILD_CIPHER(X) \
+  return std::make_shared<CryptoByteTransformer<CryptoPP::X> >(props);     
+
 namespace cryptostreampp
 {
 
@@ -74,11 +71,7 @@ namespace cryptostreampp
         } else if(props.cipher == 9) {
             BUILD_CIPHER(SHACAL2);
         } else if(props.cipher == 0) {
-            return std::make_shared<NullByteTransformer>(props.password,
-                                                         props.iv,
-                                                         props.iv2,
-                                                         props.iv3,
-                                                         props.iv3);
+            return std::make_shared<NullByteTransformer>(props);
         } else {
             BUILD_CIPHER(AES);
         }
