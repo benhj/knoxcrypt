@@ -184,8 +184,31 @@ namespace teasafe
                 // need 1 byte representations since we'll never have over 255
                 // ciphers (for example)
                 (void)ivout.write((char*)&io->rounds, 1);
+
+                // write out the encryption algorithm that was used
+                unsigned int cipher = 1; // AES (default)
+                if(io->encProps.cipher == cryptostreampp::Algorithm::Twofish) {
+                    cipher = 2;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::Serpent) {
+                    cipher = 3;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::RC6) {
+                    cipher = 4;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::MARS) {
+                    cipher = 5;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::CAST256) {
+                    cipher = 6;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::Camellia) {
+                    cipher = 7;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::RC5) {
+                    cipher = 8;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::SHACAL2) {
+                    cipher = 9;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::NONE) {
+                    cipher = 0;
+                }
+
                 for(int i = 0; i < 7; ++i) {
-                    (void)ivout.write((char*)&io->encProps.cipher, 1);
+                    (void)ivout.write((char*)&cipher, 1);
                 }
 
                 ivout.flush();

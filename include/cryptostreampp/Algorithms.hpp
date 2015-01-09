@@ -26,68 +26,9 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// a cipher type that performs zero encryption
-
 #pragma once
 
-#include "EncryptionProperties.hpp"
-#include "IByteTransformer.hpp"
-#include <cstdint>
-#include <ios>
-#include <string>
+namespace cryptostreampp {
 
-namespace cryptostreampp
-{
-
-    class NullByteTransformer : public IByteTransformer
-    {
-      public:
-        NullByteTransformer(EncryptionProperties const &encProps);
-
-        void init();
-
-        ~NullByteTransformer();
-
-      private:
-
-        NullByteTransformer(); // not required
-
-        void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
-        void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
-    };
-
-    inline
-    NullByteTransformer::NullByteTransformer(EncryptionProperties const &encProps)
-      : IByteTransformer(encProps)
-    {
-    }
-
-    inline
-    void
-    NullByteTransformer::init()
-    {
-        IByteTransformer::generateKeyAndIV();
-    }
-
-    inline
-    NullByteTransformer::~NullByteTransformer()
-    {
-
-    }
-
-    inline
-    void 
-    NullByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
-    {
-        (void)std::copy(in, in + length, out);
-    }
-
-    inline
-    void 
-    NullByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
-    {
-        (void)std::copy(in, in + length, out);
-    }
+        enum class Algorithm { AES, Twofish, Serpent, RC6, MARS, CAST256, Camellia, RC5, SHACAL2, NONE};
 }
-
-

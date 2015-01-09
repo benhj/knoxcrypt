@@ -31,6 +31,7 @@
 #include "utility/EcholessPasswordPrompt.hpp"
 #include "utility/EventType.hpp"
 #include "utility/MakeTeaSafe.hpp"
+#include "cryptostreampp/Algorithms.hpp"
 #include "cryptostreampp/RandomNumberGenerator.hpp"
 
 #include <boost/progress.hpp>
@@ -130,28 +131,27 @@ int main(int argc, char *argv[])
     io->freeBlocks = blocks;
     io->encProps.password.append(teasafe::utility::getPassword("teasafe password: "));
     io->rounds = 64; // obsolete (not currently used; used to be used by XTEA)
-    io->encProps.cipher = 1; // AES
 
     if(cipher == "aes") {
-        io->encProps.cipher = 1; 
+        io->encProps.cipher = cryptostreampp::Algorithm::AES; 
     } else if(cipher == "twofish") {
-        io->encProps.cipher = 2;
+        io->encProps.cipher = cryptostreampp::Algorithm::Twofish;
     } else if(cipher == "serpent") {
-        io->encProps.cipher = 3;
+        io->encProps.cipher = cryptostreampp::Algorithm::Serpent;
     } else if(cipher == "rc6") {
-        io->encProps.cipher = 4;
+        io->encProps.cipher = cryptostreampp::Algorithm::RC6;
     } else if(cipher == "mars") {
-        io->encProps.cipher = 5;
+        io->encProps.cipher = cryptostreampp::Algorithm::MARS;
     } else if(cipher == "cast256") {
-        io->encProps.cipher = 6;
+        io->encProps.cipher = cryptostreampp::Algorithm::CAST256;
     } else if(cipher == "camellia") {
-        io->encProps.cipher = 7;
+        io->encProps.cipher = cryptostreampp::Algorithm::Camellia;
     } else if(cipher == "rc5") {
-        io->encProps.cipher = 8;
+        io->encProps.cipher = cryptostreampp::Algorithm::RC5;
     } else if(cipher == "shacal2") {
-        io->encProps.cipher = 9;
+        io->encProps.cipher = cryptostreampp::Algorithm::SHACAL2;
     } else if(cipher == "null") {
-        io->encProps.cipher = 0;
+        io->encProps.cipher = cryptostreampp::Algorithm::NONE;
     }
 
     // magic partition?

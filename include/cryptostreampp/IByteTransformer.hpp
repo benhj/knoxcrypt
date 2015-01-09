@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without

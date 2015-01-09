@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2015>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include "Algorithms.hpp"
 #include "CryptoByteTransformer.hpp"
 #include "NullByteTransformer.hpp"
 #include "EncryptionProperties.hpp"
@@ -54,23 +55,23 @@ namespace cryptostreampp
     inline
     std::shared_ptr<IByteTransformer> buildCipherType(EncryptionProperties const &props)
     {
-        if(props.cipher == 2) {
+        if(props.cipher == Algorithm::Twofish) {
             BUILD_CIPHER(Twofish);
-        } else if(props.cipher == 3) {
+        } else if(props.cipher == Algorithm::Serpent) {
             BUILD_CIPHER(Serpent);
-        } else if(props.cipher == 4) {
+        } else if(props.cipher == Algorithm::RC6) {
             BUILD_CIPHER(RC6);
-        } else if(props.cipher == 5) {
+        } else if(props.cipher == Algorithm::MARS) {
             BUILD_CIPHER(MARS);
-        } else if(props.cipher == 6) {
+        } else if(props.cipher == Algorithm::CAST256) {
             BUILD_CIPHER(CAST256);
-        } else if(props.cipher == 7) {
+        } else if(props.cipher == Algorithm::Camellia) {
             BUILD_CIPHER(Camellia);
-        } else if(props.cipher == 8) {
+        } else if(props.cipher == Algorithm::RC5) {
             BUILD_CIPHER(RC5);
-        } else if(props.cipher == 9) {
+        } else if(props.cipher == Algorithm::SHACAL2) {
             BUILD_CIPHER(SHACAL2);
-        } else if(props.cipher == 0) {
+        } else if(props.cipher == Algorithm::NONE) {
             return std::make_shared<NullByteTransformer>(props);
         } else {
             BUILD_CIPHER(AES);

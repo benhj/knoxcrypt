@@ -469,9 +469,32 @@ namespace teasafe { namespace detail
         (void)in.read((char*)&i, 1);
         char j;
         (void)in.read((char*)&j, 1);
+        unsigned int cipher = (unsigned int)j;
         // note, i should always > 0 <= 255
         io->rounds = (unsigned int)i;
-        io->encProps.cipher = (unsigned int)j;
+
+        if(cipher == 1) {
+            io->encProps.cipher = cryptostreampp::Algorithm::AES; 
+        } else if(cipher == 2) {
+            io->encProps.cipher = cryptostreampp::Algorithm::Twofish;
+        } else if(cipher == 3) {
+            io->encProps.cipher = cryptostreampp::Algorithm::Serpent;
+        } else if(cipher == 4) {
+            io->encProps.cipher = cryptostreampp::Algorithm::RC6;
+        } else if(cipher == 5) {
+            io->encProps.cipher = cryptostreampp::Algorithm::MARS;
+        } else if(cipher == 6) {
+            io->encProps.cipher = cryptostreampp::Algorithm::CAST256;
+        } else if(cipher == 7) {
+            io->encProps.cipher = cryptostreampp::Algorithm::Camellia;
+        } else if(cipher == 8) {
+            io->encProps.cipher = cryptostreampp::Algorithm::RC5;
+        } else if(cipher == 9) {
+            io->encProps.cipher = cryptostreampp::Algorithm::SHACAL2;
+        } else if(cipher == 0) {
+            io->encProps.cipher = cryptostreampp::Algorithm::NONE;
+        }
+
         in.close();
         io->encProps.iv = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer.front());
         io->encProps.iv2 = teasafe::detail::convertInt8ArrayToInt64(&ivBuffer2.front());

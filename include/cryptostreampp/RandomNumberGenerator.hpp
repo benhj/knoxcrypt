@@ -26,68 +26,30 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// a cipher type that performs zero encryption
+/// For generating a cryptographically secure random number
 
 #pragma once
 
-#include "EncryptionProperties.hpp"
-#include "IByteTransformer.hpp"
-#include <cstdint>
-#include <ios>
-#include <string>
+#include <random>
+
+#include <functional>
 
 namespace cryptostreampp
 {
 
-    class NullByteTransformer : public IByteTransformer
+    /**
+     * @brief  generates a secure 64 bit random number;
+     * will error out if not enough entropy
+     * @return a 64 bit random number
+     */
+    uint64_t crypto_random()
     {
-      public:
-        NullByteTransformer(EncryptionProperties const &encProps);
-
-        void init();
-
-        ~NullByteTransformer();
-
-      private:
-
-        NullByteTransformer(); // not required
-
-        void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
-        void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const;
-    };
-
-    inline
-    NullByteTransformer::NullByteTransformer(EncryptionProperties const &encProps)
-      : IByteTransformer(encProps)
-    {
+        std::random_device rd;
+        std::uniform_int_distribution<uint64_t> dis;
+        std::function<uint64_t()> gen = std::bind(dis, std::ref(rd));
+        return gen();
     }
 
-    inline
-    void
-    NullByteTransformer::init()
-    {
-        IByteTransformer::generateKeyAndIV();
-    }
-
-    inline
-    NullByteTransformer::~NullByteTransformer()
-    {
-
-    }
-
-    inline
-    void 
-    NullByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
-    {
-        (void)std::copy(in, in + length, out);
-    }
-
-    inline
-    void 
-    NullByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const
-    {
-        (void)std::copy(in, in + length, out);
-    }
 }
 
 

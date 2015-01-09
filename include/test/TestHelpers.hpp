@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include "cryptostreampp/Algorithms.hpp"
 #include "teasafe/CoreTeaSafeIO.hpp"
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/TeaSafeException.hpp"
@@ -61,7 +62,7 @@ teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
     io->encProps.iv3 = uint64_t(3081342484970028645);
     io->encProps.iv4 = uint64_t(3081342484970028645);
     io->rounds = 64;
-    io->encProps.cipher = 1; // NULL cipher (no encryption)
+    io->encProps.cipher = cryptostreampp::Algorithm::AES;
     io->rootBlock = 0;
     io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
     return io;

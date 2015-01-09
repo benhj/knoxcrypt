@@ -29,6 +29,8 @@
 
 #pragma once
 
+#include "Algorithms.hpp"
+
 #include <cstdint>
 #include <string>
 
@@ -41,6 +43,6 @@ namespace cryptostreampp
         uint64_t iv2;          // IV used to initialize the cipher stream
         uint64_t iv3;          // IV used to initialize the cipher stream
         uint64_t iv4;          // IV used to initialize the cipher stream
-        int cipher;            // identifies the encryption algorithm (TODO: ENUM??)      
+        Algorithm cipher;      // identifies the encryption algorithm 
     };
 }
