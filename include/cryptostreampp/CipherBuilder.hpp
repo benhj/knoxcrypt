@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include "cryptostreampp/CryptoByteTransformer.hpp"
-#include "cryptostreampp/NullByteTransformer.hpp"
-#include "cryptostreampp/EncryptionProperties.hpp"
+#include "CryptoByteTransformer.hpp"
+#include "NullByteTransformer.hpp"
+#include "EncryptionProperties.hpp"
 
 #include "cryptopp/aes.h"
 #include "cryptopp/camellia.h"

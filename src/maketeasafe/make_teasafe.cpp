@@ -31,7 +31,7 @@
 #include "utility/EcholessPasswordPrompt.hpp"
 #include "utility/EventType.hpp"
 #include "utility/MakeTeaSafe.hpp"
-#include "utility/RandomNumberGenerator.hpp"
+#include "cryptostreampp/RandomNumberGenerator.hpp"
 
 #include <boost/progress.hpp>
 #include <boost/program_options.hpp>
@@ -83,10 +83,10 @@ int main(int argc, char *argv[])
 
     // use a non-deterministic random device to generate the iv. This
     // allegedly pulls data from /dev/urandom
-    io->encProps.iv = teasafe::utility::random();
-    io->encProps.iv2 = teasafe::utility::random();
-    io->encProps.iv3 = teasafe::utility::random();
-    io->encProps.iv4 = teasafe::utility::random();
+    io->encProps.iv = cryptostreampp::crypto_random();
+    io->encProps.iv2 = cryptostreampp::crypto_random();
+    io->encProps.iv3 = cryptostreampp::crypto_random();
+    io->encProps.iv4 = cryptostreampp::crypto_random();
 
     po::variables_map vm;
     try {

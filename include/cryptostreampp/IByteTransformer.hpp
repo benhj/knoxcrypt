@@ -39,6 +39,9 @@
 #include <ios>
 #include <string>
 
+// If static var initialization, comment this back in
+#define STATIC_VARS
+
 namespace cryptostreampp
 {
     class IByteTransformer
@@ -55,13 +58,22 @@ namespace cryptostreampp
         virtual ~IByteTransformer();
 
         /// has key and IV been initialized yet?
-        static bool m_init; 
+#ifdef STATIC_VARS
+        static 
+#endif
+        bool m_init; 
 
         /// 256 bit encryption / decryption key
-        static uint8_t g_bigKey[32]; 
+#ifdef STATIC_VARS
+        static 
+#endif
+        uint8_t g_bigKey[32]; 
 
         /// 256 bit IV
-        static uint8_t g_bigIV[32];  
+#ifdef STATIC_VARS
+        static 
+#endif
+        uint8_t g_bigIV[32];  
 
       private:
         virtual void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
@@ -92,7 +104,12 @@ namespace cryptostreampp
 
     inline
     IByteTransformer::IByteTransformer(EncryptionProperties const &encProps)
-      : m_props(encProps)
+      : 
+#ifndef STATIC_VARS
+      m_init(false),
+#endif
+      m_props(encProps)
+
     {
     }
 
