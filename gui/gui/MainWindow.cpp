@@ -231,17 +231,25 @@ void MainWindow::newButtonHandler()
             QString cipher = QInputDialog::getItem(this, tr("Algorithm choice"),
                                                     tr("Cipher:"), items, 0, false, &ok);
             if(cipher == "aes") {
-                io->cipher = 1;
+                io->encProps.cipher = cryptostreampp::Algorithm::AES; 
             } else if(cipher == "twofish") {
-                io->cipher = 2;
+                io->encProps.cipher = cryptostreampp::Algorithm::Twofish;
             } else if(cipher == "serpent") {
-                io->cipher = 3;
+                io->encProps.cipher = cryptostreampp::Algorithm::Serpent;
             } else if(cipher == "rc6") {
-                io->cipher = 4;
+                io->encProps.cipher = cryptostreampp::Algorithm::RC6;
             } else if(cipher == "mars") {
-                io->cipher = 5;
+                io->encProps.cipher = cryptostreampp::Algorithm::MARS;
             } else if(cipher == "cast256") {
-                io->cipher = 6;
+                io->encProps.cipher = cryptostreampp::Algorithm::CAST256;
+            } else if(cipher == "camellia") {
+                io->encProps.cipher = cryptostreampp::Algorithm::Camellia;
+            } else if(cipher == "rc5") {
+                io->encProps.cipher = cryptostreampp::Algorithm::RC5;
+            } else if(cipher == "shacal2") {
+                io->encProps.cipher = cryptostreampp::Algorithm::SHACAL2;
+            } else if(cipher == "none") {
+                io->encProps.cipher = cryptostreampp::Algorithm::NONE;
             }
 
             io->rootBlock = 0;
@@ -250,7 +258,6 @@ void MainWindow::newButtonHandler()
             io->encProps.iv2 = teasafe::utility::random();
             io->encProps.iv3 = teasafe::utility::random();
             io->encProps.iv4 = teasafe::utility::random();
-            io->encProps.cipher = 1; // AES for now; TODO: add ability to chose
 
             // note, getInt arguably too constraining
             io->blocks = input.getInt(this, tr("#4096 byte blocks"),
