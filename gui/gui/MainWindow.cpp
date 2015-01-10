@@ -78,10 +78,10 @@ MainWindow::MainWindow(QWidget *parent) :
                      SLOT(getTeaSafeFromLoader()));
     QObject::connect(&m_builderThread, SIGNAL(finishedBuildingSignal()), this,
                      SLOT(getTeaSafeFromBuilder()));
-    QObject::connect(&m_cipherCallback, SIGNAL(updateProgressSignal(long)), this,
-                     SLOT(updateProgressSlot(long)));
-    QObject::connect(&m_cipherCallback, SIGNAL(setMaximumProgressSignal(long)), this,
-                     SLOT(setMaximumProgressSlot(long)));
+//    QObject::connect(&m_cipherCallback, SIGNAL(updateProgressSignal(long)), this,
+//                     SLOT(updateProgressSlot(long)));
+//    QObject::connect(&m_cipherCallback, SIGNAL(setMaximumProgressSignal(long)), this,
+//                     SLOT(setMaximumProgressSlot(long)));
 
     QObject::connect(&m_builderThread, SIGNAL(blockCountSignal(long)), this,
                      SLOT(setMaximumProgressSlot(long)));
@@ -176,20 +176,20 @@ void MainWindow::loadFileButtonHandler()
             io->rootBlock = 0;
 
             // give the cipher generation process a gui callback
-            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
-                                                                &m_cipherCallback,
-                                                                std::placeholders::_1, amount));
-            io->ccb = f;
+//            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
+//            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
+//                                                                &m_cipherCallback,
+//                                                                std::placeholders::_1, amount));
+//            io->ccb = f;
 
-            // create a progress dialog to display progress of cipher generation
-            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
-            m_sd->setWindowModality(Qt::WindowModal);
+//            // create a progress dialog to display progress of cipher generation
+//            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
+//            m_sd->setWindowModality(Qt::WindowModal);
 
             // start loading of TeaSafe image
             m_loaderThread.setSharedIO(io);
             m_loaderThread.start();
-            m_sd->exec();
+            //m_sd->exec();
             ui->nameLabel->setText(io->path.c_str());
         }
     }
@@ -265,20 +265,20 @@ void MainWindow::newButtonHandler()
             io->freeBlocks = io->blocks;
 
             // give the cipher generation process a gui callback
-            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
-                                                                &m_cipherCallback,
-                                                                std::placeholders::_1, amount));
-            io->ccb = f;
+//            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
+//            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
+//                                                                &m_cipherCallback,
+//                                                                std::placeholders::_1, amount));
+//            io->ccb = f;
 
             // create a progress dialog to display progress of cipher generation
-            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
-            m_sd->setWindowModality(Qt::WindowModal);
+//            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
+//            m_sd->setWindowModality(Qt::WindowModal);
 
             m_builderThread.setSharedIO(io);
 
             m_builderThread.start();
-            m_sd->exec();
+            //m_sd->exec();
             ui->nameLabel->setText(io->path.c_str());
 
         }
