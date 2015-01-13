@@ -69,14 +69,14 @@ namespace cryptostreampp
 
     inline
     void 
-    NullByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length)
+    NullByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff, long length) const
     {
         (void)std::copy(in, in + length, out);
     }
 
     inline
     void 
-    NullByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length)
+    NullByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff, long length) const
     {
         (void)std::copy(in, in + length, out);
     }

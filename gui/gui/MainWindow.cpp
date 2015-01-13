@@ -33,7 +33,7 @@
 #include "ItemAdder.h"
 #include "TreeItemPathDeriver.h"
 
-#include "cipher/IByteTransformer.hpp"
+#include "cryptostreampp/IByteTransformer.hpp"
 #include "teasafe/EntryInfo.hpp"
 #include "teasafe/FileBlockBuilder.hpp"
 #include "teasafe/OpenDisposition.hpp"
@@ -43,7 +43,7 @@
 #include "utility/ExtractToPhysical.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
 #include "utility/RemoveEntry.hpp"
-#include "utility/RandomNumberGenerator.hpp"
+#include "cryptostreampp/RandomNumberGenerator.hpp"
 
 #include <QTreeWidgetItem>
 #include <QDebug>
@@ -78,10 +78,10 @@ MainWindow::MainWindow(QWidget *parent) :
                      SLOT(getTeaSafeFromLoader()));
     QObject::connect(&m_builderThread, SIGNAL(finishedBuildingSignal()), this,
                      SLOT(getTeaSafeFromBuilder()));
-    QObject::connect(&m_cipherCallback, SIGNAL(updateProgressSignal(long)), this,
-                     SLOT(updateProgressSlot(long)));
-    QObject::connect(&m_cipherCallback, SIGNAL(setMaximumProgressSignal(long)), this,
-                     SLOT(setMaximumProgressSlot(long)));
+//    QObject::connect(&m_cipherCallback, SIGNAL(updateProgressSignal(long)), this,
+//                     SLOT(updateProgressSlot(long)));
+//    QObject::connect(&m_cipherCallback, SIGNAL(setMaximumProgressSignal(long)), this,
+//                     SLOT(setMaximumProgressSlot(long)));
 
     QObject::connect(&m_builderThread, SIGNAL(blockCountSignal(long)), this,
                      SLOT(setMaximumProgressSlot(long)));
@@ -159,7 +159,7 @@ void MainWindow::loadFileButtonHandler()
 
         // reset state
         ui->fileTree->clear();
-        teasafe::cipher::IByteTransformer::m_init = false;
+        cryptostreampp::IByteTransformer::m_init = false;
         m_teaSafe.reset();
         std::set<std::string>().swap(m_populatedSet);
 
@@ -171,25 +171,25 @@ void MainWindow::loadFileButtonHandler()
         io->encProps.password = QInputDialog::getText(this, tr("Password dialog"),
                                              tr("Password:"), QLineEdit::NoEcho, "", &ok).toStdString();
 
-        if((!io->password.empty() && ok)) {
+        if((!io->encProps.password.empty() && ok)) {
 
             io->rootBlock = 0;
 
             // give the cipher generation process a gui callback
-            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
-                                                                &m_cipherCallback,
-                                                                std::placeholders::_1, amount));
-            io->ccb = f;
+//            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
+//            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
+//                                                                &m_cipherCallback,
+//                                                                std::placeholders::_1, amount));
+//            io->ccb = f;
 
-            // create a progress dialog to display progress of cipher generation
-            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
-            m_sd->setWindowModality(Qt::WindowModal);
+//            // create a progress dialog to display progress of cipher generation
+//            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
+//            m_sd->setWindowModality(Qt::WindowModal);
 
             // start loading of TeaSafe image
             m_loaderThread.setSharedIO(io);
             m_loaderThread.start();
-            m_sd->exec();
+            //m_sd->exec();
             ui->nameLabel->setText(io->path.c_str());
         }
     }
@@ -205,7 +205,7 @@ void MainWindow::newButtonHandler()
 
         // reset state
         ui->fileTree->clear();
-        teasafe::cipher::IByteTransformer::m_init = false;
+        cryptostreampp::IByteTransformer::m_init = false;
         m_teaSafe.reset();
         std::set<std::string>().swap(m_populatedSet);
 
@@ -216,10 +216,10 @@ void MainWindow::newButtonHandler()
         bool ok;
         QInputDialog input;
         input.setWindowModality(Qt::WindowModal);
-        io->password = input.getText(this, tr("Password dialog"),
+        io->encProps.password = input.getText(this, tr("Password dialog"),
                                      tr("Password:"), QLineEdit::NoEcho, "", &ok).toStdString();
 
-        if((!io->password.empty() && ok)) {
+        if((!io->encProps.password.empty() && ok)) {
 
             QStringList items;
             items.append("aes");
@@ -254,10 +254,10 @@ void MainWindow::newButtonHandler()
 
             io->rootBlock = 0;
             io->rounds = 64;
-            io->encProps.iv = teasafe::utility::random();
-            io->encProps.iv2 = teasafe::utility::random();
-            io->encProps.iv3 = teasafe::utility::random();
-            io->encProps.iv4 = teasafe::utility::random();
+            io->encProps.iv = cryptostreampp::crypto_random();
+            io->encProps.iv2 = cryptostreampp::crypto_random();
+            io->encProps.iv3 = cryptostreampp::crypto_random();
+            io->encProps.iv4 = cryptostreampp::crypto_random();
 
             // note, getInt arguably too constraining
             io->blocks = input.getInt(this, tr("#4096 byte blocks"),
@@ -265,20 +265,20 @@ void MainWindow::newButtonHandler()
             io->freeBlocks = io->blocks;
 
             // give the cipher generation process a gui callback
-            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
-                                                                &m_cipherCallback,
-                                                                std::placeholders::_1, amount));
-            io->ccb = f;
+//            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
+//            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
+//                                                                &m_cipherCallback,
+//                                                                std::placeholders::_1, amount));
+//            io->ccb = f;
 
             // create a progress dialog to display progress of cipher generation
-            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
-            m_sd->setWindowModality(Qt::WindowModal);
+//            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
+//            m_sd->setWindowModality(Qt::WindowModal);
 
             m_builderThread.setSharedIO(io);
 
             m_builderThread.start();
-            m_sd->exec();
+            //m_sd->exec();
             ui->nameLabel->setText(io->path.c_str());
 
         }
