@@ -30,5 +30,14 @@
 
 namespace cryptostreampp {
 
-        enum class Algorithm { AES, Twofish, Serpent, RC6, MARS, CAST256, Camellia, RC5, SHACAL2, NONE};
+        enum class Algorithm { AES, 
+                               Twofish, 
+                               Serpent, 
+                               RC6, 
+                               MARS, 
+                               CAST256, 
+                               Camellia, 
+                               RC5, 
+                               SHACAL2, 
+                               NONE};
 }

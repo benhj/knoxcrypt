@@ -44,13 +44,11 @@
 
 namespace cryptostreampp
 {
+
     class IByteTransformer
     {
       public:
         IByteTransformer(EncryptionProperties const &encProps);
-
-        /// must be implemented and called before anything else!!
-        virtual void init() = 0;
 
         void encrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length);
         void decrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length);
@@ -76,8 +74,8 @@ namespace cryptostreampp
         uint8_t g_bigIV[32];  
 
       private:
-        virtual void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
-        virtual void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) const = 0;
+        virtual void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) = 0;
+        virtual void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length) = 0;
 
       protected:
 

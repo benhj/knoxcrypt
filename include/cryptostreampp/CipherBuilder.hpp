@@ -43,11 +43,12 @@
 #include "cryptopp/shacal2.h"
 #include "cryptopp/twofish.h"
 #include "cryptopp/cast.h"
+#include "cryptopp/ccm.h"
 
 #include <memory>
 
 #define BUILD_CIPHER(X) \
-  return std::make_shared<CryptoByteTransformer<CryptoPP::X> >(props);     
+  return std::make_shared<CryptoByteTransformer<X> > (props);     
 
 namespace cryptostreampp
 {
@@ -56,25 +57,25 @@ namespace cryptostreampp
     std::shared_ptr<IByteTransformer> buildCipherType(EncryptionProperties const &props)
     {
         if(props.cipher == Algorithm::Twofish) {
-            BUILD_CIPHER(Twofish);
+            BUILD_CIPHER(CryptoPP::CTR_Mode<CryptoPP::Twofish>::Encryption);
         } else if(props.cipher == Algorithm::Serpent) {
-            BUILD_CIPHER(Serpent);
+            BUILD_CIPHER(CryptoPP::CTR_Mode<CryptoPP::Serpent>::Encryption);
         } else if(props.cipher == Algorithm::RC6) {
-            BUILD_CIPHER(RC6);
+            BUILD_CIPHER(CryptoPP::CTR_Mode<CryptoPP::RC6>::Encryption);
         } else if(props.cipher == Algorithm::MARS) {
-            BUILD_CIPHER(MARS);
+            BUILD_CIPHER(CryptoPP::CTR_Mode<CryptoPP::MARS>::Encryption);
         } else if(props.cipher == Algorithm::CAST256) {
-            BUILD_CIPHER(CAST256);
+            BUILD_CIPHER(CryptoPP::CTR_Mode<CryptoPP::CAST256>::Encryption);
         } else if(props.cipher == Algorithm::Camellia) {
-            BUILD_CIPHER(Camellia);
+            BUILD_CIPHER(CryptoPP::CTR_Mode<CryptoPP::Camellia>::Encryption);
         } else if(props.cipher == Algorithm::RC5) {
-            BUILD_CIPHER(RC5);
+            BUILD_CIPHER(CryptoPP::CTR_Mode<CryptoPP::RC5>::Encryption);
         } else if(props.cipher == Algorithm::SHACAL2) {
-            BUILD_CIPHER(SHACAL2);
+            BUILD_CIPHER(CryptoPP::CTR_Mode<CryptoPP::SHACAL2>::Encryption);
         } else if(props.cipher == Algorithm::NONE) {
             return std::make_shared<NullByteTransformer>(props);
         } else {
-            BUILD_CIPHER(AES);
+            BUILD_CIPHER(CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption);
         }
     }
 }

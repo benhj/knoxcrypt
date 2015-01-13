@@ -35,6 +35,7 @@
 
 #include <functional>
 #include <memory>
+#include <sstream>
   
 #include <fstream>
 #include <string>
@@ -47,7 +48,7 @@ namespace cryptostreampp
     class CryptoStreamPP;
     typedef std::shared_ptr<CryptoStreamPP> SharedCryptoStream;
 
-    class CryptoStreamPP
+    class CryptoStreamPP : public std::fstream
     {
       public:
         CryptoStreamPP(std::string const & path,
@@ -56,179 +57,71 @@ namespace cryptostreampp
 
         CryptoStreamPP& read(char * const buf, std::streamsize const n);
         CryptoStreamPP& write(char const * buf, std::streamsize const n);
-        CryptoStreamPP& seekg(std::streampos pos);
-        CryptoStreamPP& seekg(std::streamoff off, std::ios_base::seekdir way);
-        CryptoStreamPP& seekp(std::streampos pos);
-        CryptoStreamPP& seekp(std::streamoff off, std::ios_base::seekdir way);
-        std::streampos tellg() const;
-        std::streampos tellp() const;
-        bool bad() const;
-        void clear();
-        void flush();
-        void close();
-        bool is_open() const;
         void open(std::string const &path,
                   std::ios::openmode mode = std::ios::out | std::ios::binary);
+
       private:
+        CryptoStreamPP& doRead(char * const buf, std::streamsize const n);
+        CryptoStreamPP& doWrite(char const * buf, std::streamsize const n);
         CryptoStreamPP();
-        std::fstream m_stream;
         ByteTransformerPtr m_byteTransformer;
-        std::streampos m_gpos;
-        std::streampos m_ppos;
     };
 
     inline
     CryptoStreamPP::CryptoStreamPP(std::string const &path,
                                    EncryptionProperties const & encProps, 
                                    std::ios::openmode mode)
-        : m_stream(path.c_str(), mode)
+        : std::fstream(path.c_str(), mode)
         , m_byteTransformer(buildCipherType(encProps))
-        , m_gpos(0)
-        , m_ppos(0)
     {
-        // setup cipher
-        m_byteTransformer->init();
     }
 
     inline
     CryptoStreamPP&
     CryptoStreamPP::read(char * const buf, std::streamsize const n)
     {
-        std::ios_base::streamoff start = m_gpos;
-        std::vector<char> in;
-        in.resize(n);
-        if(m_stream.read(&in.front(), n).bad()) {
-            m_gpos = -1;
-            return *this;
-        }
-        m_gpos += n;
-        m_byteTransformer->decrypt(&in.front(), buf, start, n);
-        return *this;
+        return doRead(buf, n);
     }
 
     inline
     CryptoStreamPP&
     CryptoStreamPP::write(char const * buf, std::streamsize const n)
     {
-        std::vector<char> out;
-        out.resize(n);
-        std::ios_base::streamoff start = m_ppos;
-        m_byteTransformer->encrypt((char*)buf, &out.front(), start, n);
-        if(m_stream.write(&out.front(), n).bad()) {
-            m_ppos = -1;
+        return doWrite(buf, n);
+    }
+
+
+    inline
+    CryptoStreamPP&
+    CryptoStreamPP::doRead(char * const buf, std::streamsize const n)
+    {
+        std::ios_base::streamoff start = std::fstream::tellg();
+        std::vector<char> in;
+        in.resize(n);
+        if(std::fstream::read(&in.front(), n).bad()) {
             return *this;
         }
-        m_ppos += n;
+        m_byteTransformer->decrypt(&in.front(), buf, start, n);
         return *this;
     }
 
     inline
     CryptoStreamPP&
-    CryptoStreamPP::seekg(std::streampos pos)
+    CryptoStreamPP::doWrite(char const * buf, std::streamsize const n)
     {
-        if(m_stream.seekg(pos).bad()) {
-            m_gpos = -1;
-        } else {
-            m_gpos = pos;
-        }
+        std::vector<char> out;
+        out.resize(n);
+        std::ios_base::streamoff start = std::fstream::tellp();
+        m_byteTransformer->encrypt((char*)buf, &out.front(), start, n);
+        (void)std::fstream::write(&out.front(), n);
         return *this;
     }
 
     inline
-    CryptoStreamPP&
-    CryptoStreamPP::seekg(std::streamoff off, std::ios_base::seekdir way)
-    {
-        if(m_stream.seekg(off, way).bad()) {
-            m_gpos = -1;
-        } else {
-            m_gpos = m_stream.tellg();
-        }
-        return *this;
-    }
-
-    inline
-    CryptoStreamPP&
-    CryptoStreamPP::seekp(std::streampos pos)
-    {
-        // do not allow seeking past end of stream!!
-        if(m_stream.seekp(pos).bad()) {
-            m_ppos = -1;
-        } else {
-            m_ppos = pos;
-        }
-        return *this;
-    }
-
-    inline
-    CryptoStreamPP&
-    CryptoStreamPP::seekp(std::streamoff off, std::ios_base::seekdir way)
-    {
-        if(m_stream.seekp(off, way).bad()) {
-            m_ppos = -1;
-        } else {
-            m_ppos = m_stream.tellp();
-        }
-        return *this;
-    }
-
-    inline
-    std::streampos
-    CryptoStreamPP::tellg() const
-    {
-        return m_gpos;
-    }
-
-    inline
-    std::streampos
-    CryptoStreamPP::tellp() const
-    {
-        return m_ppos;
-    }
-
-    inline
     void
-    CryptoStreamPP::close()
+    CryptoStreamPP::open(std::string const &path, std::ios::openmode mode)
     {
-        m_stream.close();
+        std::fstream::open(path.c_str(), mode);
     }
-
-    inline
-    void
-    CryptoStreamPP::flush()
-    {
-        m_stream.flush();
-    }
-
-    inline
-    bool
-    CryptoStreamPP::is_open() const
-    {
-        return m_stream.is_open();
-    }
-
-    inline
-    void
-    CryptoStreamPP::open(std::string const &path,
-                         std::ios::openmode mode)
-    {
-        m_stream.open(path.c_str(), mode);
-        m_ppos = 0;
-        m_gpos = 0;
-    }
-
-    inline
-    bool
-    CryptoStreamPP::bad() const
-    {
-        return m_stream.bad();
-    }
-
-    inline
-    void
-    CryptoStreamPP::clear()
-    {
-        m_stream.clear();
-    }
-
 }
 

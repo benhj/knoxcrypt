@@ -30,7 +30,6 @@
 #pragma once
 
 #include "Algorithms.hpp"
-
 #include <cstdint>
 #include <string>
 
