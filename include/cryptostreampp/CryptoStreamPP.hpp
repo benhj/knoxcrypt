@@ -52,7 +52,7 @@ namespace cryptostreampp
     {
       public:
         CryptoStreamPP(std::string const & path,
-                       EncryptionProperties const &encProps,
+                       EncryptionProperties & encProps,
                        std::ios::openmode mode = std::ios::out | std::ios::binary);
 
         CryptoStreamPP& read(char * const buf, std::streamsize const n);
@@ -69,7 +69,7 @@ namespace cryptostreampp
 
     inline
     CryptoStreamPP::CryptoStreamPP(std::string const &path,
-                                   EncryptionProperties const & encProps, 
+                                   EncryptionProperties & encProps, 
                                    std::ios::openmode mode)
         : std::fstream(path.c_str(), mode)
         , m_byteTransformer(buildCipherType(encProps))

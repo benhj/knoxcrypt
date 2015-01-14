@@ -79,7 +79,7 @@ namespace cryptostreampp
     {
         IByteTransformer::generateKeyAndIV();
         m_cipher.SetKeyWithIV(IByteTransformer::g_bigKey, 
-                              sizeof(IByteTransformer::g_bigKey), 
+                              m_props.keyBytes, 
                               IByteTransformer::g_bigIV);
     }
 
