@@ -21,7 +21,7 @@ endif
 FUSE_LIBS = $(shell $(PKG_CONFIG) --libs fuse 2>/dev/null || echo "-l$(FUSE)")
 
 # standard library search paths
-LDFLAGS +=  -L/usr/local/lib -L/usr/lib 
+LDFLAGS +=  -L/usr/local/lib -L/usr/lib
 
 # try to find path of where boost is probably installed
 ifeq ($(wildcard /usr/local/lib/libboost*),)
@@ -32,9 +32,9 @@ endif
 
 # try to find where boost headers are likely installed
 ifeq ($(wildcard /usr/local/include/boost/%),)
-    BOOST_HEADERS= /usr/local/include/boost
+    BOOST_HEADERS= /usr/local/include/
 else
-    BOOST_HEADERS= /usr/include/boost
+    BOOST_HEADERS= /usr/include/
 endif
 
 # prefer dynamic libs for security
@@ -115,25 +115,25 @@ all: $(SOURCES) $(CIPHER_SRC) directoryObj \
 lib: $(SOURCES) directoryObj $(OBJECTS) libteasafe.a
 
 $(TEST_EXECUTABLE): directoryObjTest $(OBJECTS_TEST) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_TEST) ./libteasafe.a /usr/lib/libcryptopp.a $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_TEST) ./libteasafe.a /usr/local/lib/libcryptopp.a $(BOOST_LD) -o $@
 
 $(MAKETeaSafe_EXECUTABLE): directoryObjMakeBfs $(OBJECTS_MAKEBIN) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_MAKEBIN) ./libteasafe.a /usr/lib/libcryptopp.a $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_MAKEBIN) ./libteasafe.a /usr/local/lib/libcryptopp.a $(BOOST_LD) -o $@
 
 $(SHELL_BIN): directoryObjUtility $(OBJECTS_UTILITY) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_UTILITY) ./libteasafe.a /usr/lib/libcryptopp.a $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_UTILITY) ./libteasafe.a /usr/local/lib/libcryptopp.a $(BOOST_LD) -o $@
 
 $(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a /usr/lib/libcryptopp.a $(FUSE_LIBS) $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a /usr/local/lib/libcryptopp.a $(FUSE_LIBS) $(BOOST_LD) -o $@
 
 shell:  $(SOURCES) directoryObj \
         $(OBJECTS) libteasafe.a \
         $(SHELL_BIN)
-        
+
 maketeasafe: $(SOURCES) directoryObj \
              $(OBJECTS) libteasafe.a \
              $(MAKETeaSafe_EXECUTABLE)
-        
+
 clean:
 	/bin/rm -fr obj obj-maketeasafe obj-test obj-fuse test_$(UNAME) maketeasafe_$(UNAME) teasafe_$(UNAME) teashell_$(UNAME) obj-utility libteasafe.a
 
@@ -152,8 +152,8 @@ directoryObjFuse:
 directoryObjUtility:
 	/bin/mkdir -p obj-utility
 
-libteasafe.a: $(OBJECTS) 
-	/usr/bin/ar rcs libteasafe.a obj/* 
+libteasafe.a: $(OBJECTS)
+	/usr/bin/ar rcs libteasafe.a obj/*
 
 check: $(TEST_EXECUTABLE)
 	./$(TEST_EXECUTABLE)

@@ -83,7 +83,7 @@ struct CommandDescriptor
 };
 
 /// stores all available commands
-typedef std::vector<CommandDescriptor> Commands;
+using Commands = std::vector<CommandDescriptor>;
 Commands g_availableCommands;
 
 /// lists all available commands

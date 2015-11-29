@@ -33,16 +33,16 @@
 #include "teasafe/File.hpp"
 
 #include <boost/optional.hpp>
-  
+
 #include <memory>
 #include <map>
 
 namespace teasafe
 {
 
-    typedef boost::optional<std::ios_base::streamoff> OptionalOffset;
-    typedef std::shared_ptr<EntryInfo> SharedEntryInfo;
-    typedef std::map<std::string, SharedEntryInfo> EntryInfoCacheMap;
+    using OptionalOffset = boost::optional<std::ios_base::streamoff>;
+    using SharedEntryInfo = std::shared_ptr<EntryInfo>;
+    using EntryInfoCacheMap = std::map<std::string, SharedEntryInfo>;
 
     class CompoundFolder;
 
@@ -325,11 +325,10 @@ namespace teasafe
         // be written so should check list of entries to find 'blank' space.
         bool m_checkForEarlyMetaData;
 
-        // An entry was deleted meaning that there is a 'space' available for 
+        // An entry was deleted meaning that there is a 'space' available for
         // an old entry
         bool m_oldSpaceAvailableForEntry;
 
     };
 
 }
-

@@ -50,7 +50,7 @@
 
 namespace teasafe
 {
-    typedef boost::optional<uint64_t> OptionalMagicPart;
+    using OptionalMagicPart = boost::optional<uint64_t>;
 
     class MakeTeaSafe
     {
@@ -82,8 +82,8 @@ namespace teasafe
         bool m_sparse;           // should a sparse image be created?
 
         /// to notify image-writing process
-        typedef boost::signals2::signal<void(EventType)> WriteSignal;
-        typedef std::shared_ptr<WriteSignal> SharedWriteSignal;
+        using WriteSignal = boost::signals2::signal<void(EventType)>;
+        using SharedWriteSignal = std::shared_ptr<WriteSignal>;
         SharedWriteSignal m_writeSignal;
 
         MakeTeaSafe(); // not required
@@ -232,7 +232,7 @@ namespace teasafe
             out.write((char*)passHash, 32);
 
             // now seek past iv, header and hash bytes before continuing to write
-            out.seekp(detail::beginning()); 
+            out.seekp(detail::beginning());
             out.write((char*)sizeBytes, 8);
             createVolumeBitMap(io->blocks, out);
 

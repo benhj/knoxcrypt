@@ -47,11 +47,11 @@
 namespace teasafe
 {
     class TeaSafe;
-    typedef std::shared_ptr<TeaSafe> SharedTeaSafe;
+    using SharedTeaSafe = std::shared_ptr<TeaSafe>;
 
     class TeaSafe
     {
-        typedef std::shared_ptr<CompoundFolder> SharedCompoundFolder;
+        using SharedCompoundFolder = std::shared_ptr<CompoundFolder>;
 
       public:
         explicit TeaSafe(SharedCoreIO const &io);
@@ -162,15 +162,15 @@ namespace teasafe
 
         // so that folders don't have to be consistently rebuilt store
         // them as they are built in map and prefer to query map in future
-        typedef std::map<std::string, SharedCompoundFolder> FolderCache;
+        using FolderCache = std::map<std::string, SharedCompoundFolder>;
         mutable FolderCache m_folderCache;
 
-        typedef std::mutex StateMutex;
-        typedef std::lock_guard<StateMutex> StateLock;
+        using StateMutex = std::mutex;
+        using StateLock = std::lock_guard<StateMutex>;
         mutable StateMutex m_stateMutex;
 
         // so that a new file doesn't need to be created each time the same file is opened
-        typedef std::map<std::string, SharedFile> FileCache;
+        using FileCache = std::map<std::string, SharedFile>;
         mutable FileCache m_fileCache;
 
         TeaSafe(); // not required

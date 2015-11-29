@@ -162,7 +162,7 @@ namespace teasafe
         void doRemoveEntryFromCache(std::string const &name);
 
         // the underlying folder that stores index folders
-        typedef std::shared_ptr<ContentFolder> SharedContentFolder;
+        using SharedContentFolder = std::shared_ptr<ContentFolder>;
         mutable SharedContentFolder m_compoundFolder;
 
         // a compound folder will be composed of multiple sub-folders
@@ -183,5 +183,3 @@ namespace teasafe
     };
 
 }
-
-

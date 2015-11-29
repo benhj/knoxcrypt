@@ -297,7 +297,7 @@ namespace teasafe { namespace detail
      * @param in the image stream
      * @return the next available block
      */
-    typedef boost::optional<uint64_t> OptionalBlock;
+    using OptionalBlock = boost::optional<uint64_t>;
     inline OptionalBlock getNextAvailableBlock(teasafe::ContainerImageStream &in, uint64_t const blocks_ = 0)
     {
         // get number of blocks that make up fs
@@ -474,7 +474,7 @@ namespace teasafe { namespace detail
         io->rounds = (unsigned int)i;
 
         if(cipher == 1) {
-            io->encProps.cipher = cryptostreampp::Algorithm::AES; 
+            io->encProps.cipher = cryptostreampp::Algorithm::AES;
         } else if(cipher == 2) {
             io->encProps.cipher = cryptostreampp::Algorithm::Twofish;
         } else if(cipher == 3) {
@@ -504,4 +504,3 @@ namespace teasafe { namespace detail
 
 }
 }
-

@@ -46,14 +46,14 @@ namespace teasafe
 {
 
     class File;
-    typedef std::shared_ptr<File> SharedFile;
+    using SharedFile = std::shared_ptr<File>;
 
     class File
     {
 
-        typedef std::function<void(uint64_t)> SetEntryInfoSizeCallback;
-        typedef boost::optional<SetEntryInfoSizeCallback> OptionalSizeCallback;
-        typedef std::shared_ptr<FileBlock> SharedFileBlock;
+        using SetEntryInfoSizeCallback = std::function<void(uint64_t)>;
+        using OptionalSizeCallback = boost::optional<SetEntryInfoSizeCallback>;
+        using SharedFileBlock = std::shared_ptr<FileBlock>;
 
       public:
         /**

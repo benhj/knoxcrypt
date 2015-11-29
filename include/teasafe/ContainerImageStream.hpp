@@ -34,14 +34,14 @@
 
 #include <functional>
 #include <memory>
-  
+
 #include <fstream>
 #include <string>
 
 namespace teasafe
 {
     class ContainerImageStream;
-    typedef std::shared_ptr<ContainerImageStream> SharedImageStream;
+    using SharedImageStream = std::shared_ptr<ContainerImageStream>;
 
     class ContainerImageStream
     {
@@ -76,4 +76,3 @@ namespace teasafe
     };
 
 }
-

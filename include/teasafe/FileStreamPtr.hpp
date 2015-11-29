@@ -37,12 +37,9 @@
 
 namespace teasafe
 {
-    typedef boost::iostreams::stream<FileDevice> FileStream;
+    using FileStream = boost::iostreams::stream<FileDevice>;
 
     // shared_ptr until I can get c++11 supported properly at
     // which point I'll switch to unique_ptr
-    typedef std::shared_ptr<FileStream> FileStreamPtr;
-
-
+    using FileStreamPtr = std::shared_ptr<FileStream>;
 }
-

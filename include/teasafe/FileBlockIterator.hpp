@@ -72,7 +72,7 @@ namespace teasafe
 
         SharedImageStream m_stream;
 
-        typedef boost::optional<FileBlock> WorkingFileBlock;
+        using WorkingFileBlock = boost::optional<FileBlock>;
         WorkingFileBlock m_workingFileBlock;
 
     };

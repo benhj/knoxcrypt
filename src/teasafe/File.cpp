@@ -426,7 +426,7 @@ namespace teasafe
 
     }
 
-    typedef std::pair<int64_t, boost::iostreams::stream_offset> SeekPair;
+    using SeekPair = std::pair<int64_t, boost::iostreams::stream_offset>;
     SeekPair
     getPositionFromBegin(boost::iostreams::stream_offset off)
     {
@@ -474,7 +474,7 @@ namespace teasafe
                        boost::iostreams::stream_offset bytesWrittenToEnd)
     {
         // treat like begin and then 'inverse'
-        auto treatLikeBegin = getPositionFromBegin(abs(off));
+        auto treatLikeBegin = getPositionFromBegin(std::abs(off));
 
         int64_t block = endBlockIndex - treatLikeBegin.first;
         boost::iostreams::stream_offset blockPosition = bytesWrittenToEnd - treatLikeBegin.second;
@@ -506,14 +506,14 @@ namespace teasafe
             return std::make_pair(blockIndex, addition);
         } else {
 
-            boost::iostreams::stream_offset const leftOver = abs(addition) % blockSize;
+            boost::iostreams::stream_offset const leftOver = std::abs(addition) % blockSize;
 
             int64_t sumValue = 0;
 
             boost::iostreams::stream_offset roundedDown = addition - leftOver;
 
-            if (abs(roundedDown) > (blockSize)) {
-                sumValue = abs(roundedDown) / blockSize;
+            if (std::abs(roundedDown) > (blockSize)) {
+                sumValue = std::abs(roundedDown) / blockSize;
 
                 // hacky bit to get working
                 if ((addition < 0) && ((blockSize - leftOver) > indexedBlockPosition)) {

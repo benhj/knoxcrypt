@@ -40,8 +40,8 @@ namespace teasafe
 {
 
     class FileBlockBuilder;
-    typedef std::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
-    typedef std::deque<uint64_t> BlockDeque;
+    using SharedBlockBuilder = std::shared_ptr<FileBlockBuilder>;
+    using BlockDeque = std::deque<uint64_t>;
 
     class FileBlockBuilder
     {

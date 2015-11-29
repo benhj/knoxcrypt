@@ -41,7 +41,7 @@ namespace teasafe
 {
 
     class FileBlockBuilder;
-    typedef std::shared_ptr<FileBlockBuilder> SharedBlockBuilder;
+    using SharedBlockBuilder = std::shared_ptr<FileBlockBuilder>;
 
     struct CoreTeaSafeIO
     {
@@ -52,12 +52,11 @@ namespace teasafe
         unsigned int rounds;             // number of rounds used by enc. process
         uint64_t rootBlock;              // the start block of the root folder
         SharedBlockBuilder blockBuilder; // a block factory / resource manage
-        typedef std::function<void(teasafe::EventType)> Callback;
-        typedef boost::optional<Callback> OptionalCallback;
+        using Callback = std::function<void(teasafe::EventType)>;
+        using OptionalCallback = boost::optional<Callback>;
         OptionalCallback ccb;            // call back for cipher
     };
 
-    typedef std::shared_ptr<CoreTeaSafeIO> SharedCoreIO;
+    using SharedCoreIO = std::shared_ptr<CoreTeaSafeIO>;
 
 }
-
