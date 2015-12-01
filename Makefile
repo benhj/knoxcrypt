@@ -1,8 +1,3 @@
-# options
-#
-# uncomment to compile boost in statically
-# STATIC_BUILD=YES
-
 PKG_CONFIG ?= pkg-config
 
 # discover the liklihood of what version of FUSE we're using
@@ -22,27 +17,11 @@ FUSE_LIBS = $(shell $(PKG_CONFIG) --libs fuse 2>/dev/null || echo "-l$(FUSE)")
 # standard library search paths
 LDFLAGS +=  -L/usr/local/lib -L/usr/lib
 
-# try to find path of where boost is probably installed
-ifeq ($(wildcard /usr/local/lib/libboost*),)
-    BOOST_PATH= /usr/lib
-else
-    BOOST_PATH= /usr/local/lib
-endif
-
-# prefer dynamic libs for security
-ifdef STATIC_BUILD
-BOOST_LD= $(BOOST_PATH)/libboost_filesystem.a \
-          $(BOOST_PATH)/libboost_system.a \
-          $(BOOST_PATH)/libboost_program_options.a \
-          $(BOOST_PATH)/libboost_random.a \
-          $(BOOST_PATH)/libboost_regex.a
-else
-BOOST_LD= $(BOOST_PATH)/libboost_filesystem.$(LIB_EXT) \
-          $(BOOST_PATH)/libboost_system.$(LIB_EXT) \
-          $(BOOST_PATH)/libboost_program_options.$(LIB_EXT) \
-          $(BOOST_PATH)/libboost_random.$(LIB_EXT) \
-          $(BOOST_PATH)/libboost_regex.$(LIB_EXT)
-endif
+BOOST_LD= -lboost_filesystem \
+          -lboost_system \
+          -lboost_program_options \
+          -lboost_random \
+          -lboost_regex
 
 # compilation flags
 CXXFLAGS_FUSE= $(shell $(PKG_CONFIG) --cflags fuse 2>/dev/null || echo "-I/usr/local/include/$(FUSE)")  -DFUSE_USE_VERSION=26
