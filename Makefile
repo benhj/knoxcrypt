@@ -3,7 +3,6 @@
 # uncomment to compile boost in statically
 # STATIC_BUILD=YES
 
-
 PKG_CONFIG ?= pkg-config
 
 # discover the liklihood of what version of FUSE we're using
@@ -30,13 +29,6 @@ else
     BOOST_PATH= /usr/local/lib
 endif
 
-# try to find where boost headers are likely installed
-ifeq ($(wildcard /usr/local/include/boost/%),)
-    BOOST_HEADERS= /usr/local/include/
-else
-    BOOST_HEADERS= /usr/include/
-endif
-
 # prefer dynamic libs for security
 ifdef STATIC_BUILD
 BOOST_LD= $(BOOST_PATH)/libboost_filesystem.a \
@@ -60,7 +52,7 @@ CXXFLAGS ?= -O2 \
             -Wall \
             -ggdb
 CXXFLAGS += -std=c++11 \
-            -I$(BOOST_HEADERS) \
+            -I/usr/include -I/usr/local/include \
             -Iinclude -D_FILE_OFFSET_BITS=64 \
             -march=native
 
@@ -115,16 +107,16 @@ all: $(SOURCES) $(CIPHER_SRC) directoryObj \
 lib: $(SOURCES) directoryObj $(OBJECTS) libteasafe.a
 
 $(TEST_EXECUTABLE): directoryObjTest $(OBJECTS_TEST) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_TEST) ./libteasafe.a /usr/local/lib/libcryptopp.a $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_TEST) ./libteasafe.a -lcryptopp $(BOOST_LD) -o $@
 
 $(MAKETeaSafe_EXECUTABLE): directoryObjMakeBfs $(OBJECTS_MAKEBIN) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_MAKEBIN) ./libteasafe.a /usr/local/lib/libcryptopp.a $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_MAKEBIN) ./libteasafe.a -lcryptopp $(BOOST_LD) -o $@
 
 $(SHELL_BIN): directoryObjUtility $(OBJECTS_UTILITY) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_UTILITY) ./libteasafe.a /usr/local/lib/libcryptopp.a $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS_UTILITY) ./libteasafe.a -lcryptopp $(BOOST_LD) -o $@
 
 $(FUSE_LAYER): directoryObjFuse $(OBJECTS_FUSE) libteasafe.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a /usr/local/lib/libcryptopp.a $(FUSE_LIBS) $(BOOST_LD) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(FUSE_LIBS) $(OBJECTS_FUSE) ./libteasafe.a -lcryptopp $(FUSE_LIBS) $(BOOST_LD) -o $@
 
 shell:  $(SOURCES) directoryObj \
         $(OBJECTS) libteasafe.a \
