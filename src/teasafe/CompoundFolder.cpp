@@ -67,7 +67,7 @@ namespace teasafe
         doPopulateContentFolders();
     }
 
-    void 
+    void
     CompoundFolder::doPopulateContentFolders()
     {
         if(m_ContentFolderCount > 0) {
@@ -78,7 +78,7 @@ namespace teasafe
         }
     }
 
-    void 
+    void
     CompoundFolder::doAddContentFolder()
     {
         std::ostringstream ss;
@@ -88,7 +88,7 @@ namespace teasafe
         ++m_ContentFolderCount;
     }
 
-    void 
+    void
     CompoundFolder::addFile(std::string const &name)
     {
         // check if compound entries is empty. These are
@@ -147,7 +147,7 @@ namespace teasafe
         m_cacheShouldBeUpdated = true;
     }
 
-    File 
+    File
     CompoundFolder::getFile(std::string const &name,
                             OpenDisposition const &openDisposition) const
     {
@@ -160,7 +160,7 @@ namespace teasafe
             }
         }
 
-        // wasn't found in cache, therefore need to loop over content folders 
+        // wasn't found in cache, therefore need to loop over content folders
         for(auto & f : boost::adaptors::reverse(m_contentFolders)) {
             auto file(f->getFile(name, openDisposition));
             if(file) {
@@ -182,7 +182,7 @@ namespace teasafe
             }
         }
 
-        // wasn't found in cache, therefore need to loop over content folders 
+        // wasn't found in cache, therefore need to loop over content folders
         for(auto & f : m_contentFolders) {
             auto folder(f->getCompoundFolder(name));
             if(folder) {
@@ -198,13 +198,13 @@ namespace teasafe
         return m_compoundFolder;
     }
 
-    std::string 
+    std::string
     CompoundFolder::getName() const
     {
         return m_name;
     }
 
-    SharedEntryInfo 
+    SharedEntryInfo
     CompoundFolder::getEntryInfo(std::string const &name) const
     {
         // try and pull out of cache fisrt
@@ -216,12 +216,12 @@ namespace teasafe
         uint64_t index(m_contentFolders.size()-1);
         for(auto const & f : boost::adaptors::reverse(m_contentFolders)) {
             auto info(f->getEntryInfo(name));
-            if(info) { 
+            if(info) {
                 if(m_cache.find(name) == m_cache.end()) {
                     info->setBucketIndex(index);
                     m_cache.insert(std::make_pair(name, info));
                 }
-                return info; 
+                return info;
             }
             --index;
         }
@@ -249,7 +249,7 @@ namespace teasafe
         return m_cache;
     }
 
-    std::vector<SharedEntryInfo> 
+    std::vector<SharedEntryInfo>
     CompoundFolder::listFileEntries() const
     {
         std::vector<SharedEntryInfo> infos;
@@ -268,7 +268,7 @@ namespace teasafe
         return infos;
     }
 
-    std::vector<SharedEntryInfo> 
+    std::vector<SharedEntryInfo>
     CompoundFolder::listFolderEntries() const
     {
         std::vector<SharedEntryInfo> infos;
@@ -287,7 +287,7 @@ namespace teasafe
         return infos;
     }
 
-    void 
+    void
     CompoundFolder::doRemoveEntryFromCache(std::string const &name)
     {
         auto it = m_cache.find(name);
@@ -296,27 +296,27 @@ namespace teasafe
         }
     }
 
-    void 
+    void
     CompoundFolder::removeFile(std::string const &name)
     {
         for(auto & f : m_contentFolders) {
-            if(f->removeFile(name)) {                
+            if(f->removeFile(name)) {
                 // decrement number of entries in leaf
                 if(f->getEntryCount() == 0) {
                     m_compoundFolder->removeContentFolder(f->getName());
                 }
                 doRemoveEntryFromCache(name);
-                return; 
+                return;
             }
         }
         throw std::runtime_error("Error removing: file not found");
     }
 
-    void 
+    void
     CompoundFolder::removeFolder(std::string const &name)
     {
         for(auto & f : m_contentFolders) {
-            if(f->removeCompoundFolder(name)) { 
+            if(f->removeCompoundFolder(name)) {
                 // decrement number of entries in leaf
                 if(f->getEntryCount() == 0) {
                     m_compoundFolder->removeContentFolder(f->getName());
@@ -332,9 +332,9 @@ namespace teasafe
     CompoundFolder::putMetaDataOutOfUse(std::string const &name)
     {
         for(auto & f : m_contentFolders) {
-            if(f->putMetaDataOutOfUse(name)) { 
+            if(f->putMetaDataOutOfUse(name)) {
                 doRemoveEntryFromCache(name);
-                return; 
+                return;
             }
         }
         throw std::runtime_error("Error putting metadata out of use");

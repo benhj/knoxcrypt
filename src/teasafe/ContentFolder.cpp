@@ -110,7 +110,7 @@ namespace teasafe
          * @param metaData the metadata
          * @return a value indicating if specified entry metadata is in use
          */
-        bool entryMetaDataIsEnabled(std::vector<uint8_t> const &bytes) 
+        bool entryMetaDataIsEnabled(std::vector<uint8_t> const &bytes)
         {
             uint8_t byte = bytes[0];
             return detail::isBitSetInByte(byte, 0);
@@ -121,7 +121,7 @@ namespace teasafe
          * @param metaData the metadata that contains the block index
          * @return the starting block index
          */
-        uint64_t getBlockIndexForEntry(std::vector<uint8_t> const &metaData) 
+        uint64_t getBlockIndexForEntry(std::vector<uint8_t> const &metaData)
         {
             std::vector<uint8_t> theBuffer(metaData.begin() + detail::MAX_FILENAME_LENGTH + 1, metaData.end());
             return detail::convertInt8ArrayToInt64(&theBuffer.front());
@@ -132,7 +132,7 @@ namespace teasafe
          * @param metaData the metadata that contains the block index
          * @return the type of the entry
          */
-        EntryType getTypeForEntry(std::vector<uint8_t> const &bytes) 
+        EntryType getTypeForEntry(std::vector<uint8_t> const &bytes)
         {
             uint8_t byte = bytes[0];
             return (detail::isBitSetInByte(byte, 1) ? EntryType::FileType : EntryType::FolderType);
@@ -143,7 +143,7 @@ namespace teasafe
          * @param metaData the metadata
          * @return name extracted from metadata
          */
-        std::string getEntryName(std::vector<uint8_t> const &metaData) 
+        std::string getEntryName(std::vector<uint8_t> const &metaData)
         {
             std::string nameDat(metaData.begin() + 1, metaData.end() - 8);
             std::string returnString;
@@ -358,8 +358,8 @@ namespace teasafe
         if (info) {
             if (info->type() == EntryType::FileType) {
                 File file(m_io, name, info->firstFileBlock(), openDisposition);
-                file.setOptionalSizeUpdateCallback(std::bind(&EntryInfo::updateSize, 
-                                                             info, 
+                file.setOptionalSizeUpdateCallback(std::bind(&EntryInfo::updateSize,
+                                                             info,
                                                              std::placeholders::_1));
                 return file;
             }
@@ -596,7 +596,7 @@ namespace teasafe
         return *doGetEntryInfo(metaData, entryIndex);
     }
 
-    uint64_t 
+    uint64_t
     ContentFolder::getEntryCount() const
     {
         return m_entryCount;
@@ -649,7 +649,7 @@ namespace teasafe
         return boost::optional<long>();
     }
 
-    bool 
+    bool
     ContentFolder::anOldSpaceIsAvailableForNewEntry() const
     {
         return m_oldSpaceAvailableForEntry;

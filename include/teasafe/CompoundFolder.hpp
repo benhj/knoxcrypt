@@ -179,7 +179,6 @@ namespace teasafe
 
         // indicate when need to update cache map
         mutable bool m_cacheShouldBeUpdated;
-
     };
 
 }
