@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2015>, <BenHJ>
+  Copyright (c) <2015-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@ namespace teasafe
     class CompoundFolder
     {
       public:
+        CompoundFolder() = delete;
         /**
          * @brief constructs a CompoundFolder to write to. In this case the
          * starting block is unknown
@@ -151,9 +152,6 @@ namespace teasafe
                                       uint64_t startBlock);
 
       private:
-
-        CompoundFolder();
-
         void doAddContentFolder();
 
         void doPopulateContentFolders();

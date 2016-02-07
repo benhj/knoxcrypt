@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ namespace teasafe
     class MakeTeaSafe
     {
       public:
-
+        MakeTeaSafe() = delete;
         MakeTeaSafe(SharedCoreIO const &io,
                     bool const sparse = false, // sparse images not created by default
                     OptionalMagicPart const &omp = OptionalMagicPart())
@@ -85,8 +85,6 @@ namespace teasafe
         using WriteSignal = boost::signals2::signal<void(EventType)>;
         using SharedWriteSignal = std::shared_ptr<WriteSignal>;
         SharedWriteSignal m_writeSignal;
-
-        MakeTeaSafe(); // not required
 
         void buildBlockBytes(uint64_t const fsSize, uint8_t sizeBytes[8])
         {

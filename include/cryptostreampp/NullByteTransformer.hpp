@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2015>, <BenHJ>
+  Copyright (c) <2015-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,16 @@
 namespace cryptostreampp
 {
 
-    
+
     class NullByteTransformer : public IByteTransformer
     {
       public:
+        NullByteTransformer() = delete;
         NullByteTransformer(EncryptionProperties const &encProps);
 
         ~NullByteTransformer();
 
       private:
-
-        NullByteTransformer(); // not required
 
         void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length);
         void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length);
@@ -68,18 +67,16 @@ namespace cryptostreampp
     }
 
     inline
-    void 
+    void
     NullByteTransformer::doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length)
     {
         (void)std::copy(in, in + length, out);
     }
 
     inline
-    void 
+    void
     NullByteTransformer::doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length)
     {
         (void)std::copy(in, in + length, out);
     }
 }
-
-

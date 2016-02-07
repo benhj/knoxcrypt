@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014-2015>, <BenHJ>
+  Copyright (c) <2014-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@ namespace teasafe
         class FolderExtractionVisitor : public ContentFolderVisitor
         {
           public:
+            FolderExtractionVisitor() = delete;
             FolderExtractionVisitor(TeaSafe &theBfs,
                                     std::string teaPath,
                                     std::string fsPath,
@@ -106,7 +107,6 @@ namespace teasafe
             }
 
           private:
-            FolderExtractionVisitor(); // not required
             TeaSafe &m_theBfs;
             std::string m_teaPath;
             std::string m_fsPath;
@@ -116,4 +116,3 @@ namespace teasafe
     }
 
 }
-

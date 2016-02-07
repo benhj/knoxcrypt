@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ namespace teasafe
         typedef char                                   char_type;
         typedef boost::iostreams::seekable_device_tag  category;
 
+        FileDevice() = delete;
         explicit FileDevice(SharedFile const &entry);
 
         std::streamsize read(char* s, std::streamsize n);
@@ -53,7 +54,6 @@ namespace teasafe
         std::streampos tellp() const;
 
       private:
-        FileDevice();
         SharedFile m_entry;
     };
 

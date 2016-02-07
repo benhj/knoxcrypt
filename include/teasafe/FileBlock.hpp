@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@ namespace teasafe
     class FileBlock
     {
       public:
+        FileBlock() = delete;
         /**
          * @brief for when a file block needs to be written for the first time
          *        use this constructor
@@ -170,9 +171,6 @@ namespace teasafe
         SharedImageStream getStream() const;
 
       private:
-
-        FileBlock();
-
         /**
          * @brief sets number of bytes written
          * @param size
@@ -211,4 +209,3 @@ namespace teasafe
     };
 
 }
-

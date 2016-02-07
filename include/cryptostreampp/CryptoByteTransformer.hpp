@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2015>, <BenHJ>
+  Copyright (c) <2015-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -42,12 +42,13 @@ namespace cryptostreampp
     class CryptoByteTransformer : public IByteTransformer
     {
       public:
+        CryptoByteTransformer() = delete;
         CryptoByteTransformer(EncryptionProperties const &encProps);
 
         ~CryptoByteTransformer();
 
       private:
-        CryptoByteTransformer(); // not required
+
         void doEncrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length);
         void doDecrypt(char *in, char *out, std::ios_base::streamoff startPosition, long length);
 
@@ -75,11 +76,11 @@ namespace cryptostreampp
     template <typename CIPHER>
     inline
     void
-    CryptoByteTransformer<CIPHER>::initCrypto() 
+    CryptoByteTransformer<CIPHER>::initCrypto()
     {
         IByteTransformer::generateKeyAndIV();
-        m_cipher.SetKeyWithIV(IByteTransformer::g_bigKey, 
-                              m_props.keyBytes, 
+        m_cipher.SetKeyWithIV(IByteTransformer::g_bigKey,
+                              m_props.keyBytes,
                               IByteTransformer::g_bigIV);
     }
 
@@ -100,11 +101,11 @@ namespace cryptostreampp
 
     template <typename CIPHER>
     inline
-    void 
-    CryptoByteTransformer<CIPHER>::doEncrypt(char *in, 
-                                             char *out, 
-                                             std::ios_base::streamoff startPosition, 
-                                             long length) 
+    void
+    CryptoByteTransformer<CIPHER>::doEncrypt(char *in,
+                                             char *out,
+                                             std::ios_base::streamoff startPosition,
+                                             long length)
     {
         cipherInstance().Seek(startPosition);
         cipherInstance().ProcessData((uint8_t*)out, (uint8_t*)in, length);
@@ -112,14 +113,13 @@ namespace cryptostreampp
 
     template <typename CIPHER>
     inline
-    void 
-    CryptoByteTransformer<CIPHER>::doDecrypt(char *in, 
-                                             char *out, 
-                                             std::ios_base::streamoff startPosition, 
-                                             long length) 
+    void
+    CryptoByteTransformer<CIPHER>::doDecrypt(char *in,
+                                             char *out,
+                                             std::ios_base::streamoff startPosition,
+                                             long length)
     {
         cipherInstance().Seek(startPosition);
         cipherInstance().ProcessData((uint8_t*)out, (uint8_t*)in, length);
     }
 }
-

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,7 @@ namespace teasafe
         using SharedCompoundFolder = std::shared_ptr<CompoundFolder>;
 
       public:
+        TeaSafe() = delete;
         explicit TeaSafe(SharedCoreIO const &io);
 
         /**
@@ -172,8 +173,6 @@ namespace teasafe
         // so that a new file doesn't need to be created each time the same file is opened
         using FileCache = std::map<std::string, SharedFile>;
         mutable FileCache m_fileCache;
-
-        TeaSafe(); // not required
 
         void throwIfAlreadyExists(std::string const &path) const;
 

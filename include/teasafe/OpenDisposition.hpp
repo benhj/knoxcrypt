@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ namespace teasafe
     class OpenDisposition
     {
       public:
+        OpenDisposition() = delete;
         OpenDisposition(ReadOrWriteOrBoth const &readWrite,
                         AppendOrOverwrite const &append,
                         CreateOrDontCreate const &create,
@@ -119,4 +120,3 @@ namespace teasafe
 
     };
 }
-

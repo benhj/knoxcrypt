@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ namespace teasafe
     class FileBlockException : public std::exception
     {
       public:
+        FileBlockException() = delete;
         FileBlockException(FileBlockError const &error)
         : m_error(error)
         {
@@ -66,4 +67,3 @@ namespace teasafe
         FileBlockError m_error;
     };
 }
-

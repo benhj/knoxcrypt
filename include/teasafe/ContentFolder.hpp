@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@ namespace teasafe
     class ContentFolder
     {
       public:
+        ContentFolder() = delete;
         /**
          * @brief constructs a ContentFolder to write to. In this case the
          * starting block is unknown
@@ -213,9 +214,6 @@ namespace teasafe
         bool anOldSpaceIsAvailableForNewEntry() const;
 
       private:
-
-        ContentFolder();
-
         /**
          * @brief for writing new entry metadata
          * @param name name of entry

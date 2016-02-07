@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@ namespace teasafe
     class ContainerImageStream
     {
       public:
+        ContainerImageStream() = delete;
         explicit ContainerImageStream(SharedCoreIO const &io,
                                       std::ios::openmode mode = std::ios::out | std::ios::binary);
 
@@ -71,7 +72,6 @@ namespace teasafe
         void open(SharedCoreIO const &io,
                   std::ios::openmode mode = std::ios::out | std::ios::binary);
       private:
-        ContainerImageStream();
         cryptostreampp::SharedCryptoStream m_cryptoStream;
     };
 

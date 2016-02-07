@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@ namespace teasafe
         using SharedFileBlock = std::shared_ptr<FileBlock>;
 
       public:
+        File() = delete;
         /**
          * @brief when creating a new file this constructor should be used
          * @param io the core teasafe io (path, blocks, password)
