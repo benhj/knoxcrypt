@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2015>, <BenHJ>
+  Copyright (c) <2015-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -219,7 +219,7 @@ namespace teasafe
             if(info) {
                 if(m_cache.find(name) == m_cache.end()) {
                     info->setBucketIndex(index);
-                    m_cache.insert(std::make_pair(name, info));
+                    m_cache.emplace(name, info);
                 }
                 return info;
             }
@@ -259,7 +259,7 @@ namespace teasafe
             for(auto const & entry : leafEntries) {
                 if(m_cache.find(entry->filename()) == m_cache.end()) {
                     entry->setBucketIndex(index);
-                    m_cache.insert(std::make_pair(entry->filename(), entry));
+                    m_cache.emplace(entry->filename(), entry);
                 }
                 infos.push_back(entry);
             }
@@ -278,7 +278,7 @@ namespace teasafe
             for(auto const & entry : leafEntries) {
                 if(m_cache.find(entry->filename()) == m_cache.end()) {
                     entry->setBucketIndex(index);
-                    m_cache.insert(std::make_pair(entry->filename(), entry));
+                    m_cache.emplace(entry->filename(), entry);
                 }
                 infos.push_back(entry);
             }

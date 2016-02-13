@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ namespace teasafe
         , m_fileCache()
     {
     }
-    
+
     CompoundFolder
     TeaSafe::getFolder(std::string const &path)
     {
@@ -372,7 +372,7 @@ namespace teasafe
 
         auto sf(std::make_shared<File>(parentEntry->getFile(boost::filesystem::path(path).filename().string(),
                                                                    openMode)));
-        m_fileCache.insert(std::make_pair(path, sf));
+        m_fileCache.emplace(path, sf);
         return sf;
     }
 
@@ -455,7 +455,7 @@ namespace teasafe
 
                 if (entryInfo->type() == EntryType::FolderType) {
                     auto folder(folderOfInterest->getFolder(entryInfo->filename()));
-                    m_folderCache.insert(std::make_pair(pathToCheck.string(), folder));
+                    m_folderCache.emplace(pathToCheck.string(), folder);
                     return folder;
                 } else {
                     return SharedCompoundFolder();

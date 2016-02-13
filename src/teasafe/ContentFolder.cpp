@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -633,7 +633,7 @@ namespace teasafe
                                               startBlock,
                                               entryIndex));
 
-        m_entryInfoCacheMap.insert(std::make_pair(entryName, info));
+        m_entryInfoCacheMap.emplace(entryName, info);
 
         return info;
     }
