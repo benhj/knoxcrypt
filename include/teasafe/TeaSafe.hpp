@@ -151,8 +151,6 @@ namespace teasafe
          */
         void statvfs(struct statvfs *buf);
 
-        void resetFileCache();
-
       private:
 
         // the core teasafe io (path, blocks, password)
@@ -171,8 +169,8 @@ namespace teasafe
         mutable StateMutex m_stateMutex;
 
         // so that a new file doesn't need to be created each time the same file is opened
-        using FileCache = std::map<std::string, SharedFile>;
-        mutable FileCache m_fileCache;
+        // hold on to just the last opened file, rather than a cache 13/02/16
+        mutable SharedFile m_cachedFile;
 
         void throwIfAlreadyExists(std::string const &path) const;
 
@@ -192,20 +190,13 @@ namespace teasafe
         void removeDeletedParentFromCache(boost::filesystem::path const &path);
 
         /**
-         * @brief  updates the file cache / retrieves a cached entry
+         * @brief  updates the cached file
          * @param  path the path of the file to update / retrieve
          * @param  parentEntry the parent of the entry
          * @param  openMode the mode to open the file in
-         * @return the cached file
          */
-        SharedFile setAndGetCachedFile(std::string const &path,
-                                              SharedCompoundFolder const &parentEntry,
-                                              OpenDisposition openMode) const;
-
-        /**
-         * @brief removed a file from the cache if it exists in cache
-         * @param path the path of the file to remove
-         */
-        void removeFileFromFileCache(std::string const &path);
+        void setCachedFile(std::string const &path,
+                           SharedCompoundFolder const &parentEntry,
+                           OpenDisposition openMode) const;
     };
 }

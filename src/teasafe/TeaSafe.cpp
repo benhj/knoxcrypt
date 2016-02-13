@@ -38,7 +38,7 @@ namespace teasafe
         , m_rootFolder(std::make_shared<CompoundFolder>(io, io->rootBlock, "root"))
         , m_folderCache()
         , m_stateMutex()
-        , m_fileCache()
+        , m_cachedFile()
     {
     }
 
@@ -237,10 +237,6 @@ namespace teasafe
         } catch (...) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
-
-        // also remove it from the cache if it exists
-        this->removeFileFromFileCache(path);
-
     }
 
     void
@@ -312,8 +308,8 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }*/
 
-        auto fe(this->setAndGetCachedFile(path, parentEntry, openMode));
-        return FileDevice(fe);
+        setCachedFile(path, parentEntry, openMode);
+        return FileDevice(m_cachedFile);
     }
 
     void
@@ -334,46 +330,23 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }*/
 
-        auto fe(this->setAndGetCachedFile(path, parentEntry, OpenDisposition::buildOverwriteDisposition()));
-        fe->truncate(offset);
+        setCachedFile(path, parentEntry, OpenDisposition::buildOverwriteDisposition());
+        m_cachedFile->truncate(offset);
     }
 
     void
-    TeaSafe::resetFileCache()
+    TeaSafe::setCachedFile(std::string const &path,
+                           SharedCompoundFolder const &parentEntry,
+                           OpenDisposition openMode) const
     {
-        StateLock lock(m_stateMutex);
-        FileCache().swap(m_fileCache);
-    }
-
-    SharedFile
-    TeaSafe::setAndGetCachedFile(std::string const &path,
-                                 SharedCompoundFolder const &parentEntry,
-                                 OpenDisposition openMode) const
-    {
-
-        // very strictly limit the size of the cache to being able to hold
-        // on to one entry only. TODO. does this mean that a map is a map
-        // idea? We could just use a single pair.
-        if(m_fileCache.size() > 1) {
-            FileCache().swap(m_fileCache);
-        }
-
-        auto it(m_fileCache.find(path));
-        if(it != m_fileCache.end()) {
-
-            // note: need to also check if the openMode is different to the cached
-            // version in which case the cached version should probably be rebuilt
-            if(!it->second->getOpenDisposition().equals(openMode)) {
-                m_fileCache.erase(path);
-            } else {
-                return it->second;
+        auto theName = boost::filesystem::path(path).filename().string();
+        if(m_cachedFile) {
+            if(!m_cachedFile->getOpenDisposition().equals(openMode)) {
+                m_cachedFile = std::make_shared<File>(parentEntry->getFile(theName, openMode));
             }
+        } else {
+            m_cachedFile = std::make_shared<File>(parentEntry->getFile(theName, openMode));
         }
-
-        auto sf(std::make_shared<File>(parentEntry->getFile(boost::filesystem::path(path).filename().string(),
-                                                                   openMode)));
-        m_fileCache.emplace(path, sf);
-        return sf;
     }
 
     /**
@@ -516,14 +489,4 @@ namespace teasafe
             m_folderCache.erase(it);
         }
     }
-
-    void
-    TeaSafe::removeFileFromFileCache(std::string const &path)
-    {
-        auto it(m_fileCache.find(path));
-        if(it != m_fileCache.end()) {
-            m_fileCache.erase(it);
-        }
-    }
-
 }
