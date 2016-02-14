@@ -1,6 +1,6 @@
 PKG_CONFIG ?= pkg-config
 
-# immediately quite if CRYPTOSTREAMPP not set
+# immediately quit if CRYPTOSTREAMPP not set
 ifndef CRYPTOSTREAMPP
 $(error CRYPTOSTREAMPP path must be set to cryptostreampp root folder)
 endif
