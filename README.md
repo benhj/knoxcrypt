@@ -28,11 +28,16 @@ Also: since this software is highly developmental, the latest version might not 
 Note, only tested on Linux and Mac. With a bit of work, will probably build (sans fuse-bits) on windows
 too.
 
-Note:
+Requirements:
  
-- requires some of the boost headers and libraries to build (see makefile).
-- requires fuse for the main fuse layer binary (the binary 'teasafe')
-- requires crypto++ headers and libraries for building and linking
+- some of the boost headers and libraries to build (see makefile).
+- fuse for the main fuse layer binary (the binary 'teasafe')
+- crypto++ headers and libraries for building and linking
+- cryptostreampp, a small set of headers allowing straight forward implementation of encrypted file streams (see [https://github.com/benhj/cryptostreampp](https://github.com/benhj/cryptostreampp)).
+
+Before building anything, you'll need to put the cryptostreampp headers somewhere. Easiest is to just clone the above mentioned cryptostreammpp repo. You'll then need to set an environment variable pointing to them, e.g., from a bash prompt I might do something like:
+
+`export CRYPTOSTREAMPP=...`
 
 If you don't have fuse installed, you'll probably want to only build the main 
 teasafe library (libteasafe.a), the shell (teashell) and maketeasafe, the binary
