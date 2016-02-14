@@ -437,10 +437,7 @@ namespace teasafe
             // recurse deeper
             folderOfInterest = folderOfInterest->getFolder(entryInfo->filename());
         }
-
-
         return SharedCompoundFolder();
-
     }
 
     bool
