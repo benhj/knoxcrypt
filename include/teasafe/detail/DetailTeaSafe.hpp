@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 #include <iostream>
 #include <stdint.h>
 #include <vector>
+#include <strings.h>
 
 namespace teasafe { namespace detail
 {
@@ -160,6 +161,7 @@ namespace teasafe { namespace detail
      */
     inline int getNextAvailableBitInAByte(uint8_t &byte)
     {
+        if (byte == 0xFF) { return -1; }
         for (int i = 0; i < 8; ++i) {
             if (!isBitSetInByte(byte, i)) {
                 return i;
@@ -262,34 +264,31 @@ namespace teasafe { namespace detail
         (void)in.seekg(beginning());
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
+
         uint64_t blocks = convertInt8ArrayToInt64(dat);
         uint64_t bytes = blocks / uint64_t(8);
+
         // read the bytes in to a buffer
         std::vector<uint8_t> buf;
         buf.assign(bytes, 0);
         (void)in.read((char*)&buf.front(), bytes);
-        uint64_t used(0);
+
         // note this is quicker than calling isBlockInUse repeatedly
-        for (uint64_t block = 0; block < blocks; ++block) {
-            uint64_t byteThatStoresBit(0);
-            if (block < 8) {
-                uint8_t dat = buf[byteThatStoresBit];
-                if (isBitSetInByte(dat, block)) {
-                    ++used;
-                }
-            } else {
-                uint64_t const leftOver = block % 8;
-                uint64_t withoutLeftOver = block - leftOver;
-                byteThatStoresBit = (withoutLeftOver / 8) - 1;
-                ++byteThatStoresBit;
-                uint8_t &dat = buf[byteThatStoresBit];
-                if (isBitSetInByte(dat, leftOver)) {
-                    ++used;
+        uint64_t allocatedBlocks(0);
+        for (uint64_t byte = 0; byte < bytes; ++byte) {
+            uint8_t dat = buf[byte];
+            if(dat == 0xFF) {
+                allocatedBlocks += 8;
+                continue;
+            } 
+            for(int i = 0; i < 8; ++i) {
+                if(isBitSetInByte(dat, i)) {
+                    ++allocatedBlocks;
                 }
             }
         }
 
-        return used;
+        return allocatedBlocks;
     }
 
     /**
@@ -321,12 +320,11 @@ namespace teasafe { namespace detail
 
         for (uint64_t i = 0; i < bytes; ++i) {
             int availableBit = getNextAvailableBitInAByte(buf[i]);
-            if (availableBit > -1) {
+            if(availableBit > -1) {
                 bitCounter += availableBit;
                 break;
-            } else {
-                bitCounter += 8;
             }
+            bitCounter += 8;
         }
 
         // no available blocks found
@@ -371,16 +369,21 @@ namespace teasafe { namespace detail
         uint64_t eightCounter(0);
         std::vector<uint64_t> bitBuffer;
         for (uint64_t i = 0; i < bytes; ++i) {
-
-            for (int b = 0; b < 8; ++b) {
-                int availableBit = (!isBitSetInByte(buf[i], b)) ? (b + eightCounter) : -1;
-                if (availableBit > -1) {
-                    bitBuffer.push_back((uint64_t)availableBit);
-                    if (bitBuffer.size() == blocksRequired) {
-                        return bitBuffer;
+            // only continue if at least one bit available
+            if(buf[i] != 0xFF) {
+                for (int b = 0; b < 8; ++b) {
+                    uint64_t availableBit = (!isBitSetInByte(buf[i], b)) ? 
+                                            (uint64_t)(b + eightCounter) : 
+                                            0xFFFFFFFFFFFFFFFF;
+                    if (availableBit != 0xFFFFFFFFFFFFFFFF) {
+                        bitBuffer.push_back(availableBit);
+                        if (bitBuffer.size() == blocksRequired) {
+                            return bitBuffer;
+                        }
                     }
                 }
-            }
+            } 
+            
             eightCounter += 8;
         }
         return bitBuffer; // return all blocks that could be found
