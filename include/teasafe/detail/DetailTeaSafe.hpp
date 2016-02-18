@@ -243,6 +243,9 @@ namespace teasafe { namespace detail
         uint64_t byteThatStoresBit(0);
         if (block < 8) {
             uint8_t dat = buf[byteThatStoresBit];
+            if (dat == 0xFF) {
+                return true;
+            }
             return isBitSetInByte(dat, block);
         } else {
             uint64_t const leftOver = block % 8;
@@ -250,6 +253,9 @@ namespace teasafe { namespace detail
             byteThatStoresBit = (withoutLeftOver / 8) - 1;
             ++byteThatStoresBit;
             uint8_t &dat = buf[byteThatStoresBit];
+            if (dat == 0xFF) {
+                return true;
+            }
             return isBitSetInByte(dat, leftOver);
         }
     }
