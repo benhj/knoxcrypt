@@ -82,9 +82,7 @@ namespace teasafe
             // note in the following the '8' bytes represent the number of
             // entries in the folder
             if (folderData.seek(8 + (n * bufferSize) + seekOff) != -1) {
-
-                std::vector<uint8_t> metaData;
-                metaData.resize(bufSize == 0 ? bufferSize : bufSize);
+                std::vector<uint8_t> metaData(bufSize == 0 ? bufferSize : bufSize);
                 folderData.read((char*)&metaData.front(), bufSize==0 ? bufferSize : bufSize);
                 return metaData;
             }
@@ -93,8 +91,7 @@ namespace teasafe
 
         std::vector<uint8_t> createFileNameVector(std::string const &name)
         {
-            std::vector<uint8_t> filename;
-            filename.assign(detail::MAX_FILENAME_LENGTH, 0);
+            std::vector<uint8_t> filename(detail::MAX_FILENAME_LENGTH);
             (void)std::copy(&name.front(), &name.front() + name.length(), &filename.front());
             filename[name.length()] = '\0'; // set null byte to indicate end of filename
             return filename;
@@ -147,6 +144,7 @@ namespace teasafe
         {
             std::string nameDat(metaData.begin() + 1, metaData.end() - 8);
             std::string returnString;
+            returnString.reserve(nameDat.length());
             int c = 0;
             while (nameDat[c] != '\0') {
                 returnString.push_back(nameDat[c]);
@@ -388,10 +386,8 @@ namespace teasafe
         // optimization is to build the file based on metadata stored in the
         // entry info which is hopefully cached
         auto info(doGetNamedEntryInfo(name));
-        if (info) {
-            if (info->type() == EntryType::FolderType) {
-                return std::make_shared<CompoundFolder>(m_io, info->firstFileBlock(), name);
-            }
+        if (info && info->type() == EntryType::FolderType) {
+           return std::make_shared<CompoundFolder>(m_io, info->firstFileBlock(), name);
         }
         return std::shared_ptr<CompoundFolder>();
     }
@@ -454,11 +450,11 @@ namespace teasafe
         File temp(m_io, m_name, m_startVolumeBlock,
                          OpenDisposition::buildOverwriteDisposition());
 
-        auto index(doGetMetaDataIndexForEntry(name));
-        if(!index) {
+        auto index = doGetMetaDataIndexForEntry(name);
+        if(index == -1) {
             return false;
         }
-        metaDataToOutOfUse(temp, *index);
+        metaDataToOutOfUse(temp, index);
 
         // signify that a 'space' might be available for metadata earlier in list
         // than at end
@@ -638,7 +634,7 @@ namespace teasafe
         return info;
     }
 
-    boost::optional<long>
+    long
     ContentFolder::doGetMetaDataIndexForEntry(std::string const &name) const
     {
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
@@ -646,7 +642,7 @@ namespace teasafe
                 return entryIndex;
             }
         }
-        return boost::optional<long>();
+        return -1;
     }
 
     bool

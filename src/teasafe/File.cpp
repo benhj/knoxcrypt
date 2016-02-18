@@ -157,7 +157,9 @@ namespace teasafe
     {
 
         // need to take into account the currently seeked-to position and
-        // subtract that because we then only want to read from the told position
+        // subtract that because we then only want to read 
+        // (totalBytes - toldPosition) bytes. This will allows us to read
+        // from the told position up to totalBytes
         uint32_t size =  m_workingBlock->getDataBytesWritten() - m_workingBlock->tell();
 
         // try to read thisMany bytes

@@ -242,9 +242,10 @@ namespace teasafe
         /**
          * @brief returns the entry index given the name
          * @param name the name of the entry
-         * @return the index
+         * @return the index or -1 if doesn't exist
+         * @note this used to return an optional<long>
          */
-        boost::optional<long> doGetMetaDataIndexForEntry(std::string const &name) const;
+        long doGetMetaDataIndexForEntry(std::string const &name) const;
 
         /**
          * @brief write metadata to this folder entry
