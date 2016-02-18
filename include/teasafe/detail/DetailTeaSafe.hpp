@@ -359,25 +359,23 @@ namespace teasafe { namespace detail
         uint64_t bytes = totalBlocks / uint64_t(8);
 
         // read the bytes in to a buffer
-        std::vector<uint8_t> buf;
-        buf.assign(bytes, 0);
+        std::vector<uint8_t> buf(bytes);
         (void)in.seekg(beginning() + 8);
         (void)in.read((char*)&buf.front(), bytes);
 
 
         // find n available blocks
         uint64_t eightCounter(0);
-        std::vector<uint64_t> bitBuffer;
+        std::vector<uint64_t> bitBuffer(blocksRequired);
+        uint64_t filled(0);
         for (uint64_t i = 0; i < bytes; ++i) {
             // only continue if at least one bit available
             if(buf[i] != 0xFF) {
                 for (int b = 0; b < 8; ++b) {
-                    uint64_t availableBit = (!isBitSetInByte(buf[i], b)) ? 
-                                            (uint64_t)(b + eightCounter) : 
-                                            0xFFFFFFFFFFFFFFFF;
-                    if (availableBit != 0xFFFFFFFFFFFFFFFF) {
-                        bitBuffer.push_back(availableBit);
-                        if (bitBuffer.size() == blocksRequired) {
+                    if(!isBitSetInByte(buf[i], b)) {
+                        bitBuffer[filled] = b + eightCounter;
+                        ++filled;
+                        if (filled == blocksRequired) {
                             return bitBuffer;
                         }
                     }
