@@ -67,6 +67,7 @@ class FileTest
         testWriteBigDataAppendSmallStringSeekToAndReadAppendedString();
         testSeekingFromEnd();
         testSeekingFromCurrentNegative();
+        testSeekingFromCurrentNegative_bigSeek();
         testSeekingFromCurrentPositive();
         testEdgeCaseEndOfBlockOverWrite();
         testEdgeCaseEndOfBlockAppend();
@@ -670,6 +671,47 @@ class FileTest
             std::string recovered(vec.begin() + finalPosition,
                                   vec.begin() + finalPosition + testData.length());
             ASSERT_EQUAL(recovered, testData, "FileTest::testSeekingFromCurrentNegative()");
+        }
+    }
+
+    void testSeekingFromCurrentNegative_bigSeek()
+    {
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
+
+        // test write
+        {
+            teasafe::SharedCoreIO io(createTestIO(testPath));
+            teasafe::File entry(io, "test.txt");
+            std::string testData(createLargeStringToWrite());
+            std::vector<uint8_t> vec(testData.begin(), testData.end());
+            entry.write((char*)&vec.front(), testData.length());
+            entry.flush();
+        }
+
+        std::string testData("goodbye!");
+        std::streamoff off = -19476;
+        std::streamoff initialSeek = 27980;
+        std::streamoff finalPosition = initialSeek + off;
+        {
+            teasafe::SharedCoreIO io(createTestIO(testPath));
+            teasafe::File entry(io, "test.txt", 1,
+                                       teasafe::OpenDisposition::buildOverwriteDisposition());
+            entry.seek(initialSeek);
+            entry.seek(off, std::ios_base::cur);
+            entry.write(testData.c_str(), testData.length());
+            entry.flush();
+        }
+
+        {
+            teasafe::SharedCoreIO io(createTestIO(testPath));
+            teasafe::File entry(io, "entry", uint64_t(1),
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            std::vector<uint8_t> vec;
+            vec.resize(entry.fileSize());
+            entry.read((char*)&vec.front(), entry.fileSize());
+            std::string recovered(vec.begin() + finalPosition,
+                                  vec.begin() + finalPosition + testData.length());
+            ASSERT_EQUAL(recovered, testData, "FileTest::testSeekingFromCurrentNegative_bigSeek()");
         }
     }
 

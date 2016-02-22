@@ -448,24 +448,20 @@ namespace teasafe
                 // set the position of the stream in block to leftOver
                 blockPosition = leftOver;
 
-                ++block;
-
             } else {
                 blockPosition = 0;
             }
 
             // get exact number of blocks after round-down
-            block = off / blockSize;
+            block = casted / blockSize;
+            if(leftOver == 0) {
+                --block;
+            }
 
         } else {
             // offset is smaller than the first block so keep block
             // index at 0 and the position for the zero block at offset
             blockPosition = off;
-        }
-
-        // edge case
-        if(leftOver == 0 && block > 0) {
-            --block;
         }
 
         return std::make_pair(block, blockPosition);
@@ -479,7 +475,7 @@ namespace teasafe
         auto treatLikeBegin = getPositionFromBegin(std::abs(off));
 
         int64_t block = endBlockIndex - treatLikeBegin.first;
-        boost::iostreams::stream_offset blockPosition = bytesWrittenToEnd - treatLikeBegin.second;
+        auto blockPosition = bytesWrittenToEnd - treatLikeBegin.second;
 
         if (blockPosition < 0) {
             uint16_t const blockSize = blockWriteSpace();
@@ -496,42 +492,33 @@ namespace teasafe
                            int64_t blockIndex,
                            boost::iostreams::stream_offset indexedBlockPosition)
     {
-
+        std::cout<<off<<std::endl;
+        std::cout<<blockIndex<<std::endl;
+        std::cout<<indexedBlockPosition<<std::endl;
         // find what file block the offset would relate to and set extra offset in file block
         // to that position
         auto const blockSize = blockWriteSpace();
-        boost::iostreams::stream_offset const casted = off;
+        auto addition = off + indexedBlockPosition;
+        auto leftOver = std::abs(addition) % blockSize;
+        auto roundedDown = std::abs(addition) - leftOver;
+        auto toIncrementBy = roundedDown / blockSize;
 
-        boost::iostreams::stream_offset addition = casted + indexedBlockPosition;
+        std::cout<<"addition: "<<addition<<std::endl;
+        std::cout<<"leftOver: "<<leftOver<<std::endl;
+        std::cout<<"roundedDown: "<<roundedDown<<std::endl;
+        std::cout<<"toIncrementBy: "<<toIncrementBy<<std::endl;
 
-        if (addition >= 0 && addition <= blockSize) {
-            return std::make_pair(blockIndex, addition);
-        } else {
-
-            boost::iostreams::stream_offset const leftOver = std::abs(addition) % blockSize;
-
-            int64_t sumValue = 0;
-
-            boost::iostreams::stream_offset roundedDown = addition - leftOver;
-
-            if (std::abs(roundedDown) > (blockSize)) {
-                sumValue = std::abs(roundedDown) / blockSize;
-
-                // hacky bit to get working
-                if ((addition < 0) && ((blockSize - leftOver) > indexedBlockPosition)) {
-                    sumValue++;
-                }
-            } else {
-                sumValue = 1;
-            }
-
-            uint16_t const theBlock = (addition < 0) ? (blockIndex - sumValue) :
-                (blockIndex + sumValue);
-            boost::iostreams::stream_offset offset = (addition < 0) ? (blockSize - leftOver) :
-                leftOver;
-
-            return std::make_pair(theBlock, offset);
+        if (addition >= 0) {
+            auto newBlockIndex = blockIndex + toIncrementBy;
+            auto newPosition = leftOver;
+            return std::make_pair(newBlockIndex, newPosition);            
         }
+        auto newBlockIndex = blockIndex - (toIncrementBy + 1);        
+        std::cout<<"newBlockIndex: "<<newBlockIndex<<std::endl;    
+        auto newPosition = blockSize - leftOver;
+        std::cout<<"newPosition: "<<newPosition<<std::endl;
+        return std::make_pair(newBlockIndex, newPosition);
+        
     }
 
     boost::iostreams::stream_offset
@@ -626,7 +613,7 @@ namespace teasafe
 
         for (; it != end; ++it) {
             it->unlink();
-            m_io->freeBlocks++;
+            ++m_io->freeBlocks;
         }
 
         m_fileSize = 0;
@@ -645,22 +632,6 @@ namespace teasafe
     {
 
         {
-            FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition, m_stream);
-            FileBlockIterator end;
-            uint64_t c(0);
-            for (; it != end; ++it) {
-                if (c==n) {
-                    return *it;
-                }
-                ++c;
-            }
-        }
-
-        // HACK --> sometimes this funtion fails. There is some bound
-        // condition meaning that n should be n-1. Until I can figure out why,
-        // this temporary hack provides a fix.
-        {
-            --n;
             FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition, m_stream);
             FileBlockIterator end;
             uint64_t c(0);

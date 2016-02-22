@@ -42,7 +42,7 @@
 #include <string>
 #include <vector>
 
-int const HELLO_IT = 1000;
+int const HELLO_IT = 10000;
 int const BIG_SIZE = HELLO_IT * 13;
 int const A_STRING_SIZE = 998;
 
