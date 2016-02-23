@@ -286,6 +286,7 @@ namespace teasafe
     FileBlock::unlink()
     {
         this->initImageStream();
+        std::cout<<"unlinking block "<<m_index<<std::endl;
         detail::updateVolumeBitmapWithOne(*m_stream, m_index, m_io->blocks, false);
         m_io->blockBuilder->putBlockBack(m_index);
         doSetNextIndex(*m_stream, m_index);

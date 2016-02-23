@@ -69,6 +69,7 @@ class FileTest
         testSeekingFromCurrentNegative();
         testSeekingFromCurrentNegative_bigSeek();
         testSeekingFromCurrentPositive();
+        testSeekingFromCurrentPositive_bigSeek();
         testEdgeCaseEndOfBlockOverWrite();
         testEdgeCaseEndOfBlockAppend();
     }
@@ -633,7 +634,9 @@ class FileTest
         }
     }
 
-    void testSeekingFromCurrentNegative()
+    boost::filesystem::path 
+    seekingFromCurrentTestSetup(std::streamoff const off,
+                                std::streamoff const initialSeek)
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
 
@@ -648,9 +651,6 @@ class FileTest
         }
 
         std::string testData("goodbye!");
-        std::streamoff off = -5876;
-        std::streamoff initialSeek = 12880;
-        std::streamoff finalPosition = initialSeek + off;
         {
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::File entry(io, "test.txt", 1,
@@ -661,7 +661,19 @@ class FileTest
             entry.flush();
         }
 
+        return testPath;
+    }
+
+    void testSeekingFromCurrentNegative()
+    {
+        std::streamoff const off = -5876;
+        std::streamoff const initialSeek = 12880;
+        boost::filesystem::path testPath = 
+           seekingFromCurrentTestSetup(off, initialSeek);
+
         {
+            std::string testData("goodbye!");
+            std::streamoff finalPosition = initialSeek + off;
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::File entry(io, "entry", uint64_t(1),
                                        teasafe::OpenDisposition::buildReadOnlyDisposition());
@@ -676,33 +688,14 @@ class FileTest
 
     void testSeekingFromCurrentNegative_bigSeek()
     {
-        boost::filesystem::path testPath = buildImage(m_uniquePath);
-
-        // test write
-        {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
-            std::string testData(createLargeStringToWrite());
-            std::vector<uint8_t> vec(testData.begin(), testData.end());
-            entry.write((char*)&vec.front(), testData.length());
-            entry.flush();
-        }
-
-        std::string testData("goodbye!");
-        std::streamoff off = -19476;
-        std::streamoff initialSeek = 27980;
-        std::streamoff finalPosition = initialSeek + off;
-        {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildOverwriteDisposition());
-            entry.seek(initialSeek);
-            entry.seek(off, std::ios_base::cur);
-            entry.write(testData.c_str(), testData.length());
-            entry.flush();
-        }
+        std::streamoff const off = -19476;
+        std::streamoff const initialSeek = 27980;
+        boost::filesystem::path testPath = 
+           seekingFromCurrentTestSetup(off, initialSeek);
 
         {
+            std::string testData("goodbye!");
+            std::streamoff finalPosition = initialSeek + off;
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::File entry(io, "entry", uint64_t(1),
                                        teasafe::OpenDisposition::buildReadOnlyDisposition());
@@ -717,33 +710,14 @@ class FileTest
 
     void testSeekingFromCurrentPositive()
     {
-        boost::filesystem::path testPath = buildImage(m_uniquePath);
-
-        // test write
-        {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
-            std::string testData(createLargeStringToWrite());
-            std::vector<uint8_t> vec(testData.begin(), testData.end());
-            entry.write((char*)&vec.front(), testData.length());
-            entry.flush();
-        }
-
-        std::string testData("goodbye!");
-        std::streamoff off = 2176;
-        std::streamoff initialSeek = 3267;
-        std::streamoff finalPosition = initialSeek + off;
-        {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildOverwriteDisposition());
-            entry.seek(initialSeek);
-            entry.seek(off, std::ios_base::cur);
-            entry.write(testData.c_str(), testData.length());
-            entry.flush();
-        }
+        std::streamoff const off = 2176;
+        std::streamoff const initialSeek = 3267;
+        boost::filesystem::path testPath = 
+           seekingFromCurrentTestSetup(off, initialSeek);
 
         {
+            std::string testData("goodbye!");
+            std::streamoff finalPosition = initialSeek + off;
             teasafe::SharedCoreIO io(createTestIO(testPath));
             teasafe::File entry(io, "entry", uint64_t(1),
                                        teasafe::OpenDisposition::buildReadOnlyDisposition());
@@ -753,6 +727,28 @@ class FileTest
             std::string recovered(vec.begin() + finalPosition,
                                   vec.begin() + finalPosition + testData.length());
             ASSERT_EQUAL(recovered, testData, "FileTest::testSeekingFromCurrentPositive()");
+        }
+    }
+
+    void testSeekingFromCurrentPositive_bigSeek()
+    {
+        std::streamoff const off = 128176;
+        std::streamoff const initialSeek = 267;
+        boost::filesystem::path testPath = 
+           seekingFromCurrentTestSetup(off, initialSeek);
+
+        {
+            std::string testData("goodbye!");
+            std::streamoff finalPosition = initialSeek + off;
+            teasafe::SharedCoreIO io(createTestIO(testPath));
+            teasafe::File entry(io, "entry", uint64_t(1),
+                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            std::vector<uint8_t> vec;
+            vec.resize(entry.fileSize());
+            entry.read((char*)&vec.front(), entry.fileSize());
+            std::string recovered(vec.begin() + finalPosition,
+                                  vec.begin() + finalPosition + testData.length());
+            ASSERT_EQUAL(recovered, testData, "FileTest::testSeekingFromCurrentPositive_bigSeek()");
         }
     }
 
@@ -831,5 +827,4 @@ class FileTest
             ASSERT_EQUAL(recovered, testData, "FileTest:: testEdgeCaseEndOfBlockAppend() content");
         }
     }
-
 };

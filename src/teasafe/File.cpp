@@ -186,6 +186,9 @@ namespace teasafe
                                                               teasafe::OpenDisposition::buildAppendDisposition(),
                                                               m_stream,
                                                               m_enforceStartBlock));
+
+        std::cout<<"block index: "<<block.getIndex()<<std::endl;
+
         if (m_enforceStartBlock) { m_enforceStartBlock = false; }
 
         block.registerBlockWithVolumeBitmap();
@@ -244,17 +247,19 @@ namespace teasafe
     {
         // first case no file blocks so absolutely need one to write to
         if (!m_workingBlock) {
+
             newWritableFileBlock();
 
             // when writing the file, the working block will be empty
             // and the start volume block will be unset so need to set now
             m_startVolumeBlock = m_workingBlock->getIndex();
+            std::cout<<"A new one! "<<m_startVolumeBlock<<std::endl;
             return;
         }
 
         // in this case the current block is exhausted so we need a new one
         if (!workingBlockHasAvailableSpace()) {
-
+            std::cout<<"No more space!!"<<std::endl;
             // EDGE case: if overwrite causes us to go over end, need to
             // switch to append mode
             if (static_cast<uint64_t>(this->tell()) >= m_fileSize) {
@@ -263,7 +268,6 @@ namespace teasafe
 
             // if in overwrite mode, maybe we want to overwrite current bytes
             if (m_openDisposition.append() == AppendOrOverwrite::Overwrite) {
-
                 // if the reported stream position in the block is less that
                 // the block's total capacity, then we don't create a new block
                 // we simply overwrite
@@ -283,6 +287,7 @@ namespace teasafe
                 }
 
             }
+            std::cout<<"Creating a new one!!"<<std::endl;
             newWritableFileBlock();
 
             return;
@@ -371,6 +376,8 @@ namespace teasafe
             // check if the working block needs to be updated with a new one
             checkAndUpdateWorkingBlockWithNew();
 
+            std::cout<<"wrote.."<<wrote<<n<<std::endl;
+
             // buffers the data that will be written to the working block
             // computed as a function of the data left to write and the
             // working block's available space
@@ -387,6 +394,7 @@ namespace teasafe
                 m_fileSize+=actualWritten;
             }
         }
+        std::cout<<"finished writing"<<std::endl;
 
         return wrote;
     }
@@ -492,9 +500,6 @@ namespace teasafe
                            int64_t blockIndex,
                            boost::iostreams::stream_offset indexedBlockPosition)
     {
-        std::cout<<off<<std::endl;
-        std::cout<<blockIndex<<std::endl;
-        std::cout<<indexedBlockPosition<<std::endl;
         // find what file block the offset would relate to and set extra offset in file block
         // to that position
         auto const blockSize = blockWriteSpace();
@@ -503,22 +508,14 @@ namespace teasafe
         auto roundedDown = std::abs(addition) - leftOver;
         auto toIncrementBy = roundedDown / blockSize;
 
-        std::cout<<"addition: "<<addition<<std::endl;
-        std::cout<<"leftOver: "<<leftOver<<std::endl;
-        std::cout<<"roundedDown: "<<roundedDown<<std::endl;
-        std::cout<<"toIncrementBy: "<<toIncrementBy<<std::endl;
-
         if (addition >= 0) {
             auto newBlockIndex = blockIndex + toIncrementBy;
             auto newPosition = leftOver;
             return std::make_pair(newBlockIndex, newPosition);            
         }
-        auto newBlockIndex = blockIndex - (toIncrementBy + 1);        
-        std::cout<<"newBlockIndex: "<<newBlockIndex<<std::endl;    
+        auto newBlockIndex = blockIndex - (toIncrementBy + 1);      
         auto newPosition = blockSize - leftOver;
-        std::cout<<"newPosition: "<<newPosition<<std::endl;
         return std::make_pair(newBlockIndex, newPosition);
-        
     }
 
     boost::iostreams::stream_offset

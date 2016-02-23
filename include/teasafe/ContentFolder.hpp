@@ -207,7 +207,7 @@ namespace teasafe
                                       EntryType const& entryType,
                                       uint64_t startBlock);
 
-        uint64_t getEntryCount() const;
+        uint64_t getAliveEntryCount() const;
 
         /// when an old entry is deleted a 'space' become available in which
         /// this function should return true
@@ -299,6 +299,8 @@ namespace teasafe
          */
         void invalidateEntryInEntryInfoCache(std::string const &name);
 
+        void countDeadEntries();
+
         // the core teasafe io (path, blocks, password)
         SharedCoreIO m_io;
 
@@ -312,7 +314,12 @@ namespace teasafe
 
         // as an optimization, store the number of entries so that we
         // don't have to read each time (read once during construction)
+        // Note this can include entries that are no longer in use!!
         long m_entryCount;
+
+        // how many dead entries are there? Entries that used to exist
+        // but are no longer 'in use'
+        long m_deadEntryCount;
 
         // An experimental optimization: a map will store entry infos as they
         // are generated so that in future, they don't have to be regenerated.

@@ -31,7 +31,7 @@
 #include "test/FileBlockIteratorTest.hpp"
 #include "test/FileTest.hpp"
 #include "test/FileDeviceTest.hpp"
-#include "test/MakeTeaSafeTest.hpp" 
+#include "test/MakeTeaSafeTest.hpp"
 #include "test/ContentFolderTest.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
@@ -46,12 +46,12 @@ int main()
         boost::progress_timer timer;
 
         TeaSafeTest();
-        MakeTeaSafeTest();
-        FileDeviceTest();
-        FileBlockTest();
-        FileBlockIteratorTest();
-        FileTest();
-        ContentFolderTest();
+        // MakeTeaSafeTest();
+        // FileDeviceTest();
+        // FileBlockTest();
+        // FileBlockIteratorTest();
+        // FileTest();
+        // ContentFolderTest();
     }
 
     simpletest::showResults();

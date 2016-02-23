@@ -63,6 +63,7 @@ class FileBlockIteratorTest
         teasafe::SharedCoreIO io(createTestIO(testPath));
         teasafe::File entry(io, "test.txt");
         std::string testData(createLargeStringToWrite());
+
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), BIG_SIZE);
         entry.flush();
@@ -79,7 +80,7 @@ class FileBlockIteratorTest
             ++count;
         }
 
-        ASSERT_EQUAL(4, count, "FileBlockIteratorTest::test number of blocks iterated over");
+        ASSERT_EQUAL(32, count, "FileBlockIteratorTest::test number of blocks iterated over");
         ASSERT_EQUAL(true, (begin.equal(end)), "FileBlockIteratorTest::test equality AFTER true");
 
     }

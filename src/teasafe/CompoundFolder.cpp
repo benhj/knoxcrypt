@@ -47,7 +47,7 @@ namespace teasafe
       : m_compoundFolder(std::make_shared<ContentFolder>(io, name, enforceRootBlock))
       , m_contentFolders()
       , m_name(name)
-      , m_ContentFolderCount(m_compoundFolder->getEntryCount())
+      , m_ContentFolderCount(m_compoundFolder->getAliveEntryCount())
       , m_cache()
       , m_cacheShouldBeUpdated(true)
     {
@@ -60,7 +60,7 @@ namespace teasafe
       : m_compoundFolder(std::make_shared<ContentFolder>(io, startBlock, name))
       , m_contentFolders()
       , m_name(name)
-      , m_ContentFolderCount(m_compoundFolder->getEntryCount())
+      , m_ContentFolderCount(m_compoundFolder->getAliveEntryCount())
       , m_cache()
       , m_cacheShouldBeUpdated(true)
     {
@@ -84,7 +84,9 @@ namespace teasafe
         std::ostringstream ss;
         ss << "index_" << m_ContentFolderCount;
         m_compoundFolder->addContentFolder(ss.str());
+        std::cout<<"Added .... "<<ss.str()<<std::endl;
         m_contentFolders.push_back(m_compoundFolder->getContentFolder(ss.str()));
+        std::cout<<"pushed_back"<<std::endl;
         ++m_ContentFolderCount;
     }
 
@@ -94,14 +96,23 @@ namespace teasafe
         // check if compound entries is empty. These are
         // compound 'leaf' sub-folders
         if(m_contentFolders.empty()) {
+            std::cout<<"Content folders empty **"<<std::endl;
             doAddContentFolder();
+            std::cout<<m_contentFolders.empty()<<std::endl;
         }
 
         // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
 
+        std::cout<<"before loop"<<std::endl;
+        std::cout<<"content folders empty? "<<m_contentFolders.empty()<<std::endl;
+        std::cout<<"size: "<<m_contentFolders.size()<<std::endl;
+
         for(auto & f : boost::adaptors::reverse(m_contentFolders)) {
-            if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
+            std::cout<<"in loop"<<std::endl;
+            std::cout<<"loopy: "<<f->getAliveEntryCount()<<std::endl;
+            if(f->getAliveEntryCount() < CONTENT_SIZE) {
+                std::cout<<"Enough space!!"<<std::endl;
                 f->addFile(name);
                 wasAdded = true;
                 break;
@@ -111,8 +122,10 @@ namespace teasafe
         // wasn't added. Means that there wasn't room so create
         // another leaf folder
         if(!wasAdded) {
+            std::cout<<"creating content folder"<<std::endl;
             doAddContentFolder();
             m_contentFolders.back()->addFile(name);
+            std::cout<<"added "<<name<<std::endl;
         }
 
         m_cacheShouldBeUpdated = true;
@@ -124,13 +137,14 @@ namespace teasafe
         // check if compound entries is empty. These are
         // compound 'leaf' sub-folders
         if(m_contentFolders.empty()) {
+            std::cout<<"didn't expect to be here"<<std::endl;
             doAddContentFolder();
         }
 
         // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
         for(auto & f : m_contentFolders) {
-            if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
+            if(f->getAliveEntryCount() < CONTENT_SIZE) {
                 f->addCompoundFolder(name);
                 wasAdded = true;
                 break;
@@ -302,7 +316,7 @@ namespace teasafe
         for(auto & f : m_contentFolders) {
             if(f->removeFile(name)) {
                 // decrement number of entries in leaf
-                if(f->getEntryCount() == 0) {
+                if(f->getAliveEntryCount() == 0) {
                     m_compoundFolder->removeContentFolder(f->getName());
                 }
                 doRemoveEntryFromCache(name);
@@ -318,7 +332,7 @@ namespace teasafe
         for(auto & f : m_contentFolders) {
             if(f->removeCompoundFolder(name)) {
                 // decrement number of entries in leaf
-                if(f->getEntryCount() == 0) {
+                if(f->getAliveEntryCount() == 0) {
                     m_compoundFolder->removeContentFolder(f->getName());
                 }
                 doRemoveEntryFromCache(name);
@@ -349,7 +363,7 @@ namespace teasafe
         bool wasAdded = false;
 
         for(auto & f : boost::adaptors::reverse(m_contentFolders)) {
-            if(f->getEntryCount() < CONTENT_SIZE || f->anOldSpaceIsAvailableForNewEntry()) {
+            if(f->getAliveEntryCount() < CONTENT_SIZE) {
                 f->writeNewMetaDataForEntry(name, entryType, startBlock);
                 wasAdded = true;
                 break;

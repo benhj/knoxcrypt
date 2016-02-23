@@ -165,6 +165,10 @@ namespace teasafe
 
         /**
          * @brief retrieves the number of entries in folder entry
+         * @note, this number will refer to the total number of
+         * entries ever stored in the folder. Thus if a file is later
+         * deleted, this number is not decremented. There's an 
+         * optimization in there somewhere.
          * @return the number of folder entries
          */
         long getNumberOfEntries(File const & folderData, uint64_t const blocks)
@@ -196,10 +200,14 @@ namespace teasafe
         , m_startVolumeBlock(startVolumeBlock)
         , m_name(name)
         , m_entryCount(getNumberOfEntries(m_folderData, m_io->blocks))
+        , m_deadEntryCount(0)
         , m_entryInfoCacheMap()
         , m_checkForEarlyMetaData(true)
         , m_oldSpaceAvailableForEntry(false)
     {
+        countDeadEntries();
+        std::cout<<"m_entryCount: "<<m_entryCount<<std::endl;
+        std::cout<<"m_deadEntryCount: "<<m_deadEntryCount<<std::endl;
     }
 
     ContentFolder::ContentFolder(SharedCoreIO const &io,
@@ -210,6 +218,7 @@ namespace teasafe
         , m_startVolumeBlock(m_folderData.getStartVolumeBlockIndex())
         , m_name(name)
         , m_entryCount(0)
+        , m_deadEntryCount(0)
         , m_entryInfoCacheMap()
         , m_checkForEarlyMetaData(true)
         , m_oldSpaceAvailableForEntry(false)
@@ -220,6 +229,10 @@ namespace teasafe
         detail::convertUInt64ToInt8Array(startCount, buf);
         (void)m_folderData.write((char*)buf, 8);
         m_folderData.flush();
+
+        countDeadEntries();
+        std::cout<<"m_entryCount: "<<m_entryCount<<std::endl;
+        std::cout<<"m_deadEntryCount: "<<m_deadEntryCount<<std::endl;
     }
 
     std::streamsize
@@ -277,9 +290,13 @@ namespace teasafe
         auto overWroteOld(doFindOffsetWhereMetaDataShouldBeWritten());
 
         if (overWroteOld) {
+
+            std::cout<<"overWroteOld! "<<*overWroteOld<<std::endl;
+
             m_folderData = File(m_io, m_name, m_startVolumeBlock,
                                        OpenDisposition::buildOverwriteDisposition());
             m_folderData.seek(*overWroteOld);
+            --m_deadEntryCount;
         } else {
             m_folderData.seek(0, std::ios_base::end);
         }
@@ -315,6 +332,7 @@ namespace teasafe
     void
     ContentFolder::addFile(std::string const &name)
     {
+        std::cout<<"Adding file "<<name<<std::endl;
         // Create a new file entry
         File entry(m_io, name);
 
@@ -326,10 +344,12 @@ namespace teasafe
     ContentFolder::addContentFolder(std::string const &name)
     {
         // Create a new sub-folder entry
+        std::cout<<"Adding content folder "<<name<<std::endl;
         auto entry(std::make_shared<ContentFolder>(m_io, name));
-
+        std::cout<<"Created content folder "<<name<<std::endl;
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry->m_folderData.getStartVolumeBlockIndex());
+        std::cout<<"wrote meta for "<<name<<std::endl;
     }
 
     void
@@ -396,6 +416,19 @@ namespace teasafe
     ContentFolder::getName() const
     {
         return m_name;
+    }
+
+    void 
+    ContentFolder::countDeadEntries()
+    {
+        for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
+
+            // read all metadata
+            auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
+            if (!entryMetaDataIsEnabled(metaData)) {
+                ++m_deadEntryCount;
+            }
+        }
     }
 
     EntryInfoCacheMap &
@@ -495,12 +528,15 @@ namespace teasafe
         // then be later overwritten when a new entry is then added
         this->doPutMetaDataOutOfUse(name);
 
+        ++m_deadEntryCount;
+
         return true;
     }
 
     bool
     ContentFolder::removeContentFolder(std::string const &name)
     {
+
         auto entry(getContentFolder(name));
         if(!entry) { return false; }
 
@@ -522,6 +558,8 @@ namespace teasafe
 
         // unlink entry's data
         entry->m_folderData.unlink();
+
+        ++m_deadEntryCount;
 
         return true;
     }
@@ -549,6 +587,8 @@ namespace teasafe
 
         // unlink entry's data
         entry->getCompoundFolder()->m_folderData.unlink();
+
+        ++m_deadEntryCount;
 
         return true;
     }
@@ -593,9 +633,13 @@ namespace teasafe
     }
 
     uint64_t
-    ContentFolder::getEntryCount() const
+    ContentFolder::getAliveEntryCount() const
     {
-        return m_entryCount;
+        std::cout<<"here?"<<std::endl;
+        std::cout<<"dead: "<<m_deadEntryCount<<std::endl;
+        std::cout<<"total: "<<m_entryCount<<std::endl;
+        
+        return m_entryCount - m_deadEntryCount;
     }
 
     SharedEntryInfo

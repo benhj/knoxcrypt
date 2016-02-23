@@ -103,8 +103,10 @@ namespace teasafe
         if (enforceRootBlock) {
             id = io->rootBlock;
         } else {
-            id = m_blockDeque.front(); //*(detail::getNextAvailableBlock(stream, io->blocks));
-            m_blockDeque.pop_front();
+
+            checkAndInitStream(io, stream);
+            id = *(detail::getNextAvailableBlock(*stream, io->blocks));
+            //m_blockDeque.pop_front();
         }
 
         // check if block data is actually written into iomage structure (might not have been
@@ -138,7 +140,8 @@ namespace teasafe
     void
     FileBlockBuilder::putBlockBack(uint64_t const block)
     {
-        m_blockDeque.push_front(block);
+        //std::cout<<"putting back block "<<block<<std::endl;
+        //m_blockDeque.push_front(block);
     }
 
 

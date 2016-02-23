@@ -46,28 +46,29 @@ class TeaSafeTest
     TeaSafeTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
-        testFileExists();
-        testFolderExists();
-        testAddFile();
-        testAddCompoundFolder();
-        testAddFileThrowsIfParentNotFound();
-        testAddFolderThrowsIfParentNotFound();
-        testAddFileThrowsIfAlreadyExists();
-        testAddFolderThrowsIfAlreadyExists();
-        testRemoveFile();
-        testRemoveFileThrowsIfBadParent();
-        testRemoveFileThrowsIfNotFound();
-        //testRemoveFileThrowsIfFolder();
-        testRemoveEmptyFolder();
-        testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty();
-        testRemoveNonEmptyFolder();
-        //testRemoveNonExistingFolderThrows();
-        testWriteToStream();
-        testListAllEntriesEmpty();
-        testMoveFileSameFolder();
-        testMoveFileToSubFolder();
-        testMoveFileFromSubFolderToParentFolder();
-        testThatDeletingEverythingDeallocatesEverything();
+        // testFileExists();
+        // testFolderExists();
+        // testAddFile();
+        // testAddCompoundFolder();
+        // testAddFileThrowsIfParentNotFound();
+        // testAddFolderThrowsIfParentNotFound();
+        // testAddFileThrowsIfAlreadyExists();
+        // testAddFolderThrowsIfAlreadyExists();
+        // testRemoveFile();
+        // testRemoveFileThrowsIfBadParent();
+        // testRemoveFileThrowsIfNotFound();
+        // //testRemoveFileThrowsIfFolder();
+        // testRemoveEmptyFolder();
+        // testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty();
+        // testRemoveNonEmptyFolder();
+        // //testRemoveNonExistingFolderThrows();
+        // testWriteToStream();
+        // testListAllEntriesEmpty();
+        // testMoveFileSameFolder();
+        // testMoveFileToSubFolder();
+        // testMoveFileFromSubFolderToParentFolder();
+        // testThatDeletingEverythingDeallocatesEverything();
+        testDebugging();
     }
 
     ~TeaSafeTest()
@@ -79,27 +80,27 @@ class TeaSafeTest
     {
         teasafe::SharedCoreIO io = createTestIO(p);
         teasafe::CompoundFolder folder(io, 0, std::string("root"));
-        folder.addFile("test.txt");
-        folder.addFile("some.log");
+        // folder.addFile("test.txt");
+        // folder.addFile("some.log");
         folder.addFolder("folderA");
-        folder.addFile("picture.jpg");
-        folder.addFile("vai.mp3");
-        folder.addFolder("folderB");
+        // folder.addFile("picture.jpg");
+        // folder.addFile("vai.mp3");
+        // folder.addFolder("folderB");
 
         teasafe::CompoundFolder folderA = *folder.getFolder("folderA");
-        folderA.addFile("fileA");
-        folderA.addFile("fileB");
+        // folderA.addFile("fileA");
+        // folderA.addFile("fileB");
         folderA.addFolder("subFolderA");
 
         teasafe::CompoundFolder subFolderA = *folderA.getFolder("subFolderA");
-        subFolderA.addFolder("subFolderB");
+        //subFolderA.addFolder("subFolderB");
         subFolderA.addFile("fileX");
-        subFolderA.addFolder("subFolderC");
-        subFolderA.addFile("fileY");
+        // subFolderA.addFolder("subFolderC");
+        // subFolderA.addFile("fileY");
 
-        teasafe::CompoundFolder subFolderC = *subFolderA.getFolder("subFolderC");
-        subFolderC.addFolder("finalFolder");
-        subFolderC.addFile("finalFile.txt");
+        // teasafe::CompoundFolder subFolderC = *subFolderA.getFolder("subFolderC");
+        // subFolderC.addFolder("finalFolder");
+        // subFolderC.addFile("finalFile.txt");
 
         return folder;
     }
@@ -485,18 +486,19 @@ class TeaSafeTest
             for (long i = 0; i < blocks; ++i) {
 
                 if (teasafe::detail::isBlockInUse(i, blocks, in)) {
+                    std::cout<<"before i: "<<i<<std::endl;
                     blocksInUse.push_back(i);
                 }
             }
         }
 
         // now remove all content
-        theTeaSafe.removeFile("/test.txt");
-        theTeaSafe.removeFile("/some.log");
+        //theTeaSafe.removeFile("/test.txt");
+        //theTeaSafe.removeFile("/some.log");
         theTeaSafe.removeFolder("/folderA", teasafe::FolderRemovalType::Recursive);
-        theTeaSafe.removeFile("/picture.jpg");
-        theTeaSafe.removeFile("/vai.mp3");
-        theTeaSafe.removeFolder("/folderB", teasafe::FolderRemovalType::Recursive);
+        //theTeaSafe.removeFile("/picture.jpg");
+        //theTeaSafe.removeFile("/vai.mp3");
+        //theTeaSafe.removeFolder("/folderB", teasafe::FolderRemovalType::Recursive);
 
         // check that all blocks except 0 which is the root folder entry point
         // have been deallocated
@@ -506,6 +508,7 @@ class TeaSafeTest
             for (int i = 1; i<blocks; ++i) {
 
                 if (teasafe::detail::isBlockInUse(i, blocks, in)) {
+                    
                     blockCheckPassed = false;
                     break;
                 }
@@ -531,10 +534,16 @@ class TeaSafeTest
             for (long i = 0; i < blocks; ++i) {
 
                 if (teasafe::detail::isBlockInUse(i, blocks, in)) {
+                    std::cout<<"after i: "<<i<<std::endl;
                     blocksInUseB.push_back(i);
                 }
             }
         }
+
+        ASSERT_EQUAL(blocksInUse.size(), blocksInUseB.size(),
+                     "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() same block counts");
+
+        std::cout<<blocksInUse.size()<<"\t"<<blocksInUseB.size()<<std::endl;
 
         bool sameBlocks = true;
         for (size_t i = 0; i < blocksInUse.size(); ++i) {
@@ -547,5 +556,22 @@ class TeaSafeTest
         ASSERT_EQUAL(true, sameBlocks,
                      "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() same blocks");
 
+    }
+
+    // in the context of debugging on branch debuggingSeek
+    void testDebugging()
+    {
+        long const blocks = 2048;
+        boost::filesystem::path testPath = buildImage(m_uniquePath);
+        {
+            (void)createTestFolder(testPath);
+        }
+        teasafe::SharedCoreIO io(createTestIO(testPath));
+        teasafe::TeaSafe theTeaSafe(io);
+        theTeaSafe.removeFolder("/folderA", teasafe::FolderRemovalType::Recursive);
+        teasafe::CompoundFolder folder(io, 0, std::string("root"));
+        folder.addFolder("/folderA");
+        auto folderA = *folder.getFolder("/folderA");
+        folderA.addFolder("subFolderA");
     }
 };
