@@ -46,12 +46,12 @@ int main()
         boost::progress_timer timer;
 
         TeaSafeTest();
-        // MakeTeaSafeTest();
-        // FileDeviceTest();
-        // FileBlockTest();
-        // FileBlockIteratorTest();
-        // FileTest();
-        // ContentFolderTest();
+        MakeTeaSafeTest();
+        FileDeviceTest();
+        FileBlockTest();
+        FileBlockIteratorTest();
+        FileTest();
+        ContentFolderTest();
     }
 
     simpletest::showResults();

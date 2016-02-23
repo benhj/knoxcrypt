@@ -321,6 +321,7 @@ namespace teasafe
                 if((*f)->getAliveEntryCount() == 0) {
                     m_compoundFolder->removeContentFolder((*f)->getName());
                     m_contentFolders.erase(f++);
+                    --m_ContentFolderCount;
                 }
                 doRemoveEntryFromCache(name);
                 return;
@@ -339,6 +340,7 @@ namespace teasafe
                 if((*f)->getAliveEntryCount() == 0) {
                     m_compoundFolder->removeContentFolder((*f)->getName());
                     m_contentFolders.erase(f++);
+                    --m_ContentFolderCount;
                 }
                 doRemoveEntryFromCache(name);
                 std::cout<<"content folder empty? "<<m_contentFolders.empty()<<"\t"<<this<<std::endl;
