@@ -167,7 +167,7 @@ namespace teasafe
          * @brief retrieves the number of entries in folder entry
          * @note, this number will refer to the total number of
          * entries ever stored in the folder. Thus if a file is later
-         * deleted, this number is not decremented. There's an 
+         * deleted, this number is not decremented. There's an
          * optimization in there somewhere.
          * @return the number of folder entries
          */
@@ -418,7 +418,7 @@ namespace teasafe
         return m_name;
     }
 
-    void 
+    void
     ContentFolder::countDeadEntries()
     {
         for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
@@ -632,14 +632,20 @@ namespace teasafe
         return *doGetEntryInfo(metaData, entryIndex);
     }
 
-    uint64_t
+    long
     ContentFolder::getAliveEntryCount() const
     {
         std::cout<<"here?"<<std::endl;
         std::cout<<"dead: "<<m_deadEntryCount<<std::endl;
         std::cout<<"total: "<<m_entryCount<<std::endl;
-        
+
         return m_entryCount - m_deadEntryCount;
+    }
+
+    long
+    ContentFolder::getTotalEntryCount() const
+    {
+        return m_entryCount;
     }
 
     SharedEntryInfo

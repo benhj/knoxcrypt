@@ -207,7 +207,8 @@ namespace teasafe
                                       EntryType const& entryType,
                                       uint64_t startBlock);
 
-        uint64_t getAliveEntryCount() const;
+        long getAliveEntryCount() const;
+        long getTotalEntryCount() const;
 
         /// when an old entry is deleted a 'space' become available in which
         /// this function should return true

@@ -47,7 +47,7 @@ namespace teasafe
       : m_compoundFolder(std::make_shared<ContentFolder>(io, name, enforceRootBlock))
       , m_contentFolders()
       , m_name(name)
-      , m_ContentFolderCount(m_compoundFolder->getAliveEntryCount())
+      , m_ContentFolderCount(m_compoundFolder->getTotalEntryCount())
       , m_cache()
       , m_cacheShouldBeUpdated(true)
     {
@@ -60,7 +60,7 @@ namespace teasafe
       : m_compoundFolder(std::make_shared<ContentFolder>(io, startBlock, name))
       , m_contentFolders()
       , m_name(name)
-      , m_ContentFolderCount(m_compoundFolder->getAliveEntryCount())
+      , m_ContentFolderCount(m_compoundFolder->getTotalEntryCount())
       , m_cache()
       , m_cacheShouldBeUpdated(true)
     {
@@ -134,6 +134,8 @@ namespace teasafe
     void
     CompoundFolder::addFolder(std::string const &name)
     {
+
+        std::cout<<"adding folder, empty CFs? "<<m_contentFolders.empty()<<"\t"<<this<<std::endl;
         // check if compound entries is empty. These are
         // compound 'leaf' sub-folders
         if(m_contentFolders.empty()) {
@@ -313,15 +315,17 @@ namespace teasafe
     void
     CompoundFolder::removeFile(std::string const &name)
     {
-        for(auto & f : m_contentFolders) {
-            if(f->removeFile(name)) {
+        for(auto f = std::begin(m_contentFolders); f!=std::end(m_contentFolders);) {
+            if((*f)->removeFile(name)) {
                 // decrement number of entries in leaf
-                if(f->getAliveEntryCount() == 0) {
-                    m_compoundFolder->removeContentFolder(f->getName());
+                if((*f)->getAliveEntryCount() == 0) {
+                    m_compoundFolder->removeContentFolder((*f)->getName());
+                    m_contentFolders.erase(f++);
                 }
                 doRemoveEntryFromCache(name);
                 return;
             }
+            ++f;
         }
         throw std::runtime_error("Error removing: file not found");
     }
@@ -329,15 +333,18 @@ namespace teasafe
     void
     CompoundFolder::removeFolder(std::string const &name)
     {
-        for(auto & f : m_contentFolders) {
-            if(f->removeCompoundFolder(name)) {
+        for(auto f = std::begin(m_contentFolders); f!=std::end(m_contentFolders);) {
+            if((*f)->removeCompoundFolder(name)) {
                 // decrement number of entries in leaf
-                if(f->getAliveEntryCount() == 0) {
-                    m_compoundFolder->removeContentFolder(f->getName());
+                if((*f)->getAliveEntryCount() == 0) {
+                    m_compoundFolder->removeContentFolder((*f)->getName());
+                    m_contentFolders.erase(f++);
                 }
                 doRemoveEntryFromCache(name);
+                std::cout<<"content folder empty? "<<m_contentFolders.empty()<<"\t"<<this<<std::endl;
                 return;
             }
+            ++f;
         }
         throw std::runtime_error("Error removing: folder not found");
     }
