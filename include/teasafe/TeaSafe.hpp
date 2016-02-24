@@ -170,7 +170,9 @@ namespace teasafe
 
         // so that a new file doesn't need to be created each time the same file is opened
         // hold on to just the last opened file, rather than a cache 13/02/16
-        mutable SharedFile m_cachedFile;
+        using FileAndPathPair = std::pair<std::string, SharedFile>;
+        using UniqueFileAndPathPair = std::unique_ptr<FileAndPathPair>;
+        mutable UniqueFileAndPathPair m_cachedFileAndPath;
 
         void throwIfAlreadyExists(std::string const &path) const;
 

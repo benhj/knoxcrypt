@@ -206,8 +206,6 @@ namespace teasafe
         , m_oldSpaceAvailableForEntry(false)
     {
         countDeadEntries();
-        std::cout<<"m_entryCount: "<<m_entryCount<<std::endl;
-        std::cout<<"m_deadEntryCount: "<<m_deadEntryCount<<std::endl;
     }
 
     ContentFolder::ContentFolder(SharedCoreIO const &io,
@@ -231,8 +229,6 @@ namespace teasafe
         m_folderData.flush();
 
         countDeadEntries();
-        std::cout<<"m_entryCount: "<<m_entryCount<<std::endl;
-        std::cout<<"m_deadEntryCount: "<<m_deadEntryCount<<std::endl;
     }
 
     std::streamsize
@@ -291,8 +287,6 @@ namespace teasafe
 
         if (overWroteOld) {
 
-            std::cout<<"overWroteOld! "<<*overWroteOld<<std::endl;
-
             m_folderData = File(m_io, m_name, m_startVolumeBlock,
                                        OpenDisposition::buildOverwriteDisposition());
             m_folderData.seek(*overWroteOld);
@@ -332,7 +326,6 @@ namespace teasafe
     void
     ContentFolder::addFile(std::string const &name)
     {
-        std::cout<<"Adding file "<<name<<std::endl;
         // Create a new file entry
         File entry(m_io, name);
 
@@ -344,12 +337,9 @@ namespace teasafe
     ContentFolder::addContentFolder(std::string const &name)
     {
         // Create a new sub-folder entry
-        std::cout<<"Adding content folder "<<name<<std::endl;
         auto entry(std::make_shared<ContentFolder>(m_io, name));
-        std::cout<<"Created content folder "<<name<<std::endl;
         // write the first block index to the file entry metadata
         this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry->m_folderData.getStartVolumeBlockIndex());
-        std::cout<<"wrote meta for "<<name<<std::endl;
     }
 
     void
@@ -527,16 +517,8 @@ namespace teasafe
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
         this->doPutMetaDataOutOfUse(name);
-        std::cout<<"metaData put out of use for "<<name<<std::endl;
 
         ++m_deadEntryCount;
-
-        // if we now have zero entry counts, need to 'reset' 
-        // underlying file data
-        if(getAliveEntryCount() == 0) {
-            std::cout<<"m_folderData.filename(): "<<m_folderData.filename()<<std::endl;
-            m_folderData.reset();
-        }
 
         return true;
     }
@@ -569,13 +551,6 @@ namespace teasafe
 
         ++m_deadEntryCount;
 
-        // if we now have zero entry counts, need to 'reset' 
-        // underlying file data
-        if(getAliveEntryCount() == 0) {
-            std::cout<<"m_folderData.filename(): "<<m_folderData.filename()<<std::endl;
-            m_folderData.reset();
-        }
-
         return true;
     }
 
@@ -604,13 +579,6 @@ namespace teasafe
         entry->getCompoundFolder()->m_folderData.unlink();
 
         ++m_deadEntryCount;
-
-        // if we now have zero entry counts, need to 'reset' 
-        // underlying file data
-        if(getAliveEntryCount() == 0) {
-            std::cout<<"m_folderData.filename(): "<<m_folderData.filename()<<std::endl;
-            m_folderData.reset();
-        }
 
         return true;
     }
@@ -657,10 +625,6 @@ namespace teasafe
     long
     ContentFolder::getAliveEntryCount() const
     {
-        std::cout<<"here?"<<std::endl;
-        std::cout<<"dead: "<<m_deadEntryCount<<std::endl;
-        std::cout<<"total: "<<m_entryCount<<std::endl;
-
         return m_entryCount - m_deadEntryCount;
     }
 

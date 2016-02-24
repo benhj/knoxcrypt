@@ -38,7 +38,7 @@ namespace teasafe
         , m_rootFolder(std::make_shared<CompoundFolder>(io, io->rootBlock, "root"))
         , m_folderCache()
         , m_stateMutex()
-        , m_cachedFile()
+        , m_cachedFileAndPath(nullptr)
     {
     }
 
@@ -283,6 +283,22 @@ namespace teasafe
         // also remove entry from parent cache
         this->removeDeletedParentFromCache(boost::filesystem::path(thePath));
 
+        // need to also check if this now fucks up the cached file
+        if(m_cachedFileAndPath) {
+
+            auto m_cachedPath = boost::filesystem::path(m_cachedFileAndPath->first);
+            auto boostFolderPath = boost::filesystem::path(path);
+            do {
+                m_cachedPath = m_cachedPath.parent_path();
+                if(m_cachedPath == boostFolderPath) {
+                    m_cachedFileAndPath.reset();
+                    m_cachedFileAndPath = nullptr;
+                    break;
+                }
+                
+            } while (m_cachedPath.has_parent_path()); 
+        }
+
     }
 
     FileDevice
@@ -309,7 +325,7 @@ namespace teasafe
         }*/
 
         setCachedFile(path, parentEntry, openMode);
-        return FileDevice(m_cachedFile);
+        return FileDevice(m_cachedFileAndPath->second);
     }
 
     void
@@ -331,7 +347,7 @@ namespace teasafe
         }*/
 
         setCachedFile(path, parentEntry, OpenDisposition::buildOverwriteDisposition());
-        m_cachedFile->truncate(offset);
+        m_cachedFileAndPath->second->truncate(offset);
     }
 
     void
@@ -340,13 +356,15 @@ namespace teasafe
                            OpenDisposition openMode) const
     {
         auto theName = boost::filesystem::path(path).filename().string();
-        //if(m_cachedFile) {
-        //    if(!m_cachedFile->getOpenDisposition().equals(openMode)) {
-        //        m_cachedFile = std::make_shared<File>(parentEntry->getFile(theName, openMode));
-        //    }
-        //} else {
-            m_cachedFile = std::make_shared<File>(parentEntry->getFile(theName, openMode));
-        //}
+        if(m_cachedFileAndPath) {
+            if(!m_cachedFileAndPath->second->getOpenDisposition().equals(openMode)) {
+                m_cachedFileAndPath->second = std::make_shared<File>(parentEntry->getFile(theName, openMode));
+            }
+        } else {
+            m_cachedFileAndPath.reset(new FileAndPathPair(path,
+                                                          std::make_shared<File>(parentEntry->getFile(theName, 
+                                                                                                      openMode))));
+        }
     }
 
     /**

@@ -308,7 +308,6 @@ namespace teasafe { namespace detail
         // get number of blocks that make up fs
         uint64_t blocks = blocks_;
         if (blocks == 0) {
-            std::cout<<"SHIT"<<std::endl;
             blocks = getNumberOfBlocks(in);
         } else {
             (void)in.seekg(beginning() + 8);
@@ -320,8 +319,6 @@ namespace teasafe { namespace detail
         // read the bytes in to a buffer
         std::vector<uint8_t> buf(bytes);
         (void)in.read((char*)&buf.front(), bytes);
-
-        std::cout<<"HERE!!!"<<std::endl;
 
         // find out the next available bit
         uint64_t bitCounter(0);
@@ -337,7 +334,6 @@ namespace teasafe { namespace detail
 
         // no available blocks found
         if (bitCounter == blocks) {
-            std::cout<<"FUCKER"<<std::endl;
             return OptionalBlock();
         }
 

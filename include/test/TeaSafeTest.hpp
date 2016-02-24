@@ -487,7 +487,6 @@ class TeaSafeTest
             for (long i = 0; i < blocks; ++i) {
 
                 if (teasafe::detail::isBlockInUse(i, blocks, in)) {
-                    std::cout<<"before i: "<<i<<std::endl;
                     blocksInUse.push_back(i);
                 }
             }
@@ -535,7 +534,6 @@ class TeaSafeTest
             for (long i = 0; i < blocks; ++i) {
 
                 if (teasafe::detail::isBlockInUse(i, blocks, in)) {
-                    std::cout<<"after i: "<<i<<std::endl;
                     blocksInUseB.push_back(i);
                 }
             }
@@ -543,8 +541,6 @@ class TeaSafeTest
 
         ASSERT_EQUAL(blocksInUse.size(), blocksInUseB.size(),
                      "TeaSafeTest::testThatDeletingEverythingDeallocatesEverything() same block counts");
-
-        std::cout<<blocksInUse.size()<<"\t"<<blocksInUseB.size()<<std::endl;
 
         bool sameBlocks = true;
         for (size_t i = 0; i < blocksInUse.size(); ++i) {

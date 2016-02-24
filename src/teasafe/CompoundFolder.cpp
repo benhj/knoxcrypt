@@ -84,9 +84,7 @@ namespace teasafe
         std::ostringstream ss;
         ss << "index_" << m_ContentFolderCount;
         m_compoundFolder->addContentFolder(ss.str());
-        std::cout<<"Added .... "<<ss.str()<<std::endl;
         m_contentFolders.push_back(m_compoundFolder->getContentFolder(ss.str()));
-        std::cout<<"pushed_back"<<std::endl;
         ++m_ContentFolderCount;
     }
 
@@ -96,23 +94,14 @@ namespace teasafe
         // check if compound entries is empty. These are
         // compound 'leaf' sub-folders
         if(m_contentFolders.empty()) {
-            std::cout<<"Content folders empty **"<<std::endl;
             doAddContentFolder();
-            std::cout<<m_contentFolders.empty()<<std::endl;
         }
 
         // each leaf folder can have CONTENT_SIZE entries
         bool wasAdded = false;
 
-        std::cout<<"before loop"<<std::endl;
-        std::cout<<"content folders empty? "<<m_contentFolders.empty()<<std::endl;
-        std::cout<<"size: "<<m_contentFolders.size()<<std::endl;
-
         for(auto & f : boost::adaptors::reverse(m_contentFolders)) {
-            std::cout<<"in loop"<<std::endl;
-            std::cout<<"loopy: "<<f->getAliveEntryCount()<<std::endl;
             if(f->getAliveEntryCount() < CONTENT_SIZE) {
-                std::cout<<"Enough space!!"<<std::endl;
                 f->addFile(name);
                 wasAdded = true;
                 break;
@@ -122,10 +111,8 @@ namespace teasafe
         // wasn't added. Means that there wasn't room so create
         // another leaf folder
         if(!wasAdded) {
-            std::cout<<"creating content folder"<<std::endl;
             doAddContentFolder();
             m_contentFolders.back()->addFile(name);
-            std::cout<<"added "<<name<<std::endl;
         }
 
         m_cacheShouldBeUpdated = true;
@@ -134,12 +121,9 @@ namespace teasafe
     void
     CompoundFolder::addFolder(std::string const &name)
     {
-
-        std::cout<<"adding folder, empty CFs? "<<m_contentFolders.empty()<<"\t"<<this<<std::endl;
         // check if compound entries is empty. These are
         // compound 'leaf' sub-folders
         if(m_contentFolders.empty()) {
-            std::cout<<"didn't expect to be here"<<std::endl;
             doAddContentFolder();
         }
 
@@ -167,12 +151,20 @@ namespace teasafe
     CompoundFolder::getFile(std::string const &name,
                             OpenDisposition const &openDisposition) const
     {
-
         // query entry info cache to try and get index of bucket (optimization)
         auto it = m_cache.find(name);
         if(it != m_cache.end()) {
             if(it->second->hasBucketIndex()) {
-                return *m_contentFolders[it->second->bucketIndex()]->getFile(name, openDisposition);
+                auto index = it->second->bucketIndex();
+                if(index < m_contentFolders.size()) {
+                    auto file = m_contentFolders[index]->getFile(name, openDisposition);
+                    if(file) {
+                        return *file;
+                    }
+                } else {
+                    // stale cache
+                    m_cache.erase(it);
+                }
             }
         }
 
@@ -194,7 +186,18 @@ namespace teasafe
         auto it = m_cache.find(name);
         if(it != m_cache.end()) {
             if(it->second->hasBucketIndex()) {
-                return m_contentFolders[it->second->bucketIndex()]->getCompoundFolder(name);
+                auto index = it->second->bucketIndex();
+                if(index < m_contentFolders.size()) {
+                    auto folder(m_contentFolders[index]->getCompoundFolder(name));
+                    if(folder) {
+                        return folder;
+                    }
+                } else {
+                    // stale cache entry. Bucket indexing has become inconsistent,
+                    // so just remove from cache
+                    m_cache.erase(it);
+                }
+                
             }
         }
 
@@ -316,9 +319,11 @@ namespace teasafe
     CompoundFolder::removeFile(std::string const &name)
     {
         for(auto f = std::begin(m_contentFolders); f!=std::end(m_contentFolders);) {
+            assert(*f);
             if((*f)->removeFile(name)) {
                 // decrement number of entries in leaf
                 if((*f)->getAliveEntryCount() == 0) {
+                    assert(m_compoundFolder);
                     m_compoundFolder->removeContentFolder((*f)->getName());
                     m_contentFolders.erase(f++);
                     --m_ContentFolderCount;
@@ -335,15 +340,16 @@ namespace teasafe
     CompoundFolder::removeFolder(std::string const &name)
     {
         for(auto f = std::begin(m_contentFolders); f!=std::end(m_contentFolders);) {
+            assert(*f);
             if((*f)->removeCompoundFolder(name)) {
                 // decrement number of entries in leaf
                 if((*f)->getAliveEntryCount() == 0) {
+                    assert(m_compoundFolder);
                     m_compoundFolder->removeContentFolder((*f)->getName());
                     m_contentFolders.erase(f++);
                     --m_ContentFolderCount;
                 }
                 doRemoveEntryFromCache(name);
-                std::cout<<"content folder empty? "<<m_contentFolders.empty()<<"\t"<<this<<std::endl;
                 return;
             }
             ++f;
