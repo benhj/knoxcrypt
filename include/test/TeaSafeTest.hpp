@@ -494,12 +494,12 @@ class TeaSafeTest
         }
 
         // now remove all content
-        //theTeaSafe.removeFile("/test.txt");
-        //theTeaSafe.removeFile("/some.log");
+        theTeaSafe.removeFile("/test.txt");
+        theTeaSafe.removeFile("/some.log");
         theTeaSafe.removeFolder("/folderA", teasafe::FolderRemovalType::Recursive);
-        //theTeaSafe.removeFile("/picture.jpg");
-        //theTeaSafe.removeFile("/vai.mp3");
-        //theTeaSafe.removeFolder("/folderB", teasafe::FolderRemovalType::Recursive);
+        theTeaSafe.removeFile("/picture.jpg");
+        theTeaSafe.removeFile("/vai.mp3");
+        theTeaSafe.removeFolder("/folderB", teasafe::FolderRemovalType::Recursive);
 
         // check that all blocks except 0 which is the root folder entry point
         // have been deallocated
