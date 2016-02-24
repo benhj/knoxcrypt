@@ -340,13 +340,13 @@ namespace teasafe
                            OpenDisposition openMode) const
     {
         auto theName = boost::filesystem::path(path).filename().string();
-        if(m_cachedFile) {
-            if(!m_cachedFile->getOpenDisposition().equals(openMode)) {
-                m_cachedFile = std::make_shared<File>(parentEntry->getFile(theName, openMode));
-            }
-        } else {
+        //if(m_cachedFile) {
+        //    if(!m_cachedFile->getOpenDisposition().equals(openMode)) {
+        //        m_cachedFile = std::make_shared<File>(parentEntry->getFile(theName, openMode));
+        //    }
+        //} else {
             m_cachedFile = std::make_shared<File>(parentEntry->getFile(theName, openMode));
-        }
+        //}
     }
 
     /**

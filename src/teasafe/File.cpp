@@ -88,6 +88,8 @@ namespace teasafe
         // counts number of blocks and sets file size
         enumerateBlockStats();
 
+        std::cout<<"In File Constructor, block count: "<<m_blockCount<<"\t"<<m_name<<std::endl;
+
         // sets the current working block to the very first file block
         m_workingBlock = std::make_shared<FileBlock>(io, startBlock, openDisposition, m_stream);
 
@@ -248,12 +250,15 @@ namespace teasafe
         // first case no file blocks so absolutely need one to write to
         if (!m_workingBlock) {
 
+            std::cout<<"m_blockIndex before: "<<m_blockIndex<<std::endl;
             newWritableFileBlock();
+            std::cout<<"m_blockIndex after: "<<m_blockIndex<<std::endl;
 
             // when writing the file, the working block will be empty
             // and the start volume block will be unset so need to set now
             m_startVolumeBlock = m_workingBlock->getIndex();
             std::cout<<"A new one! "<<m_startVolumeBlock<<std::endl;
+            std::cout<<"Tell reads "<<m_workingBlock->tell()<<std::endl;
             return;
         }
 
@@ -288,7 +293,9 @@ namespace teasafe
 
             }
             std::cout<<"Creating a new one!!"<<std::endl;
+            std::cout<<"m_blockIndex before B: "<<m_blockIndex<<std::endl;
             newWritableFileBlock();
+            std::cout<<"m_blockIndex after B: "<<m_blockIndex<<std::endl;
 
             return;
         }
@@ -376,8 +383,6 @@ namespace teasafe
             // check if the working block needs to be updated with a new one
             checkAndUpdateWorkingBlockWithNew();
 
-            std::cout<<"wrote.."<<wrote<<n<<std::endl;
-
             // buffers the data that will be written to the working block
             // computed as a function of the data left to write and the
             // working block's available space
@@ -387,6 +392,10 @@ namespace teasafe
             writeBufferedDataToWorkingBlock(actualWritten);
             wrote += actualWritten;
 
+            std::cout<<"actualWritten: "<<actualWritten<<"\t"<<m_blockIndex<<"\t"<<m_name<<std::endl;
+            std::cout<<"wrote.."<<wrote<<"\t"<<n<<"\t"<<m_blockIndex<<std::endl;
+            std::cout<<"Tell reads "<<m_workingBlock->tell()<<"\t"<<m_blockIndex<<std::endl;
+
             // update stream position
             m_pos += actualWritten;
 
@@ -394,7 +403,7 @@ namespace teasafe
                 m_fileSize+=actualWritten;
             }
         }
-        std::cout<<"finished writing"<<std::endl;
+        std::cout<<"finished writing"<<"\t"<<m_blockIndex<<std::endl;
 
         return wrote;
     }
@@ -601,6 +610,26 @@ namespace teasafe
     }
 
     void
+    File::reset()
+    {
+        doReset();
+    }
+
+    void
+    File::doReset()
+    {
+        std::cout<<"before reset stats: "<<std::endl;
+        std::cout<<"m_name: "<<m_name<<std::endl;
+        std::cout<<"m_fileSize: "<<m_fileSize<<std::endl;
+        std::cout<<"m_blockCount: "<<m_blockCount<<std::endl;
+        std::cout<<"m_blockIndex: "<<m_blockIndex<<std::endl;
+        m_fileSize = 0;
+        m_blockCount = 0;
+        m_workingBlock = nullptr;
+        m_blockIndex = 0;
+    }
+
+    void
     File::unlink()
     {
         // loop over all file blocks and update the volume bitmap indicating
@@ -613,9 +642,7 @@ namespace teasafe
             ++m_io->freeBlocks;
         }
 
-        m_fileSize = 0;
-        m_blockCount = 0;
-        m_workingBlock = SharedFileBlock();
+        doReset();
     }
 
     void

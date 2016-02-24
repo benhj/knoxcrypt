@@ -162,6 +162,9 @@ namespace teasafe
 
         SharedImageStream getStream() const;
 
+        /// calls in to doReset (see comment therein)
+        void reset();
+
       private:
 
         // the core teasafe io (path, blocks, rootBlock, password)
@@ -272,6 +275,10 @@ namespace teasafe
          * @return a file block
          */
         FileBlock getBlockWithIndex(uint64_t n) const;
+
+        /// to be called during unlinking and when the data
+        /// represents a folder and there are no more entries
+        void doReset();
     };
 
 }

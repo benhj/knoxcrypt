@@ -51,8 +51,8 @@ namespace teasafe
             uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
             uint32_t seekTo = (8 + (n * bufferSize));
             if (folderData.seek(seekTo) != -1) {
-                uint8_t byte = 0;
-                detail::setBitInByte(byte, 0, false /* unset */);
+                uint8_t byte = 0x00;
+                //detail::setBitInByte(byte, 0, false /* unset */);
                 folderData.write((char*)&byte, 1);
                 folderData.flush();
                 return;
@@ -527,8 +527,16 @@ namespace teasafe
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
         this->doPutMetaDataOutOfUse(name);
+        std::cout<<"metaData put out of use for "<<name<<std::endl;
 
         ++m_deadEntryCount;
+
+        // if we now have zero entry counts, need to 'reset' 
+        // underlying file data
+        if(getAliveEntryCount() == 0) {
+            std::cout<<"m_folderData.filename(): "<<m_folderData.filename()<<std::endl;
+            m_folderData.reset();
+        }
 
         return true;
     }
@@ -561,6 +569,13 @@ namespace teasafe
 
         ++m_deadEntryCount;
 
+        // if we now have zero entry counts, need to 'reset' 
+        // underlying file data
+        if(getAliveEntryCount() == 0) {
+            std::cout<<"m_folderData.filename(): "<<m_folderData.filename()<<std::endl;
+            m_folderData.reset();
+        }
+
         return true;
     }
 
@@ -589,6 +604,13 @@ namespace teasafe
         entry->getCompoundFolder()->m_folderData.unlink();
 
         ++m_deadEntryCount;
+
+        // if we now have zero entry counts, need to 'reset' 
+        // underlying file data
+        if(getAliveEntryCount() == 0) {
+            std::cout<<"m_folderData.filename(): "<<m_folderData.filename()<<std::endl;
+            m_folderData.reset();
+        }
 
         return true;
     }

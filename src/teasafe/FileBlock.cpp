@@ -291,6 +291,11 @@ namespace teasafe
         m_io->blockBuilder->putBlockBack(m_index);
         doSetNextIndex(*m_stream, m_index);
         doSetSize(*m_stream, 0);
+        m_next = m_index;
+        m_initialBytesWritten = 0;
+        m_bytesWritten = 0;
+        m_seekPos = 0;
+        m_positionBeforeWrite = 0;
         m_stream->flush();
     }
 
