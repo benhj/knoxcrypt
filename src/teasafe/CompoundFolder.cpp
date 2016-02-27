@@ -164,6 +164,7 @@ namespace teasafe
                 } else {
                     // stale cache
                     m_cache.erase(it);
+                    m_cacheShouldBeUpdated = true;
                 }
             }
         }
@@ -196,8 +197,9 @@ namespace teasafe
                     // stale cache entry. Bucket indexing has become inconsistent,
                     // so just remove from cache
                     m_cache.erase(it);
+                    m_cacheShouldBeUpdated = true;
                 }
-                
+
             }
         }
 
@@ -367,6 +369,20 @@ namespace teasafe
             }
         }
         throw std::runtime_error("Error putting metadata out of use");
+    }
+
+    void
+    CompoundFolder::updateMetaDataWithNewFilename(std::string const &srcName,
+                                                  std::string const &dstName)
+    {
+        for(auto & f : m_contentFolders) {
+            if(f->updateMetaDataWithNewFilename(srcName, dstName)) {
+                // need to invalidate cache
+                doRemoveEntryFromCache(srcName);
+                return;
+            }
+        }
+        throw std::runtime_error("Error updating metadata");
     }
 
     void

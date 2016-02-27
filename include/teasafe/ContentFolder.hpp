@@ -197,6 +197,10 @@ namespace teasafe
          */
         bool putMetaDataOutOfUse(std::string const &name);
 
+        /// updates metadata filename with new filename
+        bool updateMetaDataWithNewFilename(std::string const &srcName,
+                                           std::string const &dstName);
+
         /**
          * @brief for writing new entry metadata
          * @param name name of entry

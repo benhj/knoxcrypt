@@ -147,6 +147,10 @@ namespace teasafe
         /// loops through leaf folders looking for entry to invalidate
         void putMetaDataOutOfUse(std::string const &name);
 
+        /// updates metadata filename with new filename
+        void updateMetaDataWithNewFilename(std::string const &srcName,
+                                           std::string const &dstName);
+
         void writeNewMetaDataForEntry(std::string const &name,
                                       EntryType const &entryType,
                                       uint64_t startBlock);

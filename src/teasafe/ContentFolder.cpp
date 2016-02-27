@@ -496,6 +496,40 @@ namespace teasafe
         return this->doPutMetaDataOutOfUse(name);
     }
 
+    bool ContentFolder::updateMetaDataWithNewFilename(std::string const &srcName,
+                                                      std::string const &dstName)
+    {
+        // find original meta index
+        auto index = doGetMetaDataIndexForEntry(srcName);
+        if(index == -1) {
+            return false;
+        }
+
+        // find offset of meta
+        uint32_t bufferSize = 1 + detail::MAX_FILENAME_LENGTH + 8;
+        std::ios_base::streamoff offset = (8 + (index * bufferSize));
+
+        // normally here we'd write the first byte to the metadata
+        // before writing filename, but since we don't do this, we
+        // need to seek forward by one byte
+        ++offset;
+
+        // make sure we're in 'overwrite mode'
+        m_folderData = File(m_io, m_name, m_startVolumeBlock,
+                            OpenDisposition::buildOverwriteDisposition());
+
+        // seek to correct location
+        m_folderData.seek(offset);
+
+        // finally write filename
+        doWriteFilenameToEntryMetaData(dstName);
+
+        // finally update cache
+        invalidateEntryInEntryInfoCache(srcName);
+
+        return true;
+    }
+
     void
     ContentFolder::invalidateEntryInEntryInfoCache(std::string const &name)
     {

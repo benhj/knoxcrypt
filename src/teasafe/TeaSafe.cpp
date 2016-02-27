@@ -194,7 +194,8 @@ namespace teasafe
         throwIfAlreadyExists(dstPath);
 
         // throw if source doesn't exist
-        auto const filename(boost::filesystem::path(srcPath).filename().string());
+        auto const srcPathBoost = ::boost::filesystem::path(srcPath);
+        auto const filename(srcPathBoost.filename().string());
         auto childInfo(parentSrc->getEntryInfo(filename));
         if (!childInfo) {
             throw TeaSafeException(TeaSafeError::NotFound);
@@ -203,9 +204,20 @@ namespace teasafe
         // do moving / renaming
         // (i) Remove original entry metadata entry
         // (ii) Add new metadata entry with new file name
-        parentSrc->putMetaDataOutOfUse(filename);
-        auto dstFilename(boost::filesystem::path(dstPath).filename().string());
-        parentDst->writeNewMetaDataForEntry(dstFilename, childInfo->type(), childInfo->firstFileBlock());
+        // NOTE: As an optimization, if entry is to be moved to
+        // same parent folder, don't bother invalidating parent metadata,
+        // just update the name.
+        auto const dstPathBoost = ::boost::filesystem::path(dstPath);
+        auto const destPathParent(dstPathBoost.parent_path());
+        auto const srcPathParent(srcPathBoost.parent_path());
+        auto dstFilename(dstPathBoost.filename().string());
+
+        if(destPathParent == srcPathParent) {
+            parentSrc->updateMetaDataWithNewFilename(filename, dstFilename);
+        } else {
+            parentSrc->putMetaDataOutOfUse(filename);
+            parentDst->writeNewMetaDataForEntry(dstFilename, childInfo->type(), childInfo->firstFileBlock());
+        }
     }
 
     void
@@ -295,8 +307,8 @@ namespace teasafe
                     m_cachedFileAndPath = nullptr;
                     break;
                 }
-                
-            } while (m_cachedPath.has_parent_path()); 
+
+            } while (m_cachedPath.has_parent_path());
         }
 
     }
@@ -362,7 +374,7 @@ namespace teasafe
             }
         } else {
             m_cachedFileAndPath.reset(new FileAndPathPair(path,
-                                                          std::make_shared<File>(parentEntry->getFile(theName, 
+                                                          std::make_shared<File>(parentEntry->getFile(theName,
                                                                                                       openMode))));
         }
     }
