@@ -191,7 +191,6 @@ namespace fuselayer
                     return detail::exceptionDispatch(e);
                 }
             }
-
             try {
                 auto info(TeaSafe_DATA->getInfo(path));
             } catch (teasafe::TeaSafeException const &e) {
@@ -221,7 +220,6 @@ namespace fuselayer
         {
 
             auto openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
-
             /*
               if((fi->flags & O_RDWR) == O_RDWR) {
               openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
@@ -238,7 +236,6 @@ namespace fuselayer
             if ((fi->flags & O_TRUNC) == O_TRUNC) {
                 truncateType = teasafe::TruncateOrKeep::Truncate;
             }
-
             teasafe::OpenDisposition od(openMode, appendType, teasafe::CreateOrDontCreate::Create, truncateType);
 
             auto device(TeaSafe_DATA->openFile(path, od));
@@ -252,7 +249,7 @@ namespace fuselayer
 
 	static
 	int 
-	teasafe_access(const char *, int)
+	teasafe_access(const char * path, int)
 	{ return 0; }
 
         static

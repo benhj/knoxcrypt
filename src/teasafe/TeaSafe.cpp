@@ -218,6 +218,33 @@ namespace teasafe
             parentSrc->putMetaDataOutOfUse(filename);
             parentDst->writeNewMetaDataForEntry(dstFilename, childInfo->type(), childInfo->firstFileBlock());
         }
+
+        // Need to remove parent entry from cache
+        this->removeFolderFromCache(srcPathParent);
+
+        // Also need to remove src from cache if folder
+        if(childInfo->type() == EntryType::FolderType) {
+            this->removeFolderFromCache(srcPath);
+        }
+
+        // need to also walk over children??
+
+        // need to also check if this now fucks up the cached file
+        /*
+        if(m_cachedFileAndPath) {
+
+            auto cachedPath = boost::filesystem::path(m_cachedFileAndPath->first);
+            auto boostFolderPath = srcPathBoost;
+            do {
+                cachedPath = cachedPath.parent_path();
+                if(cachedPath == boostFolderPath) {
+                    m_cachedFileAndPath.reset();
+                    m_cachedFileAndPath = nullptr;
+                    break;
+                }
+
+            } while (cachedPath.has_parent_path());
+        }*/
     }
 
     void
@@ -278,39 +305,40 @@ namespace teasafe
             throw TeaSafeException(TeaSafeError::NotFound);
         }*/
 
+        auto boostPath = ::boost::filesystem::path(thePath);
         if (removalType == FolderRemovalType::MustBeEmpty) {
 
-            auto childEntry(parentEntry->getFolder(boost::filesystem::path(thePath).filename().string()));
+            auto childEntry(parentEntry->getFolder(boostPath.filename().string()));
             if (!childEntry->listAllEntries().empty()) {
                 throw TeaSafeException(TeaSafeError::FolderNotEmpty);
             }
         }
 
         try {
-            parentEntry->removeFolder(boost::filesystem::path(thePath).filename().string());
+            parentEntry->removeFolder(boostPath.filename().string());
         } catch (...) {
             throw TeaSafeException(TeaSafeError::NotFound);
         }
 
-        // also remove entry from parent cache
-        this->removeDeletedParentFromCache(boost::filesystem::path(thePath));
+        // also remove entry and its parent from parent cache
+        this->removeFolderFromCache(boostPath);
+        this->removeFolderFromCache(boostPath.parent_path());
 
         // need to also check if this now fucks up the cached file
         if(m_cachedFileAndPath) {
 
-            auto m_cachedPath = boost::filesystem::path(m_cachedFileAndPath->first);
-            auto boostFolderPath = boost::filesystem::path(path);
+            auto cachedPath = boost::filesystem::path(m_cachedFileAndPath->first);
+            auto boostFolderPath = thePath;
             do {
-                m_cachedPath = m_cachedPath.parent_path();
-                if(m_cachedPath == boostFolderPath) {
+                cachedPath = cachedPath.parent_path();
+                if(cachedPath == boostFolderPath) {
                     m_cachedFileAndPath.reset();
                     m_cachedFileAndPath = nullptr;
                     break;
                 }
 
-            } while (m_cachedPath.has_parent_path());
+            } while (cachedPath.has_parent_path());
         }
-
     }
 
     FileDevice
@@ -509,9 +537,19 @@ namespace teasafe
     }
 
     void
-    TeaSafe::removeDeletedParentFromCache(boost::filesystem::path const &path)
+    TeaSafe::removeFolderFromCache(boost::filesystem::path const &path)
     {
-        auto it(m_folderCache.find(path.relative_path().string()));
+
+        auto strPath = path.relative_path().string();
+        // need to reset root path if root, otherwise
+        // we'll continue to use 'cached' version
+        if(strPath == "/") {
+            m_rootFolder = std::make_shared<CompoundFolder>(m_io, m_io->rootBlock, "root");
+            return;
+        } 
+
+        // else belongs to cache
+        auto it(m_folderCache.find(strPath));
         if (it != m_folderCache.end()) {
             m_folderCache.erase(it);
         }

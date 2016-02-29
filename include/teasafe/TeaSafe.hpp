@@ -185,11 +185,11 @@ namespace teasafe
         bool doExistanceCheck(std::string const &path, EntryType const &entryType) const;
 
         /**
-         * @brief when a folder is deleted, need to remove it from the parent cache
+         * @brief when a folder is deleted, need to remove it from the cache
          * if it exists. Use this function to do so
-         * @param path parent path
+         * @param path the folder to remove
          */
-        void removeDeletedParentFromCache(boost::filesystem::path const &path);
+        void removeFolderFromCache(boost::filesystem::path const &path);
 
         /**
          * @brief  updates the cached file
