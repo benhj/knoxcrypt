@@ -189,7 +189,9 @@ namespace teasafe
          * if it exists. Use this function to do so
          * @param path the folder to remove
          */
-        void removeFolderFromCache(boost::filesystem::path const &path);
+        void removeFolderFromCache(::boost::filesystem::path const &path);
+        void removeAllChildFoldersToo(::boost::filesystem::path const &path, 
+                                      SharedCompoundFolder const &f);
 
         /**
          * @brief  updates the cached file
@@ -200,5 +202,7 @@ namespace teasafe
         void setCachedFile(std::string const &path,
                            SharedCompoundFolder const &parentEntry,
                            OpenDisposition openMode) const;
+
+        void resetCachedFile(::boost::filesystem::path const &path);
     };
 }

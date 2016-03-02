@@ -230,11 +230,16 @@ namespace teasafe
         // need to also walk over children??
 
         // need to also check if this now fucks up the cached file
-        /*
+        resetCachedFile(srcPathBoost);
+    }
+
+    void 
+    TeaSafe::resetCachedFile(::boost::filesystem::path const &thePath)
+    {
         if(m_cachedFileAndPath) {
 
             auto cachedPath = boost::filesystem::path(m_cachedFileAndPath->first);
-            auto boostFolderPath = srcPathBoost;
+            auto boostFolderPath = thePath;
             do {
                 cachedPath = cachedPath.parent_path();
                 if(cachedPath == boostFolderPath) {
@@ -244,7 +249,7 @@ namespace teasafe
                 }
 
             } while (cachedPath.has_parent_path());
-        }*/
+        }
     }
 
     void
@@ -325,20 +330,7 @@ namespace teasafe
         this->removeFolderFromCache(boostPath.parent_path());
 
         // need to also check if this now fucks up the cached file
-        if(m_cachedFileAndPath) {
-
-            auto cachedPath = boost::filesystem::path(m_cachedFileAndPath->first);
-            auto boostFolderPath = thePath;
-            do {
-                cachedPath = cachedPath.parent_path();
-                if(cachedPath == boostFolderPath) {
-                    m_cachedFileAndPath.reset();
-                    m_cachedFileAndPath = nullptr;
-                    break;
-                }
-
-            } while (cachedPath.has_parent_path());
-        }
+        resetCachedFile(thePath);
     }
 
     FileDevice
@@ -536,14 +528,27 @@ namespace teasafe
         return false;
     }
 
+    void 
+    TeaSafe::removeAllChildFoldersToo(::boost::filesystem::path const &path, 
+                                      SharedCompoundFolder const &f)
+    {
+        std::vector<SharedEntryInfo> infos = f->listFolderEntries();
+        for (auto const & entry : infos) {
+            auto entryPath = path;
+            entryPath /= entry->filename();
+            removeFolderFromCache(entryPath);
+        }
+    }
+
     void
-    TeaSafe::removeFolderFromCache(boost::filesystem::path const &path)
+    TeaSafe::removeFolderFromCache(::boost::filesystem::path const &path)
     {
 
         auto strPath = path.relative_path().string();
         // need to reset root path if root, otherwise
         // we'll continue to use 'cached' version
         if(strPath == "/") {
+            removeAllChildFoldersToo(path, m_rootFolder);
             m_rootFolder = std::make_shared<CompoundFolder>(m_io, m_io->rootBlock, "root");
             return;
         } 
@@ -551,6 +556,7 @@ namespace teasafe
         // else belongs to cache
         auto it(m_folderCache.find(strPath));
         if (it != m_folderCache.end()) {
+            removeAllChildFoldersToo(path, it->second);
             m_folderCache.erase(it);
         }
     }
