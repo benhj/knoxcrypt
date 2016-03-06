@@ -233,7 +233,7 @@ namespace teasafe
         resetCachedFile(srcPathBoost);
     }
 
-    void 
+    void
     TeaSafe::resetCachedFile(::boost::filesystem::path const &thePath)
     {
         if(m_cachedFileAndPath) {
@@ -389,7 +389,8 @@ namespace teasafe
     {
         auto theName = boost::filesystem::path(path).filename().string();
         if(m_cachedFileAndPath) {
-            if(!m_cachedFileAndPath->second->getOpenDisposition().equals(openMode)) {
+            if( m_cachedFileAndPath->first != path ||
+               !m_cachedFileAndPath->second->getOpenDisposition().equals(openMode)) {
                 m_cachedFileAndPath->second = std::make_shared<File>(parentEntry->getFile(theName, openMode));
             }
         } else {
@@ -528,8 +529,8 @@ namespace teasafe
         return false;
     }
 
-    void 
-    TeaSafe::removeAllChildFoldersToo(::boost::filesystem::path const &path, 
+    void
+    TeaSafe::removeAllChildFoldersToo(::boost::filesystem::path const &path,
                                       SharedCompoundFolder const &f)
     {
         std::vector<SharedEntryInfo> infos = f->listFolderEntries();
@@ -551,7 +552,7 @@ namespace teasafe
             removeAllChildFoldersToo(path, m_rootFolder);
             m_rootFolder = std::make_shared<CompoundFolder>(m_io, m_io->rootBlock, "root");
             return;
-        } 
+        }
 
         // else belongs to cache
         auto it(m_folderCache.find(strPath));
