@@ -207,7 +207,7 @@ namespace fuselayer
             auto device(TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition()));
             device.seek(offset, std::ios_base::beg);
             auto read = device.read(buf,size);
-            if(read < 0) { 
+            if(read < 0) {
                 return 0;
             }
             return read;
@@ -248,7 +248,7 @@ namespace fuselayer
         }
 
 	static
-	int 
+	int
 	teasafe_access(const char * path, int)
 	{ return 0; }
 
@@ -485,6 +485,7 @@ int main(int argc, char *argv[])
     // Setup a core teasafe io object which stores highlevel info about accessing
     // the TeaSafe image
     teasafe::SharedCoreIO io(std::make_shared<teasafe::CoreTeaSafeIO>());
+    io->useBlockCache = true;
     io->path = vm["imageName"].as<std::string>().c_str();
     io->encProps.password = teasafe::utility::getPassword("teasafe password: ");
     io->rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;

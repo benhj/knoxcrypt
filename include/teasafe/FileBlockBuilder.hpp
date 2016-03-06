@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -58,8 +58,6 @@ namespace teasafe
                                  uint64_t const index,
                                  OpenDisposition const &openDisposition,
                                  SharedImageStream &stream);
-
-        void putBlockBack(uint64_t const);
 
       private:
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -157,7 +157,7 @@ namespace teasafe
     {
 
         // need to take into account the currently seeked-to position and
-        // subtract that because we then only want to read 
+        // subtract that because we then only want to read
         // (totalBytes - toldPosition) bytes. This will allows us to read
         // from the told position up to totalBytes
         uint32_t size =  m_workingBlock->getDataBytesWritten() - m_workingBlock->tell();
@@ -502,9 +502,9 @@ namespace teasafe
         if (addition >= 0) {
             auto newBlockIndex = blockIndex + toIncrementBy;
             auto newPosition = leftOver;
-            return std::make_pair(newBlockIndex, newPosition);            
+            return std::make_pair(newBlockIndex, newPosition);
         }
-        auto newBlockIndex = blockIndex - (toIncrementBy + 1);      
+        auto newBlockIndex = blockIndex - (toIncrementBy + 1);
         auto newPosition = blockSize - leftOver;
         return std::make_pair(newBlockIndex, newPosition);
     }

@@ -619,6 +619,7 @@ int main(int argc, char *argv[])
     // Setup a core teasafe io object which stores highlevel info about accessing
     // the TeaSafe image
     auto io(std::make_shared<teasafe::CoreTeaSafeIO>());
+    io->useBlockCache = true;
     io->path = vm["imageName"].as<std::string>().c_str();
     io->encProps.password = teasafe::utility::getPassword("teasafe password: ");
     io->rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;

@@ -65,6 +65,7 @@ teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
     io->encProps.cipher = cryptostreampp::Algorithm::AES;
     io->rootBlock = 0;
     io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
+    io->useBlockCache = false;
     return io;
 }
 
@@ -101,4 +102,3 @@ teasafe::SharedBlockBuilder testBlockBuilder()
 {
     return std::make_shared<teasafe::FileBlockBuilder>();
 }
-

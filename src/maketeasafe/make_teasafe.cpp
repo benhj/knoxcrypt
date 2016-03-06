@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
     (void)positionalOptions.add("blockCount", 1);
 
     auto io(std::make_shared<teasafe::CoreTeaSafeIO>());
+    io->useBlockCache = false;
 
     // use a non-deterministic random device to generate the iv. This
     // allegedly pulls data from /dev/urandom
@@ -133,7 +134,7 @@ int main(int argc, char *argv[])
     io->rounds = 64; // obsolete (not currently used; used to be used by XTEA)
 
     if(cipher == "aes") {
-        io->encProps.cipher = cryptostreampp::Algorithm::AES; 
+        io->encProps.cipher = cryptostreampp::Algorithm::AES;
     } else if(cipher == "twofish") {
         io->encProps.cipher = cryptostreampp::Algorithm::Twofish;
     } else if(cipher == "serpent") {

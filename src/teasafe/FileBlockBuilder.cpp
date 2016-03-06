@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -104,9 +104,17 @@ namespace teasafe
             id = io->rootBlock;
         } else {
 
-            checkAndInitStream(io, stream);
-            id = *(detail::getNextAvailableBlock(*stream, io->blocks));
-            //m_blockDeque.pop_front();
+            if(io->useBlockCache) {
+                id = m_blockDeque.front();
+                m_blockDeque.pop_front();
+                // attempt to refill cache with blocks
+                if(m_blockDeque.empty()) {
+                    populateBlockDeque(io).swap(m_blockDeque);
+                }
+            } else {
+                checkAndInitStream(io, stream);
+                id = *(detail::getNextAvailableBlock(*stream, io->blocks));
+            }
         }
 
         // check if block data is actually written into iomage structure (might not have been
@@ -136,13 +144,4 @@ namespace teasafe
         }
         return FileBlock(io, index, openDisposition, stream);
     }
-
-    void
-    FileBlockBuilder::putBlockBack(uint64_t const block)
-    {
-        //std::cout<<"putting back block "<<block<<std::endl;
-        //m_blockDeque.push_front(block);
-    }
-
-
 }

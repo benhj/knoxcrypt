@@ -55,6 +55,7 @@ namespace teasafe
         using Callback = std::function<void(teasafe::EventType)>;
         using OptionalCallback = boost::optional<Callback>;
         OptionalCallback ccb;            // call back for cipher
+        bool useBlockCache;              // cache available file blocks for faster retrieval
     };
 
     using SharedCoreIO = std::shared_ptr<CoreTeaSafeIO>;

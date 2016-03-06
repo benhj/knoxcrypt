@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -287,7 +287,6 @@ namespace teasafe
     {
         this->initImageStream();
         detail::updateVolumeBitmapWithOne(*m_stream, m_index, m_io->blocks, false);
-        m_io->blockBuilder->putBlockBack(m_index);
         doSetNextIndex(*m_stream, m_index);
         doSetSize(*m_stream, 0);
         m_next = m_index;
