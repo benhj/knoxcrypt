@@ -56,6 +56,11 @@ namespace teasafe
         using OptionalCallback = boost::optional<Callback>;
         OptionalCallback ccb;            // call back for cipher
         bool useBlockCache;              // cache available file blocks for faster retrieval
+        bool firstTimeInit;              // initialized very first time
+        
+        // Should key be initialized very first time?
+        CoreTeaSafeIO() : firstTimeInit(false) {}
+        
     };
 
     using SharedCoreIO = std::shared_ptr<CoreTeaSafeIO>;

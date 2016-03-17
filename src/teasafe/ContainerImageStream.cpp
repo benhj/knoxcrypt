@@ -37,8 +37,12 @@ uint8_t cryptostreampp::IByteTransformer::g_bigIV[32];
 namespace teasafe
 {
     ContainerImageStream::ContainerImageStream(SharedCoreIO const &io, std::ios::openmode mode)
-        : m_cryptoStream(std::make_shared<cryptostreampp::CryptoStreamPP>(io->path, io->encProps, mode))
+        : m_cryptoStream(std::make_shared<cryptostreampp::CryptoStreamPP>(io->path, 
+                                                                          io->encProps, 
+                                                                          io->firstTimeInit,
+                                                                          mode))
     {
+        io->firstTimeInit = false;
     }
 
     ContainerImageStream&

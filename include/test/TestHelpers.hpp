@@ -66,6 +66,7 @@ teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
     io->rootBlock = 0;
     io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
     io->useBlockCache = false;
+    io->firstTimeInit = false;
     return io;
 }
 
