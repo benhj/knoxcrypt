@@ -497,6 +497,22 @@ namespace teasafe { namespace detail
             io->encProps.cipher = cryptostreampp::Algorithm::RC5;
         } else if(cipher == 9) {
             io->encProps.cipher = cryptostreampp::Algorithm::SHACAL2;
+        } else if(cipher == 10) {
+            io->encProps.cipher = cryptostreampp::Algorithm::Blowfish;
+        } else if(cipher == 11) {
+            io->encProps.cipher = cryptostreampp::Algorithm::SKIPJACK;
+        } else if(cipher == 12) {
+            io->encProps.cipher = cryptostreampp::Algorithm::IDEA;
+        } else if(cipher == 13) {
+            io->encProps.cipher = cryptostreampp::Algorithm::SEED;
+        } else if(cipher == 14) {
+            io->encProps.cipher = cryptostreampp::Algorithm::TEA;
+        } else if(cipher == 15) {
+            io->encProps.cipher = cryptostreampp::Algorithm::XTEA;
+        } else if(cipher == 16) {
+            io->encProps.cipher = cryptostreampp::Algorithm::DES_EDE2;
+        } else if(cipher == 17) {
+            io->encProps.cipher = cryptostreampp::Algorithm::DES_EDE3;
         } else if(cipher == 0) {
             io->encProps.cipher = cryptostreampp::Algorithm::NONE;
         }
