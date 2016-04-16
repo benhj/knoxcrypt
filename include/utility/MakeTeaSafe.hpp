@@ -184,7 +184,7 @@ namespace teasafe
                 (void)ivout.write((char*)&io->rounds, 1);
 
                 // write out the encryption algorithm that was used
-                unsigned int cipher = 1; // AES (default)
+                unsigned int cipher = 1; // AES256 (default)
                 if(io->encProps.cipher == cryptostreampp::Algorithm::Twofish) {
                     cipher = 2;
                 } else if(io->encProps.cipher == cryptostreampp::Algorithm::Serpent) {
@@ -201,6 +201,22 @@ namespace teasafe
                     cipher = 8;
                 } else if(io->encProps.cipher == cryptostreampp::Algorithm::SHACAL2) {
                     cipher = 9;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::Blowfish) {
+                    cipher = 10;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::SKIPJACK) {
+                    cipher = 11;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::IDEA) {
+                    cipher = 12;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::SEED) {
+                    cipher = 13;
+                } else if(io->encProps.cipher== cryptostreampp::Algorithm::TEA) {
+                    cipher = 14;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::XTEA) {
+                    cipher = 15;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::DES_EDE2) {
+                    cipher = 16;
+                } else if(io->encProps.cipher == cryptostreampp::Algorithm::DES_EDE3) {
+                    cipher = 17;
                 } else if(io->encProps.cipher == cryptostreampp::Algorithm::NONE) {
                     cipher = 0;
                 }
