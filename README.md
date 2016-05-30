@@ -4,24 +4,19 @@ TeaSafe: An encrypted container format
 
 ##### What is it?
 
-- TeaSafe is an independently developed encrypted container format similar in principle to TrueCrypt.
-- supports the AES candidate ciphers (AES [Rijndael], Serpent, CAST-256, RC6, Twofish, and MARS) and others (Camellia, RC5 and SHACAL2)
-- utilizes a million iterations of PBKDF2 for key derivation
-- can create sparse containers
-- can create and use multiple sub-volumes
-- employs a very simple and custom developed filesystem (see wiki).
-- TeaSafe containers can be browsed using either of the provided shell or gui interfaces
-- can also use the provided FUSE-layer for more realistic filesystem interoperability
+- Allows you to build encrypted 'boxes' of data like Truecrypt that can be browsed using Fuse, or a GUI or a custom shell.
+- Supports lots of ciphers including AES-256. 
+- Utilizes a million iterations of PBKDF2 for key derivation. A million seemed liked a big number to me but its probably overkill.
+- Can create sparse containers.
+- Sub-volume capability.
 
-### Notes and caveats
+###### What's with the name?
 
-- The motivation for this toy project is to provide an educational testbed. Although relatively sophisticated there are known weaknesses to the underlying cryptosystem which with the correct tools could be exploited. The main exploit concerns the underlying crypto mode being CTR which for filesystem-level encryption is not recommended. 
-- CTR (counter) mode works by XORing the clear text with a stream of encrypted numbers (the counter at successive increments). Because of this, if chunks of the ciphertext change over time (which is likely in a filesystem), it is rather trivial to derive the original clear-text by combining the different ciphertext versions together. 
-- We could use a far stronger mode of encryption such as XTS. However, the underlying crypto api doesn't yet support it.
+The name has stuck for historical reasons: a very early version used the XTEA cipher for encryption. I think the project could do with a better name though. Let me know if you have any suggestions.
 
-As a result, probably best not to use this tool for anything critical. 
+###### Caveats
 
-Also: since this software is highly developmental, the latest version might not be compatible with earlier versions.
+TeaSafe is highly developmental and therefore probably buggy. I make no guarentees as to the integrity of stored data. Neither do I guarantee 100% data security. Having said that, if you're happy with the strength of AES-256 in CTR mode and with a key that has been derived using quite a few rounds of PBKDF2, then I think it should be fine. Take that as you will.
 
 ### Compiling
 
@@ -68,15 +63,14 @@ To build a teasafe container that uses AES256, with 4096 * 128000 bytes, use the
 For alternative ciphers, use the `--cipher` flag, e.g.:
 
 <pre>
-./maketeasafe ./test.vfs 128000 --cipher twofish
+./maketeasafe ./test.bfs 128000 --cipher twofish
 </pre>
 
-The available cipher options are `aes`, `serpent`, `cast256`, `rc6`, `twofish`, `mars`, `camellia`, `rc5`, `shacal2` and `null`.
+The available cipher options are `aes`, `serpent`, `cast256`, `rc6`, `twofish`, `mars`, `camellia`, `rc5`, `shacal2` and `null`. Update 30/5/15: There are quite a few more than that these days. Have a look at the cryptostream headers if you're so inclined.
 
 Note that `null` disables encryption and thus provides no security. The default is aes.
 
-Sparse containers can be created too meaning that they start off small and dynamically
-grow as more data are written to them. Just use the `--sparse` flag during creation, i.e.:
+Sparse containers can also be created, growing in size as more data are written to them. Just use the `--sparse` flag during creation, i.e.:
 
 <pre>
 ./maketeasafe ./test.bfs 128000 --sparse 1
@@ -98,6 +92,10 @@ For more info, please post up on `https://groups.google.com/forum/#!forum/teasaf
 
 ### Building the GUI
 
+Update 30/5/16: If you're a mac user, I highly recommend you try out Strongbox -- see [https://github.com/benhj/Strongbox](https://github.com/benhj/Strongbox). Might be a little easier than trying to mess around with Qt compilation and sorting out of the library dependencies etc.
+
+Having said that, the Qt GUI version....
+
 To build the GUI, first make sure that `libteasafe.a` has been built by issuing the
 command `make lib` in the top-level build-folder. 
 
@@ -107,8 +105,6 @@ of writing) and open gui.pro in QtCreator. Build and run by clicking on the buil
 The GUI provides a simple interface to browsing and manipulating TeaSafe containers.
 
 ![TeaSafe GUI](screenshots/gui.png?raw=true)
-
-
 
 Licensing
 ---------
