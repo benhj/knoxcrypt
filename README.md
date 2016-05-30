@@ -2,7 +2,7 @@
 TeaSafe: An encrypted container format
 --------------------------------------
 
-##### What is it?
+###### What is it?
 
 - A tool for creating and browsing encrypted 'boxes' of data; similar to Truecrypt. 
 - Supports lots of ciphers including AES-256. 
