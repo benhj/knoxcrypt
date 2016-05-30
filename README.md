@@ -4,9 +4,9 @@ TeaSafe: An encrypted container format
 
 ##### What is it?
 
-- Allows you to build encrypted 'boxes' of data like Truecrypt that can be browsed using Fuse, or a GUI or a custom shell.
+- A tool for creating and browsing encrypted 'boxes' of data; similar to Truecrypt. 
 - Supports lots of ciphers including AES-256. 
-- Utilizes a million iterations of PBKDF2 for key derivation. A million seemed liked a big number to me but its probably overkill.
+- Utilizes a million iterations of PBKDF2 for key derivation. Seems like a big number but probably overkill.
 - Can create sparse containers.
 - Sub-volume capability.
 
