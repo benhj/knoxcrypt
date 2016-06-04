@@ -61,23 +61,30 @@ namespace teasafe
                 dstPath.append("/");
             }
 
+            // remove trailing slash from path
+            std::string srcPath(path);
+            if(*srcPath.rbegin() == '/') {
+                srcPath = std::string(path.begin(), path.end() - 1);
+            }
+            
             // append filename on to dst path
-            boost::filesystem::path p(path);
+            boost::filesystem::path p(srcPath);
             dstPath.append(p.filename().string());
+            
 
             // create source and sink
-            if(theBfs.fileExists(path)) {
+            if(theBfs.fileExists(srcPath)) {
                 std::stringstream ss;
                 ss << "Extracting file "<<dstPath<<"...";
                 callback(dstPath);
-                teasafe::FileDevice device = theBfs.openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition());
+                teasafe::FileDevice device = theBfs.openFile(srcPath, teasafe::OpenDisposition::buildReadOnlyDisposition());
                 device.seek(0, std::ios_base::beg);
                 std::ofstream out(dstPath.c_str(), std::ios_base::binary);
                 boost::iostreams::copy(device, out);
-            } else if(theBfs.folderExists(path)) {
+            } else if(theBfs.folderExists(srcPath)) {
                 boost::filesystem::create_directory(dstPath);
-                FolderExtractionVisitor visitor(theBfs, path, dstPath, callback);
-                recursiveExtract(visitor, theBfs, path);
+                FolderExtractionVisitor visitor(theBfs, srcPath, dstPath, callback);
+                recursiveExtract(visitor, theBfs, srcPath);
             }
         }
     }
