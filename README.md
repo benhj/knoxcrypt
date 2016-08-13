@@ -1,6 +1,6 @@
 
-knoxcrypt: An encrypted filesystem
---------------------------------
+KnoxCrypt: An encrypted filesystem
+----------------------------------
 
 ###### What is it?
 
@@ -16,7 +16,7 @@ The name has stuck for historical reasons: a very early version used the XTEA ci
 
 ###### Caveats
 
-knoxcrypt is highly developmental and therefore probably buggy. I make no guarentees as to the integrity of stored data. Neither do I guarantee 100% data security. Having said that, if you're happy with the strength of AES-256 in CTR mode and with a key that has been derived using quite a few rounds of PBKDF2, then I think it should be fine. Take that as you will.
+KnoxCrypt is highly developmental and therefore probably buggy. I make no guarentees as to the integrity of stored data. Neither do I guarantee 100% data security. Having said that, if you're happy with the strength of AES-256 in CTR mode and with a key that has been derived using quite a few rounds of PBKDF2, then I think it should be fine. Take that as you will.
 
 ### Compiling
 
@@ -48,13 +48,13 @@ libknoxcrypt.a first.
 `make` or `make all` will compile everything except the GUI, i.e., the following binaries:
 
 <pre>
-test         : unit tests various parts of the main api
+test           : unit tests various parts of the main api
 makeknoxcrypt  : builds knoxcrypt containers
 knoxcrypt      : fuse layer used for mounting knoxcrypt containers
-teashell     : shell utility used for accessing and modifying knoxcrypt containers
+teashell       : shell utility used for accessing and modifying knoxcrypt containers
 </pre>
 
-To build a knoxcrypt container that uses AES256, with 4096 * 128000 bytes, use the `makeknoxcrypt` binary:
+To build a KnoxCrypt container that uses AES256, with 4096 * 128000 bytes, use the `makeknoxcrypt` binary:
 
 <pre>
 ./makeknoxcrypt ./test.bfs 128000
@@ -88,13 +88,11 @@ Runs the interactive shell on it using the `teashell` binary:
 ./teashell ./test.bfs
 </pre>
 
-For more info, please post up on `https://groups.google.com/forum/#!forum/knoxcrypt`.
-
 ### Building the GUI
 
-Update 30/5/16: If you're a mac user, I highly recommend you try out Strongbox -- see [https://github.com/benhj/Strongbox](https://github.com/benhj/Strongbox). Might be a little easier than trying to mess around with Qt compilation and sorting out of the library dependencies etc.
+Update 30/5/16: If you're a mac user, I highly recommend you try out KnoxCryptOSX -- see [https://github.com/benhj/KnoxCryptOSX](https://github.com/benhj/KnoxCryptOSX). Might be a little easier than trying to mess around with Qt compilation and sorting out of the library dependencies etc.
 
-Having said that, the Qt GUI version....
+Having said that, the Qt GUI version.... (is currently broken with the recent name changes)
 
 To build the GUI, first make sure that `libknoxcrypt.a` has been built by issuing the
 command `make lib` in the top-level build-folder. 
@@ -109,6 +107,6 @@ The GUI provides a simple interface to browsing and manipulating knoxcrypt conta
 Licensing
 ---------
 
-knoxcrypt follows the BSD 3-Clause licence. 
+KnoxCrypt follows the BSD 3-Clause licence. 
 
 
