@@ -12,7 +12,7 @@ KnoxCrypt (formerly TeaSafe): An encrypted filesystem
 
 ###### What's with the name?
 
-The name has stuck for historical reasons: a very early version used the XTEA cipher for encryption. I think the project could do with a better name though. Let me know if you have any suggestions.
+~~The name has stuck for historical reasons: a very early version used the XTEA cipher for encryption. I think the project could do with a better name though. Let me know if you have any suggestions.~~ I renamed the project to knoxcrypt. 
 
 ###### Caveats
 
