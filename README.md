@@ -1,6 +1,6 @@
 
-KnoxCrypt: An encrypted filesystem
-----------------------------------
+KnoxCrypt (formerly TeaSafe): An encrypted filesystem
+-----------------------------------------------------
 
 ###### What is it?
 
