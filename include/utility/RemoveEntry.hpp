@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "teasafe/TeaSafe.hpp"
+#include "knoxcrypt/KnoxCrypt.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -38,19 +38,19 @@
 
 #include <fstream>
 
-namespace teasafe
+namespace knoxcrypt
 {
 
     namespace utility
     {
         inline
-        void removeEntry(teasafe::TeaSafe &theBfs, std::string const &thePath)
+        void removeEntry(knoxcrypt::KnoxCrypt &theBfs, std::string const &thePath)
         {
-            teasafe::EntryInfo info = theBfs.getInfo(thePath);
-            if (info.type() == teasafe::EntryType::FileType) {
+            knoxcrypt::EntryInfo info = theBfs.getInfo(thePath);
+            if (info.type() == knoxcrypt::EntryType::FileType) {
                 theBfs.removeFile(thePath);
             } else {
-                theBfs.removeFolder(thePath, teasafe::FolderRemovalType::Recursive);
+                theBfs.removeFolder(thePath, knoxcrypt::FolderRemovalType::Recursive);
             }
         }
     }

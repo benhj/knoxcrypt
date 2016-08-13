@@ -30,9 +30,9 @@
 
 #pragma once
 
-#include "teasafe/EntryInfo.hpp"
-#include "teasafe/TeaSafe.hpp"
-#include "teasafe/FileDevice.hpp"
+#include "knoxcrypt/EntryInfo.hpp"
+#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/FileDevice.hpp"
 #include "utility/ContentFolderVisitor.hpp"
 
 #include <boost/filesystem/path.hpp>
@@ -42,7 +42,7 @@
 
 #include <sstream>
 
-namespace teasafe
+namespace knoxcrypt
 {
 
     namespace utility
@@ -52,7 +52,7 @@ namespace teasafe
         {
           public:
             FolderExtractionVisitor() = delete;
-            FolderExtractionVisitor(TeaSafe &theBfs,
+            FolderExtractionVisitor(KnoxCrypt &theBfs,
                                     std::string teaPath,
                                     std::string fsPath,
                                     std::function<void(std::string)> const &callback)
@@ -90,7 +90,7 @@ namespace teasafe
                 std::stringstream ss;
                 ss << "Extracting file "<<fsLoc<<"...";
                 m_callback(ss.str());
-                teasafe::FileDevice device = m_theBfs.openFile(teaLoc.string(), teasafe::OpenDisposition::buildReadOnlyDisposition());
+                knoxcrypt::FileDevice device = m_theBfs.openFile(teaLoc.string(), knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
                 device.seek(0, std::ios_base::beg);
                 std::ofstream out(fsLoc.string().c_str(), std::ios_base::binary);
                 boost::iostreams::copy(device, out);
@@ -107,7 +107,7 @@ namespace teasafe
             }
 
           private:
-            TeaSafe &m_theBfs;
+            KnoxCrypt &m_theBfs;
             std::string m_teaPath;
             std::string m_fsPath;
             std::function<void(std::string)> m_callback;

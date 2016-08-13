@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "teasafe/TeaSafe.hpp"
+#include "knoxcrypt/KnoxCrypt.hpp"
 #include "utility/ContentFolderVisitor.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
 #include "utility/FolderExtractionVisitor.hpp"
@@ -42,14 +42,14 @@
 #include <fstream>
 #include <sstream>
 
-namespace teasafe
+namespace knoxcrypt
 {
 
     namespace utility
     {
 
         inline
-        void extractToPhysical(teasafe::TeaSafe &theBfs,
+        void extractToPhysical(knoxcrypt::KnoxCrypt &theBfs,
                               std::string const &path,
                               std::string const &dst,
                               std::function<void(std::string)> callback)
@@ -77,7 +77,7 @@ namespace teasafe
                 std::stringstream ss;
                 ss << "Extracting file "<<dstPath<<"...";
                 callback(dstPath);
-                teasafe::FileDevice device = theBfs.openFile(srcPath, teasafe::OpenDisposition::buildReadOnlyDisposition());
+                knoxcrypt::FileDevice device = theBfs.openFile(srcPath, knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
                 device.seek(0, std::ios_base::beg);
                 std::ofstream out(dstPath.c_str(), std::ios_base::binary);
                 boost::iostreams::copy(device, out);

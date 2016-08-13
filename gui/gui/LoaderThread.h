@@ -31,20 +31,20 @@
 #ifndef LOADERTHREAD_H
 #define LOADERTHREAD_H
 
-#include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/TeaSafe.hpp"
+#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/knoxcrypt.hpp"
 #include "utility/EventType.hpp"
 
 #include <QThread>
 #include <memory>
 #include <mutex>
 
-namespace teasafe
+namespace knoxcrypt
 {
-    class TeaSafe;
+    class knoxcrypt;
 }
 
-typedef std::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
+typedef std::shared_ptr<knoxcrypt::knoxcrypt> Sharedknoxcrypt;
 
 class LoaderThread : public QThread
 {
@@ -52,9 +52,9 @@ class LoaderThread : public QThread
         public:
     explicit LoaderThread(QObject *parent = 0);
 
-    void setSharedIO(teasafe::SharedCoreIO const &io);
+    void setSharedIO(knoxcrypt::SharedCoreIO const &io);
 
-    SharedTeaSafe getTeaSafe();
+    Sharedknoxcrypt getknoxcrypt();
 
   protected:
     void run();
@@ -64,8 +64,8 @@ class LoaderThread : public QThread
     void finishedLoadingSignal();
 
   private:
-    teasafe::SharedCoreIO m_io;
-    SharedTeaSafe m_teaSafe;
+    knoxcrypt::SharedCoreIO m_io;
+    Sharedknoxcrypt m_knoxcrypt;
     typedef std::mutex TeaMutex;
     typedef std::lock_guard<TeaMutex> TeaLock;
     mutable TeaMutex m_teaMutex;

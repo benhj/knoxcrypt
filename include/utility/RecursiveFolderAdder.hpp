@@ -30,8 +30,8 @@
 
 #pragma once
 
-#include "teasafe/TeaSafe.hpp"
-#include "teasafe/EntryType.hpp"
+#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/EntryType.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -41,14 +41,14 @@
 #include <sstream>
 #include <vector>
 
-namespace teasafe
+namespace knoxcrypt
 {
 
     namespace utility
     {
 
         inline
-        void recursiveAdd(TeaSafe &theBfs,
+        void recursiveAdd(KnoxCrypt &theBfs,
                           std::string const &teaPath,
                           std::string const &fsPath,
                           std::function<void(std::string)> const &callback)
@@ -72,7 +72,7 @@ namespace teasafe
                     ss << "Adding "<<tp<<"...";
                     callback(ss.str());
                     theBfs.addFile(tp.string());
-                    teasafe::FileDevice device = theBfs.openFile(tp.string(), teasafe::OpenDisposition::buildWriteOnlyDisposition());
+                    knoxcrypt::FileDevice device = theBfs.openFile(tp.string(), knoxcrypt::OpenDisposition::buildWriteOnlyDisposition());
                     std::ifstream in(fs.string().c_str(), std::ios_base::binary);
                     boost::iostreams::copy(in, device);
                 }

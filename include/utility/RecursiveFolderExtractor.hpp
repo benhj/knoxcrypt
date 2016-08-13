@@ -30,9 +30,9 @@
 
 #pragma once
 
-#include "teasafe/TeaSafe.hpp"
-#include "teasafe/EntryInfo.hpp"
-#include "teasafe/EntryType.hpp"
+#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/EntryInfo.hpp"
+#include "knoxcrypt/EntryType.hpp"
 #include "utility/ContentFolderVisitor.hpp"
 
 #include <boost/filesystem/operations.hpp>
@@ -42,7 +42,7 @@
 #include <fstream>
 #include <vector>
 
-namespace teasafe
+namespace knoxcrypt
 {
 
     namespace utility
@@ -50,7 +50,7 @@ namespace teasafe
 
         inline
         void recursiveExtract(ContentFolderVisitor &visitor,
-                              TeaSafe &theBfs,
+                              KnoxCrypt &theBfs,
                               std::string const &teaPath)
         {
 

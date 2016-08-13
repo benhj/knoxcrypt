@@ -29,10 +29,10 @@
 #pragma once
 
 #include "cryptostreampp/Algorithms.hpp"
-#include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/FileBlockBuilder.hpp"
-#include "teasafe/TeaSafeException.hpp"
-#include "utility/MakeTeaSafe.hpp"
+#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/FileBlockBuilder.hpp"
+#include "knoxcrypt/knoxcryptException.hpp"
+#include "utility/MakeKnoxCrypt.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -50,9 +50,9 @@ int testFailures = 0;
 int passedPoints = 0;
 std::vector<std::string> failingTestPoints;
 
-teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
+knoxcrypt::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
 {
-    teasafe::SharedCoreIO io = std::make_shared<teasafe::CoreTeaSafeIO>();
+    knoxcrypt::SharedCoreIO io = std::make_shared<knoxcrypt::CoreKnoxCryptIO>();
     io->path = testPath.string();
     io->blocks = 2048;
     io->freeBlocks = 2048;
@@ -64,7 +64,7 @@ teasafe::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
     io->rounds = 64;
     io->encProps.cipher = cryptostreampp::Algorithm::AES;
     io->rootBlock = 0;
-    io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
+    io->blockBuilder = std::make_shared<knoxcrypt::FileBlockBuilder>(io);
     io->useBlockCache = false;
     io->firstTimeInit = false;
     return io;
@@ -74,10 +74,10 @@ inline boost::filesystem::path buildImage(boost::filesystem::path const &path)
 {
     std::string testImage(boost::filesystem::unique_path().string());
     boost::filesystem::path testPath = path / testImage;
-    teasafe::SharedCoreIO io(createTestIO(testPath));
+    knoxcrypt::SharedCoreIO io(createTestIO(testPath));
     bool const sparse = true; // quicker testing with sparse images
-    teasafe::MakeTeaSafe teasafe(io, sparse);
-    teasafe.buildImage();
+    knoxcrypt::MakeKnoxCrypt kc(io, sparse);
+    kc.buildImage();
     return testPath;
 }
 
@@ -99,7 +99,7 @@ std::string createAString()
     return theString;
 }
 
-teasafe::SharedBlockBuilder testBlockBuilder()
+knoxcrypt::SharedBlockBuilder testBlockBuilder()
 {
-    return std::make_shared<teasafe::FileBlockBuilder>();
+    return std::make_shared<knoxcrypt::FileBlockBuilder>();
 }

@@ -30,7 +30,7 @@
 
 /// used to notifying when certain things happen
 
-namespace teasafe
+namespace knoxcrypt
 {
     enum class EventType { KeyGenBegin,            // before key gen is started
                            KeyGenEnd,              // when key gen is finished

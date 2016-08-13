@@ -34,11 +34,11 @@
 #include "TreeItemPathDeriver.h"
 
 #include "cryptostreampp/IByteTransformer.hpp"
-#include "teasafe/EntryInfo.hpp"
-#include "teasafe/FileBlockBuilder.hpp"
-#include "teasafe/OpenDisposition.hpp"
-#include "teasafe/TeaSafe.hpp"
-#include "teasafe/CompoundFolder.hpp"
+#include "knoxcrypt/EntryInfo.hpp"
+#include "knoxcrypt/FileBlockBuilder.hpp"
+#include "knoxcrypt/OpenDisposition.hpp"
+#include "knoxcrypt/knoxcrypt.hpp"
+#include "knoxcrypt/CompoundFolder.hpp"
 #include "utility/CopyFromPhysical.hpp"
 #include "utility/ExtractToPhysical.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
@@ -59,7 +59,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_teaSafe(),
+    m_knoxcrypt(),
     m_loaderThread(this),
     m_builderThread(this),
     m_workThread(this),
@@ -75,9 +75,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->newButton, SIGNAL(clicked()),
                      this, SLOT(newButtonHandler()));
     QObject::connect(&m_loaderThread, SIGNAL(finishedLoadingSignal()), this,
-                     SLOT(getTeaSafeFromLoader()));
+                     SLOT(getknoxcryptFromLoader()));
     QObject::connect(&m_builderThread, SIGNAL(finishedBuildingSignal()), this,
-                     SLOT(getTeaSafeFromBuilder()));
+                     SLOT(getknoxcryptFromBuilder()));
 //    QObject::connect(&m_cipherCallback, SIGNAL(updateProgressSignal(long)), this,
 //                     SLOT(updateProgressSlot(long)));
 //    QObject::connect(&m_cipherCallback, SIGNAL(setMaximumProgressSignal(long)), this,
@@ -160,11 +160,11 @@ void MainWindow::loadFileButtonHandler()
         // reset state
         ui->fileTree->clear();
         cryptostreampp::IByteTransformer::m_init = false;
-        m_teaSafe.reset();
+        m_knoxcrypt.reset();
         std::set<std::string>().swap(m_populatedSet);
 
         // build new state
-        teasafe::SharedCoreIO io(std::make_shared<teasafe::CoreTeaSafeIO>());
+        knoxcrypt::SharedCoreIO io(std::make_shared<knoxcrypt::CoreknoxcryptIO>());
         io->path = dlg.selectedFiles().at(0).toStdString();
 
         bool ok;
@@ -176,8 +176,8 @@ void MainWindow::loadFileButtonHandler()
             io->rootBlock = 0;
 
             // give the cipher generation process a gui callback
-//            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-//            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
+//            long const amount = knoxcrypt::detail::CIPHER_BUFFER_SIZE / 100000;
+//            std::function<void(knoxcrypt::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
 //                                                                &m_cipherCallback,
 //                                                                std::placeholders::_1, amount));
 //            io->ccb = f;
@@ -186,7 +186,7 @@ void MainWindow::loadFileButtonHandler()
 //            m_sd = std::make_shared<QProgressDialog>("Generating key...", "Cancel", 0, 0, this);
 //            m_sd->setWindowModality(Qt::WindowModal);
 
-            // start loading of TeaSafe image
+            // start loading of knoxcrypt image
             m_loaderThread.setSharedIO(io);
             m_loaderThread.start();
             //m_sd->exec();
@@ -206,11 +206,11 @@ void MainWindow::newButtonHandler()
         // reset state
         ui->fileTree->clear();
         cryptostreampp::IByteTransformer::m_init = false;
-        m_teaSafe.reset();
+        m_knoxcrypt.reset();
         std::set<std::string>().swap(m_populatedSet);
 
         // build new state
-        teasafe::SharedCoreIO io(std::make_shared<teasafe::CoreTeaSafeIO>());
+        knoxcrypt::SharedCoreIO io(std::make_shared<knoxcrypt::CoreknoxcryptIO>());
         io->path = dlg.selectedFiles().at(0).toStdString();
 
         bool ok;
@@ -265,8 +265,8 @@ void MainWindow::newButtonHandler()
             io->freeBlocks = io->blocks;
 
             // give the cipher generation process a gui callback
-//            long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-//            std::function<void(teasafe::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
+//            long const amount = knoxcrypt::detail::CIPHER_BUFFER_SIZE / 100000;
+//            std::function<void(knoxcrypt::EventType)> f(std::bind(&GUICipherCallback::cipherCallback,
 //                                                                &m_cipherCallback,
 //                                                                std::placeholders::_1, amount));
 //            io->ccb = f;
@@ -332,7 +332,7 @@ void MainWindow::itemExpanded(QTreeWidgetItem *parent)
 
     if(m_populatedSet.find(pathOfExpanded) == m_populatedSet.end()) {
         std::function<void()> f(std::bind(&ItemAdder::populate, m_itemAdder, parent,
-                                              m_teaSafe, pathOfExpanded));
+                                              m_knoxcrypt, pathOfExpanded));
         m_workThread.addWorkFunction(f);
         m_populatedSet.insert(pathOfExpanded);
     }
@@ -353,16 +353,16 @@ void MainWindow::openProgressSlot()
     m_sd->show();
 }
 
-void MainWindow::getTeaSafeFromLoader()
+void MainWindow::getknoxcryptFromLoader()
 {
-    m_teaSafe = m_loaderThread.getTeaSafe();
+    m_knoxcrypt = m_loaderThread.getknoxcrypt();
     this->createRootFolderInTree();
     //
 }
 
-void MainWindow::getTeaSafeFromBuilder()
+void MainWindow::getknoxcryptFromBuilder()
 {
-    m_teaSafe = m_builderThread.getTeaSafe();
+    m_knoxcrypt = m_builderThread.getknoxcrypt();
     this->createRootFolderInTree();
 }
 
@@ -413,15 +413,15 @@ void MainWindow::fileDroppedSlot(QTreeWidgetItem *dropItem, std::string const &f
         isFolder = true;
     } else {
         // Not the root folder so check entry info instead for type
-        auto info(m_teaSafe->getInfo(itemPath));
-        if(info.type() == teasafe::EntryType::FolderType) {
+        auto info(m_knoxcrypt->getInfo(itemPath));
+        if(info.type() == knoxcrypt::EntryType::FolderType) {
             isFolder = true;
         }
     }
     if(isFolder) {
         std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback,
                                                       this, std::placeholders::_1));
-        auto f(std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
+        auto f(std::bind(&knoxcrypt::utility::copyFromPhysical, boost::ref(*m_knoxcrypt),
                          itemPath, theFSPath, cb));
         QTreeWidgetItem *item = new QTreeWidgetItem(dropItem);
         if(boost::filesystem::is_directory(theFSPath)) {
@@ -437,7 +437,7 @@ void MainWindow::fileDroppedSlot(QTreeWidgetItem *dropItem, std::string const &f
         boost::filesystem::path parentTeaPath(itemPath);
         parentTeaPath = parentTeaPath.parent_path();
 
-        auto f(std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
+        auto f(std::bind(&knoxcrypt::utility::copyFromPhysical, boost::ref(*m_knoxcrypt),
                          parentTeaPath.string(), theFSPath, cb));
         QTreeWidgetItem *item = new QTreeWidgetItem(dropItem->parent());
         if(boost::filesystem::is_directory(theFSPath)) {
@@ -457,7 +457,7 @@ void MainWindow::doWork(WorkType workType)
         std::function<void()> f;
         if(workType == WorkType::RemoveItem) {
             qDebug() << "RemoveItem";
-            f = std::bind(teasafe::utility::removeEntry, boost::ref(*m_teaSafe),
+            f = std::bind(knoxcrypt::utility::removeEntry, boost::ref(*m_knoxcrypt),
                           teaPath);
 
             delete it;
@@ -471,13 +471,13 @@ void MainWindow::doWork(WorkType workType)
                 qDebug() << "ExtractItem";
                 std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback,
                                                               this, std::placeholders::_1));
-                f = std::bind(teasafe::utility::extractToPhysical, boost::ref(*m_teaSafe),
+                f = std::bind(knoxcrypt::utility::extractToPhysical, boost::ref(*m_knoxcrypt),
                                 teaPath, fsPath, cb);
             }
 
         } else if(workType == WorkType::CreateFolder) {
             qDebug() << "CreateFolder";
-            if(m_teaSafe->folderExists(teaPath)) {
+            if(m_knoxcrypt->folderExists(teaPath)) {
                 bool ok;
                 std::string folderName = QInputDialog::getText(this, tr("New folder name dialog"),
                                                                tr("Folder name:"), QLineEdit::Normal,"",&ok).toStdString();
@@ -487,7 +487,7 @@ void MainWindow::doWork(WorkType workType)
                                      teaPath.append(folderName) :
                                      teaPath.append("/").append(folderName));
 
-                    f = std::bind(&teasafe::TeaSafe::addFolder, m_teaSafe, path);
+                    f = std::bind(&knoxcrypt::knoxcrypt::addFolder, m_knoxcrypt, path);
                     QTreeWidgetItem *item = new QTreeWidgetItem(it);
                     item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
                     item->setText(0, QString(folderName.c_str()));
@@ -495,7 +495,7 @@ void MainWindow::doWork(WorkType workType)
             }
         } else if(workType == WorkType::AddFolder) {
 
-            if(m_teaSafe->folderExists(teaPath)) {
+            if(m_knoxcrypt->folderExists(teaPath)) {
                 QFileDialog dlg( NULL, tr("Folder to add.."));
                 dlg.setAcceptMode( QFileDialog::AcceptOpen );
                 dlg.setFileMode(QFileDialog::DirectoryOnly);
@@ -504,7 +504,7 @@ void MainWindow::doWork(WorkType workType)
                     std::string fsPath = dlg.selectedFiles().at(0).toStdString();
                     std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback,
                                                                   this, std::placeholders::_1));
-                    f = std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
+                    f = std::bind(&knoxcrypt::utility::copyFromPhysical, boost::ref(*m_knoxcrypt),
                                     teaPath, fsPath, cb);
                     QTreeWidgetItem *item = new QTreeWidgetItem(it);
                     item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
@@ -513,7 +513,7 @@ void MainWindow::doWork(WorkType workType)
             }
         }  else if(workType == WorkType::AddFile) {
 
-            if(m_teaSafe->folderExists(teaPath)) {
+            if(m_knoxcrypt->folderExists(teaPath)) {
                 QFileDialog dlg( NULL, tr("File to add.."));
                 dlg.setAcceptMode( QFileDialog::AcceptOpen );
                 dlg.setFileMode(QFileDialog::AnyFile);
@@ -521,7 +521,7 @@ void MainWindow::doWork(WorkType workType)
                     std::string fsPath = dlg.selectedFiles().at(0).toStdString();
                     std::function<void(std::string)> cb(std::bind(&MainWindow::loggerCallback,
                                                                   this, std::placeholders::_1));
-                    f = std::bind(&teasafe::utility::copyFromPhysical, boost::ref(*m_teaSafe),
+                    f = std::bind(&knoxcrypt::utility::copyFromPhysical, boost::ref(*m_knoxcrypt),
                                     teaPath, fsPath, cb);
                     QTreeWidgetItem *item = new QTreeWidgetItem(it);
                     item->setText(0, QString(boost::filesystem::path(fsPath).filename().c_str()));

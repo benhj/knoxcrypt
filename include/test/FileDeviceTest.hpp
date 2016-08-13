@@ -26,15 +26,15 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/ContainerImageStream.hpp"
-#include "teasafe/File.hpp"
-#include "teasafe/FileDevice.hpp"
-#include "teasafe/FileStreamPtr.hpp"
-#include "teasafe/OpenDisposition.hpp"
-#include "teasafe/detail/DetailTeaSafe.hpp"
+#include "knoxcrypt/ContainerImageStream.hpp"
+#include "knoxcrypt/File.hpp"
+#include "knoxcrypt/FileDevice.hpp"
+#include "knoxcrypt/FileStreamPtr.hpp"
+#include "knoxcrypt/OpenDisposition.hpp"
+#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
-#include "utility/MakeTeaSafe.hpp"
+#include "utility/Makeknoxcrypt.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -67,16 +67,16 @@ class FileDeviceTest
 
         // test write get file size from same entry
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::SharedFile entry(std::make_shared<teasafe::File>(io, "test.txt"));
-            teasafe::FileStreamPtr stream(new teasafe::FileStream(teasafe::FileDevice(entry)));
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::SharedFile entry(std::make_shared<knoxcrypt::File>(io, "test.txt"));
+            knoxcrypt::FileStreamPtr stream(new knoxcrypt::FileStream(knoxcrypt::FileDevice(entry)));
             std::string testData(createLargeStringToWrite());
             (*stream) << testData.c_str();
         }
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::SharedFile entry(std::make_shared<teasafe::File>(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition()));
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::SharedFile entry(std::make_shared<knoxcrypt::File>(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition()));
             ASSERT_EQUAL(BIG_SIZE, entry->fileSize(), "FileStreamTest::testWriteReportsCorrectFileSize()");
         }
     }
@@ -88,19 +88,19 @@ class FileDeviceTest
         // test write get file size from same entry
         std::string testData(createLargeStringToWrite());
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::SharedFile entry(std::make_shared<teasafe::File>(io, "test.txt"));
-            teasafe::FileDevice device(entry);
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::SharedFile entry(std::make_shared<knoxcrypt::File>(io, "test.txt"));
+            knoxcrypt::FileDevice device(entry);
             std::streampos bytesWrote = device.write(testData.c_str(), testData.length());
             ASSERT_EQUAL(BIG_SIZE, bytesWrote, "FileStreamTest::testWriteFollowedByRead() bytes wrote");
         }
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::SharedFile entry(std::make_shared<teasafe::File>(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition()));
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::SharedFile entry(std::make_shared<knoxcrypt::File>(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition()));
             std::vector<uint8_t> buffer;
             buffer.resize(entry->fileSize());
-            teasafe::FileDevice device(entry);
+            knoxcrypt::FileDevice device(entry);
             std::streamsize readBytes = device.read((char*)&buffer.front(), entry->fileSize());
             ASSERT_EQUAL(BIG_SIZE, readBytes, "FileStreamTest::testWriteFollowedByRead() bytes read");
             std::string recovered(buffer.begin(), buffer.end());

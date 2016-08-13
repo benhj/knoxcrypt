@@ -26,15 +26,15 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/ContainerImageStream.hpp"
-#include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/File.hpp"
-#include "teasafe/ContentFolder.hpp"
-#include "teasafe/detail/DetailTeaSafe.hpp"
-#include "teasafe/detail/DetailFileBlock.hpp"
+#include "knoxcrypt/ContainerImageStream.hpp"
+#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/File.hpp"
+#include "knoxcrypt/ContentFolder.hpp"
+#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
+#include "knoxcrypt/detail/DetailFileBlock.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
-#include "utility/MakeTeaSafe.hpp"
+#include "utility/Makeknoxcrypt.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -82,10 +82,10 @@ class ContentFolderTest
 
     boost::filesystem::path m_uniquePath;
 
-    teasafe::ContentFolder createTestFolder(boost::filesystem::path const &p)
+    knoxcrypt::ContentFolder createTestFolder(boost::filesystem::path const &p)
     {
-        teasafe::SharedCoreIO io(createTestIO(p));
-        teasafe::ContentFolder folder(io, 0, std::string("root"));
+        knoxcrypt::SharedCoreIO io(createTestIO(p));
+        knoxcrypt::ContentFolder folder(io, 0, std::string("root"));
         folder.addFile("test.txt");
         folder.addFile("some.log");
         folder.addContentFolder("folderA");
@@ -100,7 +100,7 @@ class ContentFolderTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         {
-            teasafe::ContentFolder folder = createTestFolder(testPath);
+            knoxcrypt::ContentFolder folder = createTestFolder(testPath);
             ASSERT_EQUAL(folder.getEntryInfo(0).filename(), "test.txt", "testAddEntryNameRetrieval A");
             ASSERT_EQUAL(folder.getEntryInfo(1).filename(), "some.log", "testAddEntryNameRetrieval B");
             ASSERT_EQUAL(folder.getEntryInfo(2).filename(), "folderA", "testAddEntryNameRetrieval B");
@@ -113,7 +113,7 @@ class ContentFolderTest
     void testListAllEntries()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         auto entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 6, "testListAllEntries: number of entries");
         ASSERT_UNEQUAL(entries.find("test.txt"), (entries.end()), "testListAllEntries: filename A");
@@ -127,8 +127,8 @@ class ContentFolderTest
     void testListAllEntriesEmpty()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::SharedCoreIO io(createTestIO(testPath));
-        teasafe::ContentFolder folder(io, 0, std::string("root"));
+        knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+        knoxcrypt::ContentFolder folder(io, 0, std::string("root"));
         auto entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 0, "testListAllEntriesEmpty: number of entries");
     }
@@ -136,7 +136,7 @@ class ContentFolderTest
     void testListFileEntries()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         auto entries = folder.listFileEntries();
         ASSERT_EQUAL(entries.size(), 4, "testListFileEntries: number of entries");
         ASSERT_EQUAL(entries[0]->filename(), "test.txt", "testListFileEntries: filename A");
@@ -148,7 +148,7 @@ class ContentFolderTest
     void testListFolderEntries()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         auto entries = folder.listFolderEntries();
         ASSERT_EQUAL(entries.size(), 2, "testListFolderEntries: number of entries");
         ASSERT_EQUAL(entries[0]->filename(), "folderA", "testListFolderEntries: filename C");
@@ -160,7 +160,7 @@ class ContentFolderTest
        {
        long const blocks = 2048;
        boost::filesystem::path testPath = buildImage(m_uniquePath, blocks);
-       teasafe::ContentFolder folder = createTestFolder(testPath, blocks);
+       knoxcrypt::ContentFolder folder = createTestFolder(testPath, blocks);
 
        uint64_t b1 = folder.getEntryInfo(0).firstFileBlock();
        uint64_t b2 = folder.getEntryInfo(1).firstFileBlock();
@@ -178,9 +178,9 @@ class ContentFolderTest
     void testEntryRetrievalAndAppendSmallData()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         std::string testData("some test data!");
-        teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+        knoxcrypt::File entry = *folder.getFile("some.log", knoxcrypt::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), testData.length());
         entry.flush();
@@ -194,9 +194,9 @@ class ContentFolderTest
     void testEntryRetrievalAndAppendLargeData()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         std::string testString(createLargeStringToWrite());
-        teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+        knoxcrypt::File entry = *folder.getFile("some.log", knoxcrypt::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testString.begin(), testString.end());
         entry.write((char*)&vec.front(), testString.length());
         entry.flush();
@@ -210,19 +210,19 @@ class ContentFolderTest
     void testEntryRetrievalAppendSmallFollowedByAppendLarge()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         std::string testData("some test data!");
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::ContentFolder folder(io, 0, std::string("root"));
-            teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::ContentFolder folder(io, 0, std::string("root"));
+            knoxcrypt::File entry = *folder.getFile("some.log", knoxcrypt::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
         }
         {
             std::string testString(createLargeStringToWrite());
-            teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::File entry = *folder.getFile("some.log", knoxcrypt::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -238,19 +238,19 @@ class ContentFolderTest
     void testEntryRetrievalAppendLargeFollowedByAppendSmall()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         std::string testData("some test data!");
         std::string testString(createLargeStringToWrite());
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::ContentFolder folder(io, 0, std::string("root"));
-            teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::ContentFolder folder(io, 0, std::string("root"));
+            knoxcrypt::File entry = *folder.getFile("some.log", knoxcrypt::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
         }
         {
-            teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::File entry = *folder.getFile("some.log", knoxcrypt::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -266,10 +266,10 @@ class ContentFolderTest
     void testEntryRetrievalAppendSmallToFirstFileAndAppendLargeToSecond()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         {
             std::string testData("some test data!");
-            teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::File entry = *folder.getFile("some.log", knoxcrypt::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -281,7 +281,7 @@ class ContentFolderTest
 
         {
             std::string testString(createLargeStringToWrite());
-            teasafe::File entry = *folder.getFile("picture.jpg", teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::File entry = *folder.getFile("picture.jpg", knoxcrypt::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -296,11 +296,11 @@ class ContentFolderTest
     void testEntryRetrievalAppendLargeToFirstFileAndAppendSmallToSecond()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
 
         {
             std::string testString(createLargeStringToWrite());
-            teasafe::File entry = *folder.getFile("picture.jpg", teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::File entry = *folder.getFile("picture.jpg", knoxcrypt::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testString.begin(), testString.end());
             entry.write((char*)&vec.front(), testString.length());
             entry.flush();
@@ -311,7 +311,7 @@ class ContentFolderTest
         }
         {
             std::string testData("some test data!");
-            teasafe::File entry = *folder.getFile("some.log", teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::File entry = *folder.getFile("some.log", knoxcrypt::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -326,8 +326,8 @@ class ContentFolderTest
     void testContentFolderRetrievalAddEntries()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
-        teasafe::ContentFolder subFolder = *folder.getContentFolder("folderA");
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder subFolder = *folder.getContentFolder("folderA");
         subFolder.addFile("subFileA");
         subFolder.addFile("subFileB");
         subFolder.addFile("subFileC");
@@ -358,15 +358,15 @@ class ContentFolderTest
     void testContentFolderRetrievalAddEntriesAppendData()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
-        teasafe::ContentFolder subFolder = *folder.getContentFolder("folderA");
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder subFolder = *folder.getContentFolder("folderA");
         subFolder.addFile("subFileA");
         subFolder.addFile("subFileB");
         subFolder.addFile("subFileC");
         subFolder.addFile("subFileD");
 
         std::string testData("some test data!");
-        teasafe::File entry = *subFolder.getFile("subFileB", teasafe::OpenDisposition::buildAppendDisposition());
+        knoxcrypt::File entry = *subFolder.getFile("subFileB", knoxcrypt::OpenDisposition::buildAppendDisposition());
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         entry.write((char*)&vec.front(), testData.length());
         entry.flush();
@@ -380,7 +380,7 @@ class ContentFolderTest
     void testRemoveFile()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         folder.removeFile("test.txt");
         auto entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 5, "testRemoveFile: number of entries after removal");
@@ -389,7 +389,7 @@ class ContentFolderTest
     void testRemoveEmptySubFolder()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
-        teasafe::ContentFolder folder = createTestFolder(testPath);
+        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         folder.removeContentFolder("folderA");
         auto entries = folder.listAllEntries();
         ASSERT_EQUAL(entries.size(), 5, "testRemoveEmptySubFolder: number of entries after removal");
@@ -399,22 +399,22 @@ class ContentFolderTest
     {
         {
             boost::filesystem::path testPath = buildImage(m_uniquePath);
-            teasafe::ContentFolder folder = createTestFolder(testPath);
-            teasafe::ContentFolder subFolder = *folder.getContentFolder("folderA");
+            knoxcrypt::ContentFolder folder = createTestFolder(testPath);
+            knoxcrypt::ContentFolder subFolder = *folder.getContentFolder("folderA");
             subFolder.addFile("subFileA");
             subFolder.addFile("subFileB");
             subFolder.addFile("subFileC");
             subFolder.addFile("subFileD");
 
             std::string testData("some test data!");
-            teasafe::File entry = *subFolder.getFile("subFileB", teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::File entry = *subFolder.getFile("subFileB", knoxcrypt::OpenDisposition::buildAppendDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
         }
         {
             boost::filesystem::path testPath = buildImage(m_uniquePath);
-            teasafe::ContentFolder folder = createTestFolder(testPath);
+            knoxcrypt::ContentFolder folder = createTestFolder(testPath);
             folder.removeContentFolder("folderA");
             auto entries = folder.listAllEntries();
             ASSERT_EQUAL(entries.size(), 5, "testRemoveNonEmptySubFolder: number of entries after removal");

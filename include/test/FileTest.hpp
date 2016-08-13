@@ -26,14 +26,14 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/ContainerImageStream.hpp"
-#include "teasafe/File.hpp"
-#include "teasafe/FileEntryException.hpp"
-#include "teasafe/detail/DetailTeaSafe.hpp"
-#include "teasafe/detail/DetailFileBlock.hpp"
+#include "knoxcrypt/ContainerImageStream.hpp"
+#include "knoxcrypt/File.hpp"
+#include "knoxcrypt/FileEntryException.hpp"
+#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
+#include "knoxcrypt/detail/DetailFileBlock.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
-#include "utility/MakeTeaSafe.hpp"
+#include "utility/Makeknoxcrypt.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -89,8 +89,8 @@ class FileTest
 
         // test write get file size from same entry
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -100,9 +100,9 @@ class FileTest
 
         // test get file size different entry but same data
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             ASSERT_EQUAL(BIG_SIZE, entry.fileSize(), "testFileSizeReportedCorrectly B");
         }
     }
@@ -114,24 +114,24 @@ class FileTest
 
         // test write get file size from same entry
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
             entry.flush();
 
             uint64_t startBlock = entry.getStartVolumeBlockIndex();
-            teasafe::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
-            ASSERT_EQUAL(true, teasafe::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
-            teasafe::FileBlock block(io, startBlock,
-                                     teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            ASSERT_EQUAL(true, knoxcrypt::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
+            knoxcrypt::FileBlock block(io, startBlock,
+                                     knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             uint64_t nextBlock = block.getNextIndex();
             while (nextBlock != startBlock) {
                 startBlock = nextBlock;
-                ASSERT_EQUAL(true, teasafe::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
-                teasafe::FileBlock block(io, startBlock,
-                                         teasafe::OpenDisposition::buildReadOnlyDisposition());
+                ASSERT_EQUAL(true, knoxcrypt::detail::isBlockInUse(startBlock, blocks, in), "testBlocksAllocated: blockAllocated");
+                knoxcrypt::FileBlock block(io, startBlock,
+                                         knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
                 nextBlock = block.getNextIndex();
             }
         }
@@ -147,8 +147,8 @@ class FileTest
 
         // test write followed by unlink
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -156,16 +156,16 @@ class FileTest
 
             // get allocated block indices
             uint64_t startBlock = entry.getStartVolumeBlockIndex();
-            teasafe::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            knoxcrypt::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             blockIndices.push_back(startBlock);
 
-            teasafe::FileBlock block(io, startBlock,
-                                     teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::FileBlock block(io, startBlock,
+                                     knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             uint64_t nextBlock = block.getNextIndex();
             while (nextBlock != startBlock) {
                 startBlock = nextBlock;
-                teasafe::FileBlock block(io, startBlock,
-                                         teasafe::OpenDisposition::buildReadOnlyDisposition());
+                knoxcrypt::FileBlock block(io, startBlock,
+                                         knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
                 blockIndices.push_back(startBlock);
                 nextBlock = block.getNextIndex();
             }
@@ -178,14 +178,14 @@ class FileTest
 
         // test that filesize is 0 when read back in
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             ASSERT_EQUAL(0, entry.fileSize(), "testFileUnlink B");
 
             // test that blocks deallocated after unlink
-            teasafe::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
+            knoxcrypt::ContainerImageStream in(io, std::ios::in | std::ios::out | std::ios::binary);
             for (auto const & it : blockIndices) {
-                ASSERT_EQUAL(false, teasafe::detail::isBlockInUse(it, blocks, in), "testFileUnlink: blockDeallocatedTest");
+                ASSERT_EQUAL(false, knoxcrypt::detail::isBlockInUse(it, blocks, in), "testFileUnlink: blockDeallocatedTest");
             }
             in.close();
         }
@@ -197,8 +197,8 @@ class FileTest
 
         // test write get file size from same entry
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -206,17 +206,17 @@ class FileTest
         }
 
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildWriteOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildWriteOnlyDisposition());
             std::vector<uint8_t> vec(entry.fileSize());
 
             bool pass = false;
             // assert correct exception was thrown
             try {
                 entry.read((char*)&vec.front(), entry.fileSize());
-            } catch (teasafe::FileEntryException const &e) {
-                ASSERT_EQUAL(e, teasafe::FileEntryException(teasafe::FileEntryError::NotReadable), "testReadingFromNonReadableThrows A");
+            } catch (knoxcrypt::FileEntryException const &e) {
+                ASSERT_EQUAL(e, knoxcrypt::FileEntryException(knoxcrypt::FileEntryError::NotReadable), "testReadingFromNonReadableThrows A");
                 pass = true;
             }
             // assert that any exception was thrown
@@ -230,8 +230,8 @@ class FileTest
 
         // test write get file size from same entry
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -240,9 +240,9 @@ class FileTest
 
         // write some more
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
 
@@ -250,8 +250,8 @@ class FileTest
             // assert correct exception was thrown
             try {
                 entry.write((char*)&vec.front(), BIG_SIZE);
-            } catch (teasafe::FileEntryException const &e) {
-                ASSERT_EQUAL(e, teasafe::FileEntryException(teasafe::FileEntryError::NotWritable), "testWritingToNonWritableThrows A");
+            } catch (knoxcrypt::FileEntryException const &e) {
+                ASSERT_EQUAL(e, knoxcrypt::FileEntryException(knoxcrypt::FileEntryError::NotWritable), "testWritingToNonWritableThrows A");
                 pass = true;
             }
             // assert that any exception was thrown
@@ -265,8 +265,8 @@ class FileTest
 
         // test write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -275,9 +275,9 @@ class FileTest
 
         // test read
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
 
             std::string expected(createLargeStringToWrite());
             std::vector<char> vec;
@@ -294,8 +294,8 @@ class FileTest
 
         // initial big write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -305,18 +305,18 @@ class FileTest
         // small append
         std::string appendString("appended!");
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
 
         // test read
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", 1,
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", 1,
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(createLargeStringToWrite());
             expected.append(appendString);
             std::vector<char> vec;
@@ -333,8 +333,8 @@ class FileTest
 
         // initial big write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -344,9 +344,9 @@ class FileTest
         // secondary overwrite
         std::string testData("goodbye...!");
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildOverwriteDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildOverwriteDisposition());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -354,9 +354,9 @@ class FileTest
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtStart correct file size");
         }
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", 1,
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", 1,
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length());
             entry.read((char*)&readBackIn.front(), testData.length());
@@ -371,8 +371,8 @@ class FileTest
 
         // initial big write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -382,9 +382,9 @@ class FileTest
         // secondary overwrite
         std::string testData("goodbye...!");
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildOverwriteDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - testData.length());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -393,9 +393,9 @@ class FileTest
             ASSERT_EQUAL(entry.fileSize(), BIG_SIZE, "testBigWriteFollowedBySmallOverwriteAtEnd correct file size");
         }
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", 1,
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", 1,
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length());
             entry.seek(BIG_SIZE - testData.length());
@@ -411,8 +411,8 @@ class FileTest
 
         // initial big write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -424,9 +424,9 @@ class FileTest
         std::string testData("goodbye...!");
         std::string testDataB("final bit!");
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildOverwriteDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildOverwriteDisposition());
             assert(entry.seek(BIG_SIZE - testData.length()) != -1);
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -437,9 +437,9 @@ class FileTest
 
 
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", 1,
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", 1,
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length() + testDataB.length());
             assert(entry.seek(BIG_SIZE - testData.length()) != -1);
@@ -456,8 +456,8 @@ class FileTest
 
         // initial big write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -466,9 +466,9 @@ class FileTest
 
         // secondary overwrite
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildOverwriteDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - 50);
             std::string testData(createLargeStringToWrite("abcdefghijklm"));
             entry.write(testData.c_str(), testData.length());
@@ -476,9 +476,9 @@ class FileTest
         }
 
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", 1,
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", 1,
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(BIG_SIZE + BIG_SIZE - 50);
             entry.read((char*)&readBackIn.front(), BIG_SIZE + BIG_SIZE - 50);
@@ -498,8 +498,8 @@ class FileTest
         // initial small write
         std::string testData("small string");
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
             entry.flush();
@@ -508,18 +508,18 @@ class FileTest
         // big append
         std::string appendString(createLargeStringToWrite());
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
 
         // test read
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::string expected(testData.append(appendString));
             std::vector<char> vec;
             vec.resize(entry.fileSize());
@@ -535,8 +535,8 @@ class FileTest
 
         // test write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string const testString("Hello and goodbye!");
             std::string testData(testString);
             std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -546,9 +546,9 @@ class FileTest
 
         // test seek and read
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::string expected("goodbye!");
             std::vector<char> vec;
             vec.resize(expected.size());
@@ -565,8 +565,8 @@ class FileTest
 
         // test write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), BIG_SIZE);
@@ -576,17 +576,17 @@ class FileTest
         // test seek of big file
         std::string appendString("appended!");
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildAppendDisposition());
             entry.write(appendString.c_str(), appendString.length());
             entry.flush();
         }
 
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildAppendDisposition());
             std::vector<char> vec;
             vec.resize(appendString.length());
             entry.seek(BIG_SIZE);
@@ -603,8 +603,8 @@ class FileTest
 
         // test write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -614,17 +614,17 @@ class FileTest
         std::string testData("goodbye!");
         std::streamoff off = -548;
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildOverwriteDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildOverwriteDisposition());
             entry.seek(off, std::ios_base::end);
             entry.write(testData.c_str(), testData.length());
             entry.flush();
         }
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
@@ -642,8 +642,8 @@ class FileTest
 
         // test write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createLargeStringToWrite());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -652,9 +652,9 @@ class FileTest
 
         std::string testData("goodbye!");
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildOverwriteDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildOverwriteDisposition());
             entry.seek(initialSeek);
             entry.seek(off, std::ios_base::cur);
             entry.write(testData.c_str(), testData.length());
@@ -674,9 +674,9 @@ class FileTest
         {
             std::string testData("goodbye!");
             std::streamoff finalPosition = initialSeek + off;
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
@@ -696,9 +696,9 @@ class FileTest
         {
             std::string testData("goodbye!");
             std::streamoff finalPosition = initialSeek + off;
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
@@ -718,9 +718,9 @@ class FileTest
         {
             std::string testData("goodbye!");
             std::streamoff finalPosition = initialSeek + off;
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
@@ -740,9 +740,9 @@ class FileTest
         {
             std::string testData("goodbye!");
             std::streamoff finalPosition = initialSeek + off;
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
@@ -758,8 +758,8 @@ class FileTest
 
         // test write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createAString());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -769,18 +769,18 @@ class FileTest
         int seekPos = 499; // overwrite to begin at very end
         std::string testData("goodbye!");
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildOverwriteDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildOverwriteDisposition());
             entry.seek(seekPos);
             entry.write(testData.c_str(), testData.length());
             entry.flush();
         }
 
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> vec;
             vec.resize(entry.fileSize());
             entry.read((char*)&vec.front(), entry.fileSize());
@@ -796,8 +796,8 @@ class FileTest
 
         // test write
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt");
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt");
             std::string testData(createAString());
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -806,17 +806,17 @@ class FileTest
 
         std::string testData("goodbye!");
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "test.txt", 1,
-                                       teasafe::OpenDisposition::buildAppendDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "test.txt", 1,
+                                       knoxcrypt::OpenDisposition::buildAppendDisposition());
             entry.write(testData.c_str(), testData.length());
             entry.flush();
         }
 
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::File entry(io, "entry", uint64_t(1),
-                                       teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::File entry(io, "entry", uint64_t(1),
+                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
 
             ASSERT_EQUAL(entry.fileSize(), A_STRING_SIZE + testData.length(), "FileTest::testEdgeCaseEndOfBlockAppend() filesize");
             std::vector<uint8_t> vec;

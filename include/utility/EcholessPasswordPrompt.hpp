@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <termios.h>
 
-namespace teasafe
+namespace knoxcrypt
 {
 
     namespace utility

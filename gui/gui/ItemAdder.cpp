@@ -29,7 +29,7 @@
 
 
 #include "ItemAdder.h"
-#include "teasafe/EntryInfo.hpp"
+#include "knoxcrypt/EntryInfo.hpp"
 #include <vector>
 #include <QDebug>
 
@@ -39,15 +39,15 @@ ItemAdder::ItemAdder(QObject *parent) :
 }
 
 void ItemAdder::populate(QTreeWidgetItem *parent,
-                         teasafe::SharedTeaSafe const &teaSafe,
+                         knoxcrypt::Sharedknoxcrypt const &knoxcrypt,
                          std::string const &path)
 {
-    if(teaSafe->folderExists(path)) {
-        auto f = teaSafe->getFolder(path);
+    if(knoxcrypt->folderExists(path)) {
+        auto f = knoxcrypt->getFolder(path);
         auto entryInfos = f.listAllEntries();
         for(auto const &it : entryInfos) {
             QTreeWidgetItem *item = new QTreeWidgetItem(parent);
-            if(it.second->type() == teasafe::EntryType::FolderType) {
+            if(it.second->type() == knoxcrypt::EntryType::FolderType) {
                 item->setChildIndicatorPolicy (QTreeWidgetItem::ShowIndicator);
             }
             item->setText(0, QString(it.second->filename().c_str()));

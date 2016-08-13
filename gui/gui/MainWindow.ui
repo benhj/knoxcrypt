@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>TeaSafe GUI</string>
+   <string>knoxcrypt GUI</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget#centralWidget {

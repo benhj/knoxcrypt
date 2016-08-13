@@ -8,7 +8,7 @@
 // (c) Anthony Williams (assumed)
 //
 
-namespace teasafe {
+namespace knoxcrypt {
 
     namespace utility {
 

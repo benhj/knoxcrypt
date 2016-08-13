@@ -10,7 +10,7 @@ class GUICipherCallback : public QObject
     Q_OBJECT
 public:
     explicit GUICipherCallback(QObject *parent = 0);
-    void cipherCallback(teasafe::EventType eventType, long const amount);
+    void cipherCallback(knoxcrypt::EventType eventType, long const amount);
 
 signals:
 

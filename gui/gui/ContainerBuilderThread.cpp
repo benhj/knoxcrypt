@@ -10,24 +10,24 @@ ContainerBuilderThread::ContainerBuilderThread(QObject *parent)
 {
 }
 
-void ContainerBuilderThread::setSharedIO(teasafe::SharedCoreIO const &io)
+void ContainerBuilderThread::setSharedIO(knoxcrypt::SharedCoreIO const &io)
 {
     TeaLock lock(m_teaMutex);
     m_io = io;
     bool const sparseImage = true; // TODO: option to change this
-    m_imageBuilder = std::make_shared<teasafe::MakeTeaSafe>(m_io, sparseImage);
+    m_imageBuilder = std::make_shared<knoxcrypt::Makeknoxcrypt>(m_io, sparseImage);
 
     // register progress callback for imager
-    std::function<void(teasafe::EventType)> fb(std::bind(&ContainerBuilderThread::imagerCallback,
+    std::function<void(knoxcrypt::EventType)> fb(std::bind(&ContainerBuilderThread::imagerCallback,
                                                          this, std::placeholders::_1, m_io->blocks));
     m_imageBuilder->registerSignalHandler(fb);
 
 }
 
-SharedTeaSafe ContainerBuilderThread::getTeaSafe()
+Sharedknoxcrypt ContainerBuilderThread::getknoxcrypt()
 {
     TeaLock lock(m_teaMutex);
-    return std::make_shared<teasafe::TeaSafe>(m_io);
+    return std::make_shared<knoxcrypt::knoxcrypt>(m_io);
 }
 
 void ContainerBuilderThread::run()
@@ -41,25 +41,25 @@ void ContainerBuilderThread::buildTSImage()
     m_imageBuilder->buildImage();
 }
 
-void ContainerBuilderThread::imagerCallback(teasafe::EventType eventType, long const amount)
+void ContainerBuilderThread::imagerCallback(knoxcrypt::EventType eventType, long const amount)
 {
     static long val(0);
-    if(eventType == teasafe::EventType::ImageBuildStart) {
+    if(eventType == knoxcrypt::EventType::ImageBuildStart) {
         emit blockCountSignal(amount);
         emit setProgressLabelSignal("Building image...");
     }
-    if(eventType == teasafe::EventType::ImageBuildUpdate) {
+    if(eventType == knoxcrypt::EventType::ImageBuildUpdate) {
         emit blockWrittenSignal(++val);
     }
-    if(eventType == teasafe::EventType::ImageBuildEnd) {
+    if(eventType == knoxcrypt::EventType::ImageBuildEnd) {
         val = 0;
         emit finishedBuildingSignal();
         emit closeProgressSignal();
     }
-    if(eventType == teasafe::EventType::IVWriteEvent) {
+    if(eventType == knoxcrypt::EventType::IVWriteEvent) {
 
     }
-    if(eventType == teasafe::EventType::RoundsWriteEvent) {
+    if(eventType == knoxcrypt::EventType::RoundsWriteEvent) {
 
     }
 }

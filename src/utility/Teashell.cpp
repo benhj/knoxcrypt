@@ -27,18 +27,18 @@
 */
 
 /**
- * @brief a *very hacky* wrapper for accessing / modifying teasafe containers
+ * @brief a *very hacky* wrapper for accessing / modifying knoxcrypt containers
  *
  * Attempts to provide basic 'shell-like' access to give a real fs feel
  * (has 'ls', 'cd', 'pwd', 'rm', 'mkdir' commands)
  */
 
-#include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/EntryInfo.hpp"
-#include "teasafe/FileBlockBuilder.hpp"
-#include "teasafe/TeaSafe.hpp"
-#include "teasafe/TeaSafeException.hpp"
-#include "teasafe/FileStreamPtr.hpp"
+#include "knoxcrypt/CoreKnoxCryptIO.hpp"
+#include "knoxcrypt/EntryInfo.hpp"
+#include "knoxcrypt/FileBlockBuilder.hpp"
+#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/KnoxCryptException.hpp"
+#include "knoxcrypt/FileStreamPtr.hpp"
 #include "utility/CipherCallback.hpp"
 #include "utility/CopyFromPhysical.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
@@ -100,7 +100,7 @@ void com_help()
 }
 
 /// the 'ls' command for listing dir contents
-void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
+void com_ls(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
 {
     // make sure path begins with a slash
     std::string thePath(*path.begin() != '/' ? "/" : "");
@@ -110,7 +110,7 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
     auto folder = theBfs.getFolder(thePath);
     auto & entries = folder.listAllEntries();
     for (auto const &it : entries) {
-        if (it.second->type() == teasafe::EntryType::FileType) {
+        if (it.second->type() == knoxcrypt::EntryType::FileType) {
             std::cout<<boost::format("%1% %|30t|%2%\n") % it.second->filename() % "<F>";
         } else {
             std::cout<<boost::format("%1% %|30t|%2%\n") % it.second->filename() % "<D>";
@@ -120,7 +120,7 @@ void com_ls(teasafe::TeaSafe &theBfs, std::string const &path)
 
 /// attempts to implement tab complete by matching the provided string
 /// with an entry at the given parent path
-std::string tabCompleteTeaSafeEntry(teasafe::TeaSafe &theBfs, std::string const &path)
+std::string tabCompleteknoxcryptEntry(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
 {
     // make sure path begins with a slash
     std::string thePath(*path.begin() != '/' ? "/" : "");
@@ -163,15 +163,15 @@ std::string tabCompleteCommand(std::string const &command)
 }
 
 /// the 'rm' command for removing a folder or file
-void com_rm(teasafe::TeaSafe &theBfs, std::string const &path)
+void com_rm(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
 {
     std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
-    teasafe::utility::removeEntry(theBfs, thePath);
+    knoxcrypt::utility::removeEntry(theBfs, thePath);
 }
 
 /// the 'mkdir' command for adding a folder to the current working dir
-void com_mkdir(teasafe::TeaSafe &theBfs, std::string const &path)
+void com_mkdir(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
 {
     std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
@@ -182,22 +182,22 @@ void com_mkdir(teasafe::TeaSafe &theBfs, std::string const &path)
 /// working directory
 /// example usage:
 /// add file://path/to/file.txt
-void com_add(teasafe::TeaSafe &theBfs, std::string const &parent, std::string const &fileResource)
+void com_add(knoxcrypt::KnoxCrypt &theBfs, std::string const &parent, std::string const &fileResource)
 {
     // add the file to the container
     // this removed the first several chars assumes to be "file://"
     std::string resPath(fileResource.begin() + 7, fileResource.end());
-    teasafe::utility::copyFromPhysical(theBfs, parent, resPath, std::bind(operationCallback,
+    knoxcrypt::utility::copyFromPhysical(theBfs, parent, resPath, std::bind(operationCallback,
                                                                           std::placeholders::_1));
 }
 
-/// for extracting a teasafe file to somewhere on a physical disk location
+/// for extracting a knoxcrypt file to somewhere on a physical disk location
 /// example usage:
 /// extract file.txt file:///some/parent/path/
-void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string const &dst)
+void com_extract(knoxcrypt::KnoxCrypt &theBfs, std::string const &path, std::string const &dst)
 {
     std::string dstPath(dst.begin() + 7, dst.end());
-    teasafe::utility::extractToPhysical(theBfs, path, dstPath, std::bind(operationCallback,
+    knoxcrypt::utility::extractToPhysical(theBfs, path, dstPath, std::bind(operationCallback,
                                                                          std::placeholders::_1));
 }
 
@@ -205,7 +205,7 @@ void com_extract(teasafe::TeaSafe &theBfs, std::string const &path, std::string 
 /// example usage when working path is /hello
 /// push there
 /// result: /hello/there
-void com_push(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string &fragment)
+void com_push(knoxcrypt::KnoxCrypt &theBfs, std::string &workingDir, std::string &fragment)
 {
     auto thePath(workingDir);
     if (*thePath.rbegin() != '/') {
@@ -223,7 +223,7 @@ void com_push(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string &fr
 /// example usage when working path is /hello/there
 /// pop
 /// result: /hello
-void com_pop(teasafe::TeaSafe &theBfs, std::string &workingDir)
+void com_pop(knoxcrypt::KnoxCrypt &theBfs, std::string &workingDir)
 {
 
     boost::filesystem::path p(workingDir);
@@ -239,7 +239,7 @@ void com_pop(teasafe::TeaSafe &theBfs, std::string &workingDir)
 }
 
 /// for changing to a new folder. Path should be absolute.
-void com_cd(teasafe::TeaSafe &theBfs, std::string &workingDir, std::string const &path)
+void com_cd(knoxcrypt::KnoxCrypt &theBfs, std::string &workingDir, std::string const &path)
 {
     // try to directly resolve
     if (theBfs.folderExists(path)) {
@@ -293,7 +293,7 @@ std::string formattedPath(std::string const &workingDir, std::string const &path
 }
 
 /// parses the command string
-void parse(teasafe::TeaSafe &theBfs, std::string const &commandStr, std::string &workingDir)
+void parse(knoxcrypt::KnoxCrypt &theBfs, std::string const &commandStr, std::string &workingDir)
 {
     std::vector<std::string> comTokens;
     boost::algorithm::split_regex(comTokens, commandStr, boost::regex("\\s+"));
@@ -400,7 +400,7 @@ void handleBackspace(int &cursorPos, std::string &toReturn)
 }
 
 /// handles tab-key; attempts to provide rudimentary tab-completion
-void handleTabKey(teasafe::TeaSafe &theBfs,
+void handleTabKey(knoxcrypt::KnoxCrypt &theBfs,
                   std::string const &workingPath,
                   int &cursorPos,
                   std::string &toReturn)
@@ -445,7 +445,7 @@ void handleTabKey(teasafe::TeaSafe &theBfs,
         }
 
         // run the tab-completion algorithm and get the tab-completed string back
-        tabCompleted = tabCompleteTeaSafeEntry(theBfs, wd);
+        tabCompleted = tabCompleteknoxcryptEntry(theBfs, wd);
         len = (boost::filesystem::path(toBeCompleted).filename()).string().length();
 
     } else {
@@ -473,7 +473,7 @@ void handleTabKey(teasafe::TeaSafe &theBfs,
 /// gets a user-inputted string until return is entered
 /// will use getChar to process characters one by one so that individual
 /// key handlers can be created
-std::string getInputString(teasafe::TeaSafe &theBfs, std::string const &workingPath)
+std::string getInputString(knoxcrypt::KnoxCrypt &theBfs, std::string const &workingPath)
 {
     std::string toReturn("");
 
@@ -505,7 +505,7 @@ std::string getInputString(teasafe::TeaSafe &theBfs, std::string const &workingP
 }
 
 /// indefinitely loops over user input expecting commands
-int loop(teasafe::TeaSafe &theBfs)
+int loop(knoxcrypt::KnoxCrypt &theBfs)
 {
     std::string currentPath("/");
     while (1) {
@@ -581,7 +581,7 @@ int main(int argc, char *argv[])
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
-        ("imageName", po::value<std::string>(), "teasafe image path")
+        ("imageName", po::value<std::string>(), "knoxcrypt image path")
         ("coffee", po::value<bool>(&magic)->default_value(false), "mount alternative sub-volume")
         ;
 
@@ -616,46 +616,46 @@ int main(int argc, char *argv[])
 
     populateCommands();
 
-    // Setup a core teasafe io object which stores highlevel info about accessing
-    // the TeaSafe image
-    auto io(std::make_shared<teasafe::CoreTeaSafeIO>());
+    // Setup a core knoxcrypt io object which stores highlevel info about accessing
+    // the knoxcrypt image
+    auto io(std::make_shared<knoxcrypt::CoreKnoxCryptIO>());
     io->useBlockCache = true;
     io->path = vm["imageName"].as<std::string>().c_str();
-    io->encProps.password = teasafe::utility::getPassword("teasafe password: ");
-    io->rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;
+    io->encProps.password = knoxcrypt::utility::getPassword("knoxcrypt password: ");
+    io->rootBlock = magic ? atoi(knoxcrypt::utility::getPassword("magic number: ").c_str()) : 0;
 
     // Obtain the initialization vector from the first 8 bytes
     // and the number of xtea rounds from the ninth byte
-    teasafe::detail::readImageIVAndRounds(io);
+    knoxcrypt::detail::readImageIVAndRounds(io);
 
     // Obtain the number of blocks in the image by reading the image's block count
-    long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-    auto f(std::bind(&teasafe::cipherCallback, std::placeholders::_1, amount));
+    long const amount = knoxcrypt::detail::CIPHER_BUFFER_SIZE / 100000;
+    auto f(std::bind(&knoxcrypt::cipherCallback, std::placeholders::_1, amount));
     io->ccb = f;
-    teasafe::ContainerImageStream stream(io, std::ios::in | std::ios::binary);
+    knoxcrypt::ContainerImageStream stream(io, std::ios::in | std::ios::binary);
 
     // compare password hashes
     uint8_t hashRecovered[32];
-    teasafe::detail::getPassHash(stream, hashRecovered);
+    knoxcrypt::detail::getPassHash(stream, hashRecovered);
     uint8_t hashEntered[32];
-    teasafe::utility::sha256((char*)io->encProps.password.c_str(), hashEntered);
-    if(!teasafe::utility::compareTwoHashes(hashEntered, hashRecovered)) {
+    knoxcrypt::utility::sha256((char*)io->encProps.password.c_str(), hashEntered);
+    if(!knoxcrypt::utility::compareTwoHashes(hashEntered, hashRecovered)) {
         std::cout<<"Incorrect password"<<std::endl;
         exit(0);
     }
 
-    io->blocks = teasafe::detail::getBlockCount(stream);
+    io->blocks = knoxcrypt::detail::getBlockCount(stream);
 
     printf("Counting allocated blocks. Please wait...\n");
 
-    io->freeBlocks = io->blocks - teasafe::detail::getNumberOfAllocatedBlocks(stream);
-    io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
+    io->freeBlocks = io->blocks - knoxcrypt::detail::getNumberOfAllocatedBlocks(stream);
+    io->blockBuilder = std::make_shared<knoxcrypt::FileBlockBuilder>(io);
 
     printf("Finished counting allocated blocks.\n");
 
     stream.close();
 
     // Create the basic file system
-    teasafe::TeaSafe theBfs(io);
+    knoxcrypt::KnoxCrypt theBfs(io);
     return loop(theBfs);
 }

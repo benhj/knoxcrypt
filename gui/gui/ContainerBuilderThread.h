@@ -1,21 +1,21 @@
 #ifndef CONTAINERBUILDERTHREAD_H
 #define CONTAINERBUILDERTHREAD_H
 
-#include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/TeaSafe.hpp"
+#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/knoxcrypt.hpp"
 #include "utility/EventType.hpp"
-#include "utility/MakeTeaSafe.hpp"
+#include "utility/Makeknoxcrypt.hpp"
 
 #include <QThread>
 #include <memory>
 #include <mutex>
 
-namespace teasafe
+namespace knoxcrypt
 {
-    class TeaSafe;
+    class knoxcrypt;
 }
 
-typedef std::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
+typedef std::shared_ptr<knoxcrypt::knoxcrypt> Sharedknoxcrypt;
 
 class ContainerBuilderThread : public QThread
 {
@@ -23,9 +23,9 @@ class ContainerBuilderThread : public QThread
 public:
     explicit ContainerBuilderThread(QObject *parent = 0);
 
-    void setSharedIO(teasafe::SharedCoreIO const &io);
+    void setSharedIO(knoxcrypt::SharedCoreIO const &io);
 
-    SharedTeaSafe getTeaSafe();
+    Sharedknoxcrypt getknoxcrypt();
 
 protected:
   void run();
@@ -39,16 +39,16 @@ signals:
   void closeProgressSignal();
 
 private:
-  teasafe::SharedCoreIO m_io;
-  SharedTeaSafe m_teaSafe;
+  knoxcrypt::SharedCoreIO m_io;
+  Sharedknoxcrypt m_knoxcrypt;
   typedef std::mutex TeaMutex;
   typedef std::lock_guard<TeaMutex> TeaLock;
   mutable TeaMutex m_teaMutex;
-  std::shared_ptr<teasafe::MakeTeaSafe> m_imageBuilder;
+  std::shared_ptr<knoxcrypt::Makeknoxcrypt> m_imageBuilder;
 
   void buildTSImage();
 
-  void imagerCallback(teasafe::EventType eventType, long const amount);
+  void imagerCallback(knoxcrypt::EventType eventType, long const amount);
 
 };
 

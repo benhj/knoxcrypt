@@ -26,9 +26,9 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/ContainerImageStream.hpp"
-#include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/FileBlockIterator.hpp"
+#include "knoxcrypt/ContainerImageStream.hpp"
+#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/FileBlockIterator.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
 
@@ -60,8 +60,8 @@ class FileBlockIteratorTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         // build some blocks to iterate over
-        teasafe::SharedCoreIO io(createTestIO(testPath));
-        teasafe::File entry(io, "test.txt");
+        knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+        knoxcrypt::File entry(io, "test.txt");
         std::string testData(createLargeStringToWrite());
 
         std::vector<uint8_t> vec(testData.begin(), testData.end());
@@ -69,10 +69,10 @@ class FileBlockIteratorTest
         entry.flush();
 
         uint64_t count(0);
-        teasafe::FileBlockIterator begin(io,
+        knoxcrypt::FileBlockIterator begin(io,
                                          entry.getStartVolumeBlockIndex(),
-                                         teasafe::OpenDisposition::buildReadOnlyDisposition());
-        teasafe::FileBlockIterator end;
+                                         knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
+        knoxcrypt::FileBlockIterator end;
 
         ASSERT_EQUAL(false, (begin.equal(end)), "FileBlockIteratorTest::test equality BEFORE false");
 

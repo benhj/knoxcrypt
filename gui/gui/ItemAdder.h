@@ -31,7 +31,7 @@
 #ifndef ITEMADDER_H
 #define ITEMADDER_H
 
-#include "teasafe/TeaSafe.hpp"
+#include "knoxcrypt/knoxcrypt.hpp"
 #include <QObject>
 #include <QTreeWidgetItem>
 
@@ -42,7 +42,7 @@ public:
     explicit ItemAdder(QObject *parent = 0);
 
     void populate(QTreeWidgetItem *parent,
-                  teasafe::SharedTeaSafe const &teaSafe,
+                  knoxcrypt::Sharedknoxcrypt const &knoxcrypt,
                   std::string const &path);
 
 signals:

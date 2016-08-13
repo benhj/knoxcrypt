@@ -5,22 +5,22 @@ GUICipherCallback::GUICipherCallback(QObject *parent) :
 {
 }
 
-void GUICipherCallback::cipherCallback(teasafe::EventType eventType, long const amount)
+void GUICipherCallback::cipherCallback(knoxcrypt::EventType eventType, long const amount)
 {
     static long value(0);
-    if (eventType == teasafe::EventType::BigCipherBuildBegin) {
+    if (eventType == knoxcrypt::EventType::BigCipherBuildBegin) {
         emit openProgressSignal();
         emit setMaximumProgressSignal(amount);
         emit setProgressLabelSignal("Building cipher...");
     }
-    if (eventType == teasafe::EventType::CipherBuildUpdate) {
+    if (eventType == knoxcrypt::EventType::CipherBuildUpdate) {
         emit updateProgressSignal(value++);
     }
-    if (eventType == teasafe::EventType::BigCipherBuildEnd) {
+    if (eventType == knoxcrypt::EventType::BigCipherBuildEnd) {
         value = 0;
         emit closeProgressSignal();
     }
-    if (eventType == teasafe::EventType::KeyGenEnd) {
+    if (eventType == knoxcrypt::EventType::KeyGenEnd) {
         value = 0;
         emit closeProgressSignal();
     }

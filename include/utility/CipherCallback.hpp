@@ -34,7 +34,7 @@
 
 #include <memory>
 
-namespace teasafe
+namespace knoxcrypt
 {
 
     void cipherCallback(EventType eventType, long const amount)

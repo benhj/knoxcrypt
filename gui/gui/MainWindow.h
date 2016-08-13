@@ -48,12 +48,12 @@ namespace Ui
     class MainWindow;
 }
 
-namespace teasafe
+namespace knoxcrypt
 {
-    class TeaSafe;
+    class knoxcrypt;
 }
 
-typedef std::shared_ptr<teasafe::TeaSafe> SharedTeaSafe;
+typedef std::shared_ptr<knoxcrypt::knoxcrypt> Sharedknoxcrypt;
 
 enum class WorkType { RemoveItem, CreateFolder, ExtractItem, AddFile, AddFolder };
 
@@ -71,7 +71,7 @@ class MainWindow : public QMainWindow
 
   public slots:
     /**
-     * @brief loadFileButtonHandler for loading a TeaSafe image
+     * @brief loadFileButtonHandler for loading a knoxcrypt image
      */
     void loadFileButtonHandler();
     void newButtonHandler();
@@ -90,8 +90,8 @@ class MainWindow : public QMainWindow
     void closeProgressSlot();
     void openProgressSlot();
 
-    void getTeaSafeFromLoader();
-    void getTeaSafeFromBuilder();
+    void getknoxcryptFromLoader();
+    void getknoxcryptFromBuilder();
 
     void setBusyIndicator();
     void setReadyIndicator();
@@ -113,7 +113,7 @@ class MainWindow : public QMainWindow
 
   private:
     Ui::MainWindow *ui;
-    SharedTeaSafe m_teaSafe;
+    Sharedknoxcrypt m_knoxcrypt;
     LoaderThread m_loaderThread;
     ContainerBuilderThread m_builderThread;
     WorkThread m_workThread;

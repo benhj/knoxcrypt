@@ -26,12 +26,12 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "test/TeaSafeTest.hpp"
+#include "test/KnoxCryptTest.hpp"
 #include "test/FileBlockTest.hpp"
 #include "test/FileBlockIteratorTest.hpp"
 #include "test/FileTest.hpp"
 #include "test/FileDeviceTest.hpp"
-#include "test/MakeTeaSafeTest.hpp"
+#include "test/MakeKnoxCryptTest.hpp"
 #include "test/ContentFolderTest.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
@@ -45,8 +45,8 @@ int main()
     {
         boost::progress_timer timer;
 
-        TeaSafeTest();
-        MakeTeaSafeTest();
+        KnoxCryptTest();
+        MakeKnoxCryptTest();
         FileDeviceTest();
         FileBlockTest();
         FileBlockIteratorTest();

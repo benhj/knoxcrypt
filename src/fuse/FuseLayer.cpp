@@ -27,16 +27,16 @@
 */
 
 /**
- * @brief an experimental fuse wrapper around the teasafe container
+ * @brief an experimental fuse wrapper around the knoxcrypt container
  *
  * Based on fuse by Miklos Szeredi
  *
  */
 
-#include "teasafe/CoreTeaSafeIO.hpp"
-#include "teasafe/FileBlockBuilder.hpp"
-#include "teasafe/TeaSafe.hpp"
-#include "teasafe/TeaSafeException.hpp"
+#include "knoxcrypt/CoreKnoxCryptIO.hpp"
+#include "knoxcrypt/FileBlockBuilder.hpp"
+#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/KnoxCryptException.hpp"
 #include "utility/CipherCallback.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
 #include "utility/EventType.hpp"
@@ -50,7 +50,7 @@
 #include <vector>
 #include <functional>
 
-#define TeaSafe_DATA ((teasafe::TeaSafe*) fuse_get_context()->private_data)
+#define knoxcrypt_DATA ((knoxcrypt::KnoxCrypt*) fuse_get_context()->private_data)
 
 namespace fuselayer
 {
@@ -58,12 +58,12 @@ namespace fuselayer
     namespace detail
     {
 
-        int exceptionDispatch(teasafe::TeaSafeException const &ex)
+        int exceptionDispatch(knoxcrypt::KnoxCryptException const &ex)
         {
-            if (ex == teasafe::TeaSafeException(teasafe::TeaSafeError::NotFound)) {
+            if (ex == knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::NotFound)) {
                 return -ENOENT;
             }
-            if (ex == teasafe::TeaSafeException(teasafe::TeaSafeError::AlreadyExists)) {
+            if (ex == knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::AlreadyExists)) {
                 return -EEXIST;
             }
 
@@ -77,7 +77,7 @@ namespace fuselayer
       public:
         static
         int
-        teasafe_getattr(const char *path, struct stat *stbuf)
+        knoxcrypt_getattr(const char *path, struct stat *stbuf)
         {
             memset(stbuf, 0, sizeof(struct stat));
 
@@ -88,22 +88,22 @@ namespace fuselayer
                 return 0;
             } else {
                 try {
-                    auto info(TeaSafe_DATA->getInfo(path));
-                    if (info.type() == teasafe::EntryType::FolderType) {
+                    auto info(knoxcrypt_DATA->getInfo(path));
+                    if (info.type() == knoxcrypt::EntryType::FolderType) {
                         stbuf->st_mode = S_IFDIR | 0777;
                         stbuf->st_nlink = 3;
-                        stbuf->st_blksize = teasafe::detail::FILE_BLOCK_SIZE - teasafe::detail::FILE_BLOCK_META;
+                        stbuf->st_blksize = knoxcrypt::detail::FILE_BLOCK_SIZE - knoxcrypt::detail::FILE_BLOCK_META;
                         return 0;
-                    } else if (info.type() == teasafe::EntryType::FileType) {
+                    } else if (info.type() == knoxcrypt::EntryType::FileType) {
                         stbuf->st_mode = S_IFREG | 0777;
                         stbuf->st_nlink = 1;
                         stbuf->st_size = info.size();
-                        stbuf->st_blksize = teasafe::detail::FILE_BLOCK_SIZE - teasafe::detail::FILE_BLOCK_META;
+                        stbuf->st_blksize = knoxcrypt::detail::FILE_BLOCK_SIZE - knoxcrypt::detail::FILE_BLOCK_META;
                         return 0;
                     } else {
                         return -ENOENT;
                     }
-                } catch (teasafe::TeaSafeException const &e) {
+                } catch (knoxcrypt::KnoxCryptException const &e) {
                     return detail::exceptionDispatch(e);
                 }
             }
@@ -113,11 +113,11 @@ namespace fuselayer
 
         static
         int
-        teasafe_rename(const char *path, const char *newpath)
+        knoxcrypt_rename(const char *path, const char *newpath)
         {
             try {
-                TeaSafe_DATA->renameEntry(path, newpath);
-            } catch (teasafe::TeaSafeException const &e) {
+                knoxcrypt_DATA->renameEntry(path, newpath);
+            } catch (knoxcrypt::KnoxCryptException const &e) {
                 return detail::exceptionDispatch(e);
             }
             return 0;
@@ -126,11 +126,11 @@ namespace fuselayer
         // Create a directory
         static
         int
-        teasafe_mkdir(const char *path, mode_t)
+        knoxcrypt_mkdir(const char *path, mode_t)
         {
             try {
-                TeaSafe_DATA->addFolder(path);
-            } catch (teasafe::TeaSafeException const &e) {
+                knoxcrypt_DATA->addFolder(path);
+            } catch (knoxcrypt::KnoxCryptException const &e) {
                 return detail::exceptionDispatch(e);
             }
             return 0;
@@ -139,11 +139,11 @@ namespace fuselayer
         // Remove a file
         static
         int
-        teasafe_unlink(const char *path)
+        knoxcrypt_unlink(const char *path)
         {
             try {
-                TeaSafe_DATA->removeFile(path);
-            } catch (teasafe::TeaSafeException const &e) {
+                knoxcrypt_DATA->removeFile(path);
+            } catch (knoxcrypt::KnoxCryptException const &e) {
                 return detail::exceptionDispatch(e);
             }
 
@@ -153,11 +153,11 @@ namespace fuselayer
         // Remove a folder
         static
         int
-        teasafe_rmdir(const char *path)
+        knoxcrypt_rmdir(const char *path)
         {
             try {
-                TeaSafe_DATA->removeFolder(path, teasafe::FolderRemovalType::Recursive);
-            } catch (teasafe::TeaSafeException const &e) {
+                knoxcrypt_DATA->removeFolder(path, knoxcrypt::FolderRemovalType::Recursive);
+            } catch (knoxcrypt::KnoxCryptException const &e) {
                 return detail::exceptionDispatch(e);
             }
 
@@ -167,11 +167,11 @@ namespace fuselayer
         // truncate a file
         static
         int
-        teasafe_truncate(const char *path, off_t newsize)
+        knoxcrypt_truncate(const char *path, off_t newsize)
         {
             try {
-                TeaSafe_DATA->truncateFile(path, newsize);
-            } catch (teasafe::TeaSafeException const &e) {
+                knoxcrypt_DATA->truncateFile(path, newsize);
+            } catch (knoxcrypt::KnoxCryptException const &e) {
                 return detail::exceptionDispatch(e);
             }
 
@@ -182,18 +182,18 @@ namespace fuselayer
         // is deferred to the respective functions
         static
         int
-        teasafe_open(const char *path, struct fuse_file_info *)
+        knoxcrypt_open(const char *path, struct fuse_file_info *)
         {
-            if (!TeaSafe_DATA->fileExists(path)) {
+            if (!knoxcrypt_DATA->fileExists(path)) {
                 try {
-                    TeaSafe_DATA->addFile(path);
-                } catch (teasafe::TeaSafeException const &e) {
+                    knoxcrypt_DATA->addFile(path);
+                } catch (knoxcrypt::KnoxCryptException const &e) {
                     return detail::exceptionDispatch(e);
                 }
             }
             try {
-                auto info(TeaSafe_DATA->getInfo(path));
-            } catch (teasafe::TeaSafeException const &e) {
+                auto info(knoxcrypt_DATA->getInfo(path));
+            } catch (knoxcrypt::KnoxCryptException const &e) {
                 return detail::exceptionDispatch(e);
             }
 
@@ -202,9 +202,9 @@ namespace fuselayer
 
         static
         int
-        teasafe_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *)
+        knoxcrypt_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *)
         {
-            auto device(TeaSafe_DATA->openFile(path, teasafe::OpenDisposition::buildReadOnlyDisposition()));
+            auto device(knoxcrypt_DATA->openFile(path, knoxcrypt::OpenDisposition::buildReadOnlyDisposition()));
             device.seek(offset, std::ios_base::beg);
             auto read = device.read(buf,size);
             if(read < 0) {
@@ -215,30 +215,30 @@ namespace fuselayer
 
         static
         int
-        teasafe_write(const char *path, const char *buf, size_t size, off_t offset,
+        knoxcrypt_write(const char *path, const char *buf, size_t size, off_t offset,
                       struct fuse_file_info *fi)
         {
 
-            auto openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
+            auto openMode = knoxcrypt::ReadOrWriteOrBoth::ReadWrite;
             /*
               if((fi->flags & O_RDWR) == O_RDWR) {
-              openMode = teasafe::ReadOrWriteOrBoth::ReadWrite;
+              openMode = knoxcrypt::ReadOrWriteOrBoth::ReadWrite;
               }*/
 
-            auto appendType = teasafe::AppendOrOverwrite::Append;
+            auto appendType = knoxcrypt::AppendOrOverwrite::Append;
 
             if ((fi->flags & O_APPEND) == O_APPEND) {
-                appendType = teasafe::AppendOrOverwrite::Append;
+                appendType = knoxcrypt::AppendOrOverwrite::Append;
             }
 
-            auto truncateType = teasafe::TruncateOrKeep::Keep;
+            auto truncateType = knoxcrypt::TruncateOrKeep::Keep;
 
             if ((fi->flags & O_TRUNC) == O_TRUNC) {
-                truncateType = teasafe::TruncateOrKeep::Truncate;
+                truncateType = knoxcrypt::TruncateOrKeep::Truncate;
             }
-            teasafe::OpenDisposition od(openMode, appendType, teasafe::CreateOrDontCreate::Create, truncateType);
+            knoxcrypt::OpenDisposition od(openMode, appendType, knoxcrypt::CreateOrDontCreate::Create, truncateType);
 
-            auto device(TeaSafe_DATA->openFile(path, od));
+            auto device(knoxcrypt_DATA->openFile(path, od));
             device.seek(offset, std::ios_base::beg);
             auto written = device.write(buf, size);
             if(written < 0) {
@@ -249,24 +249,24 @@ namespace fuselayer
 
 	static
 	int
-	teasafe_access(const char * path, int)
+	knoxcrypt_access(const char * path, int)
 	{ return 0; }
 
         static
         void
-        *teasafe_init(struct fuse_conn_info *)
+        *knoxcrypt_init(struct fuse_conn_info *)
         {
-            return TeaSafe_DATA;
+            return knoxcrypt_DATA;
         }
 
         // create file; comment for git test
         static
         int
-        teasafe_create(const char *path, mode_t, struct fuse_file_info *)
+        knoxcrypt_create(const char *path, mode_t, struct fuse_file_info *)
         {
             try {
-                TeaSafe_DATA->addFile(path);
-            } catch (teasafe::TeaSafeException const &e) {
+                knoxcrypt_DATA->addFile(path);
+            } catch (knoxcrypt::KnoxCryptException const &e) {
                 return detail::exceptionDispatch(e);
             }
             return 0;
@@ -274,11 +274,11 @@ namespace fuselayer
 
         static
         int
-        teasafe_ftruncate(const char *path, off_t offset, struct fuse_file_info *)
+        knoxcrypt_ftruncate(const char *path, off_t offset, struct fuse_file_info *)
         {
             try {
-                TeaSafe_DATA->truncateFile(path, offset);
-            } catch (teasafe::TeaSafeException const &e) {
+                knoxcrypt_DATA->truncateFile(path, offset);
+            } catch (knoxcrypt::KnoxCryptException const &e) {
                 return detail::exceptionDispatch(e);
             }
             return 0;
@@ -288,7 +288,7 @@ namespace fuselayer
         // but I think its called a bunch of times
         static
         int
-        teasafe_opendir(const char *, struct fuse_file_info *)
+        knoxcrypt_opendir(const char *, struct fuse_file_info *)
         {
             return 0;
         }
@@ -297,11 +297,11 @@ namespace fuselayer
         // list the directory contents
         static
         int
-        teasafe_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+        knoxcrypt_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
                         off_t, struct fuse_file_info *)
         {
             try {
-                auto folder(TeaSafe_DATA->getFolder(path));
+                auto folder(knoxcrypt_DATA->getFolder(path));
 
                 auto & infos(folder.listAllEntries());
 
@@ -310,7 +310,7 @@ namespace fuselayer
 
                 for(auto const &it : infos) {
                     struct stat stbuf;
-                    if (it.second->type() == teasafe::EntryType::FileType) {
+                    if (it.second->type() == knoxcrypt::EntryType::FileType) {
                         stbuf.st_mode = S_IFREG | 0755;
                         stbuf.st_nlink = 1;
                         stbuf.st_size = it.second->size();
@@ -322,7 +322,7 @@ namespace fuselayer
                     filler(buf, it.second->filename().c_str(), &stbuf, 0);
 
                 }
-            } catch (teasafe::TeaSafeException const &e) {
+            } catch (knoxcrypt::KnoxCryptException const &e) {
                 return detail::exceptionDispatch(e);
             }
 
@@ -330,13 +330,13 @@ namespace fuselayer
         }
 
         // for getting stats about the overall filesystem
-        // (used when issuing a 'df' command). Note that in TeaSafe,
+        // (used when issuing a 'df' command). Note that in knoxcrypt,
         // the number of inodes corresponds to the number of blocks
         static
         int
-        teasafe_statfs(const char *, struct statvfs *statv)
+        knoxcrypt_statfs(const char *, struct statvfs *statv)
         {
-            TeaSafe_DATA->statvfs(statv);
+            knoxcrypt_DATA->statvfs(statv);
             return 0;
         }
 
@@ -344,7 +344,7 @@ namespace fuselayer
 #ifndef __linux__
         static
         int
-        teasafe_setxattr(const char *,
+        knoxcrypt_setxattr(const char *,
                          const char *,
                          const char *,
                          size_t,
@@ -353,7 +353,7 @@ namespace fuselayer
 #else
             static
             int
-            teasafe_setxattr(const char *,
+            knoxcrypt_setxattr(const char *,
                              const char *,
                              const char *,
                              size_t,
@@ -367,7 +367,7 @@ namespace fuselayer
         // not presently required
         static
         int
-        teasafe_flush(const char *, struct fuse_file_info *)
+        knoxcrypt_flush(const char *, struct fuse_file_info *)
         {
             return 0;
         }
@@ -376,7 +376,7 @@ namespace fuselayer
         // not presently required
         static
         int
-        teasafe_chmod(const char *, mode_t)
+        knoxcrypt_chmod(const char *, mode_t)
         {
             return 0;
         }
@@ -385,14 +385,14 @@ namespace fuselayer
         // not presently required
         static
         int
-        teasafe_chown(const char *, uid_t, gid_t)
+        knoxcrypt_chown(const char *, uid_t, gid_t)
         {
             return 0;
         }
 
         static
         int
-        teasafe_utimens(const char *, const struct timespec *)
+        knoxcrypt_utimens(const char *, const struct timespec *)
         {
             return 0;
         }
@@ -403,7 +403,7 @@ namespace fuselayer
 
 // to shut-up 'function not implemented warnings'
 // not presently required
-static struct fuse_operations teasafe_oper;
+static struct fuse_operations knoxcrypt_oper;
 
 /**
  * @brief initialize the fuse operations struct
@@ -411,27 +411,27 @@ static struct fuse_operations teasafe_oper;
  */
 void initOperations(struct fuse_operations &ops, fuselayer::FuseLayer &fuseLayer)
 {
-    ops.mkdir     = fuseLayer.teasafe_mkdir;
-    ops.unlink    = fuseLayer.teasafe_unlink;
-    ops.rmdir     = fuseLayer.teasafe_rmdir;
-    ops.truncate  = fuseLayer.teasafe_truncate;
-    ops.open      = fuseLayer.teasafe_open;
-    ops.read      = fuseLayer.teasafe_read;
-    ops.write     = fuseLayer.teasafe_write;
-    ops.create    = fuseLayer.teasafe_create;
-    ops.ftruncate = fuseLayer.teasafe_ftruncate;
-    ops.opendir   = fuseLayer.teasafe_opendir;
-    ops.init      = fuseLayer.teasafe_init;
-    ops.readdir   = fuseLayer.teasafe_readdir;
-    ops.getattr   = fuseLayer.teasafe_getattr;
-    ops.rename    = fuseLayer.teasafe_rename;
-    ops.statfs    = fuseLayer.teasafe_statfs;
-    ops.setxattr  = fuseLayer.teasafe_setxattr;
-    ops.flush     = fuseLayer.teasafe_flush;
-    ops.chmod     = fuseLayer.teasafe_chmod;
-    ops.chown     = fuseLayer.teasafe_chown;
-    ops.utimens   = fuseLayer.teasafe_utimens;
-    ops.access    = fuseLayer.teasafe_access;
+    ops.mkdir     = fuseLayer.knoxcrypt_mkdir;
+    ops.unlink    = fuseLayer.knoxcrypt_unlink;
+    ops.rmdir     = fuseLayer.knoxcrypt_rmdir;
+    ops.truncate  = fuseLayer.knoxcrypt_truncate;
+    ops.open      = fuseLayer.knoxcrypt_open;
+    ops.read      = fuseLayer.knoxcrypt_read;
+    ops.write     = fuseLayer.knoxcrypt_write;
+    ops.create    = fuseLayer.knoxcrypt_create;
+    ops.ftruncate = fuseLayer.knoxcrypt_ftruncate;
+    ops.opendir   = fuseLayer.knoxcrypt_opendir;
+    ops.init      = fuseLayer.knoxcrypt_init;
+    ops.readdir   = fuseLayer.knoxcrypt_readdir;
+    ops.getattr   = fuseLayer.knoxcrypt_getattr;
+    ops.rename    = fuseLayer.knoxcrypt_rename;
+    ops.statfs    = fuseLayer.knoxcrypt_statfs;
+    ops.setxattr  = fuseLayer.knoxcrypt_setxattr;
+    ops.flush     = fuseLayer.knoxcrypt_flush;
+    ops.chmod     = fuseLayer.knoxcrypt_chmod;
+    ops.chown     = fuseLayer.knoxcrypt_chown;
+    ops.utimens   = fuseLayer.knoxcrypt_utimens;
+    ops.access    = fuseLayer.knoxcrypt_access;
 }
 
 int main(int argc, char *argv[])
@@ -444,7 +444,7 @@ int main(int argc, char *argv[])
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
-        ("imageName", po::value<std::string>(), "teasafe image path")
+        ("imageName", po::value<std::string>(), "knoxcrypt image path")
         ("mountPoint", po::value<std::string>(), "mountPoint path")
         ("debug", po::value<bool>(&debug)->default_value(true), "fuse debug")
         ("coffee", po::value<bool>(&magic)->default_value(false), "mount alternative sub-volume")
@@ -482,52 +482,52 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Setup a core teasafe io object which stores highlevel info about accessing
-    // the TeaSafe image
-    teasafe::SharedCoreIO io(std::make_shared<teasafe::CoreTeaSafeIO>());
+    // Setup a core knoxcrypt io object which stores highlevel info about accessing
+    // the knoxcrypt image
+    knoxcrypt::SharedCoreIO io(std::make_shared<knoxcrypt::CoreKnoxCryptIO>());
     io->useBlockCache = true;
     io->path = vm["imageName"].as<std::string>().c_str();
-    io->encProps.password = teasafe::utility::getPassword("teasafe password: ");
-    io->rootBlock = magic ? atoi(teasafe::utility::getPassword("magic number: ").c_str()) : 0;
+    io->encProps.password = knoxcrypt::utility::getPassword("knoxcrypt password: ");
+    io->rootBlock = magic ? atoi(knoxcrypt::utility::getPassword("magic number: ").c_str()) : 0;
 
     // Obtain the initialization vector from the first 8 bytes
     // and the number of xtea rounds from the ninth byte
     // and the cipher type from the tenth byte
-    teasafe::detail::readImageIVAndRounds(io);
+    knoxcrypt::detail::readImageIVAndRounds(io);
 
     // Obtain the number of blocks in the image by reading the image's block count
-    long const amount = teasafe::detail::CIPHER_BUFFER_SIZE / 100000;
-    std::function<void(teasafe::EventType)> f(std::bind(&teasafe::cipherCallback, std::placeholders::_1, amount));
+    long const amount = knoxcrypt::detail::CIPHER_BUFFER_SIZE / 100000;
+    std::function<void(knoxcrypt::EventType)> f(std::bind(&knoxcrypt::cipherCallback, std::placeholders::_1, amount));
     io->ccb = f;
-    teasafe::ContainerImageStream stream(io, std::ios::in | std::ios::binary);
+    knoxcrypt::ContainerImageStream stream(io, std::ios::in | std::ios::binary);
 
     // compare password hashes
     uint8_t hashRecovered[32];
-    teasafe::detail::getPassHash(stream, hashRecovered);
+    knoxcrypt::detail::getPassHash(stream, hashRecovered);
     uint8_t hashEntered[32];
-    teasafe::utility::sha256((char*)io->encProps.password.c_str(), hashEntered);
-    if(!teasafe::utility::compareTwoHashes(hashEntered, hashRecovered)) {
+    knoxcrypt::utility::sha256((char*)io->encProps.password.c_str(), hashEntered);
+    if(!knoxcrypt::utility::compareTwoHashes(hashEntered, hashRecovered)) {
         std::cout<<"Incorrect password"<<std::endl;
         exit(0);
     }
 
 
-    io->blocks = teasafe::detail::getBlockCount(stream);
+    io->blocks = knoxcrypt::detail::getBlockCount(stream);
 
     printf("Counting allocated blocks. Please wait...\n");
 
-    io->freeBlocks = io->blocks - teasafe::detail::getNumberOfAllocatedBlocks(stream);
-    io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(io);
+    io->freeBlocks = io->blocks - knoxcrypt::detail::getNumberOfAllocatedBlocks(stream);
+    io->blockBuilder = std::make_shared<knoxcrypt::FileBlockBuilder>(io);
 
     printf("Finished counting allocated blocks.\n");
 
     stream.close();
 
     // Create the basic file system
-    teasafe::TeaSafe theBfs(io);
+    knoxcrypt::KnoxCrypt theBfs(io);
 
     // make arguments fuse-compatible
-    char      arg0[] = "teasafe";
+    char      arg0[] = "knoxcrypt";
     char* arg1 = (char*)vm["mountPoint"].as<std::string>().c_str();
     char      arg2[] = "-s";
     char      arg3[] = "-d";
@@ -547,9 +547,9 @@ int main(int argc, char *argv[])
 
     // initializse fuse_operations
     fuselayer::FuseLayer fuseLayer;
-    initOperations(teasafe_oper, fuseLayer);
+    initOperations(knoxcrypt_oper, fuseLayer);
 
-    int fuse_stat = fuse_main(fuseArgCount, fuseArgs, &teasafe_oper, &theBfs);
+    int fuse_stat = fuse_main(fuseArgCount, fuseArgs, &knoxcrypt_oper, &theBfs);
     fprintf(stderr, "fuse_main returned %d\n", fuse_stat);
 
     return fuse_stat;

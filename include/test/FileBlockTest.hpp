@@ -26,15 +26,15 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "teasafe/ContainerImageStream.hpp"
-#include "teasafe/FileBlock.hpp"
-#include "teasafe/FileBlockException.hpp"
-#include "teasafe/OpenDisposition.hpp"
-#include "teasafe/detail/DetailTeaSafe.hpp"
-#include "teasafe/detail/DetailFileBlock.hpp"
+#include "knoxcrypt/ContainerImageStream.hpp"
+#include "knoxcrypt/FileBlock.hpp"
+#include "knoxcrypt/FileBlockException.hpp"
+#include "knoxcrypt/OpenDisposition.hpp"
+#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
+#include "knoxcrypt/detail/DetailFileBlock.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
-#include "utility/MakeTeaSafe.hpp"
+#include "utility/Makeknoxcrypt.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -73,23 +73,23 @@ class FileBlockTest
         long const blocks = 2048;
         boost::filesystem::path testPath = buildImage(m_uniquePath);
 
-        teasafe::SharedCoreIO io(createTestIO(testPath));
+        knoxcrypt::SharedCoreIO io(createTestIO(testPath));
 
-        teasafe::FileBlock block(io, uint64_t(0), uint64_t(0),
-                                 teasafe::OpenDisposition::buildAppendDisposition());
+        knoxcrypt::FileBlock block(io, uint64_t(0), uint64_t(0),
+                                 knoxcrypt::OpenDisposition::buildAppendDisposition());
         std::string testData("Hello, world!Hello, world!");
         std::vector<uint8_t> vec(testData.begin(), testData.end());
         block.write((char*)&vec.front(), testData.length());
 
         // test that actual written correct
         assert(block.getDataBytesWritten() == 26);
-        teasafe::ContainerImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t size = teasafe::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
+        knoxcrypt::ContainerImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
+        uint64_t size = knoxcrypt::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
         ASSERT_EQUAL(size, 26, "FileBlockTest::blockWriteAndReadTest(): correctly returned block size");
 
         // test that reported next index correct
         assert(block.getNextIndex() == 0);
-        uint64_t next = teasafe::detail::getIndexOfNextFileBlockFromFileBlockN(stream, 0, blocks);
+        uint64_t next = knoxcrypt::detail::getIndexOfNextFileBlockFromFileBlockN(stream, 0, blocks);
         stream.close();
         ASSERT_EQUAL(next, 0, "FileBlockTest::blockWriteAndReadTest(): correct block index");
 
@@ -108,17 +108,17 @@ class FileBlockTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::FileBlock block(io, uint64_t(0), uint64_t(0),
-                                     teasafe::OpenDisposition::buildReadOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::FileBlock block(io, uint64_t(0), uint64_t(0),
+                                     knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::string testData("Hello, world!Hello, world!");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             bool pass = false;
             // assert correct exception was thrown
             try {
                 block.write((char*)&vec.front(), testData.length());
-            } catch (teasafe::FileBlockException const &e) {
-                ASSERT_EQUAL(e, teasafe::FileBlockException(teasafe::FileBlockError::NotWritable), "FileBlockTest::testWritingToNonWritableThrows() A");
+            } catch (knoxcrypt::FileBlockException const &e) {
+                ASSERT_EQUAL(e, knoxcrypt::FileBlockException(knoxcrypt::FileBlockError::NotWritable), "FileBlockTest::testWritingToNonWritableThrows() A");
                 pass = true;
             }
             // assert that any exception was thrown
@@ -131,25 +131,25 @@ class FileBlockTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
 
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::FileBlock block(io, uint64_t(0), uint64_t(0),
-                                     teasafe::OpenDisposition::buildWriteOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::FileBlock block(io, uint64_t(0), uint64_t(0),
+                                     knoxcrypt::OpenDisposition::buildWriteOnlyDisposition());
             std::string testData("Hello, world!Hello, world!");
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             block.write((char*)&vec.front(), testData.length());
         }
 
         {
-            teasafe::SharedCoreIO io(createTestIO(testPath));
-            teasafe::FileBlock block(io, uint64_t(0),
-                                     teasafe::OpenDisposition::buildWriteOnlyDisposition());
+            knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+            knoxcrypt::FileBlock block(io, uint64_t(0),
+                                     knoxcrypt::OpenDisposition::buildWriteOnlyDisposition());
             std::vector<uint8_t> vec(block.getInitialDataBytesWritten());
             // assert correct exception was thrown
             bool pass = false;
             try {
                 block.read((char*)&vec.front(), block.getInitialDataBytesWritten());
-            } catch (teasafe::FileBlockException const &e) {
-                ASSERT_EQUAL(e, teasafe::FileBlockException(teasafe::FileBlockError::NotReadable), "FileBlockTest::testReadingFromNonReadableThrows() A");
+            } catch (knoxcrypt::FileBlockException const &e) {
+                ASSERT_EQUAL(e, knoxcrypt::FileBlockException(knoxcrypt::FileBlockError::NotReadable), "FileBlockTest::testReadingFromNonReadableThrows() A");
                 pass = true;
             }
             // assert that any exception was thrown

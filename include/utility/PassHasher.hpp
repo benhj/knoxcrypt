@@ -32,7 +32,7 @@
 #include "cryptopp/sha.h"
 #include <string>
 
-namespace teasafe { namespace utility {
+namespace knoxcrypt { namespace utility {
 
     inline void sha256(std::string const &toHash, uint8_t hash[32])
     {

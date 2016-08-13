@@ -29,9 +29,9 @@
 
 
 #include "LoaderThread.h"
-#include "teasafe/FileBlockBuilder.hpp"
-#include "teasafe/ContainerImageStream.hpp"
-#include "teasafe/detail/DetailTeaSafe.hpp"
+#include "knoxcrypt/FileBlockBuilder.hpp"
+#include "knoxcrypt/ContainerImageStream.hpp"
+#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
 
 #include <memory>
 
@@ -43,17 +43,17 @@ LoaderThread::LoaderThread(QObject *parent) :
 
 }
 
-void LoaderThread::setSharedIO(teasafe::SharedCoreIO const &io)
+void LoaderThread::setSharedIO(knoxcrypt::SharedCoreIO const &io)
 {
     TeaLock lock(m_teaMutex);
     m_io = io;
 }
 
-SharedTeaSafe LoaderThread::getTeaSafe()
+Sharedknoxcrypt LoaderThread::getknoxcrypt()
 {
     TeaLock lock(m_teaMutex);
-    assert(m_teaSafe);
-    return m_teaSafe;
+    assert(m_knoxcrypt);
+    return m_knoxcrypt;
 }
 
 void LoaderThread::loadTSImage()
@@ -61,17 +61,17 @@ void LoaderThread::loadTSImage()
     TeaLock lock(m_teaMutex);
     // Obtain the initialization vector from the first 8 bytes
     // and the number of xtea rounds from the ninth byte
-    teasafe::detail::readImageIVAndRounds(m_io);
+    knoxcrypt::detail::readImageIVAndRounds(m_io);
 
     // Obtain the number of blocks in the image by reading the image's block count
-    teasafe::ContainerImageStream stream(m_io, std::ios::in | std::ios::binary);
-    m_io->blocks = teasafe::detail::getBlockCount(stream);
-    m_io->freeBlocks = m_io->blocks - teasafe::detail::getNumberOfAllocatedBlocks(stream);
-    m_io->blockBuilder = std::make_shared<teasafe::FileBlockBuilder>(m_io);
+    knoxcrypt::ContainerImageStream stream(m_io, std::ios::in | std::ios::binary);
+    m_io->blocks = knoxcrypt::detail::getBlockCount(stream);
+    m_io->freeBlocks = m_io->blocks - knoxcrypt::detail::getNumberOfAllocatedBlocks(stream);
+    m_io->blockBuilder = std::make_shared<knoxcrypt::FileBlockBuilder>(m_io);
     stream.close();
 
     // Create the basic file system
-    m_teaSafe = std::make_shared<teasafe::TeaSafe>(m_io);
+    m_knoxcrypt = std::make_shared<knoxcrypt::knoxcrypt>(m_io);
 
     emit finishedLoadingSignal();
 }

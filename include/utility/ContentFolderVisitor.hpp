@@ -30,10 +30,10 @@
 
 #pragma once
 
-#include "teasafe/EntryInfo.hpp"
+#include "knoxcrypt/EntryInfo.hpp"
 
 
-namespace teasafe
+namespace knoxcrypt
 {
 
     namespace utility

@@ -29,7 +29,7 @@
 #ifndef EXTRACTORTHREAD_H
 #define EXTRACTORTHREAD_H
 
-#include "teasafe/TeaSafe.hpp"
+#include "knoxcrypt/knoxcrypt.hpp"
 #include "utility/ConcurrentQueue.hpp"
 
 #include <QThread>
@@ -42,7 +42,7 @@ class WorkThread : public QThread
   public:
 
     typedef std::function<void()> WorkFunction;
-    typedef teasafe::utility::ConcurrentQueue<WorkFunction> WorkQueue;
+    typedef knoxcrypt::utility::ConcurrentQueue<WorkFunction> WorkQueue;
 
     explicit WorkThread(QObject *parent = 0);
     ~WorkThread();

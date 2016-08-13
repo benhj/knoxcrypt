@@ -26,11 +26,11 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/// Copies a file or folder from a physical location to a parent teasafe location
+/// Copies a file or folder from a physical location to a parent knoxcrypt location
 
 #pragma once
 
-#include "teasafe/TeaSafe.hpp"
+#include "knoxcrypt/KnoxCrypt.hpp"
 #include "utility/RecursiveFolderAdder.hpp"
 
 #include <boost/filesystem/operations.hpp>
@@ -38,14 +38,14 @@
 #include <boost/iostreams/copy.hpp>
 #include <functional>
 
-namespace teasafe
+namespace knoxcrypt
 {
 
     namespace utility
     {
 
         inline
-        void copyFromPhysical(teasafe::TeaSafe &theBfs,
+        void copyFromPhysical(knoxcrypt::KnoxCrypt &theBfs,
                               std::string const &teaPath,
                               std::string const &fsPath,
                               std::function<void(std::string)> const &callback)
@@ -72,7 +72,7 @@ namespace teasafe
                 theBfs.addFile(addPath);
                 // create a stream to read resource from and a device to write to
                 std::ifstream in(fsPath.c_str(), std::ios_base::binary);
-                teasafe::FileDevice device = theBfs.openFile(addPath, teasafe::OpenDisposition::buildWriteOnlyDisposition());
+                knoxcrypt::FileDevice device = theBfs.openFile(addPath, knoxcrypt::OpenDisposition::buildWriteOnlyDisposition());
                 boost::iostreams::copy(in, device);
             }
         }
