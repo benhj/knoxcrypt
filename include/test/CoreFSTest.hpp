@@ -27,8 +27,8 @@
 */
 
 #include "knoxcrypt/CompoundFolder.hpp"
-#include "knoxcrypt/CoreknoxcryptIO.hpp"
-#include "knoxcrypt/knoxCrypt.hpp"
+#include "knoxcrypt/CoreIO.hpp"
+#include "knoxcrypt/CoreFS.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
 
@@ -40,10 +40,10 @@
 
 using namespace simpletest;
 
-class KnoxCryptTest
+class CoreFSTest
 {
   public:
-    KnoxCryptTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
+    CoreFSTest() : m_uniquePath(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
     {
         boost::filesystem::create_directories(m_uniquePath);
         testFileExists();
@@ -71,7 +71,7 @@ class KnoxCryptTest
         //testDebugging();
     }
 
-    ~KnoxCryptTest()
+    ~CoreFSTest()
     {
         boost::filesystem::remove_all(m_uniquePath);
     }
@@ -117,13 +117,13 @@ class KnoxCryptTest
         }
 
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
 
         std::string testPositive("/folderA/subFolderA/subFolderC/finalFile.txt");
         std::string testNegative("/folderA/hello.log");
 
-        ASSERT_EQUAL(true, kc.fileExists(testPositive), "KnoxCryptTest::testFileExists() positive case");
-        ASSERT_EQUAL(false, kc.fileExists(testNegative), "KnoxCryptTest::testFileExists() negative case");
+        ASSERT_EQUAL(true, kc.fileExists(testPositive), "CoreFSTest::testFileExists() positive case");
+        ASSERT_EQUAL(false, kc.fileExists(testNegative), "CoreFSTest::testFileExists() negative case");
     }
 
     void testFolderExists()
@@ -133,13 +133,13 @@ class KnoxCryptTest
             (void)createTestFolder(testPath);
         }
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
 
         std::string testPositive("/folderA/subFolderA/");
         std::string testNegative("/folderA/subFolderA/subFolderX");
 
-        ASSERT_EQUAL(true, kc.folderExists(testPositive), "KnoxCryptTest::testFolderExists() positive case");
-        ASSERT_EQUAL(false, kc.folderExists(testNegative), "KnoxCryptTest::testFolderExists() negative case");
+        ASSERT_EQUAL(true, kc.folderExists(testPositive), "CoreFSTest::testFolderExists() positive case");
+        ASSERT_EQUAL(false, kc.folderExists(testNegative), "CoreFSTest::testFolderExists() negative case");
     }
 
     void testAddFile()
@@ -148,7 +148,7 @@ class KnoxCryptTest
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
 
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
 
         kc.addFile("/folderA/subFolderA/subFolderC/testAdded.txt");
 
@@ -156,9 +156,9 @@ class KnoxCryptTest
 
         knoxcrypt::SharedEntryInfo entryInfo = parent.getEntryInfo("testAdded.txt");
         bool good = entryInfo ? true : false;
-        ASSERT_EQUAL(true, good, "KnoxCryptTest::testAddFile() getting info");
-        ASSERT_EQUAL(knoxcrypt::EntryType::FileType, entryInfo->type(), "KnoxCryptTest::testAddFile() info type");
-        ASSERT_EQUAL("testAdded.txt", entryInfo->filename(), "KnoxCryptTest::testAddFile() info name");
+        ASSERT_EQUAL(true, good, "CoreFSTest::testAddFile() getting info");
+        ASSERT_EQUAL(knoxcrypt::EntryType::FileType, entryInfo->type(), "CoreFSTest::testAddFile() info type");
+        ASSERT_EQUAL("testAdded.txt", entryInfo->filename(), "CoreFSTest::testAddFile() info name");
     }
 
     void testAddCompoundFolder()
@@ -167,15 +167,15 @@ class KnoxCryptTest
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
 
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
 
         kc.addFolder("/folderA/subFolderA/subFolderC/testAdded");
         knoxcrypt::CompoundFolder parent = *root.getFolder("folderA")->getFolder("subFolderA")->getFolder("subFolderC");
         knoxcrypt::SharedEntryInfo entryInfo = parent.getEntryInfo("testAdded");
         bool good = entryInfo ? true : false;
-        ASSERT_EQUAL(true, good, "KnoxCryptTest::testAddCompoundFolder() getting info");
-        ASSERT_EQUAL(knoxcrypt::EntryType::FolderType, entryInfo->type(), "KnoxCryptTest::testAddCompoundFolder() info type");
-        ASSERT_EQUAL("testAdded", entryInfo->filename(), "KnoxCryptTest::testAddCompoundFolder() info name");
+        ASSERT_EQUAL(true, good, "CoreFSTest::testAddCompoundFolder() getting info");
+        ASSERT_EQUAL(knoxcrypt::EntryType::FolderType, entryInfo->type(), "CoreFSTest::testAddCompoundFolder() info type");
+        ASSERT_EQUAL("testAdded", entryInfo->filename(), "CoreFSTest::testAddCompoundFolder() info name");
     }
 
     void testAddFileThrowsIfParentNotFound()
@@ -184,7 +184,7 @@ class KnoxCryptTest
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
 
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
 
         bool caught = false;
         try {
@@ -192,9 +192,9 @@ class KnoxCryptTest
         } catch (knoxcrypt::KnoxCryptException const &e) {
             caught = true;
             ASSERT_EQUAL(knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::NotFound), e,
-                         "KnoxCryptTest::testAddFileThrowIfParentNotFound() asserting error type");
+                         "CoreFSTest::testAddFileThrowIfParentNotFound() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "KnoxCryptTest::testAddFileThrowIfParentNotFound() caught");
+        ASSERT_EQUAL(true, caught, "CoreFSTest::testAddFileThrowIfParentNotFound() caught");
     }
 
     void testAddFolderThrowsIfParentNotFound()
@@ -203,7 +203,7 @@ class KnoxCryptTest
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
 
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
 
         bool caught = false;
         try {
@@ -211,9 +211,9 @@ class KnoxCryptTest
         } catch (knoxcrypt::KnoxCryptException const &e) {
             caught = true;
             ASSERT_EQUAL(knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::NotFound), e,
-                         "KnoxCryptTest::testAddFolderThrowsIfParentNotFound() asserting error type");
+                         "CoreFSTest::testAddFolderThrowsIfParentNotFound() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "KnoxCryptTest::testAddFolderThrowsIfParentNotFound() caught");
+        ASSERT_EQUAL(true, caught, "CoreFSTest::testAddFolderThrowsIfParentNotFound() caught");
     }
 
     void testAddFileThrowsIfAlreadyExists()
@@ -222,7 +222,7 @@ class KnoxCryptTest
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
 
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
 
         bool caught = false;
         try {
@@ -230,9 +230,9 @@ class KnoxCryptTest
         } catch (knoxcrypt::KnoxCryptException const &e) {
             caught = true;
             ASSERT_EQUAL(knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::AlreadyExists), e,
-                         "KnoxCryptTest::testAddFileThrowsIfAlreadyExists() asserting error type");
+                         "CoreFSTest::testAddFileThrowsIfAlreadyExists() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "KnoxCryptTest::testAddFileThrowsIfAlreadyExists() caught");
+        ASSERT_EQUAL(true, caught, "CoreFSTest::testAddFileThrowsIfAlreadyExists() caught");
     }
 
     void testAddFolderThrowsIfAlreadyExists()
@@ -241,7 +241,7 @@ class KnoxCryptTest
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
 
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
 
         bool caught = false;
         try {
@@ -249,9 +249,9 @@ class KnoxCryptTest
         } catch (knoxcrypt::KnoxCryptException const &e) {
             caught = true;
             ASSERT_EQUAL(knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::AlreadyExists), e,
-                         "KnoxCryptTest::testAddFolderThrowsIfAlreadyExists() asserting error type");
+                         "CoreFSTest::testAddFolderThrowsIfAlreadyExists() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "KnoxCryptTest::testAddFolderThrowsIfAlreadyExists() caught");
+        ASSERT_EQUAL(true, caught, "CoreFSTest::testAddFolderThrowsIfAlreadyExists() caught");
     }
 
     void testRemoveFile()
@@ -260,14 +260,14 @@ class KnoxCryptTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         kc.removeFile("/folderA/subFolderA/subFolderC/finalFile.txt");
         knoxcrypt::SharedEntryInfo info = root.getFolder("folderA")
             ->getFolder("subFolderA")
             ->getFolder("subFolderC")
             ->getEntryInfo("finalFile.txt");
         bool exists = info ? true : false;
-        ASSERT_EQUAL(false, exists, "KnoxCryptTest::testRemoveFile()");
+        ASSERT_EQUAL(false, exists, "CoreFSTest::testRemoveFile()");
     }
 
     void testRemoveFileThrowsIfBadParent()
@@ -276,16 +276,16 @@ class KnoxCryptTest
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
 
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         bool caught = false;
         try {
             kc.removeFile("/folderA/subFolderA/subFolderX/finalFile.txt");
         } catch (knoxcrypt::KnoxCryptException const &e) {
             caught = true;
             ASSERT_EQUAL(knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::NotFound), e,
-                         "KnoxCryptTest::testRemoveFileThrowsIfBadParent() asserting error type");
+                         "CoreFSTest::testRemoveFileThrowsIfBadParent() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "KnoxCryptTest::testRemoveFileThrowsIfBadParent() caught");
+        ASSERT_EQUAL(true, caught, "CoreFSTest::testRemoveFileThrowsIfBadParent() caught");
     }
 
     void testRemoveFileThrowsIfNotFound()
@@ -294,16 +294,16 @@ class KnoxCryptTest
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
 
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         bool caught = false;
         try {
             kc.removeFile("/folderA/subFolderA/subFolderC/finalFileB.txt");
         } catch (knoxcrypt::KnoxCryptException const &e) {
             caught = true;
             ASSERT_EQUAL(knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::NotFound), e,
-                         "KnoxCryptTest::testRemoveFileThrowsIfNotFound() asserting error type");
+                         "CoreFSTest::testRemoveFileThrowsIfNotFound() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "KnoxCryptTest::testRemoveFileThrowsIfNotFound() caught");
+        ASSERT_EQUAL(true, caught, "CoreFSTest::testRemoveFileThrowsIfNotFound() caught");
     }
 
     void testRemoveFileThrowsIfFolder()
@@ -312,16 +312,16 @@ class KnoxCryptTest
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
 
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         bool caught = false;
         try {
             kc.removeFile("/folderA/subFolderA/subFolderC/finalFolder");
         } catch (knoxcrypt::KnoxCryptException const &e) {
             caught = true;
             ASSERT_EQUAL(knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::NotFound), e,
-                         "KnoxCryptTest::testRemoveFileThrowsIfFolder() asserting error type");
+                         "CoreFSTest::testRemoveFileThrowsIfFolder() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "KnoxCryptTest::testRemoveFileThrowsIfFolder() caught");
+        ASSERT_EQUAL(true, caught, "CoreFSTest::testRemoveFileThrowsIfFolder() caught");
     }
 
     void testRemoveEmptyFolder()
@@ -329,7 +329,7 @@ class KnoxCryptTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         kc.removeFolder("/folderA/subFolderA/subFolderC/finalFolder",
                                 knoxcrypt::FolderRemovalType::MustBeEmpty);
 
@@ -339,7 +339,7 @@ class KnoxCryptTest
             ->getFolder("subFolderC")
             ->getEntryInfo("finalFolder");
         bool exists = info ? true : false;
-        ASSERT_EQUAL(false, exists, "KnoxCryptTest::testRemoveEmptyFolder()");
+        ASSERT_EQUAL(false, exists, "CoreFSTest::testRemoveEmptyFolder()");
     }
 
     void testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty()
@@ -347,7 +347,7 @@ class KnoxCryptTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         bool caught = false;
         try {
             kc.removeFolder("/folderA/subFolderA/",
@@ -355,9 +355,9 @@ class KnoxCryptTest
         } catch (knoxcrypt::KnoxCryptException const &e) {
             caught = true;
             ASSERT_EQUAL(knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::FolderNotEmpty), e,
-                         "KnoxCryptTest::testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty() asserting error type");
+                         "CoreFSTest::testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "KnoxCryptTest::testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty() caught");
+        ASSERT_EQUAL(true, caught, "CoreFSTest::testRemoveFolderWithMustBeEmptyThrowsIfNonEmpty() caught");
     }
 
     void testRemoveNonEmptyFolder()
@@ -365,12 +365,12 @@ class KnoxCryptTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         kc.removeFolder("/folderA/subFolderA/",
                                 knoxcrypt::FolderRemovalType::Recursive);
         knoxcrypt::SharedEntryInfo info = root.getFolder("folderA")->getEntryInfo("subFolderA");
         bool exists = info ? true : false;
-        ASSERT_EQUAL(false, exists, "KnoxCryptTest::testRemoveNonEmptyFolder()");
+        ASSERT_EQUAL(false, exists, "CoreFSTest::testRemoveNonEmptyFolder()");
     }
 
     void testRemoveNonExistingFolderThrows()
@@ -378,7 +378,7 @@ class KnoxCryptTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         bool caught = false;
         try {
             kc.removeFolder("/folderA/subFolderQ/",
@@ -386,9 +386,9 @@ class KnoxCryptTest
         } catch (knoxcrypt::KnoxCryptException const &e) {
             caught = true;
             ASSERT_EQUAL(knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::NotFound), e,
-                         "KnoxCryptTest::testRemoveNonExistingFolderThrows() asserting error type");
+                         "CoreFSTest::testRemoveNonExistingFolderThrows() asserting error type");
         }
-        ASSERT_EQUAL(true, caught, "KnoxCryptTest::testRemoveNonExistingFolderThrows() caught");
+        ASSERT_EQUAL(true, caught, "CoreFSTest::testRemoveNonExistingFolderThrows() caught");
     }
 
     void testWriteToStream()
@@ -396,7 +396,7 @@ class KnoxCryptTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::CompoundFolder root = createTestFolder(testPath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
 
         // open file and append to end of it
         std::string const &testString(createLargeStringToWrite());
@@ -405,26 +405,26 @@ class KnoxCryptTest
                                                                 knoxcrypt::OpenDisposition::buildAppendDisposition());
 
         std::streampos wrote = device.write(testString.c_str(), testString.length());
-        ASSERT_EQUAL(static_cast<size_t>(wrote), testString.length(), "KnoxCryptTest::testWriteToStream() bytesWrote");
+        ASSERT_EQUAL(static_cast<size_t>(wrote), testString.length(), "CoreFSTest::testWriteToStream() bytesWrote");
         (void)device.seek(0, std::ios_base::beg);
 
         // check content
         std::vector<uint8_t> buffer;
         buffer.resize(testString.length());
         std::streampos bytesRead = device.read((char*)&buffer.front(), testString.length());
-        ASSERT_EQUAL(testString.length(), static_cast<size_t>(bytesRead), "KnoxCryptTest::testWriteToStream() bytesRead");
+        ASSERT_EQUAL(testString.length(), static_cast<size_t>(bytesRead), "CoreFSTest::testWriteToStream() bytesRead");
         std::string recovered(buffer.begin(), buffer.end());
-        ASSERT_EQUAL(testString, recovered, "KnoxCryptTest::testWriteToStream() content");
+        ASSERT_EQUAL(testString, recovered, "CoreFSTest::testWriteToStream() content");
     }
 
     void testListAllEntriesEmpty()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         knoxcrypt::CompoundFolder fe = kc.getFolder("/");
         auto infos = fe.listAllEntries();
-        ASSERT_EQUAL(infos.empty(), true, "KnoxCryptTest::testListAllEntriesEmpty()");
+        ASSERT_EQUAL(infos.empty(), true, "CoreFSTest::testListAllEntriesEmpty()");
     }
 
     void testMoveFileSameFolder()
@@ -432,10 +432,10 @@ class KnoxCryptTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         (void)createTestFolder(testPath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         kc.renameEntry("/folderA/fileA", "/folderA/renamed.txt");
-        ASSERT_EQUAL(false, kc.fileExists("/folderA/fileA"), "KnoxCryptTest::testMoveFileSameFolder() original removed");
-        ASSERT_EQUAL(true, kc.fileExists("/folderA/renamed.txt"), "KnoxCryptTest::testMoveFileSameFolder() new version");
+        ASSERT_EQUAL(false, kc.fileExists("/folderA/fileA"), "CoreFSTest::testMoveFileSameFolder() original removed");
+        ASSERT_EQUAL(true, kc.fileExists("/folderA/renamed.txt"), "CoreFSTest::testMoveFileSameFolder() new version");
     }
 
     void testMoveFileToSubFolder()
@@ -443,10 +443,10 @@ class KnoxCryptTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         (void)createTestFolder(testPath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         kc.renameEntry("/folderA/fileA", "/folderA/subFolderA/renamed.txt");
-        ASSERT_EQUAL(false, kc.fileExists("/folderA/fileA"), "KnoxCryptTest::testMoveFileToSubFolderFolder() original removed");
-        ASSERT_EQUAL(true, kc.fileExists("/folderA/subFolderA/renamed.txt"), "KnoxCryptTest::testMoveFileToSubFolderFolder() new version");
+        ASSERT_EQUAL(false, kc.fileExists("/folderA/fileA"), "CoreFSTest::testMoveFileToSubFolderFolder() original removed");
+        ASSERT_EQUAL(true, kc.fileExists("/folderA/subFolderA/renamed.txt"), "CoreFSTest::testMoveFileToSubFolderFolder() new version");
     }
 
     void testMoveFileFromSubFolderToParentFolder()
@@ -454,10 +454,10 @@ class KnoxCryptTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         (void)createTestFolder(testPath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         kc.renameEntry("/folderA/subFolderA/fileX", "/folderA/renamed.txt");
-        ASSERT_EQUAL(false, kc.fileExists("/folderA/subFolderA/fileX"), "KnoxCryptTest::testMoveFileToSubFolderFolder() original removed");
-        ASSERT_EQUAL(true, kc.fileExists("/folderA/renamed.txt"), "KnoxCryptTest::testMoveFileToSubFolderFolder() new version");
+        ASSERT_EQUAL(false, kc.fileExists("/folderA/subFolderA/fileX"), "CoreFSTest::testMoveFileToSubFolderFolder() original removed");
+        ASSERT_EQUAL(true, kc.fileExists("/folderA/renamed.txt"), "CoreFSTest::testMoveFileToSubFolderFolder() new version");
     }
 
     // checks that exactly the same blocks are allocated for content that is removed
@@ -470,7 +470,7 @@ class KnoxCryptTest
             (void)createTestFolder(testPath);
         }
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
 
         // open file and append to end of it
         std::string const &testString(createLargeStringToWrite());
@@ -514,7 +514,7 @@ class KnoxCryptTest
                 }
             }
             ASSERT_EQUAL(true, blockCheckPassed,
-                         "KnoxCryptTest::testThatDeletingEverythingDeallocatesEverything() blocks dealloc'd");
+                         "CoreFSTest::testThatDeletingEverythingDeallocatesEverything() blocks dealloc'd");
         }
 
         // now re-add content and check that allocated blocks are same as previous allocation
@@ -540,7 +540,7 @@ class KnoxCryptTest
         }
 
         ASSERT_EQUAL(blocksInUse.size(), blocksInUseB.size(),
-                     "KnoxCryptTest::testThatDeletingEverythingDeallocatesEverything() same block counts");
+                     "CoreFSTest::testThatDeletingEverythingDeallocatesEverything() same block counts");
 
         bool sameBlocks = true;
         for (size_t i = 0; i < blocksInUse.size(); ++i) {
@@ -551,7 +551,7 @@ class KnoxCryptTest
         }
 
         ASSERT_EQUAL(true, sameBlocks,
-                     "KnoxCryptTest::testThatDeletingEverythingDeallocatesEverything() same blocks");
+                     "CoreFSTest::testThatDeletingEverythingDeallocatesEverything() same blocks");
 
     }
 
@@ -563,7 +563,7 @@ class KnoxCryptTest
             (void)createTestFolder(testPath);
         }
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
-        knoxcrypt::KnoxCrypt kc(io);
+        knoxcrypt::CoreFS kc(io);
         kc.removeFolder("/folderA", knoxcrypt::FolderRemovalType::Recursive);
         knoxcrypt::CompoundFolder folder(io, 0, std::string("root"));
         folder.addFolder("/folderA");

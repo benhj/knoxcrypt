@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/CoreFS.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -44,7 +44,7 @@ namespace knoxcrypt
     namespace utility
     {
         inline
-        void removeEntry(knoxcrypt::KnoxCrypt &theBfs, std::string const &thePath)
+        void removeEntry(knoxcrypt::CoreFS &theBfs, std::string const &thePath)
         {
             knoxcrypt::EntryInfo info = theBfs.getInfo(thePath);
             if (info.type() == knoxcrypt::EntryType::FileType) {

@@ -28,7 +28,7 @@
 #pragma once
 
 #include "knoxcrypt/ContainerImageStream.hpp"
-#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/OpenDisposition.hpp"
 #include "knoxcrypt/detail/Detailknoxcrypt.hpp"
 #include "knoxcrypt/detail/DetailFileBlock.hpp"

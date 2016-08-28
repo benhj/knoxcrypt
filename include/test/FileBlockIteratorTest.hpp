@@ -27,7 +27,7 @@
 */
 
 #include "knoxcrypt/ContainerImageStream.hpp"
-#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/FileBlockIterator.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"

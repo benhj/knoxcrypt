@@ -27,13 +27,13 @@
 */
 
 #include "knoxcrypt/EntryType.hpp"
-#include "knoxcrypt/knoxcrypt.hpp"
+#include "knoxcrypt/CoreFS.hpp"
 #include "knoxcrypt/KnoxCryptException.hpp"
 
 namespace knoxcrypt
 {
 
-    KnoxCrypt::KnoxCrypt(SharedCoreIO const &io)
+    CoreFS::CoreFS(SharedCoreIO const &io)
         : m_io(io)
         , m_rootFolder(std::make_shared<CompoundFolder>(io, io->rootBlock, "root"))
         , m_folderCache()
@@ -43,7 +43,7 @@ namespace knoxcrypt
     }
 
     CompoundFolder
-    KnoxCrypt::getFolder(std::string const &path)
+    CoreFS::getFolder(std::string const &path)
     {
         StateLock lock(m_stateMutex);
         auto thePath(path);
@@ -73,7 +73,7 @@ namespace knoxcrypt
     }
 
     EntryInfo
-    KnoxCrypt::getInfo(std::string const &path)
+    CoreFS::getInfo(std::string const &path)
     {
         StateLock lock(m_stateMutex);
         auto thePath(path);
@@ -101,21 +101,21 @@ namespace knoxcrypt
 
 
     bool
-    KnoxCrypt::fileExists(std::string const &path) const
+    CoreFS::fileExists(std::string const &path) const
     {
         StateLock lock(m_stateMutex);
         return doFileExists(path);
     }
 
     bool
-    KnoxCrypt::folderExists(std::string const &path)
+    CoreFS::folderExists(std::string const &path)
     {
         StateLock lock(m_stateMutex);
         return doFolderExists(path);
     }
 
     void
-    KnoxCrypt::addFile(std::string const &path)
+    CoreFS::addFile(std::string const &path)
     {
         StateLock lock(m_stateMutex);
         auto thePath(path);
@@ -138,7 +138,7 @@ namespace knoxcrypt
     }
 
     void
-    KnoxCrypt::addFolder(std::string const &path) const
+    CoreFS::addFolder(std::string const &path) const
     {
         StateLock lock(m_stateMutex);
         auto thePath(path);
@@ -162,7 +162,7 @@ namespace knoxcrypt
     }
 
     void
-    KnoxCrypt::renameEntry(std::string const &src, std::string const &dst)
+    CoreFS::renameEntry(std::string const &src, std::string const &dst)
     {
         StateLock lock(m_stateMutex);
         auto srcPath(src);
@@ -234,7 +234,7 @@ namespace knoxcrypt
     }
 
     void
-    KnoxCrypt::resetCachedFile(::boost::filesystem::path const &thePath)
+    CoreFS::resetCachedFile(::boost::filesystem::path const &thePath)
     {
         if(m_cachedFileAndPath) {
 
@@ -253,7 +253,7 @@ namespace knoxcrypt
     }
 
     void
-    KnoxCrypt::removeFile(std::string const &path)
+    CoreFS::removeFile(std::string const &path)
     {
         StateLock lock(m_stateMutex);
         auto thePath(path);
@@ -284,7 +284,7 @@ namespace knoxcrypt
     }
 
     void
-    KnoxCrypt::removeFolder(std::string const &path, FolderRemovalType const &removalType)
+    CoreFS::removeFolder(std::string const &path, FolderRemovalType const &removalType)
     {
         StateLock lock(m_stateMutex);
         auto thePath(path);
@@ -334,7 +334,7 @@ namespace knoxcrypt
     }
 
     FileDevice
-    KnoxCrypt::openFile(std::string const &path, OpenDisposition const &openMode)
+    CoreFS::openFile(std::string const &path, OpenDisposition const &openMode)
     {
         StateLock lock(m_stateMutex);
         char ch = *path.rbegin();
@@ -361,7 +361,7 @@ namespace knoxcrypt
     }
 
     void
-    KnoxCrypt::truncateFile(std::string const &path, std::ios_base::streamoff offset)
+    CoreFS::truncateFile(std::string const &path, std::ios_base::streamoff offset)
     {
         StateLock lock(m_stateMutex);
         auto parentEntry(doGetParentCompoundFolder(path));
@@ -383,7 +383,7 @@ namespace knoxcrypt
     }
 
     void
-    KnoxCrypt::setCachedFile(std::string const &path,
+    CoreFS::setCachedFile(std::string const &path,
                            SharedCompoundFolder const &parentEntry,
                            OpenDisposition openMode) const
     {
@@ -405,7 +405,7 @@ namespace knoxcrypt
      * @param buf stores the filesystem stats data
      */
     void
-    KnoxCrypt::statvfs(struct statvfs *buf)
+    CoreFS::statvfs(struct statvfs *buf)
     {
         StateLock lock(m_stateMutex);
         buf->f_bsize   = detail::FILE_BLOCK_SIZE;
@@ -413,7 +413,7 @@ namespace knoxcrypt
         buf->f_bfree   = m_io->freeBlocks;
         buf->f_bavail  = m_io->freeBlocks;
 
-        // in knoxcrypt, the concept of an inode doesn't really exist so the
+        // in CoreFS, the concept of an inode doesn't really exist so the
         // number of inodes is set to corresponds to the number of blocks
         buf->f_files   = m_io->blocks;
         buf->f_ffree   = m_io->freeBlocks;
@@ -422,7 +422,7 @@ namespace knoxcrypt
     }
 
     void
-    KnoxCrypt::throwIfAlreadyExists(std::string const &path) const
+    CoreFS::throwIfAlreadyExists(std::string const &path) const
     {
         // throw if already exists
         boost::filesystem::path processedPath(path);
@@ -435,19 +435,19 @@ namespace knoxcrypt
     }
 
     bool
-    KnoxCrypt::doFileExists(std::string const &path) const
+    CoreFS::doFileExists(std::string const &path) const
     {
         return doExistanceCheck(path, EntryType::FileType);
     }
 
     bool
-    KnoxCrypt::doFolderExists(std::string const &path) const
+    CoreFS::doFolderExists(std::string const &path) const
     {
         return doExistanceCheck(path, EntryType::FolderType);
     }
 
-    KnoxCrypt::SharedCompoundFolder
-    KnoxCrypt::doGetParentCompoundFolder(std::string const &path) const
+    CoreFS::SharedCompoundFolder
+    CoreFS::doGetParentCompoundFolder(std::string const &path) const
     {
         boost::filesystem::path pathToCheck(path);
         if (pathToCheck.parent_path().string() == "/") {
@@ -492,7 +492,7 @@ namespace knoxcrypt
     }
 
     bool
-    KnoxCrypt::doExistanceCheck(std::string const &path, EntryType const &entryType) const
+    CoreFS::doExistanceCheck(std::string const &path, EntryType const &entryType) const
     {
         auto thePath(path);
 
@@ -530,7 +530,7 @@ namespace knoxcrypt
     }
 
     void
-    KnoxCrypt::removeAllChildFoldersToo(::boost::filesystem::path const &path,
+    CoreFS::removeAllChildFoldersToo(::boost::filesystem::path const &path,
                                       SharedCompoundFolder const &f)
     {
         std::vector<SharedEntryInfo> infos = f->listFolderEntries();
@@ -542,7 +542,7 @@ namespace knoxcrypt
     }
 
     void
-    KnoxCrypt::removeFolderFromCache(::boost::filesystem::path const &path)
+    CoreFS::removeFolderFromCache(::boost::filesystem::path const &path)
     {
 
         auto strPath = path.relative_path().string();

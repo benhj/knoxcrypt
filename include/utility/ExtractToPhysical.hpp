@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/CoreFS.hpp"
 #include "utility/ContentFolderVisitor.hpp"
 #include "utility/RecursiveFolderExtractor.hpp"
 #include "utility/FolderExtractionVisitor.hpp"
@@ -49,7 +49,7 @@ namespace knoxcrypt
     {
 
         inline
-        void extractToPhysical(knoxcrypt::KnoxCrypt &theBfs,
+        void extractToPhysical(knoxcrypt::CoreFS &theBfs,
                               std::string const &path,
                               std::string const &dst,
                               std::function<void(std::string)> callback)

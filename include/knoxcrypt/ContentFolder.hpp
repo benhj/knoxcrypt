@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/EntryInfo.hpp"
 #include "knoxcrypt/File.hpp"
 

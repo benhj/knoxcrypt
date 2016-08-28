@@ -26,7 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "knoxcrypt/CoreKnoxCryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "utility/CipherCallback.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
 #include "utility/EventType.hpp"
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     (void)positionalOptions.add("imageName", 1);
     (void)positionalOptions.add("blockCount", 1);
 
-    auto io(std::make_shared<knoxcrypt::CoreKnoxCryptIO>());
+    auto io(std::make_shared<knoxcrypt::CoreIO>());
     io->useBlockCache = false;
 
     // use a non-deterministic random device to generate the iv. This

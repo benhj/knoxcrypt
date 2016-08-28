@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/CoreFS.hpp"
 #include "utility/RecursiveFolderAdder.hpp"
 
 #include <boost/filesystem/operations.hpp>
@@ -45,7 +45,7 @@ namespace knoxcrypt
     {
 
         inline
-        void copyFromPhysical(knoxcrypt::KnoxCrypt &theBfs,
+        void copyFromPhysical(knoxcrypt::CoreFS &theBfs,
                               std::string const &teaPath,
                               std::string const &fsPath,
                               std::function<void(std::string)> const &callback)

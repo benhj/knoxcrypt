@@ -29,7 +29,7 @@
 #pragma once
 
 #include "knoxcrypt/ContainerImageStream.hpp"
-#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/FileBlock.hpp"
 #include "knoxcrypt/FileBlockBuilder.hpp"
 #include "knoxcrypt/CompoundFolder.hpp"

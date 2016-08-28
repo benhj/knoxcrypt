@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "utility/EventType.hpp"
 #include "cryptostreampp/CryptoStreamPP.hpp"
 

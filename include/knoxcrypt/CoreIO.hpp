@@ -43,7 +43,7 @@ namespace knoxcrypt
     class FileBlockBuilder;
     using SharedBlockBuilder = std::shared_ptr<FileBlockBuilder>;
 
-    struct CoreKnoxCryptIO
+    struct CoreIO
     {
         std::string path;                // path of the tea safe image
         uint64_t blocks;                 // total number of blocks
@@ -59,10 +59,10 @@ namespace knoxcrypt
         bool firstTimeInit;              // initialized very first time
         
         // Should key be initialized very first time?
-        CoreKnoxCryptIO() : firstTimeInit(false) {}
+        CoreIO() : firstTimeInit(false) {}
         
     };
 
-    using SharedCoreIO = std::shared_ptr<CoreKnoxCryptIO>;
+    using SharedCoreIO = std::shared_ptr<CoreIO>;
 
 }

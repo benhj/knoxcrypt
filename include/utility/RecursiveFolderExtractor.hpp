@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/CoreFS.hpp"
 #include "knoxcrypt/EntryInfo.hpp"
 #include "knoxcrypt/EntryType.hpp"
 #include "utility/ContentFolderVisitor.hpp"
@@ -50,7 +50,7 @@ namespace knoxcrypt
 
         inline
         void recursiveExtract(ContentFolderVisitor &visitor,
-                              KnoxCrypt &theBfs,
+                              CoreFS &theBfs,
                               std::string const &teaPath)
         {
 

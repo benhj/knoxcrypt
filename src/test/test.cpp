@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2014>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "test/KnoxCryptTest.hpp"
+#include "test/CoreFSTest.hpp"
 #include "test/FileBlockTest.hpp"
 #include "test/FileBlockIteratorTest.hpp"
 #include "test/FileTest.hpp"
@@ -45,7 +45,7 @@ int main()
     {
         boost::progress_timer timer;
 
-        KnoxCryptTest();
+        CoreFSTest();
         MakeKnoxCryptTest();
         FileDeviceTest();
         FileBlockTest();

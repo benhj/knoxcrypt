@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #pragma once
 
 #include "knoxcrypt/ContainerImageStream.hpp"
-#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/detail/DetailFileBlock.hpp"
 
 #include <iostream>

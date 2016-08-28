@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/FileDevice.hpp"
 #include "knoxcrypt/CompoundFolder.hpp"
 #include "knoxcrypt/FolderRemovalType.hpp"
@@ -46,16 +46,16 @@
 
 namespace knoxcrypt
 {
-    class KnoxCrypt;
-    using Sharedknoxcrypt = std::shared_ptr<KnoxCrypt>;
+    class CoreFS;
+    using Sharedknoxcrypt = std::shared_ptr<CoreFS>;
 
-    class KnoxCrypt
+    class CoreFS
     {
         using SharedCompoundFolder = std::shared_ptr<CompoundFolder>;
 
       public:
-        KnoxCrypt() = delete;
-        explicit KnoxCrypt(SharedCoreIO const &io);
+        CoreFS() = delete;
+        explicit CoreFS(SharedCoreIO const &io);
 
         /**
          * @brief  retrieves folder entry for given path

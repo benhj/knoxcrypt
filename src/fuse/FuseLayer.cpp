@@ -33,9 +33,9 @@
  *
  */
 
-#include "knoxcrypt/CoreKnoxCryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/FileBlockBuilder.hpp"
-#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/CoreFS.hpp"
 #include "knoxcrypt/KnoxCryptException.hpp"
 #include "utility/CipherCallback.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
@@ -50,7 +50,7 @@
 #include <vector>
 #include <functional>
 
-#define knoxcrypt_DATA ((knoxcrypt::KnoxCrypt*) fuse_get_context()->private_data)
+#define knoxcrypt_DATA ((knoxcrypt::CoreFS*) fuse_get_context()->private_data)
 
 namespace fuselayer
 {
@@ -484,7 +484,7 @@ int main(int argc, char *argv[])
 
     // Setup a core knoxcrypt io object which stores highlevel info about accessing
     // the knoxcrypt image
-    knoxcrypt::SharedCoreIO io(std::make_shared<knoxcrypt::CoreKnoxCryptIO>());
+    knoxcrypt::SharedCoreIO io(std::make_shared<knoxcrypt::CoreIO>());
     io->useBlockCache = true;
     io->path = vm["imageName"].as<std::string>().c_str();
     io->encProps.password = knoxcrypt::utility::getPassword("knoxcrypt password: ");
@@ -524,7 +524,7 @@ int main(int argc, char *argv[])
     stream.close();
 
     // Create the basic file system
-    knoxcrypt::KnoxCrypt theBfs(io);
+    knoxcrypt::CoreFS theBfs(io);
 
     // make arguments fuse-compatible
     char      arg0[] = "knoxcrypt";

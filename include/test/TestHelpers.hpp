@@ -29,7 +29,7 @@
 #pragma once
 
 #include "cryptostreampp/Algorithms.hpp"
-#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/FileBlockBuilder.hpp"
 #include "knoxcrypt/knoxcryptException.hpp"
 #include "utility/MakeKnoxCrypt.hpp"
@@ -52,7 +52,7 @@ std::vector<std::string> failingTestPoints;
 
 knoxcrypt::SharedCoreIO createTestIO(boost::filesystem::path const &testPath)
 {
-    knoxcrypt::SharedCoreIO io = std::make_shared<knoxcrypt::CoreKnoxCryptIO>();
+    knoxcrypt::SharedCoreIO io = std::make_shared<knoxcrypt::CoreIO>();
     io->path = testPath.string();
     io->blocks = 2048;
     io->freeBlocks = 2048;

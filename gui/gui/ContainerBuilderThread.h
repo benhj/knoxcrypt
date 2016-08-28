@@ -1,7 +1,7 @@
 #ifndef CONTAINERBUILDERTHREAD_H
 #define CONTAINERBUILDERTHREAD_H
 
-#include "knoxcrypt/CoreknoxcryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/knoxcrypt.hpp"
 #include "utility/EventType.hpp"
 #include "utility/Makeknoxcrypt.hpp"

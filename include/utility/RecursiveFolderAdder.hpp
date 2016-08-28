@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/CoreFS.hpp"
 #include "knoxcrypt/EntryType.hpp"
 
 #include <boost/filesystem/operations.hpp>
@@ -48,7 +48,7 @@ namespace knoxcrypt
     {
 
         inline
-        void recursiveAdd(KnoxCrypt &theBfs,
+        void recursiveAdd(CoreFS &theBfs,
                           std::string const &teaPath,
                           std::string const &fsPath,
                           std::function<void(std::string)> const &callback)

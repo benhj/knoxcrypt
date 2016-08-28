@@ -31,7 +31,7 @@
 #pragma once
 
 #include "knoxcrypt/EntryInfo.hpp"
-#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/CoreFS.hpp"
 #include "knoxcrypt/FileDevice.hpp"
 #include "utility/ContentFolderVisitor.hpp"
 
@@ -52,7 +52,7 @@ namespace knoxcrypt
         {
           public:
             FolderExtractionVisitor() = delete;
-            FolderExtractionVisitor(KnoxCrypt &theBfs,
+            FolderExtractionVisitor(CoreFS &theBfs,
                                     std::string teaPath,
                                     std::string fsPath,
                                     std::function<void(std::string)> const &callback)
@@ -107,7 +107,7 @@ namespace knoxcrypt
             }
 
           private:
-            KnoxCrypt &m_theBfs;
+            CoreFS &m_theBfs;
             std::string m_teaPath;
             std::string m_fsPath;
             std::function<void(std::string)> m_callback;

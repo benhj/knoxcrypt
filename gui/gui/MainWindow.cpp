@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014>, <BenHJ>
+  Copyright (c) <2014-2016>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -164,7 +164,7 @@ void MainWindow::loadFileButtonHandler()
         std::set<std::string>().swap(m_populatedSet);
 
         // build new state
-        knoxcrypt::SharedCoreIO io(std::make_shared<knoxcrypt::CoreknoxcryptIO>());
+        knoxcrypt::SharedCoreIO io(std::make_shared<knoxcrypt::CoreIO>());
         io->path = dlg.selectedFiles().at(0).toStdString();
 
         bool ok;
@@ -210,7 +210,7 @@ void MainWindow::newButtonHandler()
         std::set<std::string>().swap(m_populatedSet);
 
         // build new state
-        knoxcrypt::SharedCoreIO io(std::make_shared<knoxcrypt::CoreknoxcryptIO>());
+        knoxcrypt::SharedCoreIO io(std::make_shared<knoxcrypt::CoreIO>());
         io->path = dlg.selectedFiles().at(0).toStdString();
 
         bool ok;

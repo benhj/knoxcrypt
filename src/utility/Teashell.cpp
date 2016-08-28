@@ -33,10 +33,10 @@
  * (has 'ls', 'cd', 'pwd', 'rm', 'mkdir' commands)
  */
 
-#include "knoxcrypt/CoreKnoxCryptIO.hpp"
+#include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/EntryInfo.hpp"
 #include "knoxcrypt/FileBlockBuilder.hpp"
-#include "knoxcrypt/KnoxCrypt.hpp"
+#include "knoxcrypt/CoreFS.hpp"
 #include "knoxcrypt/KnoxCryptException.hpp"
 #include "knoxcrypt/FileStreamPtr.hpp"
 #include "utility/CipherCallback.hpp"
@@ -100,7 +100,7 @@ void com_help()
 }
 
 /// the 'ls' command for listing dir contents
-void com_ls(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
+void com_ls(knoxcrypt::CoreFS &theBfs, std::string const &path)
 {
     // make sure path begins with a slash
     std::string thePath(*path.begin() != '/' ? "/" : "");
@@ -120,7 +120,7 @@ void com_ls(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
 
 /// attempts to implement tab complete by matching the provided string
 /// with an entry at the given parent path
-std::string tabCompleteknoxcryptEntry(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
+std::string tabCompleteknoxcryptEntry(knoxcrypt::CoreFS &theBfs, std::string const &path)
 {
     // make sure path begins with a slash
     std::string thePath(*path.begin() != '/' ? "/" : "");
@@ -163,7 +163,7 @@ std::string tabCompleteCommand(std::string const &command)
 }
 
 /// the 'rm' command for removing a folder or file
-void com_rm(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
+void com_rm(knoxcrypt::CoreFS &theBfs, std::string const &path)
 {
     std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
@@ -171,7 +171,7 @@ void com_rm(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
 }
 
 /// the 'mkdir' command for adding a folder to the current working dir
-void com_mkdir(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
+void com_mkdir(knoxcrypt::CoreFS &theBfs, std::string const &path)
 {
     std::string thePath(*path.begin() != '/' ? "/" : "");
     thePath.append(path);
@@ -182,7 +182,7 @@ void com_mkdir(knoxcrypt::KnoxCrypt &theBfs, std::string const &path)
 /// working directory
 /// example usage:
 /// add file://path/to/file.txt
-void com_add(knoxcrypt::KnoxCrypt &theBfs, std::string const &parent, std::string const &fileResource)
+void com_add(knoxcrypt::CoreFS &theBfs, std::string const &parent, std::string const &fileResource)
 {
     // add the file to the container
     // this removed the first several chars assumes to be "file://"
@@ -194,7 +194,7 @@ void com_add(knoxcrypt::KnoxCrypt &theBfs, std::string const &parent, std::strin
 /// for extracting a knoxcrypt file to somewhere on a physical disk location
 /// example usage:
 /// extract file.txt file:///some/parent/path/
-void com_extract(knoxcrypt::KnoxCrypt &theBfs, std::string const &path, std::string const &dst)
+void com_extract(knoxcrypt::CoreFS &theBfs, std::string const &path, std::string const &dst)
 {
     std::string dstPath(dst.begin() + 7, dst.end());
     knoxcrypt::utility::extractToPhysical(theBfs, path, dstPath, std::bind(operationCallback,
@@ -205,7 +205,7 @@ void com_extract(knoxcrypt::KnoxCrypt &theBfs, std::string const &path, std::str
 /// example usage when working path is /hello
 /// push there
 /// result: /hello/there
-void com_push(knoxcrypt::KnoxCrypt &theBfs, std::string &workingDir, std::string &fragment)
+void com_push(knoxcrypt::CoreFS &theBfs, std::string &workingDir, std::string &fragment)
 {
     auto thePath(workingDir);
     if (*thePath.rbegin() != '/') {
@@ -223,7 +223,7 @@ void com_push(knoxcrypt::KnoxCrypt &theBfs, std::string &workingDir, std::string
 /// example usage when working path is /hello/there
 /// pop
 /// result: /hello
-void com_pop(knoxcrypt::KnoxCrypt &theBfs, std::string &workingDir)
+void com_pop(knoxcrypt::CoreFS &theBfs, std::string &workingDir)
 {
 
     boost::filesystem::path p(workingDir);
@@ -239,7 +239,7 @@ void com_pop(knoxcrypt::KnoxCrypt &theBfs, std::string &workingDir)
 }
 
 /// for changing to a new folder. Path should be absolute.
-void com_cd(knoxcrypt::KnoxCrypt &theBfs, std::string &workingDir, std::string const &path)
+void com_cd(knoxcrypt::CoreFS &theBfs, std::string &workingDir, std::string const &path)
 {
     // try to directly resolve
     if (theBfs.folderExists(path)) {
@@ -293,7 +293,7 @@ std::string formattedPath(std::string const &workingDir, std::string const &path
 }
 
 /// parses the command string
-void parse(knoxcrypt::KnoxCrypt &theBfs, std::string const &commandStr, std::string &workingDir)
+void parse(knoxcrypt::CoreFS &theBfs, std::string const &commandStr, std::string &workingDir)
 {
     std::vector<std::string> comTokens;
     boost::algorithm::split_regex(comTokens, commandStr, boost::regex("\\s+"));
@@ -400,7 +400,7 @@ void handleBackspace(int &cursorPos, std::string &toReturn)
 }
 
 /// handles tab-key; attempts to provide rudimentary tab-completion
-void handleTabKey(knoxcrypt::KnoxCrypt &theBfs,
+void handleTabKey(knoxcrypt::CoreFS &theBfs,
                   std::string const &workingPath,
                   int &cursorPos,
                   std::string &toReturn)
@@ -473,7 +473,7 @@ void handleTabKey(knoxcrypt::KnoxCrypt &theBfs,
 /// gets a user-inputted string until return is entered
 /// will use getChar to process characters one by one so that individual
 /// key handlers can be created
-std::string getInputString(knoxcrypt::KnoxCrypt &theBfs, std::string const &workingPath)
+std::string getInputString(knoxcrypt::CoreFS &theBfs, std::string const &workingPath)
 {
     std::string toReturn("");
 
@@ -505,7 +505,7 @@ std::string getInputString(knoxcrypt::KnoxCrypt &theBfs, std::string const &work
 }
 
 /// indefinitely loops over user input expecting commands
-int loop(knoxcrypt::KnoxCrypt &theBfs)
+int loop(knoxcrypt::CoreFS &theBfs)
 {
     std::string currentPath("/");
     while (1) {
@@ -618,7 +618,7 @@ int main(int argc, char *argv[])
 
     // Setup a core knoxcrypt io object which stores highlevel info about accessing
     // the knoxcrypt image
-    auto io(std::make_shared<knoxcrypt::CoreKnoxCryptIO>());
+    auto io(std::make_shared<knoxcrypt::CoreIO>());
     io->useBlockCache = true;
     io->path = vm["imageName"].as<std::string>().c_str();
     io->encProps.password = knoxcrypt::utility::getPassword("knoxcrypt password: ");
@@ -656,6 +656,6 @@ int main(int argc, char *argv[])
     stream.close();
 
     // Create the basic file system
-    knoxcrypt::KnoxCrypt theBfs(io);
+    knoxcrypt::CoreFS theBfs(io);
     return loop(theBfs);
 }
