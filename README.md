@@ -90,9 +90,11 @@ Runs the interactive shell on it using the `teashell` binary:
 
 ### Building the GUI
 
-Update 30/5/16: If you're a mac user, I highly recommend you try out KnoxCryptOSX -- see [https://github.com/benhj/KnoxCryptOSX](https://github.com/benhj/KnoxCryptOSX). Might be a little easier than trying to mess around with Qt compilation and sorting out of the library dependencies etc.
+~~Update 30/5/16: If you're a mac user, I highly recommend you try out KnoxCryptOSX -- see [https://github.com/benhj/KnoxCryptOSX](https://github.com/benhj/KnoxCryptOSX). Might be a little easier than trying to mess around with Qt compilation and sorting out of the library dependencies etc.~~
 
-Having said that, the Qt GUI version.... (is currently broken with the recent name changes)
+Update (beginning 2017): I have made KnoxCryptOSX a private repository as its very buggy and lacks the quality of the core infrastructure. Having said that, it you really want to give it a go, email me.
+
+Having said all the above the Qt GUI version.... (is currently broken with the recent name changes)
 
 To build the GUI, first make sure that `libknoxcrypt.a` has been built by issuing the
 command `make lib` in the top-level build-folder. 
