@@ -45,7 +45,7 @@ make makeknoxcrypt
 Note that building either of the binaries `teashell` or `makeknoxcrypt` will automatically build 
 libknoxcrypt.a first.
 
-`make` or `make all` will compile everything except the GUI, i.e., the following binaries:
+`make` or `make all` will compile everything, i.e., the following binaries:
 
 <pre>
 test           : unit tests various parts of the main api
@@ -87,24 +87,6 @@ Runs the interactive shell on it using the `teashell` binary:
 <pre>
 ./teashell ./test.bfs
 </pre>
-
-### Building the GUI
-
-~~Update 30/5/16: If you're a mac user, I highly recommend you try out KnoxCryptOSX -- see [https://github.com/benhj/KnoxCryptOSX](https://github.com/benhj/KnoxCryptOSX). Might be a little easier than trying to mess around with Qt compilation and sorting out of the library dependencies etc.~~
-
-Update (beginning 2017): I have made KnoxCryptOSX a private repository as its very buggy and lacks the quality of the core infrastructure. Having said that, it you really want to give it a go, email me.
-
-Having said all the above the Qt GUI version.... (is currently broken with the recent name changes)
-
-To build the GUI, first make sure that `libknoxcrypt.a` has been built by issuing the
-command `make lib` in the top-level build-folder. 
-
-The GUI uses Qt. Please download and install the latest version (Qt 5.3 at the time
-of writing) and open gui.pro in QtCreator. Build and run by clicking on the build icon.
-
-The GUI provides a simple interface to browsing and manipulating knoxcrypt containers.
-
-![knoxcrypt GUI](screenshots/gui.png?raw=true)
 
 Licensing
 ---------
