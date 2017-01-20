@@ -28,7 +28,7 @@
 
 #include "knoxcrypt/FileBlockBuilder.hpp"
 #include "knoxcrypt/ContainerImageStream.hpp"
-#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
+#include "knoxcrypt/detail/DetailKnoxCrypt.hpp"
 
 namespace knoxcrypt
 {

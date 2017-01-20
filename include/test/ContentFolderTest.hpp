@@ -30,11 +30,11 @@
 #include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/File.hpp"
 #include "knoxcrypt/ContentFolder.hpp"
-#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
+#include "knoxcrypt/detail/DetailKnoxCrypt.hpp"
 #include "knoxcrypt/detail/DetailFileBlock.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
-#include "utility/Makeknoxcrypt.hpp"
+#include "utility/MakeKnoxCrypt.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>

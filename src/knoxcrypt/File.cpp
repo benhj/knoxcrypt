@@ -31,7 +31,7 @@
 #include "knoxcrypt/FileBlockBuilder.hpp"
 #include "knoxcrypt/FileBlockIterator.hpp"
 #include "knoxcrypt/FileEntryException.hpp"
-#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
+#include "knoxcrypt/detail/DetailKnoxCrypt.hpp"
 #include "knoxcrypt/detail/DetailFileBlock.hpp"
 
 #include <stdexcept>

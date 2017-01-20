@@ -30,7 +30,7 @@
 #include "knoxcrypt/ContainerImageStream.hpp"
 #include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/OpenDisposition.hpp"
-#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
+#include "knoxcrypt/detail/DetailKnoxCrypt.hpp"
 #include "knoxcrypt/detail/DetailFileBlock.hpp"
 
 #include <vector>

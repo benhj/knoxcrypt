@@ -29,7 +29,7 @@
 #include "knoxcrypt/CompoundFolder.hpp"
 #include "knoxcrypt/ContainerImageStream.hpp"
 #include "knoxcrypt/ContentFolder.hpp"
-#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
+#include "knoxcrypt/detail/DetailKnoxCrypt.hpp"
 #include "knoxcrypt/detail/DetailFolder.hpp"
 
 #include <algorithm>

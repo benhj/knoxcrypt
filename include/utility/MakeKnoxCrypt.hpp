@@ -33,7 +33,7 @@
 #include "knoxcrypt/FileBlock.hpp"
 #include "knoxcrypt/FileBlockBuilder.hpp"
 #include "knoxcrypt/CompoundFolder.hpp"
-#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
+#include "knoxcrypt/detail/DetailKnoxCrypt.hpp"
 #include "knoxcrypt/detail/DetailFileBlock.hpp"
 #include "utility/EventType.hpp"
 #include "utility/PassHasher.hpp"

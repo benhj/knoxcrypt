@@ -31,7 +31,7 @@
 #include "cryptostreampp/Algorithms.hpp"
 #include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/FileBlockBuilder.hpp"
-#include "knoxcrypt/knoxcryptException.hpp"
+#include "knoxcrypt/KnoxCryptException.hpp"
 #include "utility/MakeKnoxCrypt.hpp"
 
 #include <boost/filesystem/path.hpp>
