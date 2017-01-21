@@ -30,7 +30,7 @@
 
 #include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/ContainerImageStream.hpp"
-#include "knoxcrypt/detail/Detailknoxcrypt.hpp"
+#include "knoxcrypt/detail/DetailKnoxCrypt.hpp"
 
 #include <iostream>
 #include <stdint.h>
