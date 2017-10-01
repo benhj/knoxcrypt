@@ -21,18 +21,20 @@ KnoxCrypt is highly developmental and therefore probably buggy. I make no guaren
 ### Compiling
 
 Note, only tested on Linux and Mac. With a bit of work, will probably build (sans fuse-bits) on windows
-too.
+too. 
 
 Requirements:
  
 - some of the boost headers and libraries to build (see makefile).
 - fuse for the main fuse layer binary (the binary 'knoxcrypt')
 - crypto++ headers and libraries for building and linking
-- cryptostreampp, a small set of headers allowing straight forward implementation of encrypted file streams (see [https://github.com/benhj/cryptostreampp](https://github.com/benhj/cryptostreampp)).
+- ~~cryptostreampp, a small set of headers allowing straight forward implementation of encrypted file streams (see [https://github.com/benhj/cryptostreampp](https://github.com/benhj/cryptostreampp)).~~ This is now a submodule and is automatically grabbed when cloning knoxcrypt recursively.
 
-Before building anything, you'll need to put the cryptostreampp headers somewhere. Easiest is to just clone the above mentioned cryptostreammpp repo. You'll then need to set an environment variable pointing to them, e.g., from a bash prompt I might do something like:
+First grab the source by cloning recursively:
 
-`export CRYPTOSTREAMPP=...`
+<pre>
+git clone --recursive https://github.com/benhj/knoxcrypt
+</pre>
 
 If you don't have fuse installed, you'll probably want to only build the main 
 knoxcrypt library (libknoxcrypt.a), the shell (teashell) and makeknoxcrypt, the binary
