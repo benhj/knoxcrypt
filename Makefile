@@ -1,10 +1,5 @@
 PKG_CONFIG ?= pkg-config
 
-# immediately quit if CRYPTOSTREAMPP not set
-ifndef CRYPTOSTREAMPP
-$(error CRYPTOSTREAMPP path must be set to cryptostreampp root folder)
-endif
-
 # discover the liklihood of what version of FUSE we're using
 # also set the compiler type; clang if on mac, gcc if on linux
 UNAME := $(shell uname)
@@ -36,7 +31,7 @@ CXXFLAGS ?= -O2 \
             -Wall \
             -ggdb
 CXXFLAGS += -std=c++11 \
-            -I$(CRYPTOSTREAMPP) \
+            -Icryptostreampp \
             -I/usr/include -I/usr/local/include \
             -Iinclude -D_FILE_OFFSET_BITS=64 \
             -march=native \

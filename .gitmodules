@@ -1,0 +1,3 @@
+[submodule "cryptostreampp"]
+	path = cryptostreampp
+	url = https://github.com/benhj/cryptostreampp
