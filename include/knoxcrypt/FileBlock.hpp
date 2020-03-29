@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2016>, <BenHJ>
+  Copyright (c) <2013-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -199,9 +199,6 @@ namespace knoxcrypt
         mutable boost::iostreams::stream_offset m_seekPos;
         mutable boost::iostreams::stream_offset m_positionBeforeWrite;
         OpenDisposition m_openDisposition;
-
-        // an optimization so that size can be written at end
-        mutable uint64_t m_bytesToWriteOnFlush;
 
         // used for writing to the underlying image stream
         mutable SharedImageStream m_stream;

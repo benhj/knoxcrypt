@@ -34,7 +34,7 @@
 #include "cryptostreampp/Algorithms.hpp"
 #include "cryptostreampp/RandomNumberGenerator.hpp"
 
-#include <boost/progress.hpp>
+#include <boost/timer/progress_display.hpp>
 #include <boost/program_options.hpp>
 
 #include <ctime>
@@ -44,10 +44,10 @@
 
 void imagerCallback(knoxcrypt::EventType eventType, long const amount)
 {
-    static std::shared_ptr<boost::progress_display> pd;
+    static std::shared_ptr<boost::timer::progress_display> pd;
     if(eventType == knoxcrypt::EventType::ImageBuildStart) {
         std::cout<<"Building main fs image.."<<std::endl;
-        pd = std::make_shared<boost::progress_display>(amount);
+        pd = std::make_shared<boost::timer::progress_display>(amount);
     }
     if(eventType == knoxcrypt::EventType::ImageBuildUpdate) {
         ++(*pd);

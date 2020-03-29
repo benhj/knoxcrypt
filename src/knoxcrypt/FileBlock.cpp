@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2016>, <BenHJ>
+  Copyright (c) <2013-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,6 @@ namespace knoxcrypt
         , m_seekPos(0)
         , m_positionBeforeWrite(0)
         , m_openDisposition(openDisposition)
-        , m_bytesToWriteOnFlush(0)
         , m_stream(stream)
     {
         // set m_offset
@@ -68,7 +67,6 @@ namespace knoxcrypt
         , m_offset(detail::getOffsetOfFileBlock(index, io->blocks))
         , m_seekPos(0)
         , m_openDisposition(openDisposition)
-        , m_bytesToWriteOnFlush(0)
         , m_stream(stream)
     {
         // set m_offset

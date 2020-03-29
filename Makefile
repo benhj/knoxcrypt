@@ -21,7 +21,8 @@ BOOST_LD= -lboost_filesystem \
           -lboost_system \
           -lboost_program_options \
           -lboost_random \
-          -lboost_regex
+          -lboost_regex \
+          -lboost_timer
 
 # compilation flags
 CXXFLAGS_FUSE= $(shell $(PKG_CONFIG) --cflags fuse 2>/dev/null || echo "-I/usr/local/include/$(FUSE)")  -DFUSE_USE_VERSION=26

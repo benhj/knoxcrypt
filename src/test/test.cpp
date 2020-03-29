@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2016>, <BenHJ>
+  Copyright (c) <2013-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -36,14 +36,14 @@
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
 
-#include <boost/progress.hpp>
+#include <boost/timer/timer.hpp>
 
 int main()
 {
 
     // for timing how long tests take
     {
-        boost::progress_timer timer;
+        boost::timer::auto_cpu_timer timer;
 
         CoreFSTest();
         MakeKnoxCryptTest();

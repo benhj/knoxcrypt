@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@
 #include "utility/PassHasher.hpp"
 
 #include <boost/program_options.hpp>
-#include <boost/progress.hpp>
 
 #include <fuse.h>
 #include <stdint.h>

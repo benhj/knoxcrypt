@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014-2015>, <BenHJ>
+  Copyright (c) <2014-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 #pragma once
 
 #include "utility/EventType.hpp"
-#include <boost/progress.hpp>
+#include <boost/timer/progress_display.hpp>
 
 #include <memory>
 
@@ -39,7 +39,7 @@ namespace knoxcrypt
 
     void cipherCallback(EventType eventType, long const amount)
     {
-        static std::shared_ptr<boost::progress_display> pd;
+        static std::shared_ptr<boost::timer::progress_display> pd;
         if(eventType == EventType::KeyGenBegin) {
             std::cout<<"Generating key...\n"<<std::endl;
         }
@@ -48,7 +48,7 @@ namespace knoxcrypt
         }
         if(eventType == EventType::BigCipherBuildBegin) {
             std::cout<<"Building big xtea cipher stream buffer. Please wait..."<<std::endl;
-            pd = std::make_shared<boost::progress_display>(amount);
+            pd = std::make_shared<boost::timer::progress_display>(amount);
         }
         if(eventType == EventType::BigCipherBuildEnd) {
             std::cout<<"\nBuilt big xtea cipher stream buffer.\n"<<std::endl;
