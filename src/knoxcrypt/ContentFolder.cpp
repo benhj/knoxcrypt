@@ -275,7 +275,7 @@ namespace knoxcrypt
                                             EntryType const &entryType,
                                             uint64_t startBlock)
     {
-        this->doWriteNewMetaDataForEntry(name, entryType, startBlock);
+        doWriteNewMetaDataForEntry(name, entryType, startBlock);
     }
 
     void
@@ -330,7 +330,7 @@ namespace knoxcrypt
         File entry(m_io, name);
 
         // write the first block index to the file entry metadata
-        this->doWriteNewMetaDataForEntry(name, EntryType::FileType, entry.getStartVolumeBlockIndex());
+        doWriteNewMetaDataForEntry(name, EntryType::FileType, entry.getStartVolumeBlockIndex());
     }
 
     void
@@ -339,7 +339,7 @@ namespace knoxcrypt
         // Create a new sub-folder entry
         auto entry(std::make_shared<ContentFolder>(m_io, name));
         // write the first block index to the file entry metadata
-        this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry->m_folderData.getStartVolumeBlockIndex());
+        doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry->m_folderData.getStartVolumeBlockIndex());
     }
 
     void
@@ -349,7 +349,7 @@ namespace knoxcrypt
         auto entry(std::make_shared<CompoundFolder>(m_io, name));
 
         // write the first block index to the file entry metadata
-        this->doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry
+        doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry
                                                                       ->getCompoundFolder()
                                                                       ->m_folderData
                                                                       .getStartVolumeBlockIndex());
@@ -485,7 +485,7 @@ namespace knoxcrypt
         m_oldSpaceAvailableForEntry = true;
 
         // removes any info with name from cache
-        this->invalidateEntryInEntryInfoCache(name);
+        invalidateEntryInEntryInfoCache(name);
 
         return true;
     }
@@ -493,7 +493,7 @@ namespace knoxcrypt
     bool
     ContentFolder::putMetaDataOutOfUse(std::string const &name)
     {
-        return this->doPutMetaDataOutOfUse(name);
+        return doPutMetaDataOutOfUse(name);
     }
 
     bool ContentFolder::updateMetaDataWithNewFilename(std::string const &srcName,
@@ -550,7 +550,7 @@ namespace knoxcrypt
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        this->doPutMetaDataOutOfUse(name);
+        doPutMetaDataOutOfUse(name);
 
         ++m_deadEntryCount;
 
@@ -578,7 +578,7 @@ namespace knoxcrypt
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        this->doPutMetaDataOutOfUse(name);
+        doPutMetaDataOutOfUse(name);
 
         // unlink entry's data
         entry->m_folderData.unlink();
@@ -607,7 +607,7 @@ namespace knoxcrypt
 
         // second set the metadata to an out of use state; this metadata can
         // then be later overwritten when a new entry is then added
-        this->doPutMetaDataOutOfUse(name);
+        doPutMetaDataOutOfUse(name);
 
         // unlink entry's data
         entry->getCompoundFolder()->m_folderData.unlink();
@@ -620,7 +620,7 @@ namespace knoxcrypt
     SharedEntryInfo
     ContentFolder::getEntryInfo(std::string const &name) const
     {
-        return this->doGetNamedEntryInfo(name);
+        return doGetNamedEntryInfo(name);
     }
 
     SharedEntryInfo

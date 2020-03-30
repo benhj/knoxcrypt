@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2016>, <BenHJ>
+  Copyright (c) <2013-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -59,16 +59,6 @@ namespace knoxcrypt
         if (!parentEntry) {
             return *m_rootFolder;
         }
-
-/*
-        auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string()));
-        if (!childInfo) {
-            throw KnoxCryptException(KnoxCryptError::NotFound);
-        }
-        if (childInfo->type() == EntryType::FileType) {
-            throw KnoxCryptException(KnoxCryptError::NotFound);
-        }
-*/
         return *parentEntry->getFolder(boost::filesystem::path(thePath).filename().string());
     }
 
@@ -220,11 +210,11 @@ namespace knoxcrypt
         }
 
         // Need to remove parent entry from cache
-        this->removeFolderFromCache(srcPathParent);
+        removeFolderFromCache(srcPathParent);
 
         // Also need to remove src from cache if folder
         if(childInfo->type() == EntryType::FolderType) {
-            this->removeFolderFromCache(srcPath);
+            removeFolderFromCache(srcPath);
         }
 
         // need to also walk over children??
@@ -267,15 +257,6 @@ namespace knoxcrypt
             throw KnoxCryptException(KnoxCryptError::NotFound);
         }
 
-        /*
-        auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string()));
-        if (!childInfo) {
-            throw KnoxCryptException(KnoxCryptError::NotFound);
-        }
-        if (childInfo->type() == EntryType::FolderType) {
-            throw KnoxCryptException(KnoxCryptError::NotFound);
-        }*/
-
         try {
             parentEntry->removeFile(boost::filesystem::path(thePath).filename().string());
         } catch (...) {
@@ -301,15 +282,6 @@ namespace knoxcrypt
             throw KnoxCryptException(KnoxCryptError::NotFound);
         }
 
-        /*
-        auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(thePath).filename().string()));
-        if (!childInfo) {
-            throw KnoxCryptException(KnoxCryptError::NotFound);
-        }
-        if (childInfo->type() == EntryType::FileType) {
-            throw KnoxCryptException(KnoxCryptError::NotFound);
-        }*/
-
         auto boostPath = ::boost::filesystem::path(thePath);
         if (removalType == FolderRemovalType::MustBeEmpty) {
 
@@ -326,8 +298,8 @@ namespace knoxcrypt
         }
 
         // also remove entry and its parent from parent cache
-        this->removeFolderFromCache(boostPath);
-        this->removeFolderFromCache(boostPath.parent_path());
+        removeFolderFromCache(boostPath);
+        removeFolderFromCache(boostPath.parent_path());
 
         // need to also check if this now fucks up the cached file
         resetCachedFile(thePath);
@@ -347,15 +319,6 @@ namespace knoxcrypt
             throw KnoxCryptException(KnoxCryptError::NotFound);
         }
 
-        /*
-        auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string()));
-        if (!childInfo) {
-            throw KnoxCryptException(KnoxCryptError::NotFound);
-        }
-        if (childInfo->type() == EntryType::FolderType) {
-            throw KnoxCryptException(KnoxCryptError::NotFound);
-        }*/
-
         setCachedFile(path, parentEntry, openMode);
         return FileDevice(m_cachedFileAndPath->second);
     }
@@ -368,15 +331,6 @@ namespace knoxcrypt
         if (!parentEntry) {
             throw KnoxCryptException(KnoxCryptError::NotFound);
         }
-
-        /*
-        auto childInfo(parentEntry->getEntryInfo(boost::filesystem::path(path).filename().string()));
-        if (!childInfo) {
-            throw KnoxCryptException(KnoxCryptError::NotFound);
-        }
-        if (childInfo->type() == EntryType::FolderType) {
-            throw KnoxCryptException(KnoxCryptError::NotFound);
-        }*/
 
         setCachedFile(path, parentEntry, OpenDisposition::buildOverwriteDisposition());
         m_cachedFileAndPath->second->truncate(offset);

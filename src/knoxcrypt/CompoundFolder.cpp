@@ -98,23 +98,18 @@ namespace knoxcrypt
         }
 
         // each leaf folder can have CONTENT_SIZE entries
-        bool wasAdded = false;
-
         for(auto & f : boost::adaptors::reverse(m_contentFolders)) {
             if(f->getAliveEntryCount() < CONTENT_SIZE) {
                 f->addFile(name);
-                wasAdded = true;
-                break;
+                m_cacheShouldBeUpdated = true;
+                return;
             }
         }
 
         // wasn't added. Means that there wasn't room so create
         // another leaf folder
-        if(!wasAdded) {
-            doAddContentFolder();
-            m_contentFolders.back()->addFile(name);
-        }
-
+        doAddContentFolder();
+        m_contentFolders.back()->addFile(name);
         m_cacheShouldBeUpdated = true;
     }
 
@@ -128,22 +123,18 @@ namespace knoxcrypt
         }
 
         // each leaf folder can have CONTENT_SIZE entries
-        bool wasAdded = false;
         for(auto & f : m_contentFolders) {
             if(f->getAliveEntryCount() < CONTENT_SIZE) {
                 f->addCompoundFolder(name);
-                wasAdded = true;
-                break;
+                m_cacheShouldBeUpdated = true;
+                return;
             }
         }
 
         // wasn't added. Means that there wasn't room so create
         // another leaf folder
-        if(!wasAdded) {
-            doAddContentFolder();
-            m_contentFolders.back()->addCompoundFolder(name);
-        }
-
+        doAddContentFolder();
+        m_contentFolders.back()->addCompoundFolder(name);
         m_cacheShouldBeUpdated = true;
     }
 
@@ -391,21 +382,17 @@ namespace knoxcrypt
                                              uint64_t startBlock)
     {
         // each leaf folder can have CONTENT_SIZE entries
-        bool wasAdded = false;
-
         for(auto & f : boost::adaptors::reverse(m_contentFolders)) {
             if(f->getAliveEntryCount() < CONTENT_SIZE) {
                 f->writeNewMetaDataForEntry(name, entryType, startBlock);
-                wasAdded = true;
-                break;
+                return;
             }
         }
 
         // wasn't added. Means that there wasn't room so create
         // another leaf folder
-        if(!wasAdded) {
-            doAddContentFolder();
-            m_contentFolders.back()->writeNewMetaDataForEntry(name, entryType, startBlock);
-        }
+        doAddContentFolder();
+        m_contentFolders.back()->writeNewMetaDataForEntry(name, entryType, startBlock);
+        
     }
 }
