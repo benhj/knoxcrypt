@@ -29,6 +29,7 @@
 #include "knoxcrypt/CompoundFolder.hpp"
 #include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/CoreFS.hpp"
+#include "knoxcrypt/CompoundFolderEntryIterator.hpp"
 #include "test/SimpleTest.hpp"
 #include "test/TestHelpers.hpp"
 
@@ -333,7 +334,6 @@ class CoreFSTest
         kc.removeFolder("/folderA/subFolderA/subFolderC/finalFolder",
                                 knoxcrypt::FolderRemovalType::MustBeEmpty);
 
-
         knoxcrypt::SharedEntryInfo info = root.getFolder("folderA")
             ->getFolder("subFolderA")
             ->getFolder("subFolderC")
@@ -351,7 +351,7 @@ class CoreFSTest
         bool caught = false;
         try {
             kc.removeFolder("/folderA/subFolderA/",
-                                    knoxcrypt::FolderRemovalType::MustBeEmpty);
+                            knoxcrypt::FolderRemovalType::MustBeEmpty);
         } catch (knoxcrypt::KnoxCryptException const &e) {
             caught = true;
             ASSERT_EQUAL(knoxcrypt::KnoxCryptException(knoxcrypt::KnoxCryptError::FolderNotEmpty), e,
@@ -424,7 +424,7 @@ class CoreFSTest
         knoxcrypt::CoreFS kc(io);
         knoxcrypt::CompoundFolder fe = kc.getFolder("/");
         auto infos = fe.listAllEntries();
-        ASSERT_EQUAL(infos.empty(), true, "CoreFSTest::testListAllEntriesEmpty()");
+        ASSERT_EQUAL(infos, knoxcrypt::CompoundFolderEntryIterator(), "CoreFSTest::testListAllEntriesEmpty()");
     }
 
     void testMoveFileSameFolder()

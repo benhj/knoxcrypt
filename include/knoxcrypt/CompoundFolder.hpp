@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2015-2016>, <BenHJ>
+  Copyright (c) <2015-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,9 @@
 #pragma once
 
 #include "knoxcrypt/CoreIO.hpp"
-#include "knoxcrypt/EntryInfo.hpp"
 #include "knoxcrypt/ContentFolder.hpp"
+#include "knoxcrypt/CompoundFolder.hpp"
+#include "knoxcrypt/CompoundFolderEntryIterator.hpp"
 
 #include <boost/optional.hpp>
 #include <memory>
@@ -46,26 +47,22 @@ namespace knoxcrypt
         /**
          * @brief constructs a CompoundFolder to write to. In this case the
          * starting block is unknown
-         * @param the core knoxcrypt io (path, blocks, password)
-         * @param startBlock the index of the starting file block making up entry data
-         * @param writable if data entries can be added to folder
+         * @param io the core knoxcrypt io (path, blocks, password)
          * @param name the name of the entry
          * @param enforceRootBlock true if we want to enforce the starting root block
          */
-        CompoundFolder(SharedCoreIO const &io,
-                       std::string const &name = "root",
+        CompoundFolder(SharedCoreIO io,
+                       std::string name = "root",
                        bool const enforceRootBlock = false);
 
         /**
          * @brief constructs a CompoundFolder to read from
-         * @param the core knoxcrypt io (path, blocks, password)
-         * @param startBlock the index of the starting file block making up entry data
-         * @param writable if data entries can be added to folder
+         * @param io the core knoxcrypt io (path, blocks, password)
          * @param name the name of the entry
          */
-        CompoundFolder(SharedCoreIO const &io,
-                      uint64_t const startBlock,
-                      std::string const &name = "root");
+        CompoundFolder(SharedCoreIO io,
+                       uint64_t const startBlock,
+                       std::string name = "root");
 
 
         /**
@@ -89,7 +86,7 @@ namespace knoxcrypt
          * @return a copy of the File with name
          */
         File getFile(std::string const &name,
-                            OpenDisposition const &openDisposition) const;
+                     OpenDisposition const &openDisposition) const;
 
         /**
          * @brief retrieves a CompoundFolder with specific name
@@ -118,13 +115,7 @@ namespace knoxcrypt
          * @brief returns a vector of all entry infos
          * @return all entry infos
          */
-        EntryInfoCacheMap & listAllEntries() const;
-
-        /**
-         * @brief returns a vector of file entry infos
-         * @return all file entry infos
-         */
-        std::vector<SharedEntryInfo> listFileEntries() const;
+        CompoundFolderEntryIterator listAllEntries() const;
 
         /**
          * @brief returns a vector of folder entry infos

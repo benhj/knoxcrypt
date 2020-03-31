@@ -27,6 +27,7 @@
 */
 
 #include "knoxcrypt/EntryType.hpp"
+#include "knoxcrypt/CompoundFolderEntryIterator.hpp"
 #include "knoxcrypt/CoreFS.hpp"
 #include "knoxcrypt/KnoxCryptException.hpp"
 
@@ -35,7 +36,7 @@ namespace knoxcrypt
 
     CoreFS::CoreFS(SharedCoreIO const &io)
         : m_io(io)
-        , m_rootFolder(std::make_shared<CompoundFolder>(io, io->rootBlock, "root"))
+        , m_rootFolder(std::make_shared<CompoundFolder>(m_io, m_io->rootBlock, "root"))
         , m_folderCache()
         , m_stateMutex()
         , m_cachedFileAndPath(nullptr)
@@ -284,9 +285,10 @@ namespace knoxcrypt
 
         auto boostPath = ::boost::filesystem::path(thePath);
         if (removalType == FolderRemovalType::MustBeEmpty) {
-
             auto childEntry(parentEntry->getFolder(boostPath.filename().string()));
-            if (!childEntry->listAllEntries().empty()) {
+            auto entryIt = childEntry->listAllEntries();
+            CompoundFolderEntryIterator end;
+            if (entryIt != end) {
                 throw KnoxCryptException(KnoxCryptError::FolderNotEmpty);
             }
         }
@@ -485,7 +487,7 @@ namespace knoxcrypt
 
     void
     CoreFS::removeAllChildFoldersToo(::boost::filesystem::path const &path,
-                                      SharedCompoundFolder const &f)
+                                     SharedCompoundFolder const &f)
     {
         std::vector<SharedEntryInfo> infos = f->listFolderEntries();
         for (auto const & entry : infos) {

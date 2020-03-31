@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2016>, <BenHJ>
+  Copyright (c) <2013-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,8 @@
 
 #pragma once
 
+
+#include "knoxcrypt/ContentFolderEntryIterator.hpp"
 #include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/EntryInfo.hpp"
 #include "knoxcrypt/File.hpp"
@@ -53,26 +55,23 @@ namespace knoxcrypt
         /**
          * @brief constructs a ContentFolder to write to. In this case the
          * starting block is unknown
-         * @param the core knoxcrypt io (path, blocks, password)
-         * @param startBlock the index of the starting file block making up entry data
-         * @param writable if data entries can be added to folder
+         * @param io the core knoxcrypt io (path, blocks, password)
          * @param name the name of the entry
          * @param enforceRootBlock true if we want to enforce the starting root block
          */
-        ContentFolder(SharedCoreIO const &io,
-                      std::string const &name = "root",
+        ContentFolder(SharedCoreIO io,
+                      std::string name = "root",
                       bool const enforceRootBlock = false);
 
         /**
          * @brief constructs a ContentFolder to read from
-         * @param the core knoxcrypt io (path, blocks, password)
+         * @param io the core knoxcrypt io (path, blocks, password)
          * @param startBlock the index of the starting file block making up entry data
-         * @param writable if data entries can be added to folder
          * @param name the name of the entry
          */
-        ContentFolder(SharedCoreIO const &io,
+        ContentFolder(SharedCoreIO io,
                       uint64_t const startBlock,
-                      std::string const &name = "root");
+                      std::string name = "root");
 
 
         /**
@@ -99,7 +98,7 @@ namespace knoxcrypt
          * @return a copy of the File with name
          */
         boost::optional<File> getFile(std::string const &name,
-                                                    OpenDisposition const &openDisposition) const;
+                                      OpenDisposition const &openDisposition) const;
 
         /**
          * @brief retrieves a ContentFolder with specific name
@@ -155,13 +154,7 @@ namespace knoxcrypt
          * @brief returns a vector of all entry infos
          * @return all entry infos
          */
-        EntryInfoCacheMap & listAllEntries() const;
-
-        /**
-         * @brief returns a vector of file entry infos
-         * @return all file entry infos
-         */
-        std::vector<SharedEntryInfo> listFileEntries() const;
+        ContentFolderEntryIterator listAllEntries() const;
 
         /**
          * @brief returns a vector of folder entry infos

@@ -36,6 +36,7 @@
 #include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/FileBlockBuilder.hpp"
 #include "knoxcrypt/CoreFS.hpp"
+#include "knoxcrypt/CompoundFolderEntryIterator.hpp"
 #include "knoxcrypt/KnoxCryptException.hpp"
 #include "utility/CipherCallback.hpp"
 #include "utility/EcholessPasswordPrompt.hpp"
@@ -302,25 +303,26 @@ namespace fuselayer
             try {
                 auto folder(knoxcrypt_DATA->getFolder(path));
 
-                auto & infos(folder.listAllEntries());
+                auto it = folder.listAllEntries();
 
                 filler(buf, ".", NULL, 0);           /* Current directory (.)  */
                 filler(buf, "..", NULL, 0);
 
-                for(auto const &it : infos) {
+                knoxcrypt::CompoundFolderEntryIterator end;
+                while(it != end) {                    
                     struct stat stbuf;
-                    if (it.second->type() == knoxcrypt::EntryType::FileType) {
+                    if ((*it)->type() == knoxcrypt::EntryType::FileType) {
                         stbuf.st_mode = S_IFREG | 0755;
                         stbuf.st_nlink = 1;
-                        stbuf.st_size = it.second->size();
+                        stbuf.st_size = (*it)->size();
                     } else {
                         stbuf.st_mode = S_IFDIR | 0744;
                         stbuf.st_nlink = 3;
                     }
-
-                    filler(buf, it.second->filename().c_str(), &stbuf, 0);
-
+                    filler(buf, (*it)->filename().c_str(), &stbuf, 0);
+                    ++it;
                 }
+
             } catch (knoxcrypt::KnoxCryptException const &e) {
                 return detail::exceptionDispatch(e);
             }

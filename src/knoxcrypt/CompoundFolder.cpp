@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2015-2016>, <BenHJ>
+  Copyright (c) <2015-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,12 @@ namespace knoxcrypt
     // more space required
     #define CONTENT_SIZE 10
 
-    CompoundFolder::CompoundFolder(SharedCoreIO const &io,
-                                   std::string const &name,
+    CompoundFolder::CompoundFolder(SharedCoreIO io,
+                                   std::string name,
                                    bool const enforceRootBlock)
-      : m_compoundFolder(std::make_shared<ContentFolder>(io, name, enforceRootBlock))
+      : m_compoundFolder(std::make_shared<ContentFolder>(std::move(io), name, enforceRootBlock))
       , m_contentFolders()
-      , m_name(name)
+      , m_name(std::move(name))
       , m_ContentFolderCount(m_compoundFolder->getTotalEntryCount())
       , m_cache()
       , m_cacheShouldBeUpdated(true)
@@ -54,12 +54,12 @@ namespace knoxcrypt
         doPopulateContentFolders();
     }
 
-    CompoundFolder::CompoundFolder(SharedCoreIO const &io,
+    CompoundFolder::CompoundFolder(SharedCoreIO io,
                                    uint64_t const startBlock,
-                                   std::string const &name)
-      : m_compoundFolder(std::make_shared<ContentFolder>(io, startBlock, name))
+                                   std::string name)
+      : m_compoundFolder(std::make_shared<ContentFolder>(std::move(io), startBlock, name))
       , m_contentFolders()
-      , m_name(name)
+      , m_name(std::move(name))
       , m_ContentFolderCount(m_compoundFolder->getTotalEntryCount())
       , m_cache()
       , m_cacheShouldBeUpdated(true)
@@ -91,12 +91,6 @@ namespace knoxcrypt
     void
     CompoundFolder::addFile(std::string const &name)
     {
-        // check if compound entries is empty. These are
-        // compound 'leaf' sub-folders
-        if(m_contentFolders.empty()) {
-            doAddContentFolder();
-        }
-
         // each leaf folder can have CONTENT_SIZE entries
         for(auto & f : boost::adaptors::reverse(m_contentFolders)) {
             if(f->getAliveEntryCount() < CONTENT_SIZE) {
@@ -116,12 +110,6 @@ namespace knoxcrypt
     void
     CompoundFolder::addFolder(std::string const &name)
     {
-        // check if compound entries is empty. These are
-        // compound 'leaf' sub-folders
-        if(m_contentFolders.empty()) {
-            doAddContentFolder();
-        }
-
         // each leaf folder can have CONTENT_SIZE entries
         for(auto & f : m_contentFolders) {
             if(f->getAliveEntryCount() < CONTENT_SIZE) {
@@ -240,44 +228,10 @@ namespace knoxcrypt
         return SharedEntryInfo();
     }
 
-    EntryInfoCacheMap &
+    CompoundFolderEntryIterator
     CompoundFolder::listAllEntries() const
     {
-        if(m_cacheShouldBeUpdated) {
-            uint64_t index(0);
-            for(auto const & f : m_contentFolders) {
-                auto & leafEntries(f->listAllEntries());
-                for(auto const & entry : leafEntries) {
-                    if(m_cache.find(entry.first) == m_cache.end()) {
-                        entry.second->setBucketIndex(index);
-                        m_cache.insert(entry);
-                    }
-                }
-                ++index;
-            }
-            m_cacheShouldBeUpdated = false;
-        }
-
-        return m_cache;
-    }
-
-    std::vector<SharedEntryInfo>
-    CompoundFolder::listFileEntries() const
-    {
-        std::vector<SharedEntryInfo> infos;
-        uint64_t index(0);
-        for(auto const & f : m_contentFolders) {
-            auto leafEntries(f->listFileEntries());
-            for(auto const & entry : leafEntries) {
-                if(m_cache.find(entry->filename()) == m_cache.end()) {
-                    entry->setBucketIndex(index);
-                    m_cache.emplace(entry->filename(), entry);
-                }
-                infos.push_back(entry);
-            }
-            ++index;
-        }
-        return infos;
+        return CompoundFolderEntryIterator(m_contentFolders, m_cache);
     }
 
     std::vector<SharedEntryInfo>
@@ -311,7 +265,7 @@ namespace knoxcrypt
     void
     CompoundFolder::removeFile(std::string const &name)
     {
-        for(auto f = std::begin(m_contentFolders); f!=std::end(m_contentFolders);) {
+        for(auto f = std::begin(m_contentFolders); f != std::end(m_contentFolders);) {
             assert(*f);
             if((*f)->removeFile(name)) {
                 // decrement number of entries in leaf
@@ -332,7 +286,7 @@ namespace knoxcrypt
     void
     CompoundFolder::removeFolder(std::string const &name)
     {
-        for(auto f = std::begin(m_contentFolders); f!=std::end(m_contentFolders);) {
+        for(auto f = std::begin(m_contentFolders); f != std::end(m_contentFolders);) {
             assert(*f);
             if((*f)->removeCompoundFolder(name)) {
                 // decrement number of entries in leaf

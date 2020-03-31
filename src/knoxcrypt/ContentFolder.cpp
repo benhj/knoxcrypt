@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2016>, <BenHJ>
+  Copyright (c) <2013-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include "knoxcrypt/CompoundFolder.hpp"
 #include "knoxcrypt/ContainerImageStream.hpp"
 #include "knoxcrypt/ContentFolder.hpp"
+#include "knoxcrypt/CompoundFolderEntryIterator.hpp"
 #include "knoxcrypt/detail/DetailKnoxCrypt.hpp"
 #include "knoxcrypt/detail/DetailFolder.hpp"
 
@@ -89,7 +90,7 @@ namespace knoxcrypt
             throw std::runtime_error("Problem retrieving metadata");
         }
 
-        std::vector<uint8_t> createFileNameVector(std::string const &name)
+        std::vector<uint8_t> createFileNameVector(std::string name)
         {
             std::vector<uint8_t> filename(detail::MAX_FILENAME_LENGTH);
             (void)std::copy(&name.front(), &name.front() + name.length(), &filename.front());
@@ -140,7 +141,7 @@ namespace knoxcrypt
          * @param metaData the metadata
          * @return name extracted from metadata
          */
-        std::string getEntryName(std::vector<uint8_t> const &metaData)
+        std::string getEntryName(std::vector<uint8_t> metaData)
         {
             std::string nameDat(metaData.begin() + 1, metaData.end() - 8);
             std::string returnString;
@@ -157,10 +158,10 @@ namespace knoxcrypt
          * @brief retrieves the name of an entry with given index
          * @return the name
          */
-        std::string getEntryName(File const & folderData, uint64_t const n)
+        std::string getEntryName(File folderData, uint64_t const n)
         {
-            auto metaData(doSeekAndReadOfEntryMetaData(folderData, n));
-            return getEntryName(metaData);
+            auto metaData(doSeekAndReadOfEntryMetaData(std::move(folderData), n));
+            return getEntryName(std::move(metaData));
         }
 
         /**
@@ -189,16 +190,16 @@ namespace knoxcrypt
 
     }
 
-    ContentFolder::ContentFolder(SharedCoreIO const &io,
+    ContentFolder::ContentFolder(SharedCoreIO io,
                                  uint64_t const startVolumeBlock,
-                                 std::string const &name)
-        : m_io(io)
-        , m_folderData(io,
+                                 std::string name)
+        : m_io(std::move(io))
+        , m_folderData(m_io,
                        name,
                        startVolumeBlock,
                        OpenDisposition::buildAppendDisposition())
         , m_startVolumeBlock(startVolumeBlock)
-        , m_name(name)
+        , m_name(std::move(name))
         , m_entryCount(getNumberOfEntries(m_folderData, m_io->blocks))
         , m_deadEntryCount(0)
         , m_entryInfoCacheMap()
@@ -208,13 +209,13 @@ namespace knoxcrypt
         countDeadEntries();
     }
 
-    ContentFolder::ContentFolder(SharedCoreIO const &io,
-                                 std::string const &name,
+    ContentFolder::ContentFolder(SharedCoreIO io,
+                                 std::string name,
                                  bool const enforceRootBlock)
-        : m_io(io)
+        : m_io(std::move(io))
         , m_folderData(m_io, name, enforceRootBlock)
         , m_startVolumeBlock(m_folderData.getStartVolumeBlockIndex())
-        , m_name(name)
+        , m_name(std::move(name))
         , m_entryCount(0)
         , m_deadEntryCount(0)
         , m_entryInfoCacheMap()
@@ -245,7 +246,7 @@ namespace knoxcrypt
         detail::setBitInByte(byte, 0);
 
         // set second bit to indicate that its type file; folder will be type 0
-        detail::setBitInByte(byte, 1, entryType==EntryType::FileType);
+        detail::setBitInByte(byte, 1, entryType == EntryType::FileType);
 
         // write out first byte
         return doWrite((char*)&byte, 1);
@@ -349,15 +350,13 @@ namespace knoxcrypt
         auto entry(std::make_shared<CompoundFolder>(m_io, name));
 
         // write the first block index to the file entry metadata
-        doWriteNewMetaDataForEntry(name, EntryType::FolderType, entry
-                                                                      ->getCompoundFolder()
-                                                                      ->m_folderData
-                                                                      .getStartVolumeBlockIndex());
+        doWriteNewMetaDataForEntry(name, EntryType::FolderType,
+          entry->getCompoundFolder()->m_folderData.getStartVolumeBlockIndex());
     }
 
     boost::optional<File>
     ContentFolder::getFile(std::string const &name,
-                                  OpenDisposition const &openDisposition) const
+                           OpenDisposition const &openDisposition) const
     {
 
         // optimization is to build the file based on metadata stored in the
@@ -421,19 +420,14 @@ namespace knoxcrypt
         }
     }
 
-    EntryInfoCacheMap &
+    ContentFolderEntryIterator
     ContentFolder::listAllEntries() const
     {
-
-        for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
-
-            // read all metadata
-            auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
-            if (entryMetaDataIsEnabled(metaData)) {
-                (void)doGetEntryInfo(metaData, entryIndex);
-            }
-        }
-        return m_entryInfoCacheMap;
+        return ContentFolderEntryIterator(&m_folderData, m_entryCount,
+            [this](std::vector<uint8_t> const &metaData,
+                   uint64_t const entryIndex) {
+                return doGetEntryInfo(metaData, entryIndex);
+            });
     }
 
     std::vector<SharedEntryInfo>
@@ -450,12 +444,6 @@ namespace knoxcrypt
             }
         }
         return entries;
-    }
-
-    std::vector<SharedEntryInfo>
-    ContentFolder::listFileEntries() const
-    {
-        return doListEntriesBasedOnType(EntryType::FileType);
     }
 
     std::vector<SharedEntryInfo>
@@ -477,7 +465,7 @@ namespace knoxcrypt
         if(index == -1) {
             return false;
         }
-        metaDataToOutOfUse(temp, index);
+        metaDataToOutOfUse(std::move(temp), index);
 
         // signify that a 'space' might be available for metadata earlier in list
         // than at end
@@ -566,14 +554,16 @@ namespace knoxcrypt
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto & infos(entry->listAllEntries());
-        for (auto const &it : infos) {
-            if (it.second->type() == EntryType::FileType) {
-                entry->removeFile(it.second->filename());
+        auto it = (entry->listAllEntries());
+        ContentFolderEntryIterator end;
+        while(it != end) {
+            if ((*it)->type() == EntryType::FileType) {
+                entry->removeFile((*it)->filename());
             } else {
                 // a leaf will only contain compound folders
-                entry->removeCompoundFolder(it.second->filename());
+                entry->removeCompoundFolder((*it)->filename());
             }
+            ++it;
         }
 
         // second set the metadata to an out of use state; this metadata can
@@ -596,13 +586,15 @@ namespace knoxcrypt
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto infos(entry->listAllEntries());
-        for (auto const &it : infos) {
-            if (it.second->type() == EntryType::FileType) {
-                entry->removeFile(it.second->filename());
+        auto it = (entry->listAllEntries());
+        CompoundFolderEntryIterator end;
+        while (it != end) {            
+            if ((*it)->type() == EntryType::FileType) {
+                entry->removeFile((*it)->filename());
             } else {
-                entry->removeFolder(it.second->filename());
+                entry->removeFolder((*it)->filename());
             }
+            ++it;
         }
 
         // second set the metadata to an out of use state; this metadata can
@@ -669,7 +661,8 @@ namespace knoxcrypt
     }
 
     SharedEntryInfo
-    ContentFolder::doGetEntryInfo(std::vector<uint8_t> const &metaData, uint64_t const entryIndex) const
+    ContentFolder::doGetEntryInfo(std::vector<uint8_t> const &metaData,
+                                  uint64_t const entryIndex) const
     {
 
         auto const entryName(getEntryName(metaData));

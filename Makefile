@@ -31,7 +31,7 @@ CXXFLAGS ?= -O2 \
             -Wno-ctor-dtor-privacy \
             -Wall \
             -ggdb
-CXXFLAGS += -std=c++11 \
+CXXFLAGS += -std=c++14 \
             -Icryptostreampp \
             -I/usr/include -I/usr/local/include \
             -Iinclude -D_FILE_OFFSET_BITS=64 \

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include "knoxcrypt/ContainerImageStream.hpp"
 #include "knoxcrypt/CoreIO.hpp"
+#include "knoxcrypt/EntryInfo.hpp"
 #include "knoxcrypt/File.hpp"
 #include "knoxcrypt/ContentFolder.hpp"
 #include "knoxcrypt/detail/DetailKnoxCrypt.hpp"
@@ -42,6 +43,7 @@
 #include <boost/iostreams/stream.hpp>
 
 #include <cassert>
+#include <memory>
 #include <sstream>
 
 using namespace simpletest;
@@ -56,7 +58,6 @@ class ContentFolderTest
         testAddEntryNameRetrieval();
         testListAllEntries();
         testListAllEntriesEmpty();
-        testListFileEntries();
         testListFolderEntries();
         //commented out since block-size dependent
         //testAddEntryBlockIndexRetrieval();
@@ -110,18 +111,28 @@ class ContentFolderTest
         }
     }
 
+    bool searchEntry(std::vector<std::shared_ptr<knoxcrypt::EntryInfo>> const & entries,
+                     std::string const & name)
+    {
+        return std::find_if(std::begin(entries), std::end(entries),
+            [&name](std::shared_ptr<knoxcrypt::EntryInfo> const & ei) {
+            return ei->filename() == name;
+        }) != std::end(entries);
+    }
+
     void testListAllEntries()
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::ContentFolder folder = createTestFolder(testPath);
-        auto entries = folder.listAllEntries();
-        ASSERT_EQUAL(entries.size(), 6, "testListAllEntries: number of entries");
-        ASSERT_UNEQUAL(entries.find("test.txt"), (entries.end()), "testListAllEntries: filename A");
-        ASSERT_UNEQUAL(entries.find("some.log"), (entries.end()), "testListAllEntries: filename B");
-        ASSERT_UNEQUAL(entries.find("folderA"), (entries.end()), "testListAllEntries: filename C");
-        ASSERT_UNEQUAL(entries.find("picture.jpg"), (entries.end()), "testListAllEntries: filename D");
-        ASSERT_UNEQUAL(entries.find("vai.mp3"), (entries.end()), "testListAllEntries: filename E");
-        ASSERT_UNEQUAL(entries.find("folderB"), (entries.end()), "testListAllEntries: filename F");
+        auto entry = folder.listAllEntries();
+        // ASSERT_EQUAL(entries.size(), 6, "testListAllEntries: number of entries");
+
+        ASSERT_EQUAL((*entry)->filename(), "test.txt", "testListAllEntries: filename A"); ++entry;
+        ASSERT_EQUAL((*entry)->filename(), "some.log", "testListAllEntries: filename B"); ++entry;
+        ASSERT_EQUAL((*entry)->filename(), "folderA", "testListAllEntries: filename C"); ++entry;
+        ASSERT_EQUAL((*entry)->filename(), "picture.jpg", "testListAllEntries: filename D"); ++entry;
+        ASSERT_EQUAL((*entry)->filename(), "vai.mp3", "testListAllEntries: filename E"); ++entry;
+        ASSERT_EQUAL((*entry)->filename(), "folderB", "testListAllEntries: filename F");
     }
 
     void testListAllEntriesEmpty()
@@ -129,20 +140,8 @@ class ContentFolderTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
         knoxcrypt::ContentFolder folder(io, 0, std::string("root"));
-        auto entries = folder.listAllEntries();
-        ASSERT_EQUAL(entries.size(), 0, "testListAllEntriesEmpty: number of entries");
-    }
-
-    void testListFileEntries()
-    {
-        boost::filesystem::path testPath = buildImage(m_uniquePath);
-        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
-        auto entries = folder.listFileEntries();
-        ASSERT_EQUAL(entries.size(), 4, "testListFileEntries: number of entries");
-        ASSERT_EQUAL(entries[0]->filename(), "test.txt", "testListFileEntries: filename A");
-        ASSERT_EQUAL(entries[1]->filename(), "some.log", "testListFileEntries: filename B");
-        ASSERT_EQUAL(entries[2]->filename(), "picture.jpg", "testListFileEntries: filename D");
-        ASSERT_EQUAL(entries[3]->filename(), "vai.mp3", "testListFileEntries: filename E");
+        auto entry = folder.listAllEntries();
+        ASSERT_EQUAL(entry, knoxcrypt::ContentFolderEntryIterator(), "testListAllEntriesEmpty: number of entries");
     }
 
     void testListFolderEntries()
@@ -335,23 +334,24 @@ class ContentFolderTest
 
         // test root entries still intact
         {
-            auto entries = folder.listAllEntries();
-            ASSERT_EQUAL(entries.size(), 6, "testContentFolderRetrievalAddEntries: root number of entries");
-            ASSERT_UNEQUAL(entries.find("test.txt"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename A");
-            ASSERT_UNEQUAL(entries.find("some.log"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename B");
-            ASSERT_UNEQUAL(entries.find("folderA"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename C");
-            ASSERT_UNEQUAL(entries.find("picture.jpg"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename D");
-            ASSERT_UNEQUAL(entries.find("vai.mp3"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename E");
-            ASSERT_UNEQUAL(entries.find("folderB"), (entries.end()), "testContentFolderRetrievalAddEntries: root filename F");
+            auto entry = folder.listAllEntries();
+            //
+            ASSERT_EQUAL((*entry)->filename(), "test.txt", "testContentFolderRetrievalAddEntries: root filename A"); ++entry;
+            ASSERT_EQUAL((*entry)->filename(), "some.log", "testContentFolderRetrievalAddEntries: root filename B");++entry;
+            ASSERT_EQUAL((*entry)->filename(), "folderA", "testContentFolderRetrievalAddEntries: root filename C");++entry;
+            ASSERT_EQUAL((*entry)->filename(), "picture.jpg", "testContentFolderRetrievalAddEntries: root filename D");++entry;
+            ASSERT_EQUAL((*entry)->filename(), "vai.mp3", "testContentFolderRetrievalAddEntries: root filename E");++entry;
+            ASSERT_EQUAL((*entry)->filename(), "folderB", "testContentFolderRetrievalAddEntries: root filename F");
+            ASSERT_EQUAL(++entry, knoxcrypt::ContentFolderEntryIterator(), "testContentFolderRetrievalAddEntries: root number of entries");
         }
         // test sub folder entries exist
         {
-            auto entries = subFolder.listAllEntries();
-            ASSERT_EQUAL(entries.size(), 4, "testContentFolderRetrievalAddEntries: subfolder number of entries");
-            ASSERT_UNEQUAL(entries.find("subFileA"), (entries.end()), "testContentFolderRetrievalAddEntries: subFolder filename A");
-            ASSERT_UNEQUAL(entries.find("subFileB"), (entries.end()), "testContentFolderRetrievalAddEntries: subFolder filename B");
-            ASSERT_UNEQUAL(entries.find("subFileC"), (entries.end()), "testContentFolderRetrievalAddEntries: subFolder filename C");
-            ASSERT_UNEQUAL(entries.find("subFileD"), (entries.end()), "testContentFolderRetrievalAddEntries: subFolder filename D");
+            auto entry = subFolder.listAllEntries();
+            ASSERT_EQUAL((*entry)->filename(), "subFileA", "testContentFolderRetrievalAddEntries: subFolder filename A");++entry;
+            ASSERT_EQUAL((*entry)->filename(), "subFileB", "testContentFolderRetrievalAddEntries: subFolder filename B");++entry;
+            ASSERT_EQUAL((*entry)->filename(), "subFileC", "testContentFolderRetrievalAddEntries: subFolder filename C");++entry;
+            ASSERT_EQUAL((*entry)->filename(), "subFileD", "testContentFolderRetrievalAddEntries: subFolder filename D");
+            ASSERT_EQUAL(++entry, knoxcrypt::ContentFolderEntryIterator(), "estContentFolderRetrievalAddEntries: subfolder number of entries");
         }
     }
 
@@ -382,8 +382,11 @@ class ContentFolderTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         folder.removeFile("test.txt");
-        auto entries = folder.listAllEntries();
-        ASSERT_EQUAL(entries.size(), 5, "testRemoveFile: number of entries after removal");
+        auto entry = folder.listAllEntries();
+        for(int i = 0; i < 5; ++i) {
+            ++entry;
+        }
+        ASSERT_EQUAL(++entry, knoxcrypt::ContentFolderEntryIterator(), "testRemoveFile: number of entries after removal");
     }
 
     void testRemoveEmptySubFolder()
@@ -391,8 +394,11 @@ class ContentFolderTest
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         knoxcrypt::ContentFolder folder = createTestFolder(testPath);
         folder.removeContentFolder("folderA");
-        auto entries = folder.listAllEntries();
-        ASSERT_EQUAL(entries.size(), 5, "testRemoveEmptySubFolder: number of entries after removal");
+        auto entry = folder.listAllEntries();
+        for(int i = 0; i < 5; ++i) {
+            ++entry;
+        }
+        ASSERT_EQUAL(++entry, knoxcrypt::ContentFolderEntryIterator(), "testRemoveEmptySubFolder: number of entries after removal");
     }
 
     void testRemoveNonEmptySubFolder()
@@ -416,8 +422,11 @@ class ContentFolderTest
             boost::filesystem::path testPath = buildImage(m_uniquePath);
             knoxcrypt::ContentFolder folder = createTestFolder(testPath);
             folder.removeContentFolder("folderA");
-            auto entries = folder.listAllEntries();
-            ASSERT_EQUAL(entries.size(), 5, "testRemoveNonEmptySubFolder: number of entries after removal");
+            auto entry = folder.listAllEntries();
+            for(int i = 0; i < 5; ++i) {
+                ++entry;
+            }
+            ASSERT_EQUAL(++entry, knoxcrypt::ContentFolderEntryIterator(), "testRemoveNonEmptySubFolder: number of entries after removal");
         }
     }
 

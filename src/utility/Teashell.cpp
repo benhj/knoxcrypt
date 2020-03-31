@@ -35,6 +35,7 @@
 
 #include "knoxcrypt/CoreIO.hpp"
 #include "knoxcrypt/EntryInfo.hpp"
+#include "knoxcrypt/CompoundFolderEntryIterator.hpp"
 #include "knoxcrypt/FileBlockBuilder.hpp"
 #include "knoxcrypt/CoreFS.hpp"
 #include "knoxcrypt/KnoxCryptException.hpp"
@@ -108,13 +109,15 @@ void com_ls(knoxcrypt::CoreFS &theBfs, std::string const &path)
 
     // iterate over entries in folder and print filenames of each
     auto folder = theBfs.getFolder(thePath);
-    auto & entries = folder.listAllEntries();
-    for (auto const &it : entries) {
-        if (it.second->type() == knoxcrypt::EntryType::FileType) {
-            std::cout<<boost::format("%1% %|30t|%2%\n") % it.second->filename() % "<F>";
+    auto it = folder.listAllEntries();
+    knoxcrypt::CompoundFolderEntryIterator end;
+    while(it != end) {
+        if ((*it)->type() == knoxcrypt::EntryType::FileType) {
+            std::cout<<boost::format("%1% %|30t|%2%\n") % (*it)->filename() % "<F>";
         } else {
-            std::cout<<boost::format("%1% %|30t|%2%\n") % it.second->filename() % "<D>";
+            std::cout<<boost::format("%1% %|30t|%2%\n") % (*it)->filename() % "<D>";
         }
+        ++it;
     }
 }
 
@@ -135,15 +138,17 @@ std::string tabCompleteknoxcryptEntry(knoxcrypt::CoreFS &theBfs, std::string con
     auto folder = theBfs.getFolder(parentPath);
 
     // iterate over entries in folder
-    auto & entries = folder.listAllEntries();
-    for (auto const &it : entries) {
-
+    auto it = folder.listAllEntries();
+    knoxcrypt::CompoundFolderEntryIterator end;
+    while(it != end) {
         // try to match the entry with the thing that we want to tab-complete
-        auto extracted(it.second->filename().substr(0, bp.filename().string().length()));
+        auto extracted((*it)->filename().substr(0, bp.filename().string().length()));
         if(extracted == bp.filename()) {
-            return it.second->filename(); // match, return name of entry
+            return (*it)->filename(); // match, return name of entry
         }
+        ++it;
     }
+
     return bp.filename().string(); // no match, return non tab-completed token
 }
 

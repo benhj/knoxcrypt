@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2014-present>, <BenHJ>
+  Copyright (c) <2020>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -26,57 +26,56 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/// For recursively copying a ContentFolder to some physical disk location
-
 #pragma once
 
-#include "knoxcrypt/CoreFS.hpp"
+#include "knoxcrypt/ContentFolder.hpp"
+#include "knoxcrypt/ContentFolderEntryIterator.hpp"
 #include "knoxcrypt/EntryInfo.hpp"
-#include "knoxcrypt/EntryType.hpp"
-#include "knoxcrypt/CompoundFolderEntryIterator.hpp"
-#include "utility/ContentFolderVisitor.hpp"
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/iostreams/copy.hpp>
-
-#include <fstream>
-#include <vector>
+#include <boost/iterator/iterator_facade.hpp>
+#include <map>
+#include <memory>
 
 namespace knoxcrypt
 {
 
-    namespace utility
+    class CompoundFolderEntryIterator : public boost::iterator_facade <CompoundFolderEntryIterator,
+                                                                       std::shared_ptr<EntryInfo>,
+                                                                       boost::forward_traversal_tag,
+                                                                       std::shared_ptr<EntryInfo>>
     {
+      public:
 
-        inline
-        void recursiveExtract(ContentFolderVisitor &visitor,
-                              CoreFS &theBfs,
-                              std::string const &teaPath)
-        {
+        CompoundFolderEntryIterator(std::vector<std::shared_ptr<ContentFolder>> contentFolders,
+                                    std::map<std::string, SharedEntryInfo> cache);
 
-            // get the parent folder
-            auto folder = theBfs.getFolder(teaPath);
+        CompoundFolderEntryIterator();
 
-            // iterate over entries in folder
-            auto it = folder.listAllEntries();
-            CompoundFolderEntryIterator end;
+        void increment();
 
-            while(it != end) {
-                // If folder, create a folder at whereToWrite and recurse
-                // in to recurseExtract
-                if((*it)->type() == EntryType::FolderType) {
-                    visitor.enterFolder(*(*it));
-                    boost::filesystem::path teaLoc(teaPath);
-                    teaLoc /= (*it)->filename();
-                    recursiveExtract(visitor, theBfs, teaLoc.string());
-                    visitor.exitFolder(*(*it));
-                } else {
-                    visitor.enterFile(*(*it));
-                }
-                ++it;
-            }
-        }
-    }
+        bool equal(CompoundFolderEntryIterator const& other) const;
+
+        std::shared_ptr<EntryInfo> dereference() const;
+
+      private:
+
+        std::vector<std::shared_ptr<ContentFolder>> m_contentFolders;
+        std::map<std::string, SharedEntryInfo> mutable m_cache;
+
+        // All leaf-folder buckets
+        std::vector<std::shared_ptr<ContentFolder>>::iterator m_contentFoldersIterator;
+
+        // All entries in a single bucket
+        ContentFolderEntryIterator m_bucketEntriesIterator;
+
+        uint64_t m_bucketIndex;
+
+        std::shared_ptr<EntryInfo> mutable m_entry;
+
+        bool nextContentFolder();
+        bool nextEntry();
+
+    };
+
+
 }
-
