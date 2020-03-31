@@ -424,7 +424,7 @@ class CoreFSTest
         knoxcrypt::CoreFS kc(io);
         knoxcrypt::CompoundFolder fe = kc.getFolder("/");
         auto infos = fe.begin();
-        ASSERT_EQUAL(infos, knoxcrypt::CompoundFolderEntryIterator(), "CoreFSTest::testListAllEntriesEmpty()");
+        ASSERT_EQUAL(infos, fe.end(), "CoreFSTest::testListAllEntriesEmpty()");
     }
 
     void testMoveFileSameFolder()

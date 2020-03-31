@@ -33,9 +33,9 @@ namespace knoxcrypt
 {
 
     CompoundFolderEntryIterator::CompoundFolderEntryIterator(std::vector<std::shared_ptr<ContentFolder>> contentFolders,
-                                                             std::map<std::string, SharedEntryInfo> cache)
+                                                             std::map<std::string, SharedEntryInfo> & cache)
     : m_contentFolders(std::move(contentFolders))
-    , m_cache(std::move(cache))
+    , m_cache(cache)
     , m_contentFoldersIterator(std::begin(m_contentFolders))
     , m_bucketEntriesIterator()
     , m_bucketIndex(0)
@@ -48,9 +48,9 @@ namespace knoxcrypt
         }
     }
 
-    CompoundFolderEntryIterator::CompoundFolderEntryIterator()
+    CompoundFolderEntryIterator::CompoundFolderEntryIterator(std::map<std::string, SharedEntryInfo> & cache)
     : m_contentFolders()
-    , m_cache()
+    , m_cache(cache)
     , m_contentFoldersIterator()
     , m_bucketEntriesIterator()
     , m_bucketIndex(0)

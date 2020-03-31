@@ -303,24 +303,20 @@ namespace fuselayer
             try {
                 auto folder(knoxcrypt_DATA->getFolder(path));
 
-                auto it = folder.begin();
-
                 filler(buf, ".", NULL, 0);           /* Current directory (.)  */
                 filler(buf, "..", NULL, 0);
 
-                auto end = folder.end();
-                while(it != end) {                    
+                for(auto const & it : folder) {                
                     struct stat stbuf;
-                    if ((*it)->type() == knoxcrypt::EntryType::FileType) {
+                    if (it->type() == knoxcrypt::EntryType::FileType) {
                         stbuf.st_mode = S_IFREG | 0755;
                         stbuf.st_nlink = 1;
-                        stbuf.st_size = (*it)->size();
+                        stbuf.st_size = it->size();
                     } else {
                         stbuf.st_mode = S_IFDIR | 0744;
                         stbuf.st_nlink = 3;
                     }
-                    filler(buf, (*it)->filename().c_str(), &stbuf, 0);
-                    ++it;
+                    filler(buf, it->filename().c_str(), &stbuf, 0);
                 }
 
             } catch (knoxcrypt::KnoxCryptException const &e) {

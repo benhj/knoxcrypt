@@ -155,7 +155,7 @@ namespace knoxcrypt
 
         // a compound folder will be composed of multiple sub-folders
         // which are there to build up a more efficient folder structure
-        std::vector<SharedContentFolder> m_contentFolders;
+        std::vector<SharedContentFolder> mutable m_contentFolders;
 
         // stores the name of this folder
         std::string m_name;
@@ -163,10 +163,10 @@ namespace knoxcrypt
         int m_ContentFolderCount;
 
         // optimization
-        mutable EntryInfoCacheMap m_cache;
+        EntryInfoCacheMap mutable m_cache;
 
         // indicate when need to update cache map
-        mutable bool m_cacheShouldBeUpdated;
+        bool mutable m_cacheShouldBeUpdated;
     };
 
 }

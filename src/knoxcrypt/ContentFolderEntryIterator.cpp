@@ -71,7 +71,7 @@ namespace knoxcrypt
     , m_entryCount(entryCount)
     , m_builder(std::move(builder))
     , m_currentPosition(0)
-    , m_entry(nullptr)
+    , m_entry{nullptr}
     {
         increment();
     }
@@ -81,7 +81,7 @@ namespace knoxcrypt
     , m_entryCount(static_cast<long>(0))
     , m_builder()
     , m_currentPosition(static_cast<long>(0))
-    , m_entry(nullptr)
+    , m_entry{nullptr}
     {
     }
 

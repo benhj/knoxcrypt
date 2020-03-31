@@ -59,22 +59,18 @@ namespace knoxcrypt
             auto folder = theBfs.getFolder(teaPath);
 
             // iterate over entries in folder
-            auto it = folder.begin();
-            auto end = folder.end();
-
-            while(it != end) {
+            for (auto const & it : folder) {
                 // If folder, create a folder at whereToWrite and recurse
                 // in to recurseExtract
-                if((*it)->type() == EntryType::FolderType) {
-                    visitor.enterFolder(*(*it));
+                if(it->type() == EntryType::FolderType) {
+                    visitor.enterFolder(*it);
                     boost::filesystem::path teaLoc(teaPath);
-                    teaLoc /= (*it)->filename();
+                    teaLoc /= it->filename();
                     recursiveExtract(visitor, theBfs, teaLoc.string());
-                    visitor.exitFolder(*(*it));
+                    visitor.exitFolder(*it);
                 } else {
-                    visitor.enterFile(*(*it));
+                    visitor.enterFile(*it);
                 }
-                ++it;
             }
         }
     }

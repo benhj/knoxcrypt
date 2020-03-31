@@ -47,9 +47,9 @@ namespace knoxcrypt
       public:
 
         CompoundFolderEntryIterator(std::vector<std::shared_ptr<ContentFolder>> contentFolders,
-                                    std::map<std::string, SharedEntryInfo> cache);
+                                    std::map<std::string, SharedEntryInfo> & cache);
 
-        CompoundFolderEntryIterator();
+        CompoundFolderEntryIterator(std::map<std::string, SharedEntryInfo> & cache);
 
         void increment();
 
@@ -60,7 +60,7 @@ namespace knoxcrypt
       private:
 
         std::vector<std::shared_ptr<ContentFolder>> m_contentFolders;
-        std::map<std::string, SharedEntryInfo> mutable m_cache;
+        std::map<std::string, SharedEntryInfo> & m_cache;
 
         // All leaf-folder buckets
         std::vector<std::shared_ptr<ContentFolder>>::iterator m_contentFoldersIterator;

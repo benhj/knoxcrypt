@@ -71,13 +71,10 @@ namespace knoxcrypt
     CompoundFolder::doPopulateContentFolders()
     {
         if(m_ContentFolderCount > 0) {
-            auto it = m_compoundFolder->begin();
-            auto end = m_compoundFolder->end();
-            while(it != end) {
-                if((*it)->type() == EntryType::FolderType) {
-                    m_contentFolders.push_back(m_compoundFolder->getContentFolder((*it)->filename()));
+            for(auto const & it : *m_compoundFolder) {
+                if(it->type() == EntryType::FolderType) {
+                    m_contentFolders.push_back(m_compoundFolder->getContentFolder(it->filename()));
                 }
-                ++it;
             }
         }
     }
@@ -240,7 +237,7 @@ namespace knoxcrypt
     CompoundFolderEntryIterator
     CompoundFolder::end() const
     {
-        return CompoundFolderEntryIterator();
+        return CompoundFolderEntryIterator(m_cache);
     }
 
     void

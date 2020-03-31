@@ -537,16 +537,13 @@ namespace knoxcrypt
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto it = entry->begin();
-        auto end = entry->end();
-        while(it != end) {
-            if ((*it)->type() == EntryType::FileType) {
-                entry->removeFile((*it)->filename());
+        for(auto const & it : *entry) {
+            if (it->type() == EntryType::FileType) {
+                entry->removeFile(it->filename());
             } else {
                 // a leaf will only contain compound folders
-                entry->removeCompoundFolder((*it)->filename());
+                entry->removeCompoundFolder(it->filename());
             }
-            ++it;
         }
 
         // second set the metadata to an out of use state; this metadata can
@@ -569,15 +566,12 @@ namespace knoxcrypt
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto it = entry->begin();
-        auto end = entry->end();
-        while (it != end) {            
-            if ((*it)->type() == EntryType::FileType) {
-                entry->removeFile((*it)->filename());
+        for(auto const & it : *entry) {     
+            if (it->type() == EntryType::FileType) {
+                entry->removeFile(it->filename());
             } else {
-                entry->removeFolder((*it)->filename());
+                entry->removeFolder(it->filename());
             }
-            ++it;
         }
 
         // second set the metadata to an out of use state; this metadata can
