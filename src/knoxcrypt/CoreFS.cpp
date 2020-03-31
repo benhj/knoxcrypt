@@ -46,7 +46,7 @@ namespace knoxcrypt
     CompoundFolder
     CoreFS::getFolder(std::string const &path)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         auto thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -66,7 +66,7 @@ namespace knoxcrypt
     EntryInfo
     CoreFS::getInfo(std::string const &path)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         auto thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -94,21 +94,21 @@ namespace knoxcrypt
     bool
     CoreFS::fileExists(std::string const &path) const
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         return doFileExists(path);
     }
 
     bool
     CoreFS::folderExists(std::string const &path)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         return doFolderExists(path);
     }
 
     void
     CoreFS::addFile(std::string const &path)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         auto thePath(path);
         char ch = *path.rbegin();
         // file entries with trailing slash should throw
@@ -131,7 +131,7 @@ namespace knoxcrypt
     void
     CoreFS::addFolder(std::string const &path) const
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         auto thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash
@@ -155,7 +155,7 @@ namespace knoxcrypt
     void
     CoreFS::renameEntry(std::string const &src, std::string const &dst)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         auto srcPath(src);
         char ch = *src.rbegin();
         // ignore trailing slash
@@ -246,7 +246,7 @@ namespace knoxcrypt
     void
     CoreFS::removeFile(std::string const &path)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         auto thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash
@@ -268,7 +268,7 @@ namespace knoxcrypt
     void
     CoreFS::removeFolder(std::string const &path, FolderRemovalType const &removalType)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         auto thePath(path);
         char ch = *path.rbegin();
         // ignore trailing slash, but only if folder type
@@ -291,16 +291,15 @@ namespace knoxcrypt
             }
         }
 
+        // also remove entry and its parent from parent cache
+        removeFolderFromCache(boostPath);
+        removeFolderFromCache(boostPath.parent_path());
+
         try {
             parentEntry->removeFolder(boostPath.filename().string());
         } catch (...) {
             throw KnoxCryptException(KnoxCryptError::NotFound);
         }
-
-        // also remove entry and its parent from parent cache
-        removeFolderFromCache(boostPath);
-        removeFolderFromCache(boostPath.parent_path());
-
         // need to also check if this now fucks up the cached file
         resetCachedFile(thePath);
     }
@@ -308,7 +307,7 @@ namespace knoxcrypt
     FileDevice
     CoreFS::openFile(std::string const &path, OpenDisposition const &openMode)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         char ch = *path.rbegin();
         if (ch == '/') {
             throw KnoxCryptException(KnoxCryptError::NotFound);
@@ -326,7 +325,7 @@ namespace knoxcrypt
     void
     CoreFS::truncateFile(std::string const &path, std::ios_base::streamoff offset)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         auto parentEntry(doGetParentCompoundFolder(path));
         if (!parentEntry) {
             throw KnoxCryptException(KnoxCryptError::NotFound);
@@ -361,7 +360,7 @@ namespace knoxcrypt
     void
     CoreFS::statvfs(struct statvfs *buf)
     {
-        StateLock lock(m_stateMutex);
+        //StateLock lock(m_stateMutex);
         buf->f_bsize   = detail::FILE_BLOCK_SIZE;
         buf->f_blocks  = m_io->blocks;
         buf->f_bfree   = m_io->freeBlocks;
@@ -488,7 +487,8 @@ namespace knoxcrypt
                                      SharedCompoundFolder const &f)
     {
         auto it = f->begin();
-        for(; it != f->end(); ++it) {
+        auto end = f->end();
+        for(; it != end; ++it) {
             if((*it)->type() == EntryType::FolderType) {
                 auto entryPath = path;
                 entryPath /= (*it)->filename();

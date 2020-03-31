@@ -247,10 +247,20 @@ namespace fuselayer
             return written;
         }
 
-	static
-	int
-	knoxcrypt_access(const char * path, int)
-	{ return 0; }
+        static
+        int
+        knoxcrypt_access(const char * path, int)
+        { 
+            try {
+                if (strcmp(path, "/") == 0){
+                    return 0;
+                }
+                (void)knoxcrypt_DATA->getInfo(path);
+                return 0;
+            } catch (knoxcrypt::KnoxCryptException const &e) {
+                return detail::exceptionDispatch(e);
+            }
+        }
 
         static
         void
@@ -306,17 +316,20 @@ namespace fuselayer
                 filler(buf, ".", NULL, 0);           /* Current directory (.)  */
                 filler(buf, "..", NULL, 0);
 
-                for(auto const & it : folder) {                
+                auto it = folder.begin();
+                auto end = folder.end();
+
+                for(; it != end; ++it) {                
                     struct stat stbuf;
-                    if (it->type() == knoxcrypt::EntryType::FileType) {
+                    if ((*it)->type() == knoxcrypt::EntryType::FileType) {
                         stbuf.st_mode = S_IFREG | 0755;
                         stbuf.st_nlink = 1;
-                        stbuf.st_size = it->size();
+                        stbuf.st_size = (*it)->size();
                     } else {
                         stbuf.st_mode = S_IFDIR | 0744;
                         stbuf.st_nlink = 3;
                     }
-                    filler(buf, it->filename().c_str(), &stbuf, 0);
+                    filler(buf, (*it)->filename().c_str(), &stbuf, 0);
                 }
 
             } catch (knoxcrypt::KnoxCryptException const &e) {

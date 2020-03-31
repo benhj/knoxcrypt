@@ -47,7 +47,8 @@ namespace knoxcrypt
       public:
 
         CompoundFolderEntryIterator(std::vector<std::shared_ptr<ContentFolder>> contentFolders,
-                                    std::map<std::string, SharedEntryInfo> & cache);
+                                    std::map<std::string, SharedEntryInfo> & cache,
+                                    bool const cacheShouldBeUpdated = true);
 
         CompoundFolderEntryIterator(std::map<std::string, SharedEntryInfo> & cache);
 
@@ -65,12 +66,18 @@ namespace knoxcrypt
         // All leaf-folder buckets
         std::vector<std::shared_ptr<ContentFolder>>::iterator m_contentFoldersIterator;
 
-        // All entries in a single bucket
+        // For iterating over all entries in a single bucket
         ContentFolderEntryIterator m_bucketEntriesIterator;
+
+        // If content is cached, we can iterate over the cache
+        // using the following iterator instead
+        std::map<std::string, SharedEntryInfo>::iterator m_cacheIterator;
 
         uint64_t m_bucketIndex;
 
         std::shared_ptr<EntryInfo> mutable m_entry;
+
+        bool m_cacheShouldBeUpdated;
 
         bool nextContentFolder();
         bool nextEntry();

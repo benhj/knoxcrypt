@@ -33,17 +33,22 @@ namespace knoxcrypt
 {
 
     CompoundFolderEntryIterator::CompoundFolderEntryIterator(std::vector<std::shared_ptr<ContentFolder>> contentFolders,
-                                                             std::map<std::string, SharedEntryInfo> & cache)
+                                                             std::map<std::string, SharedEntryInfo> & cache,
+                                                             bool const cacheShouldBeUpdated)
     : m_contentFolders(std::move(contentFolders))
     , m_cache(cache)
     , m_contentFoldersIterator(std::begin(m_contentFolders))
     , m_bucketEntriesIterator()
+    , m_cacheIterator(std::begin(m_cache))
     , m_bucketIndex(0)
     , m_entry{nullptr}
+    , m_cacheShouldBeUpdated(cacheShouldBeUpdated)
     {
-        if(m_contentFoldersIterator != std::end(m_contentFolders)) {
+        if(m_cacheShouldBeUpdated && m_contentFoldersIterator != std::end(m_contentFolders)) {
             m_bucketEntriesIterator = (*m_contentFoldersIterator)->begin();
             ++m_contentFoldersIterator;
+            nextEntry();
+        } else {
             nextEntry();
         }
     }
@@ -53,8 +58,10 @@ namespace knoxcrypt
     , m_cache(cache)
     , m_contentFoldersIterator()
     , m_bucketEntriesIterator()
+    , m_cacheIterator()
     , m_bucketIndex(0)
     , m_entry{nullptr}
+    , m_cacheShouldBeUpdated(true)
     {
     }
 
@@ -63,7 +70,7 @@ namespace knoxcrypt
         if(nextEntry()) {
             return;
         }
-        if(nextContentFolder() && nextEntry()) {
+        if(m_cacheShouldBeUpdated && nextContentFolder() && nextEntry()) {
             return;
         }
         m_entry = nullptr;
@@ -81,7 +88,7 @@ namespace knoxcrypt
     }
     bool CompoundFolderEntryIterator::nextEntry()
     {
-        if(m_bucketEntriesIterator != ContentFolderEntryIterator()) {
+        if(m_cacheShouldBeUpdated && m_bucketEntriesIterator != ContentFolderEntryIterator()) {
             auto entry = *m_bucketEntriesIterator;
             if(m_cache.find(entry->filename()) == m_cache.end()) {
                 entry->setBucketIndex(m_bucketIndex);
@@ -89,6 +96,10 @@ namespace knoxcrypt
             }
             m_entry = entry;
             ++m_bucketEntriesIterator;
+            return true;
+        } else if(!m_cacheShouldBeUpdated && m_cacheIterator != std::end(m_cache)) {
+            m_entry = m_cacheIterator->second;
+            ++m_cacheIterator;
             return true;
         }
         return false;
