@@ -118,12 +118,6 @@ namespace knoxcrypt
         CompoundFolderEntryIterator listAllEntries() const;
 
         /**
-         * @brief returns a vector of folder entry infos
-         * @return all folder entry infos
-         */
-        std::vector<SharedEntryInfo> listFolderEntries() const;
-
-        /**
          * @brief does what it says
          * @param name the name of the entry
          */

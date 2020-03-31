@@ -58,7 +58,6 @@ class ContentFolderTest
         testAddEntryNameRetrieval();
         testListAllEntries();
         testListAllEntriesEmpty();
-        testListFolderEntries();
         //commented out since block-size dependent
         //testAddEntryBlockIndexRetrieval();
         testEntryRetrievalAndAppendSmallData();
@@ -142,16 +141,6 @@ class ContentFolderTest
         knoxcrypt::ContentFolder folder(io, 0, std::string("root"));
         auto entry = folder.listAllEntries();
         ASSERT_EQUAL(entry, knoxcrypt::ContentFolderEntryIterator(), "testListAllEntriesEmpty: number of entries");
-    }
-
-    void testListFolderEntries()
-    {
-        boost::filesystem::path testPath = buildImage(m_uniquePath);
-        knoxcrypt::ContentFolder folder = createTestFolder(testPath);
-        auto entries = folder.listFolderEntries();
-        ASSERT_EQUAL(entries.size(), 2, "testListFolderEntries: number of entries");
-        ASSERT_EQUAL(entries[0]->filename(), "folderA", "testListFolderEntries: filename C");
-        ASSERT_EQUAL(entries[1]->filename(), "folderB", "testListFolderEntries: filename F");
     }
 
     /* Commented out, since block size dependent

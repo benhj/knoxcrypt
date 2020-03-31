@@ -71,9 +71,13 @@ namespace knoxcrypt
     CompoundFolder::doPopulateContentFolders()
     {
         if(m_ContentFolderCount > 0) {
-            auto folderInfos(m_compoundFolder->listFolderEntries());
-            for(auto const & f : folderInfos) {
-                m_contentFolders.push_back(m_compoundFolder->getContentFolder(f->filename()));
+            auto it = m_compoundFolder->listAllEntries();
+            ContentFolderEntryIterator end;
+            while(it != end) {
+                if((*it)->type() == EntryType::FolderType) {
+                    m_contentFolders.push_back(m_compoundFolder->getContentFolder((*it)->filename()));
+                }
+                ++it;
             }
         }
     }
@@ -232,25 +236,6 @@ namespace knoxcrypt
     CompoundFolder::listAllEntries() const
     {
         return CompoundFolderEntryIterator(m_contentFolders, m_cache);
-    }
-
-    std::vector<SharedEntryInfo>
-    CompoundFolder::listFolderEntries() const
-    {
-        std::vector<SharedEntryInfo> infos;
-        uint64_t index(0);
-        for(auto const & f : m_contentFolders) {
-            auto leafEntries(f->listFolderEntries());
-            for(auto const & entry : leafEntries) {
-                if(m_cache.find(entry->filename()) == m_cache.end()) {
-                    entry->setBucketIndex(index);
-                    m_cache.emplace(entry->filename(), entry);
-                }
-                infos.push_back(entry);
-            }
-            ++index;
-        }
-        return infos;
     }
 
     void

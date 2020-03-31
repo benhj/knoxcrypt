@@ -430,28 +430,6 @@ namespace knoxcrypt
             });
     }
 
-    std::vector<SharedEntryInfo>
-    ContentFolder::doListEntriesBasedOnType(EntryType entryType) const
-    {
-        std::vector<SharedEntryInfo> entries;
-        for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
-            // only push back if the metadata is enabled
-            auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
-
-            if (entryMetaDataIsEnabled(metaData) &&
-                getTypeForEntry(metaData) == entryType) {
-                entries.push_back(doGetEntryInfo(metaData, entryIndex));
-            }
-        }
-        return entries;
-    }
-
-    std::vector<SharedEntryInfo>
-    ContentFolder::listFolderEntries() const
-    {
-        return doListEntriesBasedOnType(EntryType::FolderType);
-    }
-
     bool
     ContentFolder::doPutMetaDataOutOfUse(std::string const &name)
     {

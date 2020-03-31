@@ -489,11 +489,15 @@ namespace knoxcrypt
     CoreFS::removeAllChildFoldersToo(::boost::filesystem::path const &path,
                                      SharedCompoundFolder const &f)
     {
-        std::vector<SharedEntryInfo> infos = f->listFolderEntries();
-        for (auto const & entry : infos) {
-            auto entryPath = path;
-            entryPath /= entry->filename();
-            removeFolderFromCache(entryPath);
+        auto it = f->listAllEntries();
+        CompoundFolderEntryIterator end;
+        while(it != end) {
+            if((*it)->type() == EntryType::FolderType) {
+                auto entryPath = path;
+                entryPath /= (*it)->filename();
+                removeFolderFromCache(entryPath);
+            }
+            ++it;
         }
     }
 

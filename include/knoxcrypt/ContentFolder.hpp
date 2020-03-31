@@ -157,12 +157,6 @@ namespace knoxcrypt
         ContentFolderEntryIterator listAllEntries() const;
 
         /**
-         * @brief returns a vector of folder entry infos
-         * @return all folder entry infos
-         */
-        std::vector<SharedEntryInfo> listFolderEntries() const;
-
-        /**
          * @brief does what it says
          * @param name the name of the entry
          * @return true if successful
@@ -283,12 +277,6 @@ namespace knoxcrypt
          */
         OptionalOffset
         doFindOffsetWhereMetaDataShouldBeWritten();
-
-        /**
-         * @brief lists a particular type of entry, file or folder
-         * @return a list of entries of specified type
-         */
-        std::vector<SharedEntryInfo> doListEntriesBasedOnType(EntryType entryType) const;
 
         /**
          * @brief after unlinking this will be called to indicate that cache entry
