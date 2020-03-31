@@ -421,13 +421,18 @@ namespace knoxcrypt
     }
 
     ContentFolderEntryIterator
-    ContentFolder::listAllEntries() const
+    ContentFolder::begin() const
     {
         return ContentFolderEntryIterator(&m_folderData, m_entryCount,
             [this](std::vector<uint8_t> const &metaData,
                    uint64_t const entryIndex) {
                 return doGetEntryInfo(metaData, entryIndex);
             });
+    }
+    ContentFolderEntryIterator
+    ContentFolder::end() const
+    {
+        return ContentFolderEntryIterator();
     }
 
     bool
@@ -532,8 +537,8 @@ namespace knoxcrypt
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto it = (entry->listAllEntries());
-        ContentFolderEntryIterator end;
+        auto it = entry->begin();
+        auto end = entry->end();
         while(it != end) {
             if ((*it)->type() == EntryType::FileType) {
                 entry->removeFile((*it)->filename());
@@ -564,8 +569,8 @@ namespace knoxcrypt
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto it = (entry->listAllEntries());
-        CompoundFolderEntryIterator end;
+        auto it = entry->begin();
+        auto end = entry->end();
         while (it != end) {            
             if ((*it)->type() == EntryType::FileType) {
                 entry->removeFile((*it)->filename());

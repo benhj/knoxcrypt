@@ -71,8 +71,8 @@ namespace knoxcrypt
     CompoundFolder::doPopulateContentFolders()
     {
         if(m_ContentFolderCount > 0) {
-            auto it = m_compoundFolder->listAllEntries();
-            ContentFolderEntryIterator end;
+            auto it = m_compoundFolder->begin();
+            auto end = m_compoundFolder->end();
             while(it != end) {
                 if((*it)->type() == EntryType::FolderType) {
                     m_contentFolders.push_back(m_compoundFolder->getContentFolder((*it)->filename()));
@@ -233,9 +233,14 @@ namespace knoxcrypt
     }
 
     CompoundFolderEntryIterator
-    CompoundFolder::listAllEntries() const
+    CompoundFolder::begin() const
     {
         return CompoundFolderEntryIterator(m_contentFolders, m_cache);
+    }
+    CompoundFolderEntryIterator
+    CompoundFolder::end() const
+    {
+        return CompoundFolderEntryIterator();
     }
 
     void

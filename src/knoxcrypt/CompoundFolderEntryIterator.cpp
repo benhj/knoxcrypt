@@ -39,10 +39,10 @@ namespace knoxcrypt
     , m_contentFoldersIterator(std::begin(m_contentFolders))
     , m_bucketEntriesIterator()
     , m_bucketIndex(0)
-    , m_entry(nullptr)
+    , m_entry{nullptr}
     {
         if(m_contentFoldersIterator != std::end(m_contentFolders)) {
-            m_bucketEntriesIterator = (*m_contentFoldersIterator)->listAllEntries();
+            m_bucketEntriesIterator = (*m_contentFoldersIterator)->begin();
             ++m_contentFoldersIterator;
             nextEntry();
         }
@@ -54,7 +54,7 @@ namespace knoxcrypt
     , m_contentFoldersIterator()
     , m_bucketEntriesIterator()
     , m_bucketIndex(0)
-    , m_entry(nullptr)
+    , m_entry{nullptr}
     {
     }
 
@@ -72,7 +72,7 @@ namespace knoxcrypt
     bool CompoundFolderEntryIterator::nextContentFolder()
     {
         if(m_contentFoldersIterator != std::end(m_contentFolders)) {
-            m_bucketEntriesIterator = (*m_contentFoldersIterator)->listAllEntries();
+            m_bucketEntriesIterator = (*m_contentFoldersIterator)->begin();
             ++m_contentFoldersIterator;
             ++m_bucketIndex;
             return true;

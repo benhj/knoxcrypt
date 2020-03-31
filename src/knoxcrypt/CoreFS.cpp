@@ -286,8 +286,8 @@ namespace knoxcrypt
         auto boostPath = ::boost::filesystem::path(thePath);
         if (removalType == FolderRemovalType::MustBeEmpty) {
             auto childEntry(parentEntry->getFolder(boostPath.filename().string()));
-            auto entryIt = childEntry->listAllEntries();
-            CompoundFolderEntryIterator end;
+            auto entryIt = childEntry->begin();
+            auto end = childEntry->end();
             if (entryIt != end) {
                 throw KnoxCryptException(KnoxCryptError::FolderNotEmpty);
             }
@@ -489,8 +489,8 @@ namespace knoxcrypt
     CoreFS::removeAllChildFoldersToo(::boost::filesystem::path const &path,
                                      SharedCompoundFolder const &f)
     {
-        auto it = f->listAllEntries();
-        CompoundFolderEntryIterator end;
+        auto it = f->begin();
+        auto end = f->end();
         while(it != end) {
             if((*it)->type() == EntryType::FolderType) {
                 auto entryPath = path;

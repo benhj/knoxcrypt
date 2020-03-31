@@ -423,7 +423,7 @@ class CoreFSTest
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
         knoxcrypt::CoreFS kc(io);
         knoxcrypt::CompoundFolder fe = kc.getFolder("/");
-        auto infos = fe.listAllEntries();
+        auto infos = fe.begin();
         ASSERT_EQUAL(infos, knoxcrypt::CompoundFolderEntryIterator(), "CoreFSTest::testListAllEntriesEmpty()");
     }
 

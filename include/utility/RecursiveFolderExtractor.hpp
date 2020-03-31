@@ -59,8 +59,8 @@ namespace knoxcrypt
             auto folder = theBfs.getFolder(teaPath);
 
             // iterate over entries in folder
-            auto it = folder.listAllEntries();
-            CompoundFolderEntryIterator end;
+            auto it = folder.begin();
+            auto end = folder.end();
 
             while(it != end) {
                 // If folder, create a folder at whereToWrite and recurse

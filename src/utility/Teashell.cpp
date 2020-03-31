@@ -109,8 +109,8 @@ void com_ls(knoxcrypt::CoreFS &theBfs, std::string const &path)
 
     // iterate over entries in folder and print filenames of each
     auto folder = theBfs.getFolder(thePath);
-    auto it = folder.listAllEntries();
-    knoxcrypt::CompoundFolderEntryIterator end;
+    auto it = folder.begin();
+    auto end = folder.end();
     while(it != end) {
         if ((*it)->type() == knoxcrypt::EntryType::FileType) {
             std::cout<<boost::format("%1% %|30t|%2%\n") % (*it)->filename() % "<F>";
@@ -138,8 +138,8 @@ std::string tabCompleteknoxcryptEntry(knoxcrypt::CoreFS &theBfs, std::string con
     auto folder = theBfs.getFolder(parentPath);
 
     // iterate over entries in folder
-    auto it = folder.listAllEntries();
-    knoxcrypt::CompoundFolderEntryIterator end;
+    auto it = folder.begin();
+    auto end = folder.end();
     while(it != end) {
         // try to match the entry with the thing that we want to tab-complete
         auto extracted((*it)->filename().substr(0, bp.filename().string().length()));

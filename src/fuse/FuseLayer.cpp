@@ -303,12 +303,12 @@ namespace fuselayer
             try {
                 auto folder(knoxcrypt_DATA->getFolder(path));
 
-                auto it = folder.listAllEntries();
+                auto it = folder.begin();
 
                 filler(buf, ".", NULL, 0);           /* Current directory (.)  */
                 filler(buf, "..", NULL, 0);
 
-                knoxcrypt::CompoundFolderEntryIterator end;
+                auto end = folder.end();
                 while(it != end) {                    
                     struct stat stbuf;
                     if ((*it)->type() == knoxcrypt::EntryType::FileType) {

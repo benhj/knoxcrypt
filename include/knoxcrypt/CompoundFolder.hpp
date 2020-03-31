@@ -112,10 +112,11 @@ namespace knoxcrypt
         SharedEntryInfo getEntryInfo(std::string const &name) const;
 
         /**
-         * @brief returns a vector of all entry infos
-         * @return all entry infos
+         * @brief folder iterator access
+         * @return being and end iterators
          */
-        CompoundFolderEntryIterator listAllEntries() const;
+        CompoundFolderEntryIterator begin() const;
+        CompoundFolderEntryIterator end() const;
 
         /**
          * @brief does what it says
