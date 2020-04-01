@@ -538,8 +538,7 @@ namespace knoxcrypt
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
         auto it = entry->begin();
-        auto end = entry->end();
-        for(; it != end; ++it) {
+        for(; it != entry->end(); ++it) {
             if ((*it)->type() == EntryType::FileType) {
                 entry->removeFile((*it)->filename());
             } else {

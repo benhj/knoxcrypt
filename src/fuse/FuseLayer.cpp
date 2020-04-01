@@ -294,13 +294,19 @@ namespace fuselayer
             return 0;
         }
 
-        // not sure what this does. Not figured out if we need it yet
-        // but I think its called a bunch of times
         static
         int
-        knoxcrypt_opendir(const char *, struct fuse_file_info *)
+        knoxcrypt_opendir(const char * path, struct fuse_file_info *)
         {
-            return 0;
+            try {
+                if (strcmp(path, "/") == 0){
+                    return 0;
+                }
+                (void)knoxcrypt_DATA->getInfo(path);
+                return 0;
+            } catch (knoxcrypt::KnoxCryptException const &e) {
+                return detail::exceptionDispatch(e);
+            }
         }
 
 
@@ -318,7 +324,6 @@ namespace fuselayer
 
                 auto it = folder.begin();
                 auto end = folder.end();
-
                 for(; it != end; ++it) {                
                     struct stat stbuf;
                     if ((*it)->type() == knoxcrypt::EntryType::FileType) {

@@ -72,8 +72,7 @@ namespace knoxcrypt
     {
         if(m_ContentFolderCount > 0) {
             auto it = m_compoundFolder->begin();
-            auto end = m_compoundFolder->end();
-            for(; it != end; ++it) {
+            for(; it != m_compoundFolder->end(); ++it) {
                 if((*it)->type() == EntryType::FolderType) {
                     m_contentFolders.push_back(m_compoundFolder->getContentFolder((*it)->filename()));
                 }
