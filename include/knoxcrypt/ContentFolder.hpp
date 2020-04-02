@@ -158,6 +158,11 @@ namespace knoxcrypt
         ContentFolderEntryIterator end() const;
 
         /**
+         * Retrieve a reference to the cache map
+         */
+        EntryInfoCacheMap & getCacheMapRef() const;
+
+        /**
          * @brief does what it says
          * @param name the name of the entry
          * @return true if successful

@@ -71,10 +71,11 @@ namespace knoxcrypt
     CompoundFolder::doPopulateContentFolders()
     {
         if(m_ContentFolderCount > 0) {
-            auto it = m_compoundFolder->begin();
-            for(; it != m_compoundFolder->end(); ++it) {
-                if((*it)->type() == EntryType::FolderType) {
-                    m_contentFolders.push_back(m_compoundFolder->getContentFolder((*it)->filename()));
+
+            auto entries = m_compoundFolder->getCacheMapRef();
+            for(auto const & it : entries) {
+                if(it.second->type() == EntryType::FolderType) {
+                    m_contentFolders.push_back(m_compoundFolder->getContentFolder(it.second->filename()));
                 }
             }
         }
@@ -241,6 +242,27 @@ namespace knoxcrypt
     CompoundFolder::end() const
     {
         return CompoundFolderEntryIterator(m_cache);
+    }
+
+    EntryInfoCacheMap &
+    CompoundFolder::getCacheMapRef() const
+    {
+        if(m_cacheShouldBeUpdated) {
+            uint64_t index(0);
+            for(auto const & f : m_contentFolders) {
+                auto & leafEntries(f->getCacheMapRef());
+                for(auto const & entry : leafEntries) {
+                    if(m_cache.find(entry.first) == m_cache.end()) {
+                        entry.second->setBucketIndex(index);
+                        m_cache.insert(entry);
+                    }
+                }
+                ++index;
+            }
+            m_cacheShouldBeUpdated = false;
+        }
+
+        return m_cache;
     }
 
     void

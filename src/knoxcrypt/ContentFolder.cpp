@@ -435,6 +435,21 @@ namespace knoxcrypt
         return ContentFolderEntryIterator();
     }
 
+    EntryInfoCacheMap &
+    ContentFolder::getCacheMapRef() const
+    {
+
+        for (long entryIndex = 0; entryIndex < m_entryCount; ++entryIndex) {
+
+            // read all metadata
+            auto metaData(doSeekAndReadOfEntryMetaData(m_folderData, entryIndex));
+            if (entryMetaDataIsEnabled(metaData)) {
+                (void)doGetEntryInfo(metaData, entryIndex);
+            }
+        }
+        return m_entryInfoCacheMap;
+    }
+
     bool
     ContentFolder::doPutMetaDataOutOfUse(std::string const &name)
     {
@@ -537,13 +552,13 @@ namespace knoxcrypt
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto it = entry->begin();
-        for(; it != entry->end(); ++it) {
-            if ((*it)->type() == EntryType::FileType) {
-                entry->removeFile((*it)->filename());
+        auto entries = entry->getCacheMapRef();
+        for(auto const & it : entries) {
+            if (it.second->type() == EntryType::FileType) {
+                entry->removeFile(it.second->filename());
             } else {
                 // a leaf will only contain compound folders
-                entry->removeCompoundFolder((*it)->filename());
+                entry->removeCompoundFolder(it.second->filename());
             }
         }
 
@@ -567,13 +582,12 @@ namespace knoxcrypt
 
         // loop over entries unlinking files and recursing into sub folders
         // and deleting their entries
-        auto it = entry->begin();
-        auto end = entry->end();
-        for(; it != end; ++it) {     
-            if ((*it)->type() == EntryType::FileType) {
-                entry->removeFile((*it)->filename());
+        auto entries = entry->getCacheMapRef();
+        for(auto const & it : entries) {
+            if (it.second->type() == EntryType::FileType) {
+                entry->removeFile(it.second->filename());
             } else {
-                entry->removeFolder((*it)->filename());
+                entry->removeFolder(it.second->filename());
             }
         }
 
