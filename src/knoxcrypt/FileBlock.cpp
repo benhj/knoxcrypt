@@ -53,7 +53,7 @@ namespace knoxcrypt
         , m_stream(stream)
     {
         // set m_offset
-        m_offset = detail::getOffsetOfFileBlock(m_index, io->blocks);
+        m_offset = detail::getOffsetOfFileBlock(m_io->blockSize, m_index, m_io->blocks);
     }
 
     FileBlock::FileBlock(SharedCoreIO const &io,
@@ -64,7 +64,7 @@ namespace knoxcrypt
         , m_index(index)
         , m_bytesWritten(0)
         , m_next(0)
-        , m_offset(detail::getOffsetOfFileBlock(index, io->blocks))
+        , m_offset(detail::getOffsetOfFileBlock(m_io->blockSize, index, m_io->blocks))
         , m_seekPos(0)
         , m_openDisposition(openDisposition)
         , m_stream(stream)

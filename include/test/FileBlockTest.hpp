@@ -84,12 +84,12 @@ class FileBlockTest
         // test that actual written correct
         assert(block.getDataBytesWritten() == 26);
         knoxcrypt::ContainerImageStream stream(io, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t size = knoxcrypt::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, 0, blocks);
+        uint64_t size = knoxcrypt::detail::getNumberOfDataBytesWrittenToFileBlockN(stream, io->blockSize, 0, blocks);
         ASSERT_EQUAL(size, 26, "FileBlockTest::blockWriteAndReadTest(): correctly returned block size");
 
         // test that reported next index correct
         assert(block.getNextIndex() == 0);
-        uint64_t next = knoxcrypt::detail::getIndexOfNextFileBlockFromFileBlockN(stream, 0, blocks);
+        uint64_t next = knoxcrypt::detail::getIndexOfNextFileBlockFromFileBlockN(stream, io->blockSize, 0, blocks);
         stream.close();
         ASSERT_EQUAL(next, 0, "FileBlockTest::blockWriteAndReadTest(): correct block index");
 

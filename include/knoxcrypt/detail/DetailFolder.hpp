@@ -46,7 +46,7 @@ namespace knoxcrypt { namespace detail
                                    uint64_t const inc = 1)
     {
         //knoxcrypt::ContainerImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = getOffsetOfFileBlock(startBlock, io->blocks);
+        uint64_t const offset = getOffsetOfFileBlock(io->blockSize, startBlock, io->blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);
@@ -64,7 +64,7 @@ namespace knoxcrypt { namespace detail
                                uint64_t const entryCount)
     {
         //knoxcrypt::ContainerImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = getOffsetOfFileBlock(startBlock, io->blocks);
+        uint64_t const offset = getOffsetOfFileBlock(io->blockSize, startBlock, io->blocks);
         uint8_t buf[8];
         (void)out.seekp(offset + FILE_BLOCK_META);
         convertUInt64ToInt8Array(entryCount, buf);
@@ -77,7 +77,7 @@ namespace knoxcrypt { namespace detail
                                    uint64_t const dec = 1)
     {
         knoxcrypt::ContainerImageStream out(io, std::ios::in | std::ios::out | std::ios::binary);
-        uint64_t const offset = getOffsetOfFileBlock(startBlock, io->blocks);
+        uint64_t const offset = getOffsetOfFileBlock(io->blockSize, startBlock, io->blocks);
         (void)out.seekg(offset + FILE_BLOCK_META);
         uint8_t buf[8];
         (void)out.read((char*)buf, 8);

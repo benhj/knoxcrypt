@@ -92,13 +92,13 @@ namespace fuselayer
                     if (info.type() == knoxcrypt::EntryType::FolderType) {
                         stbuf->st_mode = S_IFDIR | 0777;
                         stbuf->st_nlink = 3;
-                        stbuf->st_blksize = knoxcrypt::detail::FILE_BLOCK_SIZE - knoxcrypt::detail::FILE_BLOCK_META;
+                        stbuf->st_blksize = knoxcrypt_DATA->getBlockSize() - knoxcrypt::detail::FILE_BLOCK_META;
                         return 0;
                     } else if (info.type() == knoxcrypt::EntryType::FileType) {
                         stbuf->st_mode = S_IFREG | 0777;
                         stbuf->st_nlink = 1;
                         stbuf->st_size = info.size();
-                        stbuf->st_blksize = knoxcrypt::detail::FILE_BLOCK_SIZE - knoxcrypt::detail::FILE_BLOCK_META;
+                        stbuf->st_blksize = knoxcrypt_DATA->getBlockSize() - knoxcrypt::detail::FILE_BLOCK_META;
                         return 0;
                     } else {
                         return -ENOENT;
@@ -322,19 +322,18 @@ namespace fuselayer
                 filler(buf, ".", NULL, 0);           /* Current directory (.)  */
                 filler(buf, "..", NULL, 0);
 
-                auto it = folder.begin();
-                auto end = folder.end();
-                for(; it != end; ++it) {                
+                auto entries = folder.getCacheMapRef();
+                for(auto const & it : entries) {               
                     struct stat stbuf;
-                    if ((*it)->type() == knoxcrypt::EntryType::FileType) {
+                    if (it.second->type() == knoxcrypt::EntryType::FileType) {
                         stbuf.st_mode = S_IFREG | 0755;
                         stbuf.st_nlink = 1;
-                        stbuf.st_size = (*it)->size();
+                        stbuf.st_size = it.second->size();
                     } else {
                         stbuf.st_mode = S_IFDIR | 0744;
                         stbuf.st_nlink = 3;
                     }
-                    filler(buf, (*it)->filename().c_str(), &stbuf, 0);
+                    filler(buf, it.second->filename().c_str(), &stbuf, 0);
                 }
 
             } catch (knoxcrypt::KnoxCryptException const &e) {
@@ -378,12 +377,11 @@ namespace fuselayer
             return 0;
         }
 
-        // to shut-up 'function not implemented warnings'
-        // not presently required
         static
         int
-        knoxcrypt_flush(const char *, struct fuse_file_info *)
+        knoxcrypt_flush(const char * path, struct fuse_file_info *)
         {
+            //knoxcrypt_DATA->closeFile(path);
             return 0;
         }
 

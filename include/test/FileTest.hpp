@@ -426,7 +426,7 @@ class FileTest
         {
             knoxcrypt::SharedCoreIO io(createTestIO(testPath));
             knoxcrypt::File entry(io, "test.txt", 1,
-                                       knoxcrypt::OpenDisposition::buildOverwriteDisposition());
+                                  knoxcrypt::OpenDisposition::buildOverwriteDisposition());
             assert(entry.seek(BIG_SIZE - testData.length()) != -1);
             std::vector<uint8_t> vec(testData.begin(), testData.end());
             entry.write((char*)&vec.front(), testData.length());
@@ -439,7 +439,7 @@ class FileTest
         {
             knoxcrypt::SharedCoreIO io(createTestIO(testPath));
             knoxcrypt::File entry(io, "entry", 1,
-                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
+                                  knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(testData.length() + testDataB.length());
             assert(entry.seek(BIG_SIZE - testData.length()) != -1);
@@ -468,7 +468,7 @@ class FileTest
         {
             knoxcrypt::SharedCoreIO io(createTestIO(testPath));
             knoxcrypt::File entry(io, "test.txt", 1,
-                                       knoxcrypt::OpenDisposition::buildOverwriteDisposition());
+                                  knoxcrypt::OpenDisposition::buildOverwriteDisposition());
             entry.seek(BIG_SIZE - 50);
             std::string testData(createLargeStringToWrite("abcdefghijklm"));
             entry.write(testData.c_str(), testData.length());
@@ -478,7 +478,7 @@ class FileTest
         {
             knoxcrypt::SharedCoreIO io(createTestIO(testPath));
             knoxcrypt::File entry(io, "entry", 1,
-                                       knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
+                                  knoxcrypt::OpenDisposition::buildReadOnlyDisposition());
             std::vector<uint8_t> readBackIn;
             readBackIn.resize(BIG_SIZE + BIG_SIZE - 50);
             entry.read((char*)&readBackIn.front(), BIG_SIZE + BIG_SIZE - 50);

@@ -43,6 +43,11 @@ namespace knoxcrypt
     {
     }
 
+    long CoreFS::getBlockSize() const
+    {
+        return m_io->blockSize;
+    }
+
     CompoundFolder
     CoreFS::getFolder(std::string const &path)
     {
@@ -362,7 +367,7 @@ namespace knoxcrypt
     CoreFS::statvfs(struct statvfs *buf)
     {
         StateLock lock(m_stateMutex);
-        buf->f_bsize   = detail::FILE_BLOCK_SIZE;
+        buf->f_bsize   = m_io->blockSize;
         buf->f_blocks  = m_io->blocks;
         buf->f_bfree   = m_io->freeBlocks;
         buf->f_bavail  = m_io->freeBlocks;

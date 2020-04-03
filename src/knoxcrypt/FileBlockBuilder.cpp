@@ -72,7 +72,7 @@ namespace knoxcrypt
                 return 0;
             }
 
-            return (toReturn / (detail::FILE_BLOCK_META + detail::FILE_BLOCK_SIZE));
+            return (toReturn / (detail::FILE_BLOCK_META + io->blockSize));
         }
     }
 

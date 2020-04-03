@@ -402,7 +402,7 @@ class CoreFSTest
         std::string const &testString(createLargeStringToWrite());
 
         knoxcrypt::FileDevice device = kc.openFile("/folderA/subFolderA/fileX",
-                                                                knoxcrypt::OpenDisposition::buildAppendDisposition());
+                                                   knoxcrypt::OpenDisposition::buildAppendDisposition());
 
         std::streampos wrote = device.write(testString.c_str(), testString.length());
         ASSERT_EQUAL(static_cast<size_t>(wrote), testString.length(), "CoreFSTest::testWriteToStream() bytesWrote");

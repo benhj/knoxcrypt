@@ -44,7 +44,8 @@ namespace knoxcrypt { namespace detail
      * @param block the file block that we want to get the offset of
      * @return the offset of the file block
      */
-    inline uint64_t getOffsetOfFileBlock(uint64_t const block,
+    inline uint64_t getOffsetOfFileBlock(long const blockSize,
+                                         uint64_t const block,
                                          uint64_t const totalBlocks)
     {
         uint64_t const volumeBitMapBytes = totalBlocks / uint64_t(8);
@@ -52,7 +53,7 @@ namespace knoxcrypt { namespace detail
             + 8                            // number of fs blocks
             + volumeBitMapBytes            // volume bit map
             + 8                            // total number of files
-            + (FILE_BLOCK_SIZE * block);   // file block
+            + (blockSize * block);   // file block
     }
 
     /**
@@ -63,10 +64,11 @@ namespace knoxcrypt { namespace detail
      * @return the next file block index
      */
     inline uint64_t getIndexOfNextFileBlockFromFileBlockN(knoxcrypt::ContainerImageStream &in,
+                                                          long const blockSize,
                                                           uint64_t const n,
                                                           uint64_t const totalBlocks)
     {
-        auto offset = getOffsetOfFileBlock(n, totalBlocks) + 4;
+        auto offset = getOffsetOfFileBlock(blockSize, n, totalBlocks) + 4;
         (void)in.seekg(offset);
         uint8_t dat[8];
         (void)in.read((char*)dat, 8);
@@ -81,10 +83,11 @@ namespace knoxcrypt { namespace detail
      * @return the next file block index
      */
     inline uint32_t getNumberOfDataBytesWrittenToFileBlockN(knoxcrypt::ContainerImageStream &in,
+                                                            long const blockSize,
                                                             uint64_t const n,
                                                             uint64_t const totalBlocks)
     {
-        uint64_t offset = getOffsetOfFileBlock(n, totalBlocks);
+        uint64_t offset = getOffsetOfFileBlock(blockSize, n, totalBlocks);
         (void)in.seekg(offset);
         uint8_t dat[4];
         (void)in.read((char*)dat, 4);
@@ -100,10 +103,10 @@ namespace knoxcrypt { namespace detail
     inline void writeBlock(SharedCoreIO const &io, ContainerImageStream &out, uint64_t const block)
     {
         std::vector<uint8_t> ints;
-        ints.assign(FILE_BLOCK_SIZE - FILE_BLOCK_META, 0);
+        ints.assign(io->blockSize - FILE_BLOCK_META, 0);
 
         // write out block metadata
-        uint64_t offset = getOffsetOfFileBlock(block, io->blocks);
+        uint64_t offset = getOffsetOfFileBlock(io->blockSize, block, io->blocks);
         (void)out.seekp(offset);
 
         // write m_bytesWritten; 0 to begin with
@@ -118,7 +121,7 @@ namespace knoxcrypt { namespace detail
         (void)out.write((char*)nextDat, 8);
 
         // write data bytes
-        (void)out.write((char*)&ints.front(), FILE_BLOCK_SIZE - FILE_BLOCK_META);
+        (void)out.write((char*)&ints.front(), io->blockSize - FILE_BLOCK_META);
 
         assert(!out.bad());
     }

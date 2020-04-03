@@ -43,7 +43,6 @@ namespace knoxcrypt { namespace detail
     uint64_t const METABLOCKS_BEGIN = 24;
     uint64_t const METABLOCK_SIZE = 25;
     uint64_t const MAX_FILENAME_LENGTH = 255;
-    uint64_t const FILE_BLOCK_SIZE = 4096;
     uint64_t const FILE_BLOCK_META = 12;
     uint64_t const IV_BYTES = 8;
     uint64_t const HEADER_BYTES = 8;

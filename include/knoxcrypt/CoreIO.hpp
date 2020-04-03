@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2015>, <BenHJ>
+  Copyright (c) <2013-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@ namespace knoxcrypt
         std::string path;                // path of the tea safe image
         uint64_t blocks;                 // total number of blocks
         uint64_t freeBlocks;             // number of free blocks
+        long blockSize = 4096;           // size in bytes of each block
         cryptostreampp::EncryptionProperties encProps; // stuff like password and iv
         unsigned int rounds;             // number of rounds used by enc. process
         uint64_t rootBlock;              // the start block of the root folder

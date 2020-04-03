@@ -41,9 +41,9 @@ namespace knoxcrypt
 
     namespace {
 
-        uint32_t blockWriteSpace()
+        uint32_t blockWriteSpace(long const blockSize)
         {
-            return detail::FILE_BLOCK_SIZE - detail::FILE_BLOCK_META;
+            return blockSize - detail::FILE_BLOCK_META;
         }
 
     }
@@ -98,12 +98,12 @@ namespace knoxcrypt
 
             // if in trunc, unlink
             if (m_openDisposition.trunc() == TruncateOrKeep::Truncate) {
-                this->unlink();
+                unlink();
 
             } else {
                 // only if in append mode do we seek to end.
                 if (m_openDisposition.append() == AppendOrOverwrite::Append) {
-                    this->seek(0, std::ios::end);
+                    seek(0, std::ios::end);
                 }
             }
         }
@@ -197,7 +197,7 @@ namespace knoxcrypt
 
         ++m_blockCount;
         m_blockIndex = m_blockCount - 1;
-        m_workingBlock = std::make_shared<FileBlock>(block);
+        m_workingBlock = std::make_shared<FileBlock>(std::move(block));
     }
 
     void File::enumerateBlockStats()
@@ -233,7 +233,7 @@ namespace knoxcrypt
         // is always updates after reads/writes
         uint32_t const bytesWritten = m_workingBlock->tell();
 
-        if (bytesWritten < blockWriteSpace()) {
+        if (bytesWritten < blockWriteSpace(m_io->blockSize)) {
             return true;
         }
         return false;
@@ -258,7 +258,7 @@ namespace knoxcrypt
         if (!workingBlockHasAvailableSpace()) {
             // EDGE case: if overwrite causes us to go over end, need to
             // switch to append mode
-            if (static_cast<uint64_t>(this->tell()) >= m_fileSize) {
+            if (static_cast<uint64_t>(tell()) >= m_fileSize) {
                 m_openDisposition = OpenDisposition::buildAppendDisposition();
             }
 
@@ -267,18 +267,18 @@ namespace knoxcrypt
                 // if the reported stream position in the block is less that
                 // the block's total capacity, then we don't create a new block
                 // we simply overwrite
-                if (m_workingBlock->tell() < blockWriteSpace()) {
+                if (m_workingBlock->tell() < blockWriteSpace(m_io->blockSize)) {
                     return;
                 }
 
                 // edge case; if right at the very end of the block, need to
                 // iterate the block index and return if possible
-                if (m_workingBlock->tell() == blockWriteSpace()) {
+                if (m_workingBlock->tell() == blockWriteSpace(m_io->blockSize)) {
                     ++m_blockIndex;
                     m_workingBlock = std::make_shared<FileBlock>(m_io,
-                                                                   m_workingBlock->getNextIndex(),
-                                                                   m_openDisposition,
-                                                                   m_stream);
+                                                                 m_workingBlock->getNextIndex(),
+                                                                 m_openDisposition,
+                                                                 m_stream);
                     return;
                 }
 
@@ -300,7 +300,7 @@ namespace knoxcrypt
         // the stream position is subtracted since block may have already
         // had bytes written to it in which case the available size left
         // is approx. block size - stream position
-        return (blockWriteSpace()) - streamPosition;
+        return (blockWriteSpace(m_io->blockSize)) - streamPosition;
     }
 
     std::streamsize
@@ -394,7 +394,7 @@ namespace knoxcrypt
     File::truncate(std::ios_base::streamoff newSize)
     {
         // compute number of block required
-        auto const blockSize = blockWriteSpace();
+        auto const blockSize = blockWriteSpace(m_io->blockSize);
 
         // edge case
         if (newSize < blockSize) {
@@ -429,16 +429,16 @@ namespace knoxcrypt
 
     using SeekPair = std::pair<int64_t, boost::iostreams::stream_offset>;
     SeekPair
-    getPositionFromBegin(boost::iostreams::stream_offset off)
+    getPositionFromBegin(boost::iostreams::stream_offset off, long const blockSize)
     {
         // find what file block the offset would relate to and set extra offset in file block
         // to that position
-        auto const blockSize = blockWriteSpace();
+        auto const blockSpace = blockWriteSpace(blockSize);
         boost::iostreams::stream_offset casted = off;
-        boost::iostreams::stream_offset const leftOver = casted % blockSize;
+        boost::iostreams::stream_offset const leftOver = casted % blockSpace;
         int64_t block = 0;
         boost::iostreams::stream_offset blockPosition = 0;
-        if (off > blockSize) {
+        if (off > blockSpace) {
             if (leftOver > 0) {
 
                 // round down casted
@@ -452,7 +452,7 @@ namespace knoxcrypt
             }
 
             // get exact number of blocks after round-down
-            block = casted / blockSize;
+            block = casted / blockSpace;
             if(leftOver == 0) {
                 --block;
             }
@@ -467,18 +467,20 @@ namespace knoxcrypt
     }
 
     SeekPair
-    getPositionFromEnd(boost::iostreams::stream_offset off, int64_t endBlockIndex,
-                       boost::iostreams::stream_offset bytesWrittenToEnd)
+    getPositionFromEnd(boost::iostreams::stream_offset off, 
+                       int64_t endBlockIndex,
+                       boost::iostreams::stream_offset bytesWrittenToEnd,
+                       long const blockSize)
     {
         // treat like begin and then 'inverse'
-        auto treatLikeBegin = getPositionFromBegin(std::abs(off));
+        auto treatLikeBegin = getPositionFromBegin(std::abs(off), blockSize);
 
         int64_t block = endBlockIndex - treatLikeBegin.first;
         auto blockPosition = bytesWrittenToEnd - treatLikeBegin.second;
 
         if (blockPosition < 0) {
-            uint16_t const blockSize = blockWriteSpace();
-            blockPosition = blockSize + blockPosition;
+            uint16_t const blockSpace = blockWriteSpace(blockSize);
+            blockPosition = blockSpace + blockPosition;
             --block;
         }
 
@@ -489,15 +491,16 @@ namespace knoxcrypt
     SeekPair
     getPositionFromCurrent(boost::iostreams::stream_offset off,
                            int64_t blockIndex,
-                           boost::iostreams::stream_offset indexedBlockPosition)
+                           boost::iostreams::stream_offset indexedBlockPosition,
+                           long const blockSize)
     {
         // find what file block the offset would relate to and set extra offset in file block
         // to that position
-        auto const blockSize = blockWriteSpace();
+        auto const blockSpace = blockWriteSpace(blockSize);
         auto addition = off + indexedBlockPosition;
-        auto leftOver = std::abs(addition) % blockSize;
+        auto leftOver = std::abs(addition) % blockSpace;
         auto roundedDown = std::abs(addition) - leftOver;
-        auto toIncrementBy = roundedDown / blockSize;
+        auto toIncrementBy = roundedDown / blockSpace;
 
         if (addition >= 0) {
             auto newBlockIndex = blockIndex + toIncrementBy;
@@ -505,7 +508,7 @@ namespace knoxcrypt
             return std::make_pair(newBlockIndex, newPosition);
         }
         auto newBlockIndex = blockIndex - (toIncrementBy + 1);
-        auto newPosition = blockSize - leftOver;
+        auto newPosition = blockSpace - leftOver;
         return std::make_pair(newBlockIndex, newPosition);
     }
 
@@ -526,8 +529,10 @@ namespace knoxcrypt
         if (way == std::ios_base::end) {
 
             size_t endBlock = m_blockCount - 1;
-            seekPair = getPositionFromEnd(off, endBlock,
-                                          getBlockWithIndex(endBlock).getDataBytesWritten());
+            seekPair = getPositionFromEnd(off, 
+                                          endBlock,
+                                          getBlockWithIndex(endBlock).getDataBytesWritten(),
+                                          m_io->blockSize);
 
         }
 
@@ -536,12 +541,14 @@ namespace knoxcrypt
         // if seeking from the beginning
 
         if (way == std::ios_base::beg) {
-            seekPair = getPositionFromBegin(off);
+            seekPair = getPositionFromBegin(off, m_io->blockSize);
         }
         // seek relative to the current position
         if (way == std::ios_base::cur) {
-            seekPair = getPositionFromCurrent(off, m_blockIndex,
-                                              m_workingBlock->tell());
+            seekPair = getPositionFromCurrent(off, 
+                                              m_blockIndex,
+                                              m_workingBlock->tell(),
+                                              m_io->blockSize);
         }
 
         // check bounds and error if too big
@@ -551,7 +558,7 @@ namespace knoxcrypt
 
             // update block where we start reading/writing from
             m_blockIndex = seekPair.first;
-            m_workingBlock = std::make_shared<FileBlock>(this->getBlockWithIndex(m_blockIndex));
+            m_workingBlock = std::make_shared<FileBlock>(getBlockWithIndex(m_blockIndex));
 
             // set the position to seek to for given block
             // this will be the point from which we read or write

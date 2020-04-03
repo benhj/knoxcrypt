@@ -130,9 +130,9 @@ class MakeKnoxCryptTest
     {
         boost::filesystem::path testPath = buildImage(m_uniquePath);
         uint64_t blocks(2048);
-        uint64_t offset = knoxcrypt::detail::getOffsetOfFileBlock(0, blocks);
         // open a stream and read the first byte which signifies number of entries
         knoxcrypt::SharedCoreIO io(createTestIO(testPath));
+        uint64_t offset = knoxcrypt::detail::getOffsetOfFileBlock(io->blockSize, 0, blocks);
         knoxcrypt::ContainerImageStream is(io, std::ios::in | std::ios::out | std::ios::binary);
         is.seekg(offset + knoxcrypt::detail::FILE_BLOCK_META);
         uint8_t bytes[8];

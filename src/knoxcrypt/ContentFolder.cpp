@@ -172,10 +172,14 @@ namespace knoxcrypt
          * optimization in there somewhere.
          * @return the number of folder entries
          */
-        long getNumberOfEntries(File const & folderData, uint64_t const blocks)
+        long getNumberOfEntries(File const & folderData,
+                                uint64_t const blocks,
+                                long const blockSize)
         {
             auto out(folderData.getStream());
-            uint64_t const offset = detail::getOffsetOfFileBlock(folderData.getStartVolumeBlockIndex(), blocks);
+            uint64_t const offset = detail::getOffsetOfFileBlock(blockSize,
+                                                                 folderData.getStartVolumeBlockIndex(),
+                                                                 blocks);
             (void)out->seekg(offset + detail::FILE_BLOCK_META);
             if(!out->bad()) { // bad when not initialized, i.e., when sparse image
                 uint8_t buf[8];
@@ -200,7 +204,7 @@ namespace knoxcrypt
                        OpenDisposition::buildAppendDisposition())
         , m_startVolumeBlock(startVolumeBlock)
         , m_name(std::move(name))
-        , m_entryCount(getNumberOfEntries(m_folderData, m_io->blocks))
+        , m_entryCount(getNumberOfEntries(m_folderData, m_io->blocks, m_io->blockSize))
         , m_deadEntryCount(0)
         , m_entryInfoCacheMap()
         , m_checkForEarlyMetaData(true)

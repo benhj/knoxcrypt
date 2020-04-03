@@ -1,5 +1,5 @@
 /*
-  Copyright (c) <2013-2016>, <BenHJ>
+  Copyright (c) <2013-present>, <BenHJ>
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,11 @@ namespace knoxcrypt
       public:
         CoreFS() = delete;
         explicit CoreFS(SharedCoreIO const &io);
+
+        /**
+         * Retrieve the designated file block size
+         */
+        long getBlockSize() const;
 
         /**
          * @brief  retrieves folder entry for given path
