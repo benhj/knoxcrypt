@@ -531,7 +531,7 @@ namespace knoxcrypt { namespace detail
         char v;
         (void)in.read((char*)&v, 1);
         int version = (int)v;
-        if(v == 20) {
+        if(version == 20) {
             io->blockSize = detail::convertInt4ArrayToInt32(blockSizeArray);
         }
         in.close();

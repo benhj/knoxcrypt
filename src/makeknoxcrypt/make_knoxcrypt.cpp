@@ -67,11 +67,13 @@ int main(int argc, char *argv[])
     bool magicPartition;
     bool sparse;
     std::string cipher;
+    long blockSize;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
         ("imageName", po::value<std::string>(), "knoxcrypt image path")
-        ("blockCount", po::value<uint64_t>(), "size of filesystem in 4096 blocks (12800 = 50MB)")
+        ("blockSize", po::value<long>(&blockSize)->default_value(4096), "block size")
+        ("blockCount", po::value<uint64_t>(), "size of filesystem in blocks")
         ("coffee", po::value<bool>(&magicPartition)->default_value(false), "create alternative sub-volume")
         ("sparse", po::value<bool>(&sparse)->default_value(false), "create a sparse image")
         ("cipher", po::value<std::string>(&cipher)->default_value("aes"), "the cipher type used");
@@ -112,7 +114,8 @@ int main(int argc, char *argv[])
             }
 
             std::cout<<"image path: "<<vm["imageName"].as<std::string>()<<std::endl;
-            std::cout<<"file system size in blocks: "<<vm["blockCount"].as<uint64_t>()<<std::endl;
+            std::cout<<"block size in bytes: "<<blockSize<<std::endl;
+            std::cout<<"number of blocks: "<<vm["blockCount"].as<uint64_t>()<<std::endl;
             std::cout<<"initialization vector A: "<<io->encProps.iv<<std::endl;
             std::cout<<"initialization vector B: "<<io->encProps.iv2<<std::endl;
             std::cout<<"initialization vector C: "<<io->encProps.iv3<<std::endl;
@@ -128,6 +131,7 @@ int main(int argc, char *argv[])
     auto blocks = vm["blockCount"].as<uint64_t>();
 
     io->path = vm["imageName"].as<std::string>().c_str();
+    io->blockSize = blockSize;
     io->blocks = blocks;
     io->freeBlocks = blocks;
     io->encProps.password.append(knoxcrypt::utility::getPassword("knoxcrypt password: "));
