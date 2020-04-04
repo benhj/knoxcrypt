@@ -61,7 +61,7 @@ namespace knoxcrypt { namespace detail
         array[7] = static_cast<uint8_t>((bigNum) & 0xFF);
     }
 
-    inline void convertInt32ToInt4Array(uint32_t const bigNum, uint8_t array[8])
+    inline void convertInt32ToInt4Array(uint32_t const bigNum, uint8_t array[4])
     {
         array[0] = static_cast<uint8_t>((bigNum >> 24) & 0xFF);
         array[1] = static_cast<uint8_t>((bigNum >> 16) & 0xFF);
@@ -516,12 +516,29 @@ namespace knoxcrypt { namespace detail
             io->encProps.cipher = cryptostreampp::Algorithm::NONE;
         }
 
+        uint8_t blockSizeArray[4];
+        (void)in.read((char*)blockSizeArray, 4); 
+
+        // See if container is 'version 20'. Prior to this version,
+        // the following byte was effectively 'unused' and stored the
+        // cipher number (0-17 inclusive), which note, is already
+        // recorded earlier in the header as byte number 34
+        // (33 with zero begin) so is actually redundant information.
+        // Now however, version 20 indicates that the prior 4 bytes
+        // store the filesystem's block-size which should be read
+        // in when reading the filesystem. Prior to this, the block
+        // size is always 4096.
+        char v;
+        (void)in.read((char*)&v, 1);
+        int version = (int)v;
+        if(v == 20) {
+            io->blockSize = detail::convertInt4ArrayToInt32(blockSizeArray);
+        }
         in.close();
         io->encProps.iv = knoxcrypt::detail::convertInt8ArrayToInt64(&ivBuffer.front());
         io->encProps.iv2 = knoxcrypt::detail::convertInt8ArrayToInt64(&ivBuffer2.front());
         io->encProps.iv3 = knoxcrypt::detail::convertInt8ArrayToInt64(&ivBuffer3.front());
         io->encProps.iv4 = knoxcrypt::detail::convertInt8ArrayToInt64(&ivBuffer4.front());
     }
-
 }
 }

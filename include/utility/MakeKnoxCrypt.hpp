@@ -221,9 +221,22 @@ namespace knoxcrypt
                     cipher = 0;
                 }
 
-                for(int i = 0; i < 7; ++i) {
-                    (void)ivout.write((char*)&cipher, 1);
-                }
+                (void)ivout.write((char*)&cipher, 1);
+
+                // Write out blockSize
+                auto blockSize = io->blockSize;
+                uint8_t blockSizeArray[4];
+                detail::convertInt32ToInt4Array(blockSize, blockSizeArray);
+                (void)ivout.write((char*)blockSizeArray, 4);
+
+                // Introduce 'versioning'; the value 20 indicates 'latest version'
+                // with block size to be read/written from prior 4 bytes.
+                // Anything below 20 will indicate that an earlier version
+                // was used to create the filesystem container for which a
+                // block size of 4096 should be used.
+                int version = 20;
+                (void)ivout.write((char*)&version, 1);
+                (void)ivout.write((char*)&cipher, 1);
 
                 ivout.flush();
                 ivout.close();
