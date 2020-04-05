@@ -273,6 +273,7 @@ namespace knoxcrypt
 
                 // edge case; if right at the very end of the block, need to
                 // iterate the block index and return if possible
+                /*
                 if (m_workingBlock->tell() == blockWriteSpace(m_io->blockSize)) {
                     ++m_blockIndex;
                     m_workingBlock = std::make_shared<FileBlock>(m_io,
@@ -280,7 +281,7 @@ namespace knoxcrypt
                                                                  m_openDisposition,
                                                                  m_stream);
                     return;
-                }
+                }*/
 
             }
             newWritableFileBlock();
@@ -650,7 +651,19 @@ namespace knoxcrypt
                 ++c;
             }
         }
-
+        // edge case bug
+        {
+            --n;
+            FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition, m_stream);
+            FileBlockIterator end;
+            uint64_t c(0);
+            for (; it != end; ++it) {
+                if (c==n) {
+                    return *it;
+                }
+                ++c;
+            }
+        }
         throw std::runtime_error("Whoops! Something went wrong in File::getBlockWithIndex");
     }
 }
