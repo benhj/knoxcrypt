@@ -26,9 +26,10 @@ BOOST_LD= -lboost_filesystem \
 
 # compilation flags
 CXXFLAGS_FUSE= $(shell $(PKG_CONFIG) --cflags fuse 2>/dev/null || echo "-I/usr/local/include/$(FUSE)")  -DFUSE_USE_VERSION=26
-CXXFLAGS ?= -O2 \
+CXXFLAGS ?= -O3 \
             -funroll-loops \
             -Wno-ctor-dtor-privacy \
+            -ffast-math \
             -Wall \
             -ggdb
 CXXFLAGS += -std=c++14 \
