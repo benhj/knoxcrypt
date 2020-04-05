@@ -270,19 +270,6 @@ namespace knoxcrypt
                 if (m_workingBlock->tell() < blockWriteSpace(m_io->blockSize)) {
                     return;
                 }
-
-                // edge case; if right at the very end of the block, need to
-                // iterate the block index and return if possible
-                /*
-                if (m_workingBlock->tell() == blockWriteSpace(m_io->blockSize)) {
-                    ++m_blockIndex;
-                    m_workingBlock = std::make_shared<FileBlock>(m_io,
-                                                                 m_workingBlock->getNextIndex(),
-                                                                 m_openDisposition,
-                                                                 m_stream);
-                    return;
-                }*/
-
             }
             newWritableFileBlock();
 
@@ -651,7 +638,10 @@ namespace knoxcrypt
                 ++c;
             }
         }
-        // edge case bug
+        // Edge case bug. Rarely, n goes past the number of blocks causing the following
+        // runtime error to be thrown. Until I figure out the exact point at which this
+        // occurs it appears to suffice to simply subract 1 from n (thus returning
+        // the final block.)
         {
             --n;
             FileBlockIterator it(m_io, m_startVolumeBlock, m_openDisposition, m_stream);
@@ -664,6 +654,7 @@ namespace knoxcrypt
                 ++c;
             }
         }
+        
         throw std::runtime_error("Whoops! Something went wrong in File::getBlockWithIndex");
     }
 }
