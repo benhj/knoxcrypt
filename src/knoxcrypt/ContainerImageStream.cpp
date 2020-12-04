@@ -38,9 +38,9 @@ namespace knoxcrypt
 {
     ContainerImageStream::ContainerImageStream(SharedCoreIO const &io, std::ios::openmode mode)
         : m_cryptoStream(std::make_shared<cryptostreampp::CryptoStreamPP>(io->path, 
-                                                                          io->encProps, 
-                                                                          io->firstTimeInit,
-                                                                          mode))
+                                                                          io->encProps,
+                                                                          mode,
+                                                                          io->firstTimeInit))
     {
         io->firstTimeInit = false;
     }
